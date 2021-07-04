@@ -1,19 +1,23 @@
 have to choose syntax
 compiled or interpreted? or both??
-name: faxdown or faxdawn
-; or \n
-file extension: fxd
+name: faxdown
+; or \n as a command end
+file extension: fxdn
 
 
 data types: char, string, short, int, long, float, double, bool
 variables
 dynmaic arrays
+for, while, if, else, else if
 functions
 structures
+dictionaries
+maybe classes
 
 easy out of the box:
-window(gui) support
-tcp support
-web scraping(html download and search by class and so on) support
+math functions
 file management
+window(gui)(maybe just maybe OpenGL support....)
+web scraping(html download and search by class and so on)
+tcp
 
