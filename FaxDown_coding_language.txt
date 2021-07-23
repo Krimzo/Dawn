@@ -1,24 +1,23 @@
-have to choose syntax
-interpreted
 name: FaxDown
-; or \n as a command end
-file extension: fxdn
-cmd command: interpreter: FaxD filename.fxdn
+interpreted
+\n as a command end
+{} as a code snippet
+file extension: .fxdn
+cmd command: interpreter: fxdi filename.fxdn
 
-data types: char, string, short, int, long, float, double, bool
-variables
-dynmaic arrays
-maybe arrays with different types of data ?
-for, while, if, else, else if
-functions
-structures
-dictionaries
-maybe classes
+data types: bool, string = std::string = "" or '', int = int64_t, double
+? variables
+? simple arithmetic
+? for, while, if, else, else if
+? dynamic arrays ?? maybe arrays with different types of data ?
+? dictionaries
+? functions
+?? structures
+??? maybe classes
 
 easy out of the box:
-math functions
-file management(maybe bitmap and video too)
-window(gui)(maybe just maybe OpenGL support....)
-web scraping(html download and search by class and so on)
-tcp
-multithreading
+? file management(bitmap, audio, video...)
+? window(gui)(maybe just maybe OpenGL support....)
+? web scraping(html download and search by class and so on)
+? tcp
+? multithreading

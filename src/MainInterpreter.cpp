@@ -1,6 +1,12 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <fstream>
+#include <vector>
+#include "MyStuff/MyGlobal.h"
+#include "MyStuff/MyStruct.h"
+#include "MyStuff/MyFunc.h"
+
 
 int main(int argc, char* argv[]) {
     // Check argument count
@@ -13,9 +19,16 @@ int main(int argc, char* argv[]) {
             std::ifstream openedCodeFile(fileName);
             // Check if file exists
             if (openedCodeFile.is_open()) {
-                printf("File opened!\n");
-
+                // Read commands to string vector and close the file stream
+                std::stringstream stringBuffer;
+                stringBuffer << openedCodeFile.rdbuf();
+                std::vector<std::string> programCommands = GetCommands(stringBuffer.str());
                 openedCodeFile.close();
+
+                // Handle each command
+                for(int i=0; i<programCommands.size(); i++){
+                    std::cout << "Command " << i + 1 << ": " << programCommands[i] << std::endl;
+                }
             }
             else {
                 printf("File doesn't exist.\n");
