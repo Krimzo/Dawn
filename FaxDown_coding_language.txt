@@ -1,10 +1,9 @@
 have to choose syntax
-compiled or interpreted? or both??
+interpreted
 name: FaxDown
 ; or \n as a command end
 file extension: fxdn
-cmd command: interpreter: FaxD filename.fxdn, compiler: FaxDc filename.fxdn
-
+cmd command: interpreter: FaxD filename.fxdn
 
 data types: char, string, short, int, long, float, double, bool
 variables
