@@ -1,11 +1,12 @@
 name: FaxDown
 interpreted
-\n as a command end
-{} as a code snippet
-file extension: .fxdn
-cmd command: interpreter: fxdi filename.fxdn
 
-data types: bool, string = std::string = "" or '', int = int64_t, double
+! \n as a command end
+! {} as a code snippet
+! file extension: .fxdn
+! cmd command: interpreter: fxdi filename.fxdn
+
+? data types: bool, string = std::string = "" or '', int = int64_t, double
 ? variables
 ? simple arithmetic
 ? for, while, if, else, else if

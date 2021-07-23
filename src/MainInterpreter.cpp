@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
                 std::vector<std::string> programCommands = GetCommands(stringBuffer.str());
                 openedCodeFile.close();
 
-                // Handle each command
+                // Handle commands
                 for(int i=0; i<programCommands.size(); i++){
                     std::cout << "Command " << i + 1 << ": " << programCommands[i] << std::endl;
                 }

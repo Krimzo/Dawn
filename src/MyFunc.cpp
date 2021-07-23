@@ -12,6 +12,7 @@ std::vector<std::string> GetCommands(std::string fileAsString) {
 
     std::string tempString;
     int bracketCounter = 0;
+    int lastFoundClosedBracket = 0;
     int newLineCount = 0;
     bool commentFound = false;
     for (int i = 0; i < fileAsString.length(); i++) {
@@ -39,6 +40,7 @@ std::vector<std::string> GetCommands(std::string fileAsString) {
             case '{':
                 tempString.push_back(fileAsString[i]);
                 bracketCounter++;
+                lastFoundClosedBracket = newLineCount + 1;
                 break;
             case '}':
                 tempString.push_back(fileAsString[i]);
@@ -46,6 +48,9 @@ std::vector<std::string> GetCommands(std::string fileAsString) {
                 if (bracketCounter == 0) {
                     while (tempString.find("~~") != -1) {
                         tempString.replace(tempString.find("~~"), 2, "~");
+                    }
+                    while (tempString.find(" ~") != -1) {
+                        tempString.replace(tempString.find(" ~"), 2, "~");
                     }
                     while (tempString.find("{~") != -1) {
                         tempString.replace(tempString.find("{~"), 2, "{");
@@ -74,9 +79,11 @@ std::vector<std::string> GetCommands(std::string fileAsString) {
                         while (tempString.find("  ") != -1) {
                             tempString.replace(tempString.find("  "), 2, " ");
                         }
-                        commands.push_back(tempString);
+                        if (tempString != " ") {
+                            commands.push_back(tempString);
+                        }
+                        tempString.clear();
                     }
-                    tempString.clear();
                 }
                 commentFound = true;
                 break;
@@ -87,11 +94,12 @@ std::vector<std::string> GetCommands(std::string fileAsString) {
         }
         else if (fileAsString[i] == '\n') {
             commentFound = false;
+            newLineCount++;
         }
     }
 
     if (bracketCounter != 0) {
-        printf("Excess '{' found\n");
+        printf("Excess '{' found at line %d\n", lastFoundClosedBracket);
         exit(1);
     }
 
