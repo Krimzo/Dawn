@@ -13,7 +13,7 @@ std::vector<std::string> GetCommands(std::string stringOfCommands) {
 
     std::string tempString;
     int bracketCounter = 0;
-    int lastFoundClosedBracket = 0;
+    int lastFoundBracket = 0;
     int newLineCount = 0;
     bool commentFound = false;
     for (int i = 0; i < stringOfCommands.length(); i++) {
@@ -44,7 +44,7 @@ std::vector<std::string> GetCommands(std::string stringOfCommands) {
             case '{':
                 tempString.push_back(stringOfCommands[i]);
                 bracketCounter++;
-                lastFoundClosedBracket = newLineCount + 1;
+                lastFoundBracket = newLineCount + 1;
                 break;
             case '}':
                 tempString.push_back(stringOfCommands[i]);
@@ -81,19 +81,17 @@ std::vector<std::string> GetCommands(std::string stringOfCommands) {
                 exit(1);
                 break;
             case '$':
-                if (bracketCounter == 0) {
-                    if (tempString != "") {
-                        while (tempString.find("  ") != -1) {
-                            tempString.replace(tempString.find("  "), 2, " ");
-                        }
-                        if (tempString != " ") {
-                            if (tempString[0] == ' ') {
-                                tempString.erase(0, 1);
-                            }
-                            commands.push_back(tempString);
-                        }
-                        tempString.clear();
+                if (bracketCounter == 0 && tempString != "") {
+                    while (tempString.find("  ") != -1) {
+                        tempString.replace(tempString.find("  "), 2, " ");
                     }
+                    if (tempString != " ") {
+                        if (tempString[0] == ' ') {
+                            tempString.erase(0, 1);
+                        }
+                        commands.push_back(tempString);
+                    }
+                    tempString.clear();
                 }
                 commentFound = true;
                 break;
@@ -109,7 +107,7 @@ std::vector<std::string> GetCommands(std::string stringOfCommands) {
     }
 
     if (bracketCounter > 0) {
-        printf("Excess '{' found, at line %d\n", lastFoundClosedBracket);
+        printf("Excess '{' found, at line %d\n", lastFoundBracket);
         exit(1);
     }
 
@@ -157,17 +155,13 @@ void HandleCommand(std::string command, int commandIndex) {
                 // Var name
                 else if (actionType == 1) {
                     for (int j = 0; j < tempString.length(); j++) {
-                        if (j == 0) {
-                            if (!((tempString[j] > 64 && tempString[j] < 91) || (tempString[j] > 96 && tempString[j] < 123))) {
-                                printf("First char of the variable name can't be a number, at command %d\n", commandIndex);
-                                exit(1);
-                            }
+                        if (j == 0 && !((tempString[j] > 64 && tempString[j] < 91) || (tempString[j] > 96 && tempString[j] < 123))) {
+                            printf("First char of the variable name can't be a number, at command %d\n", commandIndex);
+                            exit(1);
                         }
-                        else {
-                            if (!((tempString[j] > 64 && tempString[j] < 91) || (tempString[j] > 96 && tempString[j] < 123) || (tempString[j] > 47 && tempString[j] < 58))) {
-                                printf("Bad name assigned, at command %d\n", commandIndex);
-                                exit(1);
-                            }
+                        else if (!((tempString[j] > 64 && tempString[j] < 91) || (tempString[j] > 96 && tempString[j] < 123) || (tempString[j] > 47 && tempString[j] < 58))) {
+                            printf("Bad name assigned, at command %d\n", commandIndex);
+                            exit(1);
                         }
                     }
                     tempVar.varName = tempString;
@@ -191,6 +185,22 @@ void HandleCommand(std::string command, int commandIndex) {
                         }
                         else if (tempString == "false") {
                             tempVar.boolValue = false;
+                        }
+                        else if (tempString.find("is") != -1 || tempString.find("or") != -1 || tempString.find("and") != -1) {
+                            bool tempBool = false;
+                            if (tempString.find("(") != -1) {
+                                if (tempString.find("(") == tempString.find(")")) {
+                                    printf("I gave up :(\n");
+                                }
+                                else {
+                                    printf("Uneven bracket count, at command %d\n", commandIndex);
+                                    exit(1);
+                                }
+                            }
+                            else {
+                                printf("I gave up :(\n");
+                            }
+                            tempVar.boolValue = tempBool;
                         }
                         else {
                             printf("Bad data assignment, at command %d\n", commandIndex);

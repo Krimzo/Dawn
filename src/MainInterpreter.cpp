@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
                 // Testing
                 std::cout << "Variable count: " << programVariables.size() << std::endl;
                 for (int i = 0; i < programVariables.size(); i++) {
-                    std::cout << "Variable " << i+1 << ": " << programVariables[i].varName << " " << programVariables[i].boolValue << " " << programVariables[i].intValue << " " << programVariables[i].floatValue << " " << programVariables[i].stringValue << " " << std::endl;
+                    std::cout << "Variable " << i+1 << ": " << '"' << programVariables[i].varName << '"' << " " << programVariables[i].boolValue << " " << programVariables[i].intValue << " " << programVariables[i].floatValue << " " << '"' << programVariables[i].stringValue << '"' << " " << std::endl;
                 }
             }
             else {
