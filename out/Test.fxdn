@@ -1,7 +1,14 @@
 
-a = 2 + 3
 
-out(a)
+bool mozda = false 
+int da = 2
+float pet = 505.123
+string l2ol = "Pecanje da"
+
+int pet = 3
+string pet = "ha ha!"
+
+out(lol)
 
 for(i, 0, 100){
     a += 3
@@ -10,3 +17,4 @@ for(i, 0, 100){
     }
 }
 
+int l2ol = 3

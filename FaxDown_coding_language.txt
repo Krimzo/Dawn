@@ -6,15 +6,11 @@ interpreted
 ! file extension: .fxdn
 ! cmd command: interpreter: fxdi filename.fxdn
 
-? data types: bool, string = std::string = "" or '', int = int64_t, double
-? variables
+? variables: bool, string = std::string = "", int = int64_t, double
 ? simple arithmetic
-? for, while, if, else, else if
-? dynamic arrays ?? maybe arrays with different types of data ?
+? arrays
 ? dictionaries
-? functions
-?? structures
-??? maybe classes
+? custom functions
 
 easy out of the box:
 ? file management(bitmap, audio, video...)
@@ -25,7 +21,6 @@ easy out of the box:
 
 command types:
 variable assignement(including arithmetic)
-
-function call
-built in function: for, while, if, else if, else, return,  
+function calls
+built in function: out, for, while, if, else if, else
 function declaration
