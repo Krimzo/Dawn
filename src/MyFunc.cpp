@@ -165,7 +165,7 @@ void HandleCommand(std::string command, int commandIndex) {
                         }
                         else {
                             if (!((tempString[j] > 64 && tempString[j] < 91) || (tempString[j] > 96 && tempString[j] < 123) || (tempString[j] > 47 && tempString[j] < 58))) {
-                                printf("Bad name assinged, at command %d\n", commandIndex);
+                                printf("Bad name assigned, at command %d\n", commandIndex);
                                 exit(1);
                             }
                         }
@@ -177,7 +177,7 @@ void HandleCommand(std::string command, int commandIndex) {
                 // =
                 else if (actionType == 2) {
                     if (tempString != "=") {
-                        printf("Bad variable assignement, at command %d\n", commandIndex);
+                        printf("Bad variable assignment, at command %d\n", commandIndex);
                         exit(1);
                     }
                     tempString.clear();
@@ -193,14 +193,14 @@ void HandleCommand(std::string command, int commandIndex) {
                             tempVar.boolValue = false;
                         }
                         else {
-                            printf("Bad data assignement, at command %d\n", commandIndex);
+                            printf("Bad data assignment, at command %d\n", commandIndex);
                             exit(1);
                         }
                     }
                     else if (dataType == 1) {
                         for (int j = 0; j < tempString.length(); j++) {
                             if (tempString[j] < 48 || tempString[j] > 57) {
-                                printf("Bad data assignement, at command %d\n", commandIndex);
+                                printf("Bad data assignment, at command %d\n", commandIndex);
                                 exit(1);
                             }
                         }
@@ -209,7 +209,7 @@ void HandleCommand(std::string command, int commandIndex) {
                     else if (dataType == 2) {
                         for (int j = 0; j < tempString.length(); j++) {
                             if ((tempString[j] < 48 || tempString[j] > 57) && tempString[j] != '.') {
-                                printf("Bad data assignement, at command %d\n", commandIndex);
+                                printf("Bad data assignment, at command %d\n", commandIndex);
                                 exit(1);
                             }
                         }
