@@ -27,6 +27,9 @@ std::vector<std::string> GetCommands(std::string fileAsString) {
                             tempString.replace(tempString.find("  "), 2, " ");
                         }
                         if (tempString != " ") {
+                            if (tempString[0] == ' ') {
+                                tempString.erase(0, 1);
+                            }
                             commands.push_back(tempString);
                         }
                         tempString.clear();
@@ -61,6 +64,9 @@ std::vector<std::string> GetCommands(std::string fileAsString) {
                     while (tempString.find("  ") != -1) {
                         tempString.replace(tempString.find("  "), 2, " ");
                     }
+                    if (tempString[0] == ' ') {
+                        tempString.erase(0, 1);
+                    }
                     commands.push_back(tempString);
                     tempString.clear();
                 }
@@ -80,6 +86,9 @@ std::vector<std::string> GetCommands(std::string fileAsString) {
                             tempString.replace(tempString.find("  "), 2, " ");
                         }
                         if (tempString != " ") {
+                            if (tempString[0] == ' ') {
+                                tempString.erase(0, 1);
+                            }
                             commands.push_back(tempString);
                         }
                         tempString.clear();
@@ -98,7 +107,7 @@ std::vector<std::string> GetCommands(std::string fileAsString) {
         }
     }
 
-    if (bracketCounter != 0) {
+    if (bracketCounter > 0) {
         printf("Excess '{' found at line %d\n", lastFoundClosedBracket);
         exit(1);
     }
@@ -106,3 +115,12 @@ std::vector<std::string> GetCommands(std::string fileAsString) {
     return commands;
 }
 
+
+void HandleCommand(std::string command) {
+    if (command.find("{") == -1 && command.find("(") == -1) {
+        FaxDownVar tempVar = { "", false, 0, 0.0, "" };
+    }
+    else {
+        std::cout << "Command: " << command << std::endl;
+    }
+}

@@ -22,3 +22,10 @@ easy out of the box:
 ? web scraping(html download and search by class and so on)
 ? tcp
 ? multithreading
+
+command types:
+variable assignement(including arithmetic)
+
+function call
+built in function: for, while, if, else if, else, return,  
+function declaration

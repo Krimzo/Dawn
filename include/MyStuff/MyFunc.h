@@ -5,4 +5,5 @@
 
 
 std::vector<std::string> GetCommands(std::string fileAsString);
+void HandleCommand(std::string command);
 

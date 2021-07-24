@@ -1,27 +1,12 @@
 
-out("da")
-for(){
-    pecanje
-    lol
+a = 2 + 3
+
+out(a)
+
+for(i, 0, 100){
+    a += 3
+    for(j, i, 10){
+        out(a * 2)
+    }
 }
 
-test d$ ne znas
-
-
-lol noob = pecanje
-some more commands(){
-    lol{
-        da 
-    }
-
-    
-    ha{
-        $mozda
-        ne ne {
-            da
-        }
-    }
-    
-}
-ha ha
-ne

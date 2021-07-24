@@ -8,6 +8,8 @@
 #include "MyStuff/MyFunc.h"
 
 
+std::vector<FaxDownVar> programVariables;
+
 int main(int argc, char* argv[]) {
     // Check argument count
     if (argc == 2) {
@@ -27,7 +29,7 @@ int main(int argc, char* argv[]) {
 
                 // Handle commands
                 for(int i=0; i<programCommands.size(); i++){
-                    std::cout << "Command " << i + 1 << ": " << programCommands[i] << std::endl;
+                    HandleCommand(programCommands[i]);
                 }
             }
             else {
