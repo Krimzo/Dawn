@@ -131,6 +131,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)incl\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,10 +141,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\LineHandler.cpp" />
     <ClCompile Include="src\Interpreter.cpp" />
+    <ClCompile Include="src\MiscFuncs.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ideas.txt" />
+    <Text Include="info.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="incl\LineHandler.h" />
+    <ClInclude Include="incl\MiscFuncs.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\test.xdn" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

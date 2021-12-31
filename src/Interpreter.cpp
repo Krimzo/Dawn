@@ -4,38 +4,60 @@
 #include <fstream>
 #include <vector>
 
+#include "MiscFuncs.h"
+#include "LineHandler.h";
+
+const std::string fileExtension = ".xdn";
 
 int main(int argc, char** argv) {
-    // Checking argument count
-    if (argc > 2) {
-        printf("Too many arguments given.\n");
+    // Checking arguments
+    if (argc < 2) {
+        printf("Error. Source file input is empty.\n");
         return 1;
     }
-    else if (argc < 2) {
-        printf("Missing file argument.\n");
+    else if (argc > 2) {
+        printf("Error. Too many arguments given.\n");
         return 1;
     }
     else {
         // Getting the file name
         std::string fileName(argv[1]);
 
-        // Check if the file has .fxdn extension
-        if (fileName.length() > 5 && fileName.find(".fxdn") == (fileName.length() - 5)) {
-            // Opening the source file
-            std::ifstream sourceFile(fileName);
+        // Checking if the file has .xdn extension
+        if (fileName.length() > fileExtension.length() && fileName.find(fileExtension) == (fileName.length() - fileExtension.length())) {
+            // Opening source file
+            std::ifstream fileStream(fileName);
 
-            // Opening the file
-            if (sourceFile.is_open()) {
+            // Checking the file status
+            if (fileStream.is_open()) {
+                // Reading the file to a string
+                std::stringstream sourceStream;
+                sourceStream << fileStream.rdbuf();
+                std::string source = sourceStream.str();
+
                 // Closing the file stream
-                sourceFile.close();
+                fileStream.close();
+
+                // Removing whitespace
+                while (StringReplace(source, "\t", " "));
+                while (StringReplace(source, "  ", " "));
+                while (StringReplace(source, "\n ", "\n"));
+                if (source.front() == ' ') source.erase(source.begin());
+
+                // Getting a new source stream
+                sourceStream = std::stringstream(source);
+
+                // Interpreting lines
+                std::string line;
+                while (std::getline(sourceStream, line)) HandleLine(line);
             }
             else {
-                printf("File doesn't exist.\n");
+                printf("Error. File \"%s\" does not exist.\n", fileName.c_str());
                 return 1;
             }
         }
         else {
-            printf("Missing file extension .fxdn\n");
+            printf("Error. File \"%s\" does not contain a \".xdn\" extension.\n", fileName.c_str());
         }
     }
     return 0;

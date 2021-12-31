@@ -1,0 +1,30 @@
+name: XDawn
+type: interpreted
+extension: .xdn
+
+interpreter: xdni filename.xdn
+
+command end		\n
+splitter		:
+code snippet	||
+define			#
+dereference		?
+
+for #a 0 : a < 6 : a++ |
+	outln a?
+|
+
+built in functions:
+out, outln, for, while, do while, if, else if, else
+
+variables: bool, string, int64, double
+simple arithmetic
+custom functions
+arrays
+
+built in:
+file management(bitmap, audio, video)
+gui (OpenGL, DirectX)
+web (html parsing, file downloading)
+tcp (server - client)
+multithreading (atomic variables)
