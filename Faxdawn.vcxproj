@@ -211,6 +211,7 @@
     <ClCompile Include="source\Faxdawn.cpp" />
     <ClCompile Include="source\Interpreter\Interpreter.cpp" />
     <ClCompile Include="source\Interpreter\LineHandler.cpp" />
+    <ClCompile Include="source\Types\Types.cpp" />
     <ClCompile Include="source\Utility\Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -251,6 +252,7 @@
     <ClInclude Include="source\Faxdawn.h" />
     <ClInclude Include="source\Interpreter\Interpreter.h" />
     <ClInclude Include="source\Interpreter\LineHandler.h" />
+    <ClInclude Include="source\Types\Types.h" />
     <ClInclude Include="source\Utility\Utility.h" />
   </ItemGroup>
   <ItemGroup>

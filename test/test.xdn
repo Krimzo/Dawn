@@ -1,12 +1,14 @@
 
-int a = 2;
-float b = 3.0f;
-string c = "haha";
+int a = 2!
+flt b = 3.0!
+str c = "haha"!
 
-print(a);
+out(a?)!
 
-for(int i = 0; i < 2; i++) {
-	print(b);
-}
+for (a? = 0) (a? < 5) (a?++) [
+	if (a <= 2) [
+		out(a?)!
+	]
+]
 
-// who cares about c
+$ who cares about c $

@@ -2,9 +2,9 @@
 
 
 size_t Utility::ReplaceInString(String& str, const String& from, const String& to) {
-	size_t foundAt = -1;
+	size_t foundAt = 0;
 	size_t replaceCounter = 0;
-	while ((foundAt = str.find(from, foundAt)) != std::string::npos) {
+	while ((foundAt = str.find(from, foundAt)) != String::npos) {
 		str.replace(foundAt, from.length(), to);
 		foundAt += to.length();
 		replaceCounter++;

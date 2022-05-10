@@ -1,30 +1,40 @@
-name: XDawn
+name: Faxdawn
 type: interpreted
 extension: .xdn
 
-interpreter: xdni filename.xdn
+interpreter: faxdawn filename.xdn
 
-command end		\n
-splitter		:
-code snippet	||
-define			#
+syntax:
+command end		!
 dereference		?
+code snippet	[]
+splitter		()
+comment			$$
 
-for #a 0 : a < 6 : a++ |
-	outln a?
-|
+bools(same as c++):
+equal			==
+not equal		!=
+greater			>
+smaller			<
+...
 
-built in functions:
-out, outln, for, while, do while, if, else if, else
+built in functions(+math stuff):
+out, outsl, for, while, do while, if, else if, else
 
-variables: bool, string, int64, double
+for (int i = 0) (i? < 5) (i?++) [
+	if (i <= 2) [
+		out(i?)!
+	]
+]
+
+variables: bol, int(int64), flt(double), str
 simple arithmetic
 custom functions
 arrays
 
 built in:
 file management(bitmap, audio, video)
-gui (OpenGL, DirectX)
+gui (CPU, DirectX)
 web (html parsing, file downloading)
 tcp (server - client)
-multithreading (atomic variables)
+multithreading (mutex, atomic)
