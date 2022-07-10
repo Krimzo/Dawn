@@ -1,0 +1,62 @@
+
+use "..\somefolder\somefile.fxdn";
+
+
+int a = 2;
+float b = 3.0;
+int c = 5.0; float d = 6;
+
+{
+	 float f = 2.0;
+
+	 string funny = "HAHA";
+}
+
+int[] a = [ 1, 2, 3 ];
+
+$
+	random comment
+$
+
+def test_add(int value, int adder) -> int {
+	return value + adder;
+}
+
+def test_print(int value) {
+	print(test_add(value, 5));
+}
+
+for (int i = 0) (i < 5) (i += 1) {
+	if (i <= 2) {
+		test_print(i);
+	}
+}
+
+class Float2 {
+	pub float x, y;
+
+	Float2() {
+		x = 0.0;
+		y = 0.0;
+	}
+	Float2(float a) {
+		x = a;
+		y = a;
+	}
+	Float2(float x, float y) {
+		self->x = x;
+		self->y = y;
+	}
+
+	add(Float2 obj) -> Float2 {
+		return Float2(x + obj->x, y + obj->y);
+	}
+	sub(Float2 obj) -> Float2 {
+		return Float2(x - obj->x, y - obj->y);
+	}
+}
+
+Float2 vector = Float2(1.0, 2.0);
+
+
+$ more comments... $

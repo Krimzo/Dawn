@@ -15,271 +15,28 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\Interpreter\Interpreter.cpp">
+    <ClCompile Include="source\Compiler\Compiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Interpreter\LineHandler.cpp">
+    <ClCompile Include="source\Lexer\Lexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Utility\Utility.cpp">
+    <ClCompile Include="source\Lexer\Token.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="KLibrary\geometry\plane.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\geometry\ray.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\geometry\sphere.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\geometry\triangle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\geometry\vertex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\gpu\buffer\constant_buffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\gpu\buffer\gpu_buffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\gpu\states\depth_state.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\gpu\states\raster_state.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\gpu\states\sampler_state.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\gpu\utility\shaders.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\gpu\utility\texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\gpu\utility\vbuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\gpu\views\depth_view.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\gpu\views\shader_view.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\gpu\views\target_view.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\gpu\gpu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\graphics\color.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\graphics\image.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\graphics\video.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\math\float2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\math\float3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\math\float4.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\math\int2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\math\int3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\math\int4.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\math\mat3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\math\mat4.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\math\math.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\utility\console.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\utility\convert.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\utility\file.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\utility\random.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\utility\socket.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\utility\thread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\utility\time.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\utility\web.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\view\camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\window\double_buffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\window\key.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\window\keys.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\window\mouse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KLibrary\window\window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Faxdawn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Types\Types.cpp">
+    <ClCompile Include="source\IOHandler\IOHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\Interpreter\LineHandler.h">
+    <ClInclude Include="source\Lexer\Lexer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Utility\Utility.h">
+    <ClInclude Include="source\Lexer\Token.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KLibrary\geometry\plane.h">
+    <ClInclude Include="source\IOHandler\IOHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KLibrary\geometry\ray.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\geometry\sphere.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\geometry\triangle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\geometry\vertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\gpu\gpu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\graphics\color.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\graphics\image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\graphics\video.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\libspec\using.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\math\float2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\math\float3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\math\float4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\math\int2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\math\int3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\math\int4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\math\mat3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\math\mat4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\math\math.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\utility\console.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\utility\convert.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\utility\file.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\utility\random.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\utility\socket.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\utility\thread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\utility\time.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\utility\web.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\view\camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\window\double_buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\window\key.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\window\keys.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\window\mouse.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\window\window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KLibrary\KrimzLib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Faxdawn.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Interpreter\Interpreter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Types\Types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="test\test.xdn" />
   </ItemGroup>
 </Project>

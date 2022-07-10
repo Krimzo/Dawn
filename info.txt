@@ -1,40 +1,45 @@
 name: Faxdawn
-type: interpreted
-extension: .xdn
+type: intercompiled
 
-interpreter: faxdawn filename.xdn
+source extension: .fxdn
+compiled extension: .fxex
 
-syntax:
-command end		!
-dereference		?
-code snippet	[]
+compile command: fxdc SourceFile.fxdn
+execute command: fxdn CompiledFile.fxex
+
+line end		;
+code scope		{}
 splitter		()
+arrays			[]
 comment			$$
 
-bools(same as c++):
-equal			==
-not equal		!=
-greater			>
-smaller			<
-...
+keywords:
+if, elif, else,
+not, and, or,
+switch, case,
+for, while, do, loop, break, continue,
+def, return,
+class, pub, self,
+use
 
-built in functions(+math stuff):
-out, outsl, for, while, do while, if, else if, else
+primitives:
+bool, byte, char, int(64bit), float(64bit)
 
-for (int i = 0) (i? < 5) (i?++) [
-	if (i <= 2) [
-		out(i?)!
-	]
-]
+built-in:
+string,
+lambda
 
-variables: bol, int(int64), flt(double), str
-simple arithmetic
-custom functions
-arrays
+function example
+Test() -> int {
+	return 6;
+}
 
-built in:
-file management(bitmap, audio, video)
-gui (CPU, DirectX)
+loading modules:
+use module_name.fxdn;
+
+std lib:
+file management (image, audio, video)
+gui (CPU, DirectX, OpenGL)
 web (html parsing, file downloading)
 tcp (server - client)
 multithreading (mutex, atomic)

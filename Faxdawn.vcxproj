@@ -18,6 +18,17 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\IOHandler\IOHandler.cpp" />
+    <ClCompile Include="source\Lexer\Lexer.cpp" />
+    <ClCompile Include="source\Lexer\Token.cpp" />
+    <ClCompile Include="source\Compiler\Compiler.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\IOHandler\IOHandler.h" />
+    <ClInclude Include="source\Lexer\Lexer.h" />
+    <ClInclude Include="source\Lexer\Token.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -90,12 +101,12 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)KLibrary\;$(SolutionDir)source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <Optimization>MaxSpeed</Optimization>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <Optimization>Disabled</Optimization>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -129,12 +140,12 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)KLibrary\;$(SolutionDir)source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <Optimization>MaxSpeed</Optimization>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>$(SolutionDir)source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Disabled</Optimization>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -152,7 +163,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)KLibrary\;$(SolutionDir)source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -164,100 +175,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="KLibrary\geometry\plane.cpp" />
-    <ClCompile Include="KLibrary\geometry\ray.cpp" />
-    <ClCompile Include="KLibrary\geometry\sphere.cpp" />
-    <ClCompile Include="KLibrary\geometry\triangle.cpp" />
-    <ClCompile Include="KLibrary\geometry\vertex.cpp" />
-    <ClCompile Include="KLibrary\gpu\buffer\constant_buffer.cpp" />
-    <ClCompile Include="KLibrary\gpu\buffer\gpu_buffer.cpp" />
-    <ClCompile Include="KLibrary\gpu\gpu.cpp" />
-    <ClCompile Include="KLibrary\gpu\states\depth_state.cpp" />
-    <ClCompile Include="KLibrary\gpu\states\raster_state.cpp" />
-    <ClCompile Include="KLibrary\gpu\states\sampler_state.cpp" />
-    <ClCompile Include="KLibrary\gpu\utility\shaders.cpp" />
-    <ClCompile Include="KLibrary\gpu\utility\texture.cpp" />
-    <ClCompile Include="KLibrary\gpu\utility\vbuffer.cpp" />
-    <ClCompile Include="KLibrary\gpu\views\depth_view.cpp" />
-    <ClCompile Include="KLibrary\gpu\views\shader_view.cpp" />
-    <ClCompile Include="KLibrary\gpu\views\target_view.cpp" />
-    <ClCompile Include="KLibrary\graphics\color.cpp" />
-    <ClCompile Include="KLibrary\graphics\image.cpp" />
-    <ClCompile Include="KLibrary\graphics\video.cpp" />
-    <ClCompile Include="KLibrary\math\float2.cpp" />
-    <ClCompile Include="KLibrary\math\float3.cpp" />
-    <ClCompile Include="KLibrary\math\float4.cpp" />
-    <ClCompile Include="KLibrary\math\int2.cpp" />
-    <ClCompile Include="KLibrary\math\int3.cpp" />
-    <ClCompile Include="KLibrary\math\int4.cpp" />
-    <ClCompile Include="KLibrary\math\mat3.cpp" />
-    <ClCompile Include="KLibrary\math\mat4.cpp" />
-    <ClCompile Include="KLibrary\math\math.cpp" />
-    <ClCompile Include="KLibrary\utility\console.cpp" />
-    <ClCompile Include="KLibrary\utility\convert.cpp" />
-    <ClCompile Include="KLibrary\utility\file.cpp" />
-    <ClCompile Include="KLibrary\utility\random.cpp" />
-    <ClCompile Include="KLibrary\utility\socket.cpp" />
-    <ClCompile Include="KLibrary\utility\thread.cpp" />
-    <ClCompile Include="KLibrary\utility\time.cpp" />
-    <ClCompile Include="KLibrary\utility\web.cpp" />
-    <ClCompile Include="KLibrary\view\camera.cpp" />
-    <ClCompile Include="KLibrary\window\double_buffer.cpp" />
-    <ClCompile Include="KLibrary\window\key.cpp" />
-    <ClCompile Include="KLibrary\window\keys.cpp" />
-    <ClCompile Include="KLibrary\window\mouse.cpp" />
-    <ClCompile Include="KLibrary\window\window.cpp" />
-    <ClCompile Include="source\Faxdawn.cpp" />
-    <ClCompile Include="source\Interpreter\Interpreter.cpp" />
-    <ClCompile Include="source\Interpreter\LineHandler.cpp" />
-    <ClCompile Include="source\Types\Types.cpp" />
-    <ClCompile Include="source\Utility\Utility.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="KLibrary\geometry\plane.h" />
-    <ClInclude Include="KLibrary\geometry\ray.h" />
-    <ClInclude Include="KLibrary\geometry\sphere.h" />
-    <ClInclude Include="KLibrary\geometry\triangle.h" />
-    <ClInclude Include="KLibrary\geometry\vertex.h" />
-    <ClInclude Include="KLibrary\gpu\gpu.h" />
-    <ClInclude Include="KLibrary\graphics\color.h" />
-    <ClInclude Include="KLibrary\graphics\image.h" />
-    <ClInclude Include="KLibrary\graphics\video.h" />
-    <ClInclude Include="KLibrary\KrimzLib.h" />
-    <ClInclude Include="KLibrary\libspec\using.h" />
-    <ClInclude Include="KLibrary\math\float2.h" />
-    <ClInclude Include="KLibrary\math\float3.h" />
-    <ClInclude Include="KLibrary\math\float4.h" />
-    <ClInclude Include="KLibrary\math\int2.h" />
-    <ClInclude Include="KLibrary\math\int3.h" />
-    <ClInclude Include="KLibrary\math\int4.h" />
-    <ClInclude Include="KLibrary\math\mat3.h" />
-    <ClInclude Include="KLibrary\math\mat4.h" />
-    <ClInclude Include="KLibrary\math\math.h" />
-    <ClInclude Include="KLibrary\utility\console.h" />
-    <ClInclude Include="KLibrary\utility\convert.h" />
-    <ClInclude Include="KLibrary\utility\file.h" />
-    <ClInclude Include="KLibrary\utility\random.h" />
-    <ClInclude Include="KLibrary\utility\socket.h" />
-    <ClInclude Include="KLibrary\utility\thread.h" />
-    <ClInclude Include="KLibrary\utility\time.h" />
-    <ClInclude Include="KLibrary\utility\web.h" />
-    <ClInclude Include="KLibrary\view\camera.h" />
-    <ClInclude Include="KLibrary\window\double_buffer.h" />
-    <ClInclude Include="KLibrary\window\key.h" />
-    <ClInclude Include="KLibrary\window\keys.h" />
-    <ClInclude Include="KLibrary\window\mouse.h" />
-    <ClInclude Include="KLibrary\window\window.h" />
-    <ClInclude Include="source\Faxdawn.h" />
-    <ClInclude Include="source\Interpreter\Interpreter.h" />
-    <ClInclude Include="source\Interpreter\LineHandler.h" />
-    <ClInclude Include="source\Types\Types.h" />
-    <ClInclude Include="source\Utility\Utility.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="test\test.xdn" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
