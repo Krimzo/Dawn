@@ -7,29 +7,46 @@
 
 namespace Faxdawn {
 	inline const char comment = '$';
-	inline const char ignored[] = {
-		'\t', '\n'
-	};
+	inline const char character = '\'';
+	inline const char string = '"';
 
-	inline const char separators[] = {
-		' ', ';', ',',
-		'{', '(', '[',
-		'}', ')', ']'
+	/* ----- */
+	inline const std::vector<std::string> ignored = {
+		"\t", "\n"
 	};
-	inline const std::string operators[] = {
+	inline const std::vector<std::string> discarded = {
+		"", " "
+	};
+	bool IsIgnored(char value);
+	bool IsIgnored(const std::string& value);
+	bool IsDiscarded(const std::string& value);
+
+	/* ----- */
+	inline const std::vector<std::string> separators = {
+		" ", ";", ",",
+		"{", "(", "[",
+		"}", ")", "]"
+	};
+	inline const std::vector<std::string> operators = {
 		"=",
 		"+", "-", "*", "/", "%",
 		"+=", "-=", "*=", "/=", "%=",
-		"==", "!=", "<", ">", "<=", ">=",
-		"->"
+		"<", ">", "<=", ">=",
+		"->", "<-"
 	};
-	inline const std::string keywords[] = {
+	bool IsSeparator(char value);
+	bool IsOperator(char value);
+	bool IsSeparator(const std::string& value);
+	bool IsOperator(const std::string& value);
+
+	/* ----- */
+	inline const std::vector<std::string> keywords = {
 		"if", "elif", "else",
-		"not", "and", "or",
+		"is", "not", "and", "or",
 		"switch", "case",
-		"for", "while", "do", "loop", "break", "continue",
-		"def", "return",
-		"class", "pub", "self",
+		"while", "loop", "stop", "skip",
+		"for", "in",
+		"class", "pub", "self", "static",
 		"use"
 	};
 	inline std::vector<std::string> types = {
@@ -37,7 +54,11 @@ namespace Faxdawn {
 		"int", "float",
 		"string", "lambda"
 	};
+	bool IsKeyword(const std::string& value);
+	bool IsType(const std::string& value);
+	bool IsLiteral(const std::string& value);
 
+	/* ----- */
 	class Lexer {
 	private:
 		std::vector<std::string> split(const std::string& source) const;

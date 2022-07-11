@@ -15,11 +15,11 @@ comment			$$
 
 keywords:
 if, elif, else,
-not, and, or,
+is, not, and, or,
 switch, case,
-for, while, do, loop, break, continue,
-def, return,
-class, pub, self,
+while, loop, stop, skip,
+for, in,
+class, pub, self, static,
 use
 
 primitives:

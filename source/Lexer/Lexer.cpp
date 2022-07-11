@@ -10,41 +10,20 @@ Faxdawn::Lexer::~Lexer() {
 
 }
 
-template<typename T> static std::string ToString(const T& value) {
-	std::stringstream ss;
-	ss << value;
-	return ss.str();
-}
-static bool IsIgnored(char value) {
-	for (auto& ignoredValue : Faxdawn::ignored) {
-		if (ignoredValue == value) {
-			return true;
-		}
+// Source splitter
+static void SaveStreamPart(std::stringstream& stream, std::vector<std::string>& parts) {
+	const std::string result = stream.str();
+	if (!Faxdawn::IsDiscarded(result)) {
+		parts.push_back(result);
 	}
-	return false;
+	stream = {};
 }
-static bool IsSeparator(char value) {
-	for (auto& separatorValue : Faxdawn::separators) {
-		if (separatorValue == value) {
-			return true;
-		}
-	}
-	return false;
-}
-static bool IsOperator(const std::string& value) {
-	for (auto& operatorValue : Faxdawn::operators) {
-		if (operatorValue == value) {
-			return true;
-		}
-	}
-	return false;
-}
-
 std::vector<std::string> Faxdawn::Lexer::split(const std::string& source) const {
 	std::vector<std::string> parts;
 
 	bool readingComment = false;
 	bool readingSplitter = false;
+	bool readingString = false;
 	std::stringstream partStream = {};
 
 	for (auto& sourceChar : source) {
@@ -52,41 +31,31 @@ std::vector<std::string> Faxdawn::Lexer::split(const std::string& source) const 
 			readingComment = !readingComment;
 		}
 		else if (!readingComment && !IsIgnored(sourceChar)) {
-			if (IsSeparator(sourceChar) || IsOperator(ToString(sourceChar))) {
-				if (!readingSplitter) {
-					readingSplitter = true;
-					std::string part = partStream.str();
-					if (part != "") {
-						parts.push_back(part);
-					}
-					partStream = {};
-					partStream << sourceChar;
-				}
-				else {
-					std::string possibleOperator = partStream.str() + sourceChar;
-					if (IsOperator(possibleOperator)) {
-						parts.push_back(possibleOperator);
-						partStream = {};
+			if (sourceChar == Faxdawn::string) {
+				readingString = !readingString;
+			}
+			if (!readingString && (IsSeparator(sourceChar) || IsOperator(sourceChar))) {
+				if (readingSplitter) {
+					if (IsOperator(partStream.str() + sourceChar)) {
+						partStream << sourceChar;
+						SaveStreamPart(partStream, parts);
 						readingSplitter = false;
 					}
 					else {
-						std::string splitter = partStream.str();
-						if (splitter != " ") {
-							parts.push_back(splitter);
-						}
-						partStream = {};
+						SaveStreamPart(partStream, parts);
 						partStream << sourceChar;
 					}
+				}
+				else {
+					SaveStreamPart(partStream, parts);
+					partStream << sourceChar;
+					readingSplitter = true;
 				}
 			}
 			else {
 				if (readingSplitter) {
+					SaveStreamPart(partStream, parts);
 					readingSplitter = false;
-					std::string splitter = partStream.str();
-					if (splitter != " ") {
-						parts.push_back(splitter);
-					}
-					partStream = {};
 				}
 				partStream << sourceChar;
 			}
@@ -95,6 +64,85 @@ std::vector<std::string> Faxdawn::Lexer::split(const std::string& source) const 
 	return parts;
 }
 
+// Find types and generate tokens
+static Faxdawn::Token::Type GetTokenType(const std::string& value) {
+	if (Faxdawn::IsSeparator(value)) {
+		return Faxdawn::Token::Type::Separator;
+	}
+	if (Faxdawn::IsOperator(value)) {
+		return Faxdawn::Token::Type::Operator;
+	}
+	if (Faxdawn::IsKeyword(value)) {
+		return Faxdawn::Token::Type::Keyword;
+	}
+	if (Faxdawn::IsType(value)) {
+		return Faxdawn::Token::Type::Type;
+	}
+	if (Faxdawn::IsLiteral(value)) {
+		return Faxdawn::Token::Type::Literal;
+	}
+	return Faxdawn::Token::Type::Identifier;
+}
+std::vector<Faxdawn::Token> Faxdawn::Lexer::generate(const std::string& source) const {
+	std::vector<Faxdawn::Token> tokens;
+	for (auto& part : split(source)) {
+		Faxdawn::Token token;
+		token.value = part;
+		token.type = GetTokenType(token.value);
+		tokens.push_back(token);
+	}
+	return tokens;
+}
+
+// Utility
+static std::string ToString(char value) {
+	std::string result;
+	result.push_back(value);
+	return result;
+}
+static bool ContainerContains(const std::vector<std::string>& container, const std::string& value) {
+	for (auto& containerValue : container) {
+		if (containerValue == value) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// Don' care
+bool Faxdawn::IsIgnored(char value) {
+	return IsIgnored(ToString(value));
+}
+bool Faxdawn::IsIgnored(const std::string& value) {
+	return ContainerContains(Faxdawn::ignored, value);
+}
+bool Faxdawn::IsDiscarded(const std::string& value) {
+	return ContainerContains(Faxdawn::discarded, value);
+}
+
+// Separators/operators
+bool Faxdawn::IsSeparator(char value) {
+	return IsSeparator(ToString(value));
+}
+bool Faxdawn::IsOperator(char value) {
+	return IsSeparator(ToString(value));
+}
+bool Faxdawn::IsSeparator(const std::string& value) {
+	return ContainerContains(Faxdawn::separators, value);
+}
+bool Faxdawn::IsOperator(const std::string& value) {
+	return ContainerContains(Faxdawn::operators, value);
+}
+
+// Keywords/types
+bool Faxdawn::IsKeyword(const std::string& value) {
+	return ContainerContains(Faxdawn::keywords, value);
+}
+bool Faxdawn::IsType(const std::string& value) {
+	return ContainerContains(Faxdawn::types, value);
+}
+
+// Literals
 static bool IsInteger(const std::string& value) {
 	if (value.empty()) {
 		return false;
@@ -111,23 +159,7 @@ static bool IsDouble(const std::string& value) {
 	double iHateWarnings = strtod(value.data(), &res);
 	return !*res;
 }
-static bool IsKeyword(const std::string& value) {
-	for (auto& keywordValue : Faxdawn::keywords) {
-		if (keywordValue == value) {
-			return true;
-		}
-	}
-	return false;
-}
-static bool IsType(const std::string& value) {
-	for (auto& typeValue : Faxdawn::types) {
-		if (typeValue == value) {
-			return true;
-		}
-	}
-	return false;
-}
-static bool IsLiteral(const std::string& value) {
+bool Faxdawn::IsLiteral(const std::string& value) {
 	if (value.find("'") != std::string::npos) {
 		return true;
 	}
@@ -141,34 +173,4 @@ static bool IsLiteral(const std::string& value) {
 		return true;
 	}
 	return false;
-}
-
-static Faxdawn::Token::Type GetTokenType(const std::string& value) {
-	if (value.size() == 1 && IsSeparator(value.front())) {
-		return Faxdawn::Token::Type::Separator;
-	}
-	if (IsOperator(value)) {
-		return Faxdawn::Token::Type::Operator;
-	}
-	if (IsKeyword(value)) {
-		return Faxdawn::Token::Type::Keyword;
-	}
-	if (IsType(value)) {
-		return Faxdawn::Token::Type::Type;
-	}
-	if (IsLiteral(value)) {
-		return Faxdawn::Token::Type::Literal;
-	}
-	return Faxdawn::Token::Type::Identifier;
-}
-
-std::vector<Faxdawn::Token> Faxdawn::Lexer::generate(const std::string& source) const {
-	std::vector<Faxdawn::Token> tokens;
-	for (auto& part : split(source)) {
-		Faxdawn::Token token;
-		token.value = part;
-		token.type = GetTokenType(token.value);
-		tokens.push_back(token);
-	}
-	return tokens;
 }
