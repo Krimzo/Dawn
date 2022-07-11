@@ -19,15 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\IOHandler\IOHandler.cpp" />
+    <ClCompile Include="source\FileIO\FileIO.cpp" />
     <ClCompile Include="source\Lexer\Lexer.cpp" />
     <ClCompile Include="source\Lexer\Token.cpp" />
-    <ClCompile Include="source\Compiler\Compiler.cpp" />
+    <ClCompile Include="source\Faxdawn\Faxdawn.cpp" />
+    <ClCompile Include="source\Parser\Parser.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\IOHandler\IOHandler.h" />
+    <ClInclude Include="source\Faxdawn\Faxdawn.h" />
+    <ClInclude Include="source\FileIO\FileIO.h" />
     <ClInclude Include="source\Lexer\Lexer.h" />
     <ClInclude Include="source\Lexer\Token.h" />
+    <ClInclude Include="source\Parser\Parser.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

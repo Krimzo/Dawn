@@ -65,30 +65,30 @@ switch (switch_test) {
 class Float2 {
 	pub float x, y;
 
-	Float2() {
+	pub maker() {
 		x = 0.0;
 		y = 0.0;
 	}
-	Float2(float a) {
+	pub maker(float a) {
 		x = a;
 		y = a;
 	}
-	Float2(float x, float y) {
+	pub maker(float x, float y) {
 		self->x = x;
 		self->y = y;
 	}
 
-	add(Float2 obj) -> Float2 {
+	pub add(Float2 obj) -> Float2 {
 		<- Float2(x + obj->x, y + obj->y);
 	}
-	sub(Float2 obj) -> Float2 {
+	pub sub(Float2 obj) -> Float2 {
 		<- Float2(x - obj->x, y - obj->y);
 	}
 
-	+(Float2 obj) -> Float2 {
+	pub +(Float2 obj) -> Float2 {
 		<- add(obj);
 	}
-	-(Float2 obj) -> Float2 {
+	pub -(Float2 obj) -> Float2 {
 		<- sub(obj);
 	}
 }

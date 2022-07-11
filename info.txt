@@ -19,7 +19,7 @@ is, not, and, or,
 switch, case,
 while, loop, stop, skip,
 for, in,
-class, pub, self, static,
+class, pub, maker, self, static,
 use
 
 primitives:

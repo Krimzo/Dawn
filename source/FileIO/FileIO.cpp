@@ -1,17 +1,14 @@
-#include "IOHandler/IOHandler.h"
-
-#include <fstream>
-#include <sstream>
+#include "FileIO/FileIO.h"
 
 
-Faxdawn::IOHandler::IOHandler() {
+Faxdawn::FileIO::FileIO() {
 
 }
-Faxdawn::IOHandler::~IOHandler() {
+Faxdawn::FileIO::~FileIO() {
 
 }
 
-std::string Faxdawn::IOHandler::read(const std::string& filePath) const {
+std::string Faxdawn::FileIO::read(const std::string& filePath) const {
 	std::ifstream file(filePath);
 	if (!file.is_open()) {
 		return "";
@@ -22,7 +19,7 @@ std::string Faxdawn::IOHandler::read(const std::string& filePath) const {
 	return dataStream.str();
 }
 
-bool Faxdawn::IOHandler::write(const std::string& filePath, const std::string& data) const {
+bool Faxdawn::FileIO::write(const std::string& filePath, const std::string& data) const {
 	std::ofstream file(filePath);
 	if (!file.is_open()) {
 		return false;
@@ -32,7 +29,7 @@ bool Faxdawn::IOHandler::write(const std::string& filePath, const std::string& d
 	return true;
 }
 
-int Faxdawn::IOHandler::read(const std::string& filePath, void* buffer, int bufferSize) const {
+int Faxdawn::FileIO::read(const std::string& filePath, void* buffer, int bufferSize) const {
 	FILE* file = nullptr;
 	if (fopen_s(&file, filePath.data(), "rb")) {
 		return 0;
@@ -41,7 +38,7 @@ int Faxdawn::IOHandler::read(const std::string& filePath, void* buffer, int buff
 	fclose(file);
 	return bytesRead;
 }
-int Faxdawn::IOHandler::write(const std::string& filePath, const void* buffer, int bufferSize) const {
+int Faxdawn::FileIO::write(const std::string& filePath, const void* buffer, int bufferSize) const {
 	FILE* file = nullptr;
 	if (fopen_s(&file, filePath.data(), "wb")) {
 		return 0;

@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\Compiler\Compiler.cpp">
+    <ClCompile Include="source\Faxdawn\Faxdawn.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\Lexer\Lexer.cpp">
@@ -24,7 +24,10 @@
     <ClCompile Include="source\Lexer\Token.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\IOHandler\IOHandler.cpp">
+    <ClCompile Include="source\FileIO\FileIO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Parser\Parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,7 +38,13 @@
     <ClInclude Include="source\Lexer\Token.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\IOHandler\IOHandler.h">
+    <ClInclude Include="source\FileIO\FileIO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Parser\Parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Faxdawn\Faxdawn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

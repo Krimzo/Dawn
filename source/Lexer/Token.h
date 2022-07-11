@@ -21,6 +21,7 @@ namespace Faxdawn {
 
 		Type type = Type::Unknown;
 		std::string value;
+		int line = -1;
 
 		Token();
 		~Token();
