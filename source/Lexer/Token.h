@@ -15,8 +15,9 @@ namespace Faxdawn {
 			Operator,
 			Keyword,
 			Type,
+			Array,
 			Literal,
-			Identifier
+			Identifier,
 		};
 
 		Type type = Type::Unknown;
@@ -25,6 +26,8 @@ namespace Faxdawn {
 
 		Token();
 		~Token();
+
+		std::string getType() const;
 	};
 
 	std::ostream& operator<<(std::ostream& stream, const Token& token);

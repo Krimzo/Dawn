@@ -7,7 +7,7 @@ compiled extension: .fxex
 compile command: fxdc SourceFile.fxdn
 execute command: fxdn CompiledFile.fxex
 
-line end		;
+command end		;
 code scope		{}
 splitter		()
 arrays			[]
@@ -20,6 +20,7 @@ switch, case,
 while, loop, stop, skip,
 for, in,
 class, pub, maker, self, static,
+none,
 use
 
 primitives:

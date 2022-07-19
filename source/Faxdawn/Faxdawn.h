@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Lexer/Token.h"
 #include <iostream>
 #include <syncstream>
 #include <string>
@@ -38,12 +39,8 @@ namespace Faxdawn {
 		"while", "loop", "stop", "skip",
 		"for", "in",
 		"class", "pub", "maker", "self", "static",
+		"none",
 		"use"
-	};
-	inline std::vector<std::string> types = {
-		"bool", "byte", "char",
-		"int", "float",
-		"string", "lambda"
 	};
 
 	template<const char END = '\n', typename... Args> inline void print(const Args&... args) {
@@ -60,5 +57,8 @@ namespace Faxdawn {
 			std::cin.get();
 			exit(E);
 		}
+	}
+	template<const int E = 1> inline void error(bool state, const Faxdawn::Token& token) {
+		error(state, "Error ", token.getType(), " \"", token.value, "\" at line ", token.line);
 	}
 }

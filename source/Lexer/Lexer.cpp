@@ -1,7 +1,7 @@
 #include "Lexer/Lexer.h"
 
 
-Faxdawn::Lexer::Lexer() {
+Faxdawn::Lexer::Lexer(std::vector<std::string>& types) : types(types) {
 
 }
 Faxdawn::Lexer::~Lexer() {
@@ -70,7 +70,7 @@ std::vector<Faxdawn::Token> Faxdawn::Lexer::split(const std::string& source) con
 }
 
 // Find types and generate tokens
-static Faxdawn::Token::Type GetTokenType(const std::string& value) {
+static Faxdawn::Token::Type GetTokenType(const std::vector<std::string>& types, const std::string& value) {
 	if (Faxdawn::IsSeparator(value)) {
 		return Faxdawn::Token::Type::Separator;
 	}
@@ -80,7 +80,7 @@ static Faxdawn::Token::Type GetTokenType(const std::string& value) {
 	if (Faxdawn::IsKeyword(value)) {
 		return Faxdawn::Token::Type::Keyword;
 	}
-	if (Faxdawn::IsType(value)) {
+	if (Faxdawn::IsType(types, value)) {
 		return Faxdawn::Token::Type::Type;
 	}
 	if (Faxdawn::IsLiteral(value)) {
@@ -91,7 +91,7 @@ static Faxdawn::Token::Type GetTokenType(const std::string& value) {
 std::vector<Faxdawn::Token> Faxdawn::Lexer::generate(const std::string& source) const {
 	auto tokens = split(source);
 	for (auto& token : tokens) {
-		token.type = GetTokenType(token.value);
+		token.type = GetTokenType(types, token.value);
 	}
 	return tokens;
 }
@@ -140,8 +140,8 @@ bool Faxdawn::IsOperator(const std::string& value) {
 bool Faxdawn::IsKeyword(const std::string& value) {
 	return ContainerContains(Faxdawn::keywords, value);
 }
-bool Faxdawn::IsType(const std::string& value) {
-	return ContainerContains(Faxdawn::types, value);
+bool Faxdawn::IsType(const std::vector<std::string>& types, const std::string& value) {
+	return ContainerContains(types, value);
 }
 
 // Literals

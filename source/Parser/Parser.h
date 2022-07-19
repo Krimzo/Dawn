@@ -1,17 +1,21 @@
 #pragma once
 
 #include "Faxdawn/Faxdawn.h"
-#include "Lexer/Token.h"
+#include "Lexer/Lexer.h"
 #include <list>
 
 
 namespace Faxdawn {
 	class Parser {
 	private:
-		std::vector<Token> validate_identifiers(const std::vector<Token>& tokens) const;
+		std::vector<std::string>& types;
+
+		std::vector<Token> update_class_types(const std::vector<Token>& tokens) const;
+		std::vector<Token> update_identifier_types(const std::vector<Token>& tokens) const;
+		std::vector<Token> update_array_types(const std::vector<Token>& tokens) const;
 
 	public:
-		Parser();
+		Parser(std::vector<std::string>& types);
 		Parser(const Parser&) = delete;
 		void operator=(const Parser&) = delete;
 		~Parser();

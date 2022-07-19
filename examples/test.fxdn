@@ -93,6 +93,7 @@ class Float2 {
 	}
 }
 
+Float2 nothing = none;
 Float2 vector = Float2(1.0, 2.0);
 
 

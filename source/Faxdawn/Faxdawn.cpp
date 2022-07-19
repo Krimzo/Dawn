@@ -1,20 +1,10 @@
-#include "FileIO/FileIO.h"
-#include "Lexer/Lexer.h"
-#include "Parser/Parser.h"
+#include "Machine/Machine.h"
 
 
-int main(int argc, const char* argv) {
-	Faxdawn::FileIO fileIO;
-	Faxdawn::Lexer lexer;
-	Faxdawn::Parser parser;
+int main(int argc, const char** argv) {
+	Faxdawn::Machine machine;
 
-	std::string source = fileIO.read("examples/test.fxdn");
-	auto tokens = lexer.generate(source);
-	tokens = parser.parse(tokens);
-
-	for (auto& token : tokens) {
-		std::cout << token << std::endl;
-	}
+	machine.compile_file("examples/test.fxdn");
 
 
 	std::cin.get();

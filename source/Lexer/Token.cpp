@@ -8,31 +8,27 @@ Faxdawn::Token::~Token() {
 
 }
 
-std::ostream& Faxdawn::operator<<(std::ostream& stream, const Token& token) {
-	stream << "[";
-	switch (token.type) {
-	case Token::Type::Unknown:
-		stream << " Unknown : ";
-		break;
+std::string Faxdawn::Token::getType() const {
+	switch (type) {
 	case Token::Type::Separator:
-		stream << " Separator : ";
-		break;
+		return "Separator";
 	case Token::Type::Operator:
-		stream << " Operator : ";
-		break;
+		return "Operator";
 	case Token::Type::Keyword:
-		stream << " Keyword : ";
-		break;
+		return "Keyword";
 	case Token::Type::Type:
-		stream << " Type : ";
-		break;
+		return "Type";
+	case Token::Type::Array:
+		return "Array";
 	case Token::Type::Literal:
-		stream << " Literal : ";
-		break;
+		return "Literal";
 	case Token::Type::Identifier:
-		stream << " Identifier : ";
-		break;
+		return "Identifier";
 	}
-	stream << "\"" << token.value << "\" ]";
+	return "Unknown";
+}
+
+std::ostream& Faxdawn::operator<<(std::ostream& stream, const Token& token) {
+	stream << "[ " << token.getType() << " : \"" << token.value << "\" ]";
 	return stream;
 }
