@@ -32,7 +32,7 @@ lambda
 
 function example
 Test() -> int {
-	return 6;
+	<- 6;
 }
 
 loading modules:

@@ -15,42 +15,42 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\Faxdawn\Faxdawn.cpp">
+    <ClCompile Include="Source\Faxdawn\Faxdawn.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Lexer\Lexer.cpp">
+    <ClCompile Include="Source\Lexer\Lexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Lexer\Token.cpp">
+    <ClCompile Include="Source\Lexer\Token.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\FileIO\FileIO.cpp">
+    <ClCompile Include="Source\FileIO\FileIO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Parser\Parser.cpp">
+    <ClCompile Include="Source\Parser\Parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Machine\Machine.cpp">
+    <ClCompile Include="Source\Machine\Machine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\Lexer\Lexer.h">
+    <ClInclude Include="Source\Lexer\Lexer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Lexer\Token.h">
+    <ClInclude Include="Source\Lexer\Token.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\FileIO\FileIO.h">
+    <ClInclude Include="Source\FileIO\FileIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Parser\Parser.h">
+    <ClInclude Include="Source\Parser\Parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Faxdawn\Faxdawn.h">
+    <ClInclude Include="Source\Faxdawn\Faxdawn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Machine\Machine.h">
+    <ClInclude Include="Source\Machine\Machine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
