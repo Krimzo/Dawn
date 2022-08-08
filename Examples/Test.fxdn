@@ -1,0 +1,100 @@
+
+use "..\somefolder\somefile.fxdn";
+
+
+int a = 2;
+float b = 3.0;
+int c = 5.0; float d = 6;
+
+char who = 'U';
+
+{
+	 float e = 2.0;
+	 d = a * 2.0 + e * c;
+	 b = int(d) % 2 + 5.0;
+
+	 String funny = "HAHA";
+	 String maybe = funny + ", maybe?";
+}
+
+int[] f = [ 1, 2, 3 ];
+
+$
+	random comment
+$
+
+test_add(int value, int adder) -> int {
+	<- value + adder;
+}
+
+test_print(int value) {
+	print(test_add(value, 5));
+}
+
+for (int i = 0) (i < 10) (i += 1) {
+	if (i is 7) {
+		skip;
+	}
+	elif (test_add(i, 5) > 12) {
+		stop;
+	}
+	else {
+		print(i);
+	}
+}
+for (int value) in (f) {
+	test_print(value);
+}
+
+int switch_test = 6;
+switch (switch_test) {
+	case (1, 2, 3) {
+		print("it's 1, 2 or 3");
+	}
+	case (4) {
+		print("it's 4");
+	}
+	case (5) {
+		print("it's 5");
+	}
+	else {
+		print("it's something i don't know");
+	}
+}
+
+class Float2 {
+	pub float x, y;
+
+	pub maker() {
+		x = 0.0;
+		y = 0.0;
+	}
+	pub maker(float a) {
+		x = a;
+		y = a;
+	}
+	pub maker(float x, float y) {
+		self->x = x;
+		self->y = y;
+	}
+
+	pub add(Float2 obj) -> Float2 {
+		<- Float2(x + obj->x, y + obj->y);
+	}
+	pub sub(Float2 obj) -> Float2 {
+		<- Float2(x - obj->x, y - obj->y);
+	}
+
+	pub +(Float2 obj) -> Float2 {
+		<- add(obj);
+	}
+	pub -(Float2 obj) -> Float2 {
+		<- sub(obj);
+	}
+}
+
+Float2 nothing = none;
+Float2 vector = Float2(1.0, 2.0);
+
+
+$ more comments... $
