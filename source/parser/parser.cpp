@@ -63,7 +63,6 @@ std::vector<faxdawn::token> faxdawn::parser::fix_array_types(const std::vector<t
 			if (update_token.value == "]") {
 				updated_tokens.pop_back();
 				updated_tokens.back().value += "[]";
-				updated_tokens.back().type = token_type::Array;
 				should_save = false;
 			}
 			state = 0;

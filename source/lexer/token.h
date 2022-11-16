@@ -10,9 +10,8 @@ namespace faxdawn {
 		Separator,
 		Operator,
 		Keyword,
-		Type,
-		Array,
 		Literal,
+		Type,
 		Identifier,
 	};
 
