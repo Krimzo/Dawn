@@ -19,20 +19,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\FileIO\FileIO.cpp" />
-    <ClCompile Include="Source\Lexer\Lexer.cpp" />
-    <ClCompile Include="Source\Lexer\Token.cpp" />
-    <ClCompile Include="Source\Faxdawn\Faxdawn.cpp" />
-    <ClCompile Include="Source\Machine\Machine.cpp" />
-    <ClCompile Include="Source\Parser\Parser.cpp" />
+    <ClCompile Include="source\faxdawn\syntax.cpp" />
+    <ClCompile Include="source\file_io\file_io.cpp" />
+    <ClCompile Include="source\lexer\lexer.cpp" />
+    <ClCompile Include="source\lexer\token.cpp" />
+    <ClCompile Include="source\faxdawn\faxdawn.cpp" />
+    <ClCompile Include="source\machine\machine.cpp" />
+    <ClCompile Include="source\parser\parser.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Faxdawn\Faxdawn.h" />
-    <ClInclude Include="Source\FileIO\FileIO.h" />
-    <ClInclude Include="Source\Lexer\Lexer.h" />
-    <ClInclude Include="Source\Lexer\Token.h" />
-    <ClInclude Include="Source\Machine\Machine.h" />
-    <ClInclude Include="Source\Parser\Parser.h" />
+    <ClInclude Include="source\faxdawn\utility.h" />
+    <ClInclude Include="source\faxdawn\syntax.h" />
+    <ClInclude Include="source\file_io\file_io.h" />
+    <ClInclude Include="source\lexer\lexer.h" />
+    <ClInclude Include="source\lexer\token.h" />
+    <ClInclude Include="source\machine\machine.h" />
+    <ClInclude Include="source\parser\parser.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -58,13 +60,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -95,12 +97,12 @@
     <IntDir>$(SolutionDir)inter\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)Bin\Debug\</OutDir>
-    <IntDir>$(SolutionDir)Bin\Debug\Intermediate\</IntDir>
+    <OutDir>$(SolutionDir)bin\debug\</OutDir>
+    <IntDir>$(SolutionDir)bin\debug\intermediate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)Bin\Release\</OutDir>
-    <IntDir>$(SolutionDir)Bin\Release\Intermediate\</IntDir>
+    <OutDir>$(SolutionDir)bin\release\</OutDir>
+    <IntDir>$(SolutionDir)bin\Release\intermediate\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

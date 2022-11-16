@@ -15,42 +15,45 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Faxdawn\Faxdawn.cpp">
+    <ClCompile Include="source\faxdawn\faxdawn.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Lexer\Lexer.cpp">
+    <ClCompile Include="source\lexer\lexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Lexer\Token.cpp">
+    <ClCompile Include="source\lexer\token.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\FileIO\FileIO.cpp">
+    <ClCompile Include="source\file_io\file_io.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Parser\Parser.cpp">
+    <ClCompile Include="source\parser\parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Machine\Machine.cpp">
+    <ClCompile Include="source\machine\machine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Lexer\Lexer.h">
+    <ClInclude Include="source\lexer\lexer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Lexer\Token.h">
+    <ClInclude Include="source\lexer\token.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\FileIO\FileIO.h">
+    <ClInclude Include="source\file_io\file_io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Parser\Parser.h">
+    <ClInclude Include="source\parser\parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Faxdawn\Faxdawn.h">
+    <ClInclude Include="source\faxdawn\utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Machine\Machine.h">
+    <ClInclude Include="source\machine\machine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\faxdawn\syntax.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

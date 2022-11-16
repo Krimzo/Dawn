@@ -1,7 +1,8 @@
 
-# Visual studio
+# IDE
 .vs
+.idea
 
-# Compile
-/bin
-/inter
+# Other
+bin
+temp
