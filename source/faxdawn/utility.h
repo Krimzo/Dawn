@@ -2,17 +2,16 @@
 
 #include "lexer/token.h"
 
-#include <syncstream>
 #include <iostream>
 
+#undef assert
 
 namespace faxdawn::utility {
 	template<bool NewLine = true, typename... Args> void print(const Args&... args)
 	{
-		std::osyncstream stream(std::cout);
-		(stream << ... << args);
+		(std::cout << ... << args);
 		if constexpr (NewLine) {
-			stream << std::endl;
+            std::cout << std::endl;
 		}
 	}
 

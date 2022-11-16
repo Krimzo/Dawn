@@ -3,6 +3,10 @@
 .vs
 .idea
 
-# Other
+# Compile
 bin
+cmake-build*
+
+# Other
+.DS_Store
 temp

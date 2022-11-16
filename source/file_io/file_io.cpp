@@ -27,24 +27,22 @@ bool faxdawn::file_io::write_string(const std::string& filePath, const std::stri
 	return true;
 }
 
-int64_t faxdawn::file_io::read_bytes(const std::string& filePath, void* buffer, const size_t buffer_size)
+size_t faxdawn::file_io::read_bytes(const std::string& filePath, void* buffer, const size_t buffer_size)
 {
-	FILE* file = nullptr;
-	if (fopen_s(&file, filePath.data(), "rb")) {
-		return -1;
+	if (FILE* file = fopen(filePath.data(), "rb")) {
+        const size_t bytes_read = fread(buffer, 1, buffer_size, file);
+        fclose(file);
+        return bytes_read;
 	}
-	const int bytes_read = int(fread(buffer, 1, buffer_size, file));
-	fclose(file);
-	return bytes_read;
+    return -1;
 }
 
-int64_t faxdawn::file_io::write_bytes(const std::string& filePath, const void* buffer, const size_t buffer_size)
+size_t faxdawn::file_io::write_bytes(const std::string& filePath, const void* buffer, const size_t buffer_size)
 {
-	FILE* file = nullptr;
-	if (fopen_s(&file, filePath.data(), "wb")) {
-		return -1;
+	if (FILE* file = fopen(filePath.data(), "wb")) {
+        const size_t bytes_written = fwrite(buffer, 1, buffer_size, file);
+        fclose(file);
+        return bytes_written;
 	}
-	const int bytes_written = int(fwrite(buffer, 1, buffer_size, file));
-	fclose(file);
-	return bytes_written;
+	return -1;
 }
