@@ -1,0 +1,110 @@
+
+use "..\somefolder\somefile.fxdn";
+
+
+main!() {
+    int a = 2;
+    float b = 3.0;
+    int c = 5.0; float d = 6;
+    byte b = 25;
+    
+    char who = 'U';
+    
+    $ scope test $ {
+         float e = 2.0;
+         d = a * 2.0 + e * c;
+         b = int(d) % 2 + 5.0;
+    
+         String! funny = "HAHA";
+         String maybe = funny + ", maybe?";
+    }
+    
+    int[] f = [ 1, 2, 3 ];
+    
+    $ random comment $
+    
+    test_add(int value, int adder) : int {
+        value + adder
+    }
+    
+    test_print!(int value) {
+        print(test_add(value, 5));
+    }
+    
+    loop 10: i {
+        if i is 7 {
+            skip;
+        }
+        elif test_add(i, 5) > 12 {
+            stop;
+        }
+        else {
+            print(i);
+        }
+    }
+    loop f: value {
+        test_print(value);
+    }
+    
+    int compare_test = 6;
+    compare compare_test {
+        check 1, 2, 3 {
+            print("it's 1, 2 or 3");
+        }
+        check 4 {
+            print("it's 4");
+        }
+        check 5 {
+            print("it's 5");
+        }
+        other {
+            print("it's something i don't know");
+        }
+    }
+    
+    type Float2 {
+        pub float x, y;
+    
+        pub maker() {
+            x = 0.0;
+            y = 0.0;
+        }
+        pub maker(float a) {
+            x = a;
+            y = a;
+        }
+        pub maker(float x, float y) {
+            self:x = x;
+            self:y = y;
+        }
+    
+        pub add(Float2 obj) : Float2 {
+            Float2(x + obj:x, y + obj:y)
+        }
+        pub sub(Float2 obj) : Float2 {
+            Float2(x - obj:x, y - obj:y)
+        }
+    
+        pub +(Float2 obj) : Float2 {
+            add(obj)
+        }
+        pub -(Float2 obj) : Float2 {
+            sub(obj)
+        }
+        
+        pub static new(float x, float y) : Float2 {
+            Float2(x, y)
+        }
+    }
+    
+    Float2? nothing = none;
+    if not nothing {
+        nothing = Float2:new(3, 4);
+    }
+    
+    Float2 vector = Float2(1.0, 2.0);
+    vector:x = 5.0 ^ 3;
+    print(vector:x);
+    
+    $ more comments... $
+}

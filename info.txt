@@ -4,39 +4,44 @@ type: intercompiled
 source extension: .fxdn
 compiled extension: .fxex
 
-compile command: fxdc SourceFile.fxdn
-execute command: fxdn CompiledFile.fxex
+compile command: fxdc source_file.fxdn
+execute command: fxdn compiled_file.fxex
 
 command end		;
 code scope		{}
-splitter		()
+functions		()
 arrays			[]
 comment			$$
 
 keywords:
 if, elif, else,
 is, not, and, or,
-switch, case,
+compare, check, other,
 while, loop, stop, skip,
-for, in,
-class, pub, maker, self, static,
+type, pub, maker,
+self, static,
 none,
 use
 
 primitives:
-bool, byte, char, int(64bit), float(64bit)
+bool (8bit),
+byte (unsigned 8bit),
+char (16bit),
+int (64bit),
+float (64bit)
 
 built-in:
-string,
-lambda
+String,
+Function,
+Thread,
 
 function example
-Test() -> int {
-	<- 6;
+Test() : int {
+	6
 }
 
 loading modules:
-use module_name.fxdn;
+use "module_name.fxdn";
 
 std lib:
 file management (image, audio, video)
