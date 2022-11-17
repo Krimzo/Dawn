@@ -21,17 +21,7 @@ static bool is_double(const std::string& value)
     return !*res;
 }
 
-static bool container_contains(const std::vector<std::string>& container, const std::string& value)
-{
-    for (auto& container_value : container) {
-        if (container_value == value) {
-            return true;
-        }
-    }
-    return false;
-}
-
-faxdawn::token_type faxdawn::syntax::get_token_type(const std::vector<std::string>& all_types, const std::string& value)
+faxdawn::token_type faxdawn::syntax::get_token_type(const std::unordered_set<std::string>& all_types, const std::string& value)
 {
     if (is_separator(value)) {
         return token_type::Separator;
@@ -45,7 +35,7 @@ faxdawn::token_type faxdawn::syntax::get_token_type(const std::vector<std::strin
     if (is_literal(value)) {
         return token_type::Literal;
     }
-    if (is_type(all_types, value)) {
+    if (all_types.contains(value)) {
         return token_type::Type;
     }
     return token_type::Identifier;
@@ -53,7 +43,7 @@ faxdawn::token_type faxdawn::syntax::get_token_type(const std::vector<std::strin
 
 bool faxdawn::syntax::is_discarded(const std::string& value)
 {
-    return container_contains(discarded, value);
+    return discarded.contains(value);
 }
 
 bool faxdawn::syntax::is_ignored(const char value)
@@ -63,7 +53,7 @@ bool faxdawn::syntax::is_ignored(const char value)
 
 bool faxdawn::syntax::is_ignored(const std::string& value)
 {
-    return container_contains(ignored, value);
+    return ignored.contains(value);
 }
 
 bool faxdawn::syntax::is_separator(const char value)
@@ -73,7 +63,7 @@ bool faxdawn::syntax::is_separator(const char value)
 
 bool faxdawn::syntax::is_separator(const std::string& value)
 {
-    return container_contains(separators, value);
+    return separators.contains(value);
 }
 
 bool faxdawn::syntax::is_operator(const char value)
@@ -83,28 +73,23 @@ bool faxdawn::syntax::is_operator(const char value)
 
 bool faxdawn::syntax::is_operator(const std::string& value)
 {
-    return container_contains(operators, value);
+    return operators.contains(value);
 }
 
 bool faxdawn::syntax::is_keyword(const std::string& value)
 {
-    return container_contains(keywords, value);
-}
-
-bool faxdawn::syntax::is_type(const std::vector<std::string>& all_types, const std::string& value)
-{
-    return container_contains(all_types, value);
+    return keywords.contains(value);
 }
 
 bool faxdawn::syntax::is_literal(const std::string& value)
 {
-    if (value.length() == 3 && value.front() == '\'' && value.back() == '\'') {
+    if (value.front() == literal::character.front() && value.back() == literal::character.front()) {
         return true;
     }
-    if (value.front() == '"' && value.back() == '"') {
+    if (value.front() == literal::string.front() && value.back() == literal::string.front()) {
         return true;
     }
-    if (value == "true" || value == "false") {
+    if (value == literal::empty || value == literal::false_ || value == literal::true_) {
         return true;
     }
     if (is_integer(value) || is_double(value)) {

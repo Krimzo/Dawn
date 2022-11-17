@@ -4,7 +4,7 @@
 #include "file_io/file_io.h"
 
 
-static void debug_print_tokens(const std::vector<faxdawn::token>& tokens, const std::vector<std::string>& types)
+static void debug_print_tokens(const std::vector<faxdawn::token>& tokens, const std::unordered_set<std::string>& types)
 {
 	using namespace faxdawn::utility;
 
@@ -14,11 +14,11 @@ static void debug_print_tokens(const std::vector<faxdawn::token>& tokens, const 
 	}
 
 	// Types
-	print<false>("Types: [");
-	for (size_t i = 0; i < types.size() - 1; i++) {
-		print<false>(types[i], ", ");
+	print<false>("Types: [ ");
+	for (auto& val : types) {
+		print<false>(val, " ");
 	}
-	print(types[types.size() - 1], "]");
+	print("]");
 }
 
 bool faxdawn::machine::compile(const std::string& source) const

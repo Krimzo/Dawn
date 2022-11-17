@@ -6,7 +6,7 @@
 
 namespace faxdawn {
 	class machine {
-		std::vector<std::string> types_ = syntax::types;
+		std::unordered_set<std::string> types_ = syntax::types;
 		lexer lexer_ = lexer(types_);
 		parser parser_ = parser(types_);
 

@@ -3,7 +3,7 @@
 #include <sstream>
 
 
-faxdawn::lexer::lexer(std::vector<std::string>& types)
+faxdawn::lexer::lexer(std::unordered_set<std::string>& types)
 	: types_(types)
 {}
 
@@ -32,11 +32,11 @@ std::vector<faxdawn::token> faxdawn::lexer::split(const std::string& source) con
 		if (source_char == '\n') {
 			line_id += 1;
 		}
-		if (source_char == syntax::comment) {
+		if (source_char == syntax::literal::comment.front()) {
 			reading_comment = !reading_comment;
 		}
 		else if (!reading_comment && !syntax::is_ignored(source_char)) {
-			if (source_char == syntax::string) {
+			if (source_char == syntax::literal::string.front()) {
 				reading_string = !reading_string;
 			}
 			if (!reading_string && (syntax::is_separator(source_char) || syntax::is_operator(source_char))) {

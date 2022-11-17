@@ -14,14 +14,14 @@ arrays			[]
 comment			$$
 
 keywords:
+not,
 if, elif, else,
-is, not, and, or,
-compare, check, other,
-while, loop, stop, skip,
-type, pub, maker,
+switch, "case,
+loop, stop, skip,
+type, pub,
 self, static,
 none,
-use
+use,
 
 primitives:
 bool (8bit),
@@ -36,7 +36,7 @@ Function,
 Thread,
 
 function example
-Test() : int {
+Test(): int {
 	6
 }
 

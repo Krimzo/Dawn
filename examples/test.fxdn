@@ -6,7 +6,7 @@ main!() {
     int a = 2;
     float b = 3.0;
     int c = 5.0; float d = 6;
-    byte b = 25;
+    byte e = 25;
     
     char who = 'U';
     
@@ -19,11 +19,9 @@ main!() {
          String maybe = funny + ", maybe?";
     }
     
-    int[] f = [ 1, 2, 3 ];
-    
     $ random comment $
     
-    test_add(int value, int adder) : int {
+    test_add(int value, int adder): int {
         value + adder
     }
     
@@ -32,7 +30,7 @@ main!() {
     }
     
     loop 10: i {
-        if i is 7 {
+        if i == 7 {
             skip;
         }
         elif test_add(i, 5) > 12 {
@@ -42,69 +40,75 @@ main!() {
             print(i);
         }
     }
-    loop f: value {
+    
+    int[] arr = [1, 2, 3];
+    loop arr: value {
         test_print(value);
     }
     
-    int compare_test = 6;
-    compare compare_test {
-        check 1, 2, 3 {
+    int switch_test = 6;
+    switch switch_test {
+        case 1, 2, 3 {
             print("it's 1, 2 or 3");
         }
-        check 4 {
+        case 4 {
             print("it's 4");
         }
-        check 5 {
+        case 5 {
             print("it's 5");
         }
-        other {
+        else {
             print("it's something i don't know");
         }
     }
     
     type Float2 {
-        pub float x, y;
+        pub float x;
+        pub float y;
     
-        pub maker() {
+        pub Float2() {
             x = 0.0;
             y = 0.0;
         }
-        pub maker(float a) {
+        pub Float2(float a) {
             x = a;
             y = a;
         }
-        pub maker(float x, float y) {
+        pub Float2(float x, float y) {
             self:x = x;
             self:y = y;
         }
-    
-        pub add(Float2 obj) : Float2 {
+        
+        pub add(Float2 obj): Float2 {
             Float2(x + obj:x, y + obj:y)
         }
-        pub sub(Float2 obj) : Float2 {
+        pub sub(Float2 obj): Float2 {
             Float2(x - obj:x, y - obj:y)
         }
-    
-        pub +(Float2 obj) : Float2 {
+        
+        pub +(Float2 obj): Float2 {
             add(obj)
         }
-        pub -(Float2 obj) : Float2 {
+        pub -(Float2 obj): Float2 {
             sub(obj)
         }
         
-        pub static new(float x, float y) : Float2 {
+        pub static new(float x, float y): Float2 {
             Float2(x, y)
         }
     }
     
-    Float2? nothing = none;
-    if not nothing {
-        nothing = Float2:new(3, 4);
+    Float2? something = none;
+    if !something? {
+        something = Float2:new(3, 4);
     }
     
     Float2 vector = Float2(1.0, 2.0);
     vector:x = 5.0 ^ 3;
     print(vector:x);
+    
+    Float2[] vec_array = [];
+    int vec_array_len = vec_array:length;
     
     $ more comments... $
 }
