@@ -14,6 +14,6 @@ int main(const int argc, const char** argv)
 		faxdawn::utility::print("Please provide a source file");
 	}
 #else
-	machine.compile_file("C:/Users/Krimzo/Documents/Hobby/Coding/C++/Faxdawn/examples/test.fxdn");
+	machine.compile_file("examples/test.fxdn");
 #endif
 }

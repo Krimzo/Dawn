@@ -64,6 +64,13 @@ def process_files(files):
     return result
 
 
+def run_command(arguments):
+    command = ""
+    for arg in arguments:
+        command += arg + " "
+    return subprocess.run(command, shell=True).returncode
+
+
 def compile_file(file, custom_args, include_folders, output_folder):
     print("Compiling source file [%s]" % file.name)
 
@@ -72,12 +79,13 @@ def compile_file(file, custom_args, include_folders, output_folder):
 
     arguments = ["g++", "-Wall"]
     arguments += custom_args
-    arguments += ["-c", file.as_posix()]
     for folder in include_folders:
         arguments.append("-I")
         arguments.append(folder)
+    arguments += ["-c", file.as_posix()]
     arguments += ["-o", output_file]
-    return subprocess.run(arguments, shell=True).returncode
+
+    return run_command(arguments)
 
 
 def compile_intermediate(files, custom_args, include_folders, build_folder):
@@ -123,7 +131,7 @@ def build_executable(project_name, build_folder):
         "-o",
         "%s/%s" % (build_folder, project_name)
     ]
-    if subprocess.run(arguments, shell=True).returncode == 0:
+    if run_command(arguments) == 0:
         print("Project built")
 
 
@@ -154,9 +162,15 @@ if __name__ == "__main__":
     header_files = []
     for folder in include_folders:
         header_files += get_files(folder, "h")
-    
+
+    should_run = False
+    for arg in sys.argv:
+        arg = arg.lower()
+        if arg == "-run":
+            should_run = True
+
     compile_state = compile_intermediate(header_files + source_files, custom_args, include_folders, build_folder)
-    executable_file = "%s/%s.exe" % (build_folder, project_name)
+    executable_file = "%s/%s" % (build_folder, project_name)
 
     if compile_state > 0:
         build_executable(project_name, build_folder)
@@ -165,13 +179,7 @@ if __name__ == "__main__":
         should_run = False
     else:
         print("Skipping project build")
-
-    should_run = False
-    for arg in sys.argv:
-        arg = arg.lower()
-        if arg == "-run":
-            should_run = True
     
     if should_run:
         print("Running the program")
-        subprocess.run(executable_file)
+        run_command([executable_file])
