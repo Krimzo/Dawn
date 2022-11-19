@@ -5,7 +5,8 @@
 
 
 namespace faxdawn {
-	enum class token_type {
+	enum class token_type
+	{
 		Unknown = 0,
 		Separator,
 		Operator,
@@ -15,14 +16,15 @@ namespace faxdawn {
 		Identifier,
 	};
 
-	struct token {
+	struct token
+	{
 		token_type type = token_type::Unknown;
 		std::string value;
 		int line = -1;
 
 		token() = default;
 
-		[[nodiscard]] std::string type_description() const;
+		std::string type_description() const;
 	};
 
 	std::ostream& operator<<(std::ostream& stream, const token& token);

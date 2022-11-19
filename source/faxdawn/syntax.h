@@ -3,17 +3,18 @@
 #include "lexer/token.h"
 
 #include <string>
+#include <vector>
 #include <unordered_set>
 
 
 namespace faxdawn::syntax {
 	namespace literal {
-		inline const std::string comment    = "$";
-		inline const std::string character  = "'";
-		inline const std::string string     = "\"";
-		inline const std::string empty      = "none";
-		inline const std::string true_      = "true";
-		inline const std::string false_     = "false";
+		inline const std::string comment   = "$";
+		inline const std::string character = "'";
+		inline const std::string string    = "\"";
+		inline const std::string empty     = "none";
+		inline const std::string true_     = "true";
+		inline const std::string false_    = "false";
 	}
 
 	inline const std::unordered_set<std::string> ignored = {
@@ -120,6 +121,8 @@ namespace faxdawn::syntax {
 		inline const std::string loop_init                  = "loop";
 		inline const std::string loop_stop                  = "stop";
 		inline const std::string loop_skip                  = "skip";
+		inline const std::string function_init              = "fn";
+		inline const std::string function_evaluate          = "eval";
 		inline const std::string type_declaration           = "type";
 		inline const std::string public_access              = "pub";
 		inline const std::string self_access                = "self";
@@ -137,6 +140,8 @@ namespace faxdawn::syntax {
 		keyword::loop_init,
 		keyword::loop_stop,
 		keyword::loop_skip,
+		keyword::function_init,
+		keyword::function_evaluate,
 		keyword::type_declaration,
 		keyword::public_access,
 		keyword::self_access,

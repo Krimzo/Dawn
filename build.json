@@ -1,0 +1,14 @@
+{
+  "Name": "faxdawn",
+  "Release": true,
+  "Args": [
+    "-std=c++20"
+  ],
+  "Include folders": [
+    "source"
+  ],
+  "Source folders": [
+    "source"
+  ],
+  "Build folder": "build"
+}

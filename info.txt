@@ -1,51 +1,7 @@
 name: Faxdawn
-type: intercompiled
 
 source extension: .fxdn
 compiled extension: .fxex
 
 compile command: fxdc source_file.fxdn
 execute command: fxdn compiled_file.fxex
-
-command end		;
-code scope		{}
-functions		()
-arrays			[]
-comment			$$
-
-keywords:
-not,
-if, elif, else,
-switch, "case,
-loop, stop, skip,
-type, pub,
-self, static,
-none,
-use,
-
-primitives:
-bool (8bit),
-byte (unsigned 8bit),
-char (16bit),
-int (64bit),
-float (64bit)
-
-built-in:
-String,
-Function,
-Thread,
-
-function example
-Test(): int {
-	6
-}
-
-loading modules:
-use "module_name.fxdn";
-
-std lib:
-file management (image, audio, video)
-gui (CPU, DirectX, OpenGL)
-web (html parsing, file downloading)
-tcp (server - client)
-multithreading (mutex, atomic)

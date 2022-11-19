@@ -1,8 +1,54 @@
-
 use "..\somefolder\somefile.fxdn";
 
 
-main!() {
+fn test_add(int value, int adder): int {
+    if value > adder {
+        eval value + adder;
+    }
+    eval 0;
+}
+
+fn test_print(int value) {
+    print(test_add(value, 5));
+}
+
+type Float2 {
+    pub float x;
+    pub float y;
+
+    pub Float2() {
+        x = 0.0;
+        y = 0.0;
+    }
+    pub Float2(float a) {
+        x = a;
+        y = a;
+    }
+    pub Float2(float x, float y) {
+        self:x = x;
+        self:y = y;
+    }
+    
+    pub add(Float2 obj): Float2 {
+        eval Float2(x + obj:x, y + obj:y);
+    }
+    pub sub(Float2 obj): Float2 {
+        eval Float2(x - obj:x, y - obj:y);
+    }
+    
+    pub static new(float x, float y): Float2 {
+        eval Float2(x, y);
+    }
+}
+
+fn +(Float2 left, Float2 right): Float2 {
+    eval left:add(right);
+}
+fn -(Float2 left, Float2 right): Float2 {
+    eval left:sub(right);
+}
+
+fn main() {
     int a = 2;
     float b = 3.0;
     int c = 5.0; float d = 6;
@@ -19,15 +65,7 @@ main!() {
          String maybe = funny + ", maybe?";
     }
     
-    $ random comment $
-    
-    test_add(int value, int adder): int {
-        value + adder
-    }
-    
-    test_print!(int value) {
-        print(test_add(value, 5));
-    }
+    $ some comment $
     
     loop 10: i {
         if i == 7 {
@@ -62,45 +100,9 @@ main!() {
         }
     }
     
-    type Float2 {
-        pub float x;
-        pub float y;
-    
-        pub Float2() {
-            x = 0.0;
-            y = 0.0;
-        }
-        pub Float2(float a) {
-            x = a;
-            y = a;
-        }
-        pub Float2(float x, float y) {
-            self:x = x;
-            self:y = y;
-        }
-        
-        pub add(Float2 obj): Float2 {
-            Float2(x + obj:x, y + obj:y)
-        }
-        pub sub(Float2 obj): Float2 {
-            Float2(x - obj:x, y - obj:y)
-        }
-        
-        pub +(Float2 obj): Float2 {
-            add(obj)
-        }
-        pub -(Float2 obj): Float2 {
-            sub(obj)
-        }
-        
-        pub static new(float x, float y): Float2 {
-            Float2(x, y)
-        }
-    }
-    
     Float2? something = none;
     if !something? {
-        something = Float2:new(3, 4);
+        something = Float2:new(1, 2);
     }
     
     Float2 vector = Float2(1.0, 2.0);
@@ -108,7 +110,7 @@ main!() {
     print(vector:x);
     
     Float2[] vec_array = [];
-    int vec_array_len = vec_array:length;
+    int vec_array_len = vec_array:length();
     
     $ more comments... $
 }

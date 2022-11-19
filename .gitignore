@@ -1,10 +1,12 @@
 
 # IDE
 .vs
+.vscode
 .idea
 
 # Compile
 bin
+build
 cmake-build*
 
 # Other
