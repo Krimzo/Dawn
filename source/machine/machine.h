@@ -2,22 +2,25 @@
 
 #include "lexer/lexer.h"
 #include "parser/parser.h"
+#include "logic/function.h"
+
+#include <unordered_map>
 
 
 namespace faxdawn {
 	class machine
 	{
-		std::unordered_set<std::string> types_ = syntax::types;
-		lexer lexer_ = lexer(types_);
-		parser parser_ = parser(types_);
+		std::unordered_map<std::string, function> functions_ = {};
 
 	public:
 		machine() = default;
 
-		bool compile(const std::string& source) const;
-		bool compile_file(const std::string& filepath) const;
+		void load(const std::string& name, const function& function);
 
-		bool run(const std::vector<token>& tokens);
-		bool run_file(const std::string& filepath);
+		void remove(const std::string& name);
+
+		bool execute(const std::string& name) const;
+
+		bool execute_main() const;
 	};
 }

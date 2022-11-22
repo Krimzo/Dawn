@@ -9,7 +9,7 @@ faxdawn::instruction::instruction(const instruction_type type, void* first, void
     : type(type), first(first), second(second)
 {}
 
-void faxdawn::instruction::execute() noexcept
+void faxdawn::instruction::execute() const
 {
     switch (type) {
     case instruction_type::move_to:
@@ -31,22 +31,22 @@ void faxdawn::instruction::execute() noexcept
     }
 }
 
-void faxdawn::instruction::move_to() noexcept
+void faxdawn::instruction::move_to() const
 {
     
 }
 
-void faxdawn::instruction::set_memory() noexcept
+void faxdawn::instruction::set_memory() const
 {
     
 }
 
-void faxdawn::instruction::read_memory() noexcept
+void faxdawn::instruction::read_memory() const
 {
     
 }
 
-void faxdawn::instruction::call_function() noexcept
+void faxdawn::instruction::call_function() const
 {
     
 }

@@ -7,6 +7,15 @@ faxdawn::lexer::lexer(std::unordered_set<std::string>& types)
 	: types_(types)
 {}
 
+std::vector<faxdawn::token> faxdawn::lexer::generate(const std::string& source) const
+{
+	auto tokens = split(source);
+	for (auto& token : tokens) {
+		token.type = syntax::get_token_type(types_, token.value);
+	}
+	return tokens;
+}
+
 static void save_stream_part(std::stringstream& stream, std::vector<faxdawn::token>& tokens, const int line_id)
 {
 	if (const std::string result = stream.str(); !faxdawn::syntax::is_discarded(result)) {
@@ -65,15 +74,6 @@ std::vector<faxdawn::token> faxdawn::lexer::split(const std::string& source) con
 				value_stream << source_char;
 			}
 		}
-	}
-	return tokens;
-}
-
-std::vector<faxdawn::token> faxdawn::lexer::generate(const std::string& source) const
-{
-	auto tokens = split(source);
-	for (auto& token : tokens) {
-		token.type = syntax::get_token_type(types_, token.value);
 	}
 	return tokens;
 }

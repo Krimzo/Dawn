@@ -11,5 +11,7 @@ namespace faxdawn {
         std::vector<instruction> instructions;
 
         function();
+
+        void execute() const;
     };
 }

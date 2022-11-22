@@ -14,10 +14,10 @@ namespace faxdawn {
     struct instruction
     {
     private:
-        void move_to() noexcept;
-        void set_memory() noexcept;
-        void read_memory() noexcept;
-        void call_function() noexcept;
+        void move_to() const;
+        void set_memory() const;
+        void read_memory() const;
+        void call_function() const;
 
     public:
         instruction_type type;
@@ -27,6 +27,6 @@ namespace faxdawn {
         instruction();
         instruction(instruction_type type, void* first, void* second);
 
-        void execute() noexcept;
+        void execute() const;
     };
 }

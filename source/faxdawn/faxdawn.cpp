@@ -1,19 +1,30 @@
-#include "utility.h"
+#include "faxdawn/utility.h"
+#include "file_io/file_io.h"
 #include "machine/machine.h"
+#include "compiler/compiler.h"
 
-
-static faxdawn::machine machine;
 
 int main(const int argc, const char** argv)
 {
+	std::vector<faxdawn::function> functions = {};
+
+	// Compiling
+	faxdawn::compiler compiler = {};
 #ifdef NDEBUG
 	if (argc > 1) {
-		machine.compile_file(argv[1]);
+		functions = compiler.compile(faxdawn::file_io::read_string(argv[1]));
 	}
 	else {
 		faxdawn::utility::print("Please provide a source file");
 	}
 #else
-	machine.compile_file("examples/test.fxdn");
+	functions = compiler.compile(faxdawn::file_io::read_string("examples/test.fxdn"));
 #endif
+
+	// Executing
+	faxdawn::machine machine = {};
+	for (auto& function : functions) {
+		machine.load("WIP", function);
+	}
+	machine.execute_main();
 }
