@@ -9,12 +9,12 @@ namespace faxdawn {
 	{
 		std::unordered_set<std::string>& types_;
 
-		std::vector<token> fix_class_types(const std::vector<token>& tokens) const;
-		std::vector<token> fix_identifier_types(const std::vector<token>& tokens) const;
+		[[nodiscard]] std::vector<token> fix_class_types(const std::vector<token>& tokens) const;
+		[[nodiscard]] std::vector<token> fix_identifier_types(const std::vector<token>& tokens) const;
 
 	public:
-		parser(std::unordered_set<std::string>& types);
+		explicit parser(std::unordered_set<std::string>& types);
 
-		std::vector<token> parse(const std::vector<token>& tokens) const;
+		[[nodiscard]] std::vector<token> parse(const std::vector<token>& tokens) const;
 	};
 }

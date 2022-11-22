@@ -7,6 +7,14 @@ faxdawn::parser::parser(std::unordered_set<std::string>& types)
 	: types_(types)
 {}
 
+std::vector<faxdawn::token> faxdawn::parser::parse(const std::vector<token>& tokens) const
+{
+    std::vector<token> parsed_tokens = tokens;
+    parsed_tokens = fix_class_types(parsed_tokens);
+    parsed_tokens = fix_identifier_types(parsed_tokens);
+    return parsed_tokens;
+}
+
 std::vector<faxdawn::token> faxdawn::parser::fix_class_types(const std::vector<token>& tokens) const
 {
 	std::vector<token> updated_tokens;
@@ -40,12 +48,4 @@ std::vector<faxdawn::token> faxdawn::parser::fix_identifier_types(const std::vec
 		updated_tokens.push_back(updated_token);
 	}
 	return updated_tokens;
-}
-
-std::vector<faxdawn::token> faxdawn::parser::parse(const std::vector<token>& tokens) const
-{
-	std::vector<token> parsed_tokens = tokens;
-	parsed_tokens = fix_class_types(parsed_tokens);
-	parsed_tokens = fix_identifier_types(parsed_tokens);
-	return parsed_tokens;
 }

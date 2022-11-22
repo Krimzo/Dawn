@@ -6,6 +6,7 @@
 #include "logic/function.h"
 
 #include <vector>
+#include <unordered_map>
 
 
 namespace faxdawn {
@@ -13,14 +14,20 @@ namespace faxdawn {
     {
         std::unordered_set<std::string> types_ = syntax::types;
         preprocessor preprocessor_ = {};
-        lexer lexer_ = types_;
-        parser parser_ = types_;
+        lexer lexer_ = lexer(types_);
+        parser parser_ = parser(types_);
 
-        std::vector<function> compile(const std::vector<token>& tokens) const;
+        std::unordered_map<std::string, function> compile(const std::vector<token>& tokens) const;
 
     public:
         compiler() = default;
 
-        std::vector<function> compile(const std::string& source) const;
+        void set_macro(const std::string& name, const std::string& value);
+
+        std::string get_macro(const std::string& name) const;
+
+        void remove_macro(const std::string& name);
+
+        std::unordered_map<std::string, function> compile(const std::string& source) const;
     };
 }

@@ -8,11 +8,11 @@ namespace faxdawn {
 	{
 		std::unordered_set<std::string>& types_;
 
-		std::vector<token> split(const std::string& source) const;
+		[[nodiscard]] std::vector<token> split(const std::string& source) const;
 
 	public:
-		lexer(std::unordered_set<std::string>& types);
+		explicit lexer(std::unordered_set<std::string>& types);
 
-		std::vector<token> generate(const std::string& source) const;
+		[[nodiscard]] std::vector<token> generate(const std::string& source) const;
 	};
 }

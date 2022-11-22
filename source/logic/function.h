@@ -10,7 +10,7 @@ namespace faxdawn {
     {
         std::vector<instruction> instructions;
 
-        function();
+        function() = default;
 
         void execute() const;
     };

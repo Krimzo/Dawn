@@ -6,7 +6,7 @@
 
 int main(const int argc, const char** argv)
 {
-	std::vector<faxdawn::function> functions = {};
+	std::unordered_map<std::string, faxdawn::function> functions = {};
 
 	// Compiling
 	faxdawn::compiler compiler = {};
@@ -14,7 +14,7 @@ int main(const int argc, const char** argv)
 	if (argc > 1) {
 		functions = compiler.compile(faxdawn::file_io::read_string(argv[1]));
 	}
-	else {
+    else {
 		faxdawn::utility::print("Please provide a source file");
 	}
 #else
@@ -24,7 +24,7 @@ int main(const int argc, const char** argv)
 	// Executing
 	faxdawn::machine machine = {};
 	for (auto& function : functions) {
-		machine.load("WIP", function);
+		machine.load(function.first, function.second);
 	}
 	machine.execute_main();
 }

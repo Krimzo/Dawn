@@ -1,10 +1,6 @@
 ﻿#include "logic/instruction.h"
 
 
-faxdawn::instruction::instruction()
-    : type(instruction_type::none)
-{}
-
 faxdawn::instruction::instruction(const instruction_type type, void* first, void* second)
     : type(type), first(first), second(second)
 {}
@@ -27,7 +23,7 @@ void faxdawn::instruction::execute() const
 
     case instruction_type::none:
     default:
-        break;
+        return;
     }
 }
 

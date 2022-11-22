@@ -20,11 +20,11 @@ namespace faxdawn {
         void call_function() const;
 
     public:
-        instruction_type type;
-        void* first;
-        void* second;
+        instruction_type type = instruction_type::none;
+        void* first = nullptr;
+        void* second = nullptr;
 
-        instruction();
+        instruction() = default;
         instruction(instruction_type type, void* first, void* second);
 
         void execute() const;
