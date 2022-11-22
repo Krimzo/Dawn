@@ -1,7 +1,0 @@
-name: Faxdawn
-
-source extension: .fxdn
-compiled extension: .fxex
-
-compile command: fxdc source_file.fxdn
-execute command: fxdn compiled_file.fxex

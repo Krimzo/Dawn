@@ -112,40 +112,36 @@ namespace faxdawn::syntax {
 
 namespace faxdawn::syntax {
 	namespace keyword {
-		inline const std::string condition_init             = "if";
-		inline const std::string condition_additional_check = "elif";
-		inline const std::string condition_final            = "else";
-		inline const std::string condition_multiple_init    = "switch";
-		inline const std::string condition_multiple_check   = "case";
-		inline const std::string condition_multiple_final   = "else";
-		inline const std::string loop_init                  = "loop";
-		inline const std::string loop_stop                  = "stop";
-		inline const std::string loop_skip                  = "skip";
-		inline const std::string function_init              = "fn";
-		inline const std::string function_evaluate          = "eval";
-		inline const std::string type_declaration           = "type";
-		inline const std::string public_access              = "pub";
-		inline const std::string self_access                = "self";
-		inline const std::string static_instance            = "static";
-		inline const std::string use_module                 = "use";
+		inline const std::string condition_init    = "if";
+		inline const std::string condition_check   = "elif";
+		inline const std::string condition_final   = "else";
+		inline const std::string switch_init       = "switch";
+		inline const std::string switch_check      = "case";
+		inline const std::string switch_final      = "else";
+		inline const std::string loop_init         = "loop";
+		inline const std::string loop_stop         = "stop";
+		inline const std::string loop_skip         = "skip";
+		inline const std::string function_init     = "fu";
+		inline const std::string function_evaluate = "eval";
+		inline const std::string type_declaration  = "type";
+		inline const std::string self_access       = "self";
+		inline const std::string use_module        = "use";
 	}
 	
 	inline const std::unordered_set keywords = {
 		keyword::condition_init,
-		keyword::condition_additional_check,
+		keyword::condition_check,
 		keyword::condition_final,
-		keyword::condition_multiple_init,
-		keyword::condition_multiple_check,
-		keyword::condition_multiple_final,
+		keyword::switch_init,
+		keyword::switch_check,
+		keyword::switch_final,
 		keyword::loop_init,
 		keyword::loop_stop,
 		keyword::loop_skip,
 		keyword::function_init,
 		keyword::function_evaluate,
 		keyword::type_declaration,
-		keyword::public_access,
 		keyword::self_access,
-		keyword::static_instance,
 		keyword::use_module,
 	};
 }
@@ -157,9 +153,9 @@ namespace faxdawn::syntax {
 		"int",
 		"float",
 		"char",
-		"String",
-		"Function",
-		"Thread",
+		"string",
+		"function",
+		"thread",
 	};
 }
 
