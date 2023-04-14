@@ -1,18 +1,15 @@
 #include "machine/Machine.h"
 
 
-void dawn::Machine::Load(const String& name, const Function& function)
-{
+void dawn::Machine::Load(const String& name, const Function& function) {
 	(*this)[name] = function;
 }
 
-void dawn::Machine::Unload(const String& name)
-{
+void dawn::Machine::Unload(const String& name) {
 	this->erase(name);
 }
 
-bool dawn::Machine::Execute(const String& name)
-{
+bool dawn::Machine::Execute(const String& name) {
 	if (!this->contains(name)) {
 		return false;
 	}
@@ -21,7 +18,6 @@ bool dawn::Machine::Execute(const String& name)
 	return true;
 }
 
-bool dawn::Machine::ExecuteMain()
-{
+bool dawn::Machine::ExecuteMain() {
 	return Execute(L"main");
 }

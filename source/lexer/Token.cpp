@@ -1,8 +1,7 @@
 #include "lexer/Token.h"
 
 
-dawn::String dawn::GetTokenDescription(TokenType type)
-{
+dawn::String dawn::GetTokenDescription(TokenType type) {
 	switch (type) {
 	case Unknown:
 		return L"Unknown";
@@ -22,8 +21,7 @@ dawn::String dawn::GetTokenDescription(TokenType type)
 	return {};
 }
 
-std::wostream& dawn::operator<<(std::wostream& stream, const Token& token)
-{
+std::wostream& dawn::operator<<(std::wostream& stream, const Token& token) {
 	stream << "(" << GetTokenDescription(token.type) << " : " << token.value << ")";
 	return stream;
 }

@@ -6,8 +6,7 @@
 using namespace dawn;
 
 
-int main()
-{
+int main() {
 	// Source
 	String source = ReadFileString(L"examples/test.fxdn");
 

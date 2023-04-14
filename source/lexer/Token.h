@@ -4,8 +4,7 @@
 
 
 namespace dawn {
-	enum TokenType
-	{
+	enum TokenType {
 		Unknown = 0,
 		Separator,
 		Operator,

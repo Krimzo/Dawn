@@ -48,8 +48,7 @@ FILE* dawn::OpenFileC(const String& filepath, const String& mode) {
 	return file;
 }
 
-dawn::Bool dawn::CloseFileC(FILE*& file)
-{
+dawn::Bool dawn::CloseFileC(FILE*& file) {
 	if (!file) {
 		return false;
 	}
