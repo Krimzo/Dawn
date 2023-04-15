@@ -108,11 +108,12 @@ namespace dawn::keyword {
 	inline const String      switch_check = L"case";
 	inline const String      switch_final = L"else";
 	inline const String         loop_init = L"loop";
-	inline const String         loop_stop = L"stop";
+	inline const String       loop_cancel = L"leave";
 	inline const String         loop_skip = L"skip";
 	inline const String     function_init = L"fu";
 	inline const String function_evaluate = L"eval";
 	inline const String  type_declaration = L"type";
+	inline const String         type_init = L"init";
 	inline const String       self_access = L"self";
 	inline const String        use_module = L"use";
 	
@@ -124,11 +125,12 @@ namespace dawn::keyword {
 		switch_check,
 		switch_final,
 		loop_init,
-		loop_stop,
+		loop_cancel,
 		loop_skip,
 		function_init,
 		function_evaluate,
 		type_declaration,
+		type_init,
 		self_access,
 		use_module,
 	};

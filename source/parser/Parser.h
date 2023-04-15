@@ -5,9 +5,6 @@
 
 namespace dawn {
 	class Parser {
-		Array<Token> FixClassTypes(const Array<Token>& tokens) const;
-		Array<Token> FixIdentifierTypes(const Array<Token>& tokens) const;
-
 	public:
 		Set<String>& typesRef;
 

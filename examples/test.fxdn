@@ -17,14 +17,14 @@ type Float2 {
     Float x;
     Float y;
 
-    fu Float2 {}
+    init {}
     
-    fu Float2(Float a) {
+    init(Float a) {
         x = a;
         y = a;
     }
 
-    fu Float2(Float x, Float y) {
+    init(Float x, Float y) {
         self:x = x;
         self:y = y;
     }
@@ -46,11 +46,13 @@ fu -(Float2 left, Float2 right): Float2 {
     eval left:sub(right);
 }
 
+fu empty_func {}
+
 fu main {
     Int a = 2;
     Float b = 3.0;
     Int c = 5.0; Float d = 6;
-    Byte e = 25;
+    Byte e = 255;
     
     Char who = 'U';
     
@@ -70,7 +72,7 @@ fu main {
             skip;
         }
         elif test_add(i, 5) > 12 {
-            stop;
+            leave;
         }
         else {
             print(i);
@@ -100,7 +102,7 @@ fu main {
     
     Float2? something = none;
     if !(something?) {
-        something = Float2:new(1, 2);
+        something = Float2(1, 2);
     }
     
     Float2 vector = Float2(1.0, 2.0);

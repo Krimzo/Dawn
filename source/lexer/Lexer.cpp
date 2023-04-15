@@ -1,17 +1,17 @@
 #include "lexer/Lexer.h"
+#include "dawn/IO.h"
 
 
 dawn::Lexer::Lexer(Set<String>& typesRef) : typesRef(typesRef) {}
 
-void dawn::Lexer::SaveStreamPart(StringStream& stream, Array<Token>& tokens, const Int lineID) const {
-	const String result = stream.str();
-	if (!dawn::IsDiscarded(result)) {
-		Token token = {};
-		token.value = result;
-		token.line = lineID;
-		tokens.push_back(token);
+dawn::Array<dawn::Token> dawn::Lexer::Generate(const String& source) const {
+	auto tokens = Split(source);
+	for (auto& token : tokens) {
+		token.type = GetTokenType(typesRef, token.value);
 	}
-	stream = {};
+	tokens = FixClassTypes(tokens);
+	tokens = FixIdentifierTypes(tokens);
+	return tokens;
 }
 
 dawn::Array<dawn::Token> dawn::Lexer::Split(const String& source) const {
@@ -69,10 +69,50 @@ dawn::Array<dawn::Token> dawn::Lexer::Split(const String& source) const {
 	return tokens;
 }
 
-dawn::Array<dawn::Token> dawn::Lexer::Generate(const String& source) const {
-	auto tokens = Split(source);
-	for (auto& token : tokens) {
-		token.type = GetTokenType(typesRef, token.value);
+void dawn::Lexer::SaveStreamPart(StringStream& stream, Array<Token>& tokens, const Int lineID) const {
+	const String result = stream.str();
+	if (!dawn::IsDiscarded(result)) {
+		Token token = {};
+		token.value = result;
+		token.line = lineID;
+		tokens.push_back(token);
 	}
-	return tokens;
+	stream = {};
+}
+
+dawn::Array<dawn::Token> dawn::Lexer::FixClassTypes(const Array<Token>& tokens) const {
+	Array<Token> updatedTokens = {};
+	updatedTokens.reserve(tokens.size());
+
+	bool lastTokenWasTypeDecl = false;
+	for (const auto& token : tokens) {
+		Token updatedToken = token;
+
+		if (lastTokenWasTypeDecl) {
+			Assert(updatedToken.type != Identifier, updatedToken);
+			typesRef.insert(updatedToken.value);
+			updatedToken.type = Type;
+			lastTokenWasTypeDecl = false;
+		}
+		else if (updatedToken.value == keyword::type_declaration) {
+			lastTokenWasTypeDecl = true;
+		}
+
+		updatedTokens.push_back(updatedToken);
+	}
+	return updatedTokens;
+}
+
+dawn::Array<dawn::Token> dawn::Lexer::FixIdentifierTypes(const Array<Token>& tokens) const {
+	Array<Token> updated_tokens = {};
+	updated_tokens.reserve(tokens.size());
+
+	for (const auto& token : tokens) {
+		Token updatedToken = token;
+		if (updatedToken.type == Identifier && typesRef.contains(updatedToken.value)) {
+			updatedToken.type = Type;
+		}
+		updated_tokens.push_back(updatedToken);
+	}
+	return updated_tokens;
 }

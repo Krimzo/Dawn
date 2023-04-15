@@ -21,6 +21,4 @@ int main() {
 		machine.Load(function.first, function.second);
 	}
 	machine.ExecuteMain();
-
-	std::cin.get();
 }

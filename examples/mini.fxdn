@@ -1,0 +1,6 @@
+
+fu main {
+	Int a = 5;
+	Int b = 4 + a * 2;
+	print(b);
+}
