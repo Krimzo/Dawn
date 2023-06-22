@@ -4,7 +4,8 @@
 
 
 namespace dawn {
-    enum class InstructionType {
+    enum class InstructionType
+    {
         None = 0,
         MoveTo,
         SetMemory,
@@ -14,7 +15,8 @@ namespace dawn {
 }
 
 namespace dawn {
-    class Instruction {
+    class Instruction
+    {
         void MoveTo();
         void SetMemory();
         void ReadMemory();

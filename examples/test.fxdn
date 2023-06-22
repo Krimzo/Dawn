@@ -1,5 +1,4 @@
 use "..\somefolder\somefile.fxdn";
-use String;
 
 
 fu test_add(Int value, Int adder): Int {

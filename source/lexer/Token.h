@@ -4,7 +4,8 @@
 
 
 namespace dawn {
-	enum TokenType {
+	enum TokenType
+	{
 		Unknown = 0,
 		Separator,
 		Operator,
@@ -20,7 +21,8 @@ namespace dawn {
 }
 
 namespace dawn {
-	struct Token {
+	struct Token
+	{
 		TokenType type = Unknown;
 		String value = {};
 		Int line = -1;

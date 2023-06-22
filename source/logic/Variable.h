@@ -4,7 +4,8 @@
 
 
 namespace dawn {
-    struct Variable {
+    struct Variable
+    {
         String type = {};
         Array<Byte> data = {};
     };

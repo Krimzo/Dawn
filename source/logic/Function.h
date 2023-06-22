@@ -4,7 +4,8 @@
 
 
 namespace dawn {
-    struct Function : public Array<Instruction> {
+    struct Function : public Array<Instruction>
+    {
         void Execute();
     };
 }

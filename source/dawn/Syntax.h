@@ -3,7 +3,7 @@
 #include "lexer/Token.h"
 
 
-namespace dawn::synatx {
+namespace dawn::syntax {
 	inline const Set<String> ignored = {
 		L"\t", L"\n",
 	};
@@ -101,21 +101,22 @@ namespace dawn::operator_ {
 }
 
 namespace dawn::keyword {
-	inline const String    condition_init = L"if";
-	inline const String   condition_check = L"elif";
-	inline const String   condition_final = L"else";
-	inline const String       switch_init = L"switch";
-	inline const String      switch_check = L"case";
-	inline const String      switch_final = L"else";
-	inline const String         loop_init = L"loop";
-	inline const String       loop_cancel = L"leave";
-	inline const String         loop_skip = L"skip";
-	inline const String     function_init = L"fu";
-	inline const String function_evaluate = L"eval";
-	inline const String  type_declaration = L"type";
-	inline const String         type_init = L"init";
-	inline const String       self_access = L"self";
-	inline const String        use_module = L"use";
+	inline const String  condition_init = L"if";
+	inline const String condition_check = L"elif";
+	inline const String condition_final = L"else";
+	inline const String     switch_init = L"switch";
+	inline const String    switch_check = L"case";
+	inline const String    switch_final = L"else";
+	inline const String       loop_init = L"loop";
+	inline const String     loop_cancel = L"leave";
+	inline const String       loop_skip = L"skip";
+	inline const String      global_var = L"global";
+	inline const String   function_decl = L"fu";
+	inline const String   function_eval = L"eval";
+	inline const String       type_decl = L"type";
+	inline const String       type_init = L"init";
+	inline const String     self_access = L"self";
+	inline const String      use_module = L"use";
 	
 	inline const Set<String> all = {
 		condition_init,
@@ -127,9 +128,10 @@ namespace dawn::keyword {
 		loop_init,
 		loop_cancel,
 		loop_skip,
-		function_init,
-		function_evaluate,
-		type_declaration,
+		global_var,
+		function_decl,
+		function_eval,
+		type_decl,
 		type_init,
 		self_access,
 		use_module,

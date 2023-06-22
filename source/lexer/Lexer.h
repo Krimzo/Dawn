@@ -4,7 +4,8 @@
 
 
 namespace dawn {
-	class Lexer {
+	class Lexer
+	{
 		Array<Token> Split(const String& source) const;
 		void SaveStreamPart(StringStream& stream, Array<Token>& tokens, Int lineID) const;
 
@@ -16,6 +17,6 @@ namespace dawn {
 
 		Lexer(Set<String>& typesRef);
 
-		Array<Token> Generate(const String& source) const;
+		Array<Token> Tokenize(const String& source) const;
 	};
 }

@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include <vector>
+#include <list>
 #include <unordered_set>
 #include <unordered_map>
 
@@ -23,10 +24,26 @@ namespace dawn {
     using Char = wchar_t;
     using String = std::wstring;
 
+    using InputStream = std::wistream;
+    using OutputStream = std::wostream;
+
+    using FileOutputStream = std::wofstream;
+    using FileInputStream = std::wifstream;
+
     using StringStream = std::wstringstream;
 
-    template<typename T> using Lambda = std::function<T>;
-    template<typename T> using Array = std::vector<T>;
-    template<typename K> using Set = std::unordered_set<K>;
-    template<typename K, typename V> using Map = std::unordered_map<K, V>;
+    template<typename T>
+    using Lambda = std::function<T>;
+
+    template<typename T>
+    using Array = std::vector<T>;
+
+    template<typename T>
+    using List = std::list<T>;
+
+    template<typename K>
+    using Set = std::unordered_set<K>;
+
+    template<typename K, typename V>
+    using Map = std::unordered_map<K, V>;
 }

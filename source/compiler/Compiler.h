@@ -7,7 +7,8 @@
 
 
 namespace dawn {
-    class Compiler {
+    class Compiler
+    {
         Map<String, Function> Compile(const Array<Token>& tokens) const;
 
     public:

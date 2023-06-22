@@ -1,7 +1,8 @@
 ﻿#include "logic/Instruction.h"
 
 
-void dawn::Instruction::Execute() {
+void dawn::Instruction::Execute()
+{
     switch (type) {
     case InstructionType::MoveTo:
         MoveTo();
@@ -21,18 +22,14 @@ void dawn::Instruction::Execute() {
     }
 }
 
-void dawn::Instruction::MoveTo() {
-    
-}
+void dawn::Instruction::MoveTo()
+{}
 
-void dawn::Instruction::SetMemory() {
-    
-}
+void dawn::Instruction::SetMemory()
+{}
 
-void dawn::Instruction::ReadMemory() {
-    
-}
+void dawn::Instruction::ReadMemory()
+{}
 
-void dawn::Instruction::CallFunction() {
-    
-}
+void dawn::Instruction::CallFunction()
+{}

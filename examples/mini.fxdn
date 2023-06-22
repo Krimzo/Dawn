@@ -1,6 +1,20 @@
+use "something";
+
+
+global Int someGlobal = 5;
+
+type Person {
+	String name = "";
+}
 
 fu main {
 	Int a = 5;
-	Int b = 4 + a * 2;
+	Int b = testFunc(a);
 	print(b);
 }
+
+fu testFunc(Int a): Int {
+	eval 4 + a * 2;
+}
+
+fu xD {}

@@ -6,19 +6,19 @@
 using namespace dawn;
 
 
-int main() {
-	// Source
-	String source = ReadFileString(L"examples/test.fxdn");
+int main()
+{
+	Set<String> types = dawn::types::all;
+	Lexer lexer = { types };
+	Parser parser = { types };
 
-	// Compiling
-	Compiler compiler = {};
-	Map<String, Function> functions = {};
-	functions = compiler.Compile(source);
+	String source = ReadFileString(L"examples/mini.fxdn");
+	Array<Token> tokens = lexer.Tokenize(source);
 
-	// Executing
-	Machine machine = {};
-	for (auto& function : functions) {
-		machine.Load(function.first, function.second);
-	}
-	machine.ExecuteMain();
+	Array<Array<Token>> uses = parser.ExtractUses(tokens);
+	Array<Array<Token>> customTypes = parser.ExtractTypes(tokens);
+	Array<Array<Token>> globalVars = parser.ExtractGlobalVars(tokens);
+	Array<Array<Token>> functions = parser.ExtractFunctions(tokens);
+
+	Print(functions);
 }
