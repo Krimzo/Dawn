@@ -2,9 +2,9 @@
 module my_example;
 
 internal {
-	let nobody_can_see = 6;
+	let only_for_module = 6;
 
-	def my_private_function {
+	def my_private_module_function {
 		print("super private");
 	}
 }
@@ -38,9 +38,9 @@ def primitives_examp {
 
 // Collection example
 def collections_examp {
-	let data0: [int] = new [int; 1, 2, 3];
-	let data1: (int) = new (int; 1, 2, 3);
-	let data2: {int: string} = new {int: string; 1: "one", 2: "two", 3: "three" };
+	let data0: [int] = new [int; 1, 2, 3];                                         // array
+	let data1: (int) = new (int; 1, 2, 3);                                         // set
+	let data2: {int: string} = new {int: string; 1: "one", 2: "two", 3: "three" }; // map
 }
 
 // Variable example
@@ -166,7 +166,9 @@ class Person: Living {
 	}
 
 	internal {
-		def my_private_method {
+		m_id: int = 6;
+
+		def my_private_class_method {
 			print("It's lonely here.");
 		}
 	}

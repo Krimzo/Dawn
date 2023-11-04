@@ -1,0 +1,9 @@
+def main {
+	let a = 5;
+	let b = a * 2;
+	print(f"{b}");
+}
+
+def sqr(a: int): int {
+	return a * a;
+}

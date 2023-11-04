@@ -1,25 +1,40 @@
 #include "lexer.h"
 
 
-std::vector<Token> Lexer::process(const std::string_view& source) const
+static std::string error_helper(const size_t row_index, const size_t col_index, const char c)
 {
-	std::vector<Token> tokens = {};
-	this->process(source, tokens);
-	return tokens;
+	std::stringstream stream = {};
+	stream << "Lexer error: Unknown char ";
+	if (c > 32 && c < 127) {
+		stream << c;
+	}
+	else {
+		stream << "\\" << static_cast<int>(c);
+	}
+	stream << " at (" << row_index << ", " << col_index << ")";
+	return stream.str();
 }
 
-void Lexer::process(const std::string_view& source, std::vector<Token>& tokens) const
+std::optional<std::string> dawn::Lexer::process(const std::string_view& source, std::vector<Token>* tokens) const
 {
+	size_t new_line_counter = 0;
+	size_t last_new_line_index = 0;
+
 	for (size_t i = 0; i < source.size(); i++) {
 		// Range check
 		if (source[i] < 0 || source[i] > 127) {
-			continue;
+			return { error_helper(new_line_counter + 1, i - last_new_line_index, source[i]) };
 		}
 
 		// Whitespace
 		if (isspace(source[i])) {
 			Token token = {};
 			for (; i < source.size(); i++) {
+				if (source[i] == '\n') {
+					new_line_counter += 1;
+					last_new_line_index = i;
+				}
+
 				if (isspace(source[i])) {
 					token.value.push_back(source[i]);
 				}
@@ -28,17 +43,20 @@ void Lexer::process(const std::string_view& source, std::vector<Token>& tokens) 
 				}
 			}
 			token.type = TokenType::WHITESPACE;
-			tokens.push_back(token);
+			tokens->push_back(token);
+
+			i -= 1;
+			continue;
 		}
 
 		// Single line comments
-		if (handle_line_comments(i, source, tokens)) {
+		if (handle_line_comments(source, i)) {
 			i -= 1;
 			continue;
 		}
 
 		// Multiline comments
-		if (handle_multiline_comments(i, source, tokens)) {
+		if (handle_multiline_comments(source, i)) {
 			i -= 1;
 			continue;
 		}
@@ -55,7 +73,10 @@ void Lexer::process(const std::string_view& source, std::vector<Token>& tokens) 
 				}
 			}
 			token.type = iskey(token.value) ? TokenType::KEYWORD : TokenType::IDENTIFIER;
-			tokens.push_back(token);
+			tokens->push_back(token);
+
+			i -= 1;
+			continue;
 		}
 
 		// Numbers
@@ -70,7 +91,10 @@ void Lexer::process(const std::string_view& source, std::vector<Token>& tokens) 
 				}
 			}
 			token.type = TokenType::NUMBER;
-			tokens.push_back(token);
+			tokens->push_back(token);
+
+			i -= 1;
+			continue;
 		}
 
 		// Chars
@@ -85,7 +109,10 @@ void Lexer::process(const std::string_view& source, std::vector<Token>& tokens) 
 				}
 			}
 			token.type = TokenType::CHAR;
-			tokens.push_back(token);
+			tokens->push_back(token);
+
+			i -= 1;
+			continue;
 		}
 
 		// Strings
@@ -100,7 +127,10 @@ void Lexer::process(const std::string_view& source, std::vector<Token>& tokens) 
 				}
 			}
 			token.type = TokenType::STRING;
-			tokens.push_back(token);
+			tokens->push_back(token);
+
+			i -= 1;
+			continue;
 		}
 
 		// Operators
@@ -110,12 +140,14 @@ void Lexer::process(const std::string_view& source, std::vector<Token>& tokens) 
 				token.value.push_back(source[i]);
 				if (!isop(token.value)) {
 					token.value.pop_back();
-					i -= 1;
 					break;
 				}
 			}
 			token.type = TokenType::OPERATOR;
-			tokens.push_back(token);
+			tokens->push_back(token);
+
+			i -= 1;
+			continue;
 		}
 
 		// Separators
@@ -123,12 +155,18 @@ void Lexer::process(const std::string_view& source, std::vector<Token>& tokens) 
 			Token token = {};
 			token.value = std::string(1, source[i]);
 			token.type = TokenType::SEPARATOR;
-			tokens.push_back(token);
+			tokens->push_back(token);
+
+			continue;
 		}
+
+		// Error
+		return { error_helper(new_line_counter + 1, i - last_new_line_index, source[i]) };
 	}
+	return {};
 }
 
-bool Lexer::handle_line_comments(size_t& i, const std::string_view& source, std::vector<Token>& tokens) const
+bool dawn::Lexer::handle_line_comments(const std::string_view& source, size_t& i) const
 {
 	if (line_comment.contains(source[i])) {
 		std::string temp_holder = {};
@@ -151,7 +189,7 @@ bool Lexer::handle_line_comments(size_t& i, const std::string_view& source, std:
 	return false;
 }
 
-bool Lexer::handle_multiline_comments(size_t& i, const std::string_view& source, std::vector<Token>& tokens) const
+bool dawn::Lexer::handle_multiline_comments(const std::string_view& source, size_t& i) const
 {
 	if (multiline_comment.first.contains(source[i])) {
 		std::string left_holder = {};
@@ -184,204 +222,159 @@ bool Lexer::handle_multiline_comments(size_t& i, const std::string_view& source,
 }
 
 // Keywords
-bool Lexer::iskey(const std::string& data) const
+bool dawn::Lexer::iskey(const std::string& data) const
 {
 	return keywords.contains(data);
 }
 
 // Operators
-bool Lexer::isop(const std::string& data) const
+bool dawn::Lexer::isop(const std::string& data) const
 {
 	return operators.contains(data);
 }
 
-bool Lexer::isop(const char value) const
+bool dawn::Lexer::isop(const char value) const
 {
 	return this->isop(std::string(1, value));
 }
 
 // Separators
-bool Lexer::issep(const char value) const
+bool dawn::Lexer::issep(const char value) const
 {
 	return separators.contains(value);
 }
 
-void Lexer::load_defualt_dawn()
+void dawn::Lexer::load_defualt_dawn()
 {
 	keywords = {
-		// Modules
-		"module",
-		"import",
-		"internal",
-
-		// Functions
-		"def",
-		"return",
-
-		// Variables
-		"let",
-		"var",
-		"null",
-		"new",
-
-		// If
-		"if",
-		"else",
-		"elif",
-
-		// Switch
-		"switch",
-		"case",
-		"default",
-
-		// Loops
-		"for",
-		"while",
-		"loop",
-		"continue",
-		"break",
-
-		// POD objects
-		"enum",
-		"struct",
-
-		// Class objects
-		"interface",
-		"implement",
-		"class",
-		"init",
-		"deinit",
-		"self",
-
-		// Integers
-		"int8",
-		"int16",
-		"int32",
-		"int64",
-
-		// Unsigned integers
-		"uint8",
-		"uint16",
-		"uint32",
-		"uint64",
-
-		// Floating point
-		"float",
-		"double",
-
-		// Text
-		"char",
-		"string",
-
-		// Bools
-		"true",
-		"false",
+		kw_module,
+		kw_import,
+		kw_internal,
+		kw_def,
+		kw_return,
+		kw_let,
+		kw_var,
+		kw_null,
+		kw_new,
+		kw_if,
+		kw_else,
+		kw_elif,
+		kw_switch,
+		kw_case,
+		kw_default,
+		kw_for,
+		kw_while,
+		kw_loop,
+		kw_continue,
+		kw_break,
+		kw_enum,
+		kw_struct,
+		kw_interface,
+		kw_implement,
+		kw_class,
+		kw_init,
+		kw_deinit,
+		kw_self,
+		kw_int8,
+		kw_int16,
+		kw_int32,
+		kw_int64,
+		kw_uint8,
+		kw_uint16,
+		kw_uint32,
+		kw_uint64,
+		kw_float,
+		kw_double,
+		kw_char,
+		kw_string,
+		kw_true,
+		kw_false,
 	};
 
 	operators = {
-		// Bits
-		"~",
-		"|",
-		"^",
-		"&",
-		"<<",
-		">>",
-		"~=",
-		"|=",
-		"^=",
-		"&=",
-		"<<=",
-		">>=",
-
-		// Math
-		"+",
-		"-",
-		"*",
-		"/",
-		"%",
-		"+=",
-		"-=",
-		"*=",
-		"/=",
-		"%=",
-
-		// Bools
-		"!",
-		"<",
-		">",
-		"!=",
-		"<=",
-		">=",
-		"==",
-		"&&",
-		"||",
-
-		// Access
-		"->",
+		op_add,
+		op_sub,
+		op_mul,
+		op_div,
+		op_pow,
+		op_mod,
+		op_add_eq,
+		op_sub_eq,
+		op_mul_eq,
+		op_div_eq,
+		op_pow_eq,
+		op_mod_eq,
+		op_and,
+		op_or,
+		op_not,
+		op_less,
+		op_great,
+		op_eq,
+		op_not_eq,
+		op_less_eq,
+		op_great_eq,
+		op_ptr_access,
 	};
 
 	separators = {
-		// Access
-		'=',
-		',',
-		';',
-		'.',
-		':',
-
-		// Control
-		'(',
-		')',
-		'{',
-		'}',
-		'[',
-		']',
+		sep_assign,
+		sep_split,
+		sep_express,
+		sep_access,
+		sep_static_access,
+		sep_def_open,
+		sep_def_close,
+		sep_scope_open,
+		sep_scope_close,
+		sep_array_open,
+		sep_array_close,
 	};
 
-	identifier_extender = '_';
-	decimal_number_definer = '.';
+	identifier_extender = misc_iden_ex;
+	decimal_number_definer = misc_dec_ex;
 
-	literal_char = '\'';
-	literal_string = '"';
+	literal_char = misc_lit_char;
+	literal_string = misc_lit_str;
 
-	line_comment = "//";
-	multiline_comment = { "/*", "*/" };
+	line_comment = misc_line_comm;
+	multiline_comment = misc_multiline_comm;
 }
 
-std::ostream& operator<<(std::ostream& stream, const TokenType type)
+std::ostream& operator<<(std::ostream& stream, const dawn::TokenType type)
 {
 	switch (type) {
-	case TokenType::WHITESPACE:
+	case dawn::TokenType::WHITESPACE:
 		stream << "Whitespace";
 		break;
-	case TokenType::IDENTIFIER:
+	case dawn::TokenType::IDENTIFIER:
 		stream << "Identifier";
 		break;
-	case TokenType::KEYWORD:
+	case dawn::TokenType::KEYWORD:
 		stream << "Keyword";
 		break;
-	case TokenType::NUMBER:
+	case dawn::TokenType::NUMBER:
 		stream << "Number";
 		break;
-	case TokenType::CHAR:
+	case dawn::TokenType::CHAR:
 		stream << "Char";
 		break;
-	case TokenType::STRING:
+	case dawn::TokenType::STRING:
 		stream << "String";
 		break;
-	case TokenType::OPERATOR:
+	case dawn::TokenType::OPERATOR:
 		stream << "Operator";
 		break;
-	case TokenType::SEPARATOR:
+	case dawn::TokenType::SEPARATOR:
 		stream << "Separator";
 		break;
 	}
 	return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const Token& token)
+std::ostream& operator<<(std::ostream& stream, const dawn::Token& token)
 {
 	stream << '[';
-	if (token.type == TokenType::WHITESPACE) {
+	if (token.type == dawn::TokenType::WHITESPACE) {
 		for (size_t i = 0; i < token.value.size() - 1; i++) {
 			stream << "'\\" << static_cast<int>(token.value[i]) << "' ";
 		}
