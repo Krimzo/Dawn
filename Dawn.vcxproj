@@ -15,12 +15,14 @@
     <ClCompile Include="source\file_helper.cpp" />
     <ClCompile Include="source\lexer.cpp" />
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\parser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\cpp_helper.h" />
     <ClInclude Include="source\display_helper.h" />
     <ClInclude Include="source\file_helper.h" />
     <ClInclude Include="source\lexer.h" />
+    <ClInclude Include="source\parser.h" />
     <ClInclude Include="source\syntax.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

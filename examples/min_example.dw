@@ -1,3 +1,5 @@
+let something_global: int = 12;
+
 def main {
 	let a = 5;
 	let b = a * 2;
