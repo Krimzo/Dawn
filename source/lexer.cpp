@@ -51,6 +51,11 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 
 		// Single line comments
 		if (handle_line_comments(source, i)) {
+			Token token = {};
+			token.value = "\n";
+			token.type = TokenType::WHITESPACE;
+			tokens->push_back(token);
+
 			i -= 1;
 			continue;
 		}
@@ -279,10 +284,12 @@ void dawn::Lexer::load_defualt_dawn()
 		kw_int16,
 		kw_int32,
 		kw_int64,
+		kw_int,
 		kw_uint8,
 		kw_uint16,
 		kw_uint32,
 		kw_uint64,
+		kw_uint,
 		kw_float,
 		kw_double,
 		kw_char,

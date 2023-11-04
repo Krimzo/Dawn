@@ -11,11 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\display_helper.cpp" />
+    <ClCompile Include="source\file_helper.cpp" />
     <ClCompile Include="source\lexer.cpp" />
     <ClCompile Include="source\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\cpp_helper.h" />
+    <ClInclude Include="source\display_helper.h" />
+    <ClInclude Include="source\file_helper.h" />
     <ClInclude Include="source\lexer.h" />
     <ClInclude Include="source\syntax.h" />
   </ItemGroup>

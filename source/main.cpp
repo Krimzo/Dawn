@@ -1,12 +1,6 @@
-#include "lexer.h"
+#include "file_helper.h"
+#include "display_helper.h"
 
-
-static std::string read_file(const std::string& path)
-{
-	std::stringstream stream = {};
-	stream << std::ifstream(path).rdbuf();
-	return stream.str();
-}
 
 int main()
 {
@@ -27,7 +21,11 @@ int main()
 	}
 
 	// Print tokens
+#if 1
 	for (size_t i = 0; i < tokens.size(); i++) {
 		std::cout << (i + 1) << ". " << tokens[i] << std::endl;
 	}
+#else
+	display_colored(tokens);
+#endif
 }
