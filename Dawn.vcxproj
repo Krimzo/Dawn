@@ -10,6 +10,13 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\lexer.cpp" />
+    <ClCompile Include="source\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\lexer.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -49,7 +56,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)source\</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -66,7 +73,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)source\</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -77,39 +84,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="source\compiler\Compiler.cpp" />
-    <ClCompile Include="source\Dawn.cpp" />
-    <ClCompile Include="source\dawn\CppTypes.cpp" />
-    <ClCompile Include="source\dawn\Syntax.cpp" />
-    <ClCompile Include="source\dawn\IO.cpp" />
-    <ClCompile Include="source\dawn\FileIO.cpp" />
-    <ClCompile Include="source\lexer\Lexer.cpp" />
-    <ClCompile Include="source\lexer\Token.cpp" />
-    <ClCompile Include="source\logic\Function.cpp" />
-    <ClCompile Include="source\logic\Instruction.cpp" />
-    <ClCompile Include="source\logic\Scope.cpp" />
-    <ClCompile Include="source\logic\Variable.cpp" />
-    <ClCompile Include="source\machine\Machine.cpp" />
-    <ClCompile Include="source\parser\Parser.cpp" />
-    <ClCompile Include="source\preprocessor\Preprocessor.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="source\compiler\Compiler.h" />
-    <ClInclude Include="source\dawn\CppTypes.h" />
-    <ClInclude Include="source\dawn\Syntax.h" />
-    <ClInclude Include="source\dawn\IO.h" />
-    <ClInclude Include="source\dawn\FileIO.h" />
-    <ClInclude Include="source\lexer\Lexer.h" />
-    <ClInclude Include="source\lexer\Token.h" />
-    <ClInclude Include="source\logic\Function.h" />
-    <ClInclude Include="source\logic\Instruction.h" />
-    <ClInclude Include="source\logic\Scope.h" />
-    <ClInclude Include="source\logic\Variable.h" />
-    <ClInclude Include="source\machine\Machine.h" />
-    <ClInclude Include="source\parser\Parser.h" />
-    <ClInclude Include="source\preprocessor\Preprocessor.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

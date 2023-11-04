@@ -1,0 +1,194 @@
+// Module example
+module my_example;
+
+internal {
+	let nobody_can_see = 6;
+
+	def my_private_function {
+		print("super private");
+	}
+}
+
+// Primitive example
+def primitives_examp {
+	// Integers
+	let i0:  int8 = -10; // [                -128,                 127]
+	let i1: int16 = -20; // [              -32768,               32767]
+	let i2: int32 = -30; // [         -2147483648,          2147483647]
+	let i3: int64 = -40; // [-9223372036854775808, 9223372036854775807]
+
+	// Unsigned integers
+	let u0:  uint8 = 10; // [0,                  255]
+	let u1: uint16 = 20; // [0,                65535]
+	let u2: uint32 = 30; // [0,           4294967295]
+	let u3: uint64 = 40; // [0, 18446744073709551615]
+
+	// Floating
+	let f0: float = 6.0f; // [        1.175494351E-38,         3.402823466E+38]
+	let f1: double = 6.0; // [2.2250738585072014E-308, 1.7976931348623158E+308]
+
+	// Text
+	let t0: char = 'd';
+	let t1: string = "nice";
+
+	// Bools
+	let b0: bool = false;
+	let b1: bool = !b0 && u0 > 5;
+}
+
+// Collection example
+def collections_examp {
+	let data0: [int] = new [int; 1, 2, 3];
+	let data1: (int) = new (int; 1, 2, 3);
+	let data2: {int: string} = new {int: string; 1: "one", 2: "two", 3: "three" };
+}
+
+// Variable example
+def vars_examp {
+	let a = 5;                 // implicit type, constant, int, 5
+	var b: int = 6;            // explicit type, variable, int, 6
+	let c: int var* = &b;      // explicit type, constant, int variable pointer, address from b
+	let d: float = (float) *c; // explicit type, constant, float, casted value from dereferenced pointer
+	var e: double let* = null; // explicit type, variable, double constant pointer, null
+}
+
+// Function example
+def sqr(a: int): int {
+	return a * a;
+}
+
+def *(left: string, right: int): string {
+	return left.repeat(right);
+}
+
+// If example
+def if_examp {
+	let a = (5 + 1.0) * 2.;
+	if a < 10.0 {
+		print(f"res = {sqr(a)}");
+	}
+	elif <= 15.0 {
+		print("it's less or equal to 15");
+	}
+	else {
+		print("it's more than 15");
+	}
+}
+
+// Switch example
+def switch_examp {
+	let value = 16;
+	switch value {
+		case 3 {
+			print("it's 3");
+		}
+		case 14 {
+			print("it's 14");
+		}
+		default {
+			print("it's something that im not aware of");
+		}
+	}
+}
+
+// Loop example
+def loops_examp {
+	// For
+	for i: range(5) {
+		print(i);
+	}
+	for i: range(3, 6) {
+		print(i);
+	}
+	for value: new [int; 5, 4, 3] {
+		print(value);
+	}
+
+	// While
+	var counter = 0;
+	while counter < 10 {
+		if counter == 6 {
+			continue;
+		}
+		counter += 1;
+	}
+
+	// Loop
+	loop {
+		print("One loop run");
+		break;
+	}
+}
+
+// POD object example
+enum ExampleEnum: int {
+	ME(0);
+	YOU(1);
+	THEM(2);
+}
+
+struct ExampleStruct {
+	name: string;
+	age: int;
+}
+
+def pod_objects_example {
+	let someone = ExampleEnum:Me;
+	let somone_value: int = someone.value;
+
+	let object0 = ExampleStruct("John", 16);
+	let object1 = ExampleStruct{ age: 12, name: "Billy" };
+}
+
+// Class object example
+interface Living {
+	def get_age: int;
+}
+
+class Person: Living {
+	name: string = "nobody";
+
+	init {
+		print("Nobody created.");
+	}
+
+	init(name: string) {
+		self->name = name;
+		print(f"Created person {name}.");
+	}
+
+	deinit {
+		print(f"Removed person {name}.");
+	}
+
+	implement get_age: int {
+		return self->age;
+	}
+
+	internal {
+		def my_private_method {
+			print("It's lonely here.");
+		}
+	}
+
+	def myself: Person* { // can't know if pointer will be var* or let*, it depends on the state of self
+		return self;
+	}
+
+	def who: string {
+		return self->name;
+	}
+}
+
+def class_objects_examp {
+	let person0 = new Person();
+	var person1: Person = new Person("Timmy");
+	
+	var living: [Living let*] = new [Living let*; &person0];
+	living.push(&person1);
+
+	for liv: living {
+		let age = liv->get_age();
+		print(age);
+	}
+}
