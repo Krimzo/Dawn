@@ -48,18 +48,18 @@ namespace dawn {
 	inline const std::string kw_self = "self";
 
 	// Integers
+	inline const std::string kw_int = "int";
 	inline const std::string kw_int8 = "int8";
 	inline const std::string kw_int16 = "int16";
 	inline const std::string kw_int32 = "int32";
 	inline const std::string kw_int64 = "int64";
-	inline const std::string kw_int = kw_int32;
 
 	// Unsigned integers
+	inline const std::string kw_uint = "uint";
 	inline const std::string kw_uint8 = "uint8";
 	inline const std::string kw_uint16 = "uint16";
 	inline const std::string kw_uint32 = "uint32";
 	inline const std::string kw_uint64 = "uint64";
-	inline const std::string kw_uint = kw_uint32;
 
 	// Floating point
 	inline const std::string kw_float = "float";
@@ -70,6 +70,7 @@ namespace dawn {
 	inline const std::string kw_string = "string";
 
 	// Bools
+	inline const std::string kw_bool = "bool";
 	inline const std::string kw_true = "true";
 	inline const std::string kw_false = "false";
 }

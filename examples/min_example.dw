@@ -1,9 +1,11 @@
+module min_example;
+
 let something_global: int = 12;
 
-def main {
+def main() {
 	let a = 5;
 	let b = a * 2;
-	print(f"{b}");
+	print("{b}");
 }
 
 def sqr(a: int): int {

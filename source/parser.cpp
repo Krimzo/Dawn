@@ -1,30 +1,36 @@
 #include "parser.h"
 
 
-std::shared_ptr<dawn::ASTNode> dawn::Parser::parse_expression(const std::vector<Token>& tokens)
+const std::vector<std::string>& dawn::Parser::get_errors() const
 {
-	if (tokens.empty()) {
+	return m_errors;
+}
+
+void dawn::Parser::print_errors() const
+{
+	for (const auto& error : m_errors) {
+		std::cout << error << std::endl;
+	}
+}
+
+void dawn::Parser::assign_tokens(const std::vector<Token>& tokens)
+{
+	m_tokens.clear();
+	m_errors.clear();
+
+	for (const auto& token : tokens) {
+		if (token.type != TokenType::WHITESPACE) {
+			m_tokens.push_back(token);
+		}
+	}
+}
+
+std::shared_ptr<dawn::ASTNode> dawn::Parser::parse()
+{
+	if (m_tokens.empty()) {
 		return nullptr;
 	}
 
-	auto& token = tokens.front();
-	switch (token.type)
-	{
-	case TokenType::KEYWORD:    return parse_expression_keyword(tokens);
-	case TokenType::IDENTIFIER: return parse_expression_identifier(tokens);
-	}
-
-	return log_error("Expression can't start with a ", token);
-}
-
-std::shared_ptr<dawn::ASTNode> dawn::Parser::parse_expression_keyword(const std::vector<Token>& tokens)
-{
-
-	return nullptr;
-}
-
-std::shared_ptr<dawn::ASTNode> dawn::Parser::parse_expression_identifier(const std::vector<Token>& tokens)
-{
-
+	
 	return nullptr;
 }

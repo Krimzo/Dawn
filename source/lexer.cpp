@@ -1,7 +1,7 @@
 #include "lexer.h"
 
 
-static std::string error_helper(const size_t row_index, const size_t col_index, const char c)
+static std::string error_helper(const size_t line_number, const size_t col_number, const char c)
 {
 	std::stringstream stream = {};
 	stream << "Lexer error: Unknown char ";
@@ -11,7 +11,7 @@ static std::string error_helper(const size_t row_index, const size_t col_index, 
 	else {
 		stream << "\\" << static_cast<int>(c);
 	}
-	stream << " at (" << row_index << ", " << col_index << ")";
+	stream << " at (" << line_number << ", " << col_number << ")";
 	return stream.str();
 }
 
@@ -21,14 +21,19 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 	size_t last_new_line_index = 0;
 
 	for (size_t i = 0; i < source.size(); i++) {
+		const size_t line_number = new_line_counter + 1;
+		const size_t col_number = i - last_new_line_index + 1;
+
 		// Range check
 		if (source[i] < 0 || source[i] > 127) {
-			return { error_helper(new_line_counter + 1, i - last_new_line_index, source[i]) };
+			return { error_helper(line_number, col_number, source[i]) };
 		}
 
 		// Whitespace
 		if (isspace(source[i])) {
 			Token token = {};
+			token.line_number = line_number;
+			token.col_number = col_number;
 			for (; i < source.size(); i++) {
 				if (source[i] == '\n') {
 					new_line_counter += 1;
@@ -52,6 +57,8 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Single line comments
 		if (handle_line_comments(source, i)) {
 			Token token = {};
+			token.line_number = line_number;
+			token.col_number = col_number;
 			token.value = "\n";
 			token.type = TokenType::WHITESPACE;
 			tokens->push_back(token);
@@ -69,6 +76,8 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Identifiers and Keywords
 		if (isalpha(source[i])) {
 			Token token = {};
+			token.line_number = line_number;
+			token.col_number = col_number;
 			for (; i < source.size(); i++) {
 				if (isalnum(source[i]) || source[i] == identifier_extender) {
 					token.value.push_back(source[i]);
@@ -87,15 +96,22 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Numbers
 		if (isdigit(source[i])) {
 			Token token = {};
+			token.line_number = line_number;
+			token.col_number = col_number;
+			bool is_floating = false;
 			for (; i < source.size(); i++) {
-				if (isdigit(source[i]) || source[i] == decimal_number_definer) {
+				const bool is_decimal_definer = (source[i] == decimal_number_definer);
+				if (isdigit(source[i]) || (!is_floating && is_decimal_definer)) {
 					token.value.push_back(source[i]);
 				}
 				else {
 					break;
 				}
+				if (is_decimal_definer) {
+					is_floating = true;
+				}
 			}
-			token.type = TokenType::NUMBER;
+			token.type = is_floating ? TokenType::FLOAT : TokenType::INTEGER;
 			tokens->push_back(token);
 
 			i -= 1;
@@ -105,6 +121,8 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Chars
 		if (source[i] == literal_char) {
 			Token token = {};
+			token.line_number = line_number;
+			token.col_number = col_number;
 			token.value.push_back(source[i++]);
 			for (; i < source.size(); i++) {
 				token.value.push_back(source[i]);
@@ -123,6 +141,8 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Strings
 		if (source[i] == literal_string) {
 			Token token = {};
+			token.line_number = line_number;
+			token.col_number = col_number;
 			token.value.push_back(source[i++]);
 			for (; i < source.size(); i++) {
 				token.value.push_back(source[i]);
@@ -141,6 +161,8 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Operators
 		if (isop(source[i])) {
 			Token token = {};
+			token.line_number = line_number;
+			token.col_number = col_number;
 			for (; i < source.size(); i++) {
 				token.value.push_back(source[i]);
 				if (!isop(token.value)) {
@@ -158,6 +180,8 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Separators
 		if (issep(source[i])) {
 			Token token = {};
+			token.line_number = line_number;
+			token.col_number = col_number;
 			token.value = std::string(1, source[i]);
 			token.type = TokenType::SEPARATOR;
 			tokens->push_back(token);
@@ -166,7 +190,7 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		}
 
 		// Error
-		return { error_helper(new_line_counter + 1, i - last_new_line_index, source[i]) };
+		return { error_helper(line_number, col_number, source[i]) };
 	}
 	return {};
 }
@@ -280,20 +304,21 @@ void dawn::Lexer::load_defualt_dawn()
 		kw_init,
 		kw_deinit,
 		kw_self,
+		kw_int,
 		kw_int8,
 		kw_int16,
 		kw_int32,
 		kw_int64,
-		kw_int,
+		kw_uint,
 		kw_uint8,
 		kw_uint16,
 		kw_uint32,
 		kw_uint64,
-		kw_uint,
 		kw_float,
 		kw_double,
 		kw_char,
 		kw_string,
+		kw_bool,
 		kw_true,
 		kw_false,
 	};
@@ -359,8 +384,11 @@ std::ostream& operator<<(std::ostream& stream, const dawn::TokenType type)
 	case dawn::TokenType::KEYWORD:
 		stream << "Keyword";
 		break;
-	case dawn::TokenType::NUMBER:
-		stream << "Number";
+	case dawn::TokenType::INTEGER:
+		stream << "Integer";
+		break;
+	case dawn::TokenType::FLOAT:
+		stream << "Float";
 		break;
 	case dawn::TokenType::CHAR:
 		stream << "Char";
@@ -392,6 +420,6 @@ std::ostream& operator<<(std::ostream& stream, const dawn::Token& token)
 	else {
 		stream << token.value;
 	}
-	stream << ", " << token.type << ']';
+	stream << ", " << token.type << ", (" << token.line_number << ", " << token.col_number << ")]";
 	return stream;
 }

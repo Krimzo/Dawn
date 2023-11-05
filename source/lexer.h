@@ -8,7 +8,8 @@ namespace dawn {
 		WHITESPACE = 0,
 		IDENTIFIER,
 		KEYWORD,
-		NUMBER,
+		INTEGER,
+		FLOAT,
 		CHAR,
 		STRING,
 		OPERATOR,
@@ -21,6 +22,8 @@ namespace dawn {
 	{
 		TokenType type = {};
 		std::string value = {};
+		size_t line_number = 0;
+		size_t col_number = 0;
 
 		Token() = default;
 	};

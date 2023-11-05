@@ -8,7 +8,8 @@ dawn::Color dawn::get_token_color(const Token& token)
 	{
 	case TokenType::IDENTIFIER: return Color(235, 235, 235);
 	case TokenType::KEYWORD:    return Color( 85, 155, 215);
-	case TokenType::NUMBER:     return Color(180, 205, 170);
+	case TokenType::INTEGER:    return Color(180, 205, 170);
+	case TokenType::FLOAT:      return Color(180, 205, 170);
 	case TokenType::CHAR:       return Color(230, 200, 190);
 	case TokenType::STRING:     return Color(230, 200, 190);
 	case TokenType::OPERATOR:   return Color(245, 245, 245);
