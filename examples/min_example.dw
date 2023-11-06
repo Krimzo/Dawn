@@ -2,10 +2,14 @@ module min_example;
 
 let something_global: int = 12;
 
+internal {
+	let only_this_module: int = 6;
+}
+
 def main() {
 	let a = 5;
 	let b = a * 2;
-	print("{b}");
+	print(b);
 }
 
 def sqr(a: int): int {

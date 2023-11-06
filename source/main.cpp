@@ -1,11 +1,12 @@
 #include "lexer.h"
 #include "parser.h"
+#include "engine.h"
 
 #include "file_helper.h"
 #include "display_helper.h"
 
 
-static constexpr bool TEST_FROM_FILE = false;
+static constexpr bool TEST_FROM_FILE = true;
 static constexpr bool DEBUG_LEXER = true;
 static constexpr bool DEBUG_IGNORE_WHITESPACE = true;
 
@@ -16,7 +17,7 @@ int main()
 	// Source
 	std::string source = "let a: int = (2 + 3.0) * 4;";
 	if constexpr (TEST_FROM_FILE) {
-		source = read_file("examples/full_example.dw");
+		source = read_file("examples/min_example.dw");
 	}
 
 	// Lex
@@ -31,19 +32,24 @@ int main()
 	
 	// Debug lex
 	if constexpr (DEBUG_LEXER) {
-		for (size_t i = 0; i < tokens.size(); i++) {
-			if (DEBUG_IGNORE_WHITESPACE && tokens[i].type == TokenType::WHITESPACE) {
+		size_t counter = 0;
+		for (const auto& token : tokens) {
+			if (DEBUG_IGNORE_WHITESPACE && token.type == TokenType::WHITESPACE) {
 				continue;
 			}
-			std::cout << (i + 1) << ". " << tokens[i] << std::endl;
+			std::cout << ++counter << ". " << token << std::endl;
 		}
 	}
 
 	// Parse
 	Parser parser = {};
 	parser.assign_tokens(tokens);
-	std::shared_ptr ast = parser.parse();
-	if (!ast) {
+	std::shared_ptr globals = parser.parse_global();
+	if (!globals) {
 		parser.print_errors();
 	}
+
+	// Engine
+	Engine engine = {};
+
 }

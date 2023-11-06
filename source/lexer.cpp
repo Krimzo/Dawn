@@ -1,7 +1,7 @@
 #include "lexer.h"
 
 
-static std::string error_helper(const size_t line_number, const size_t col_number, const char c)
+static std::string error_helper(const size_t line_number, const char c)
 {
 	std::stringstream stream = {};
 	stream << "Lexer error: Unknown char ";
@@ -11,33 +11,26 @@ static std::string error_helper(const size_t line_number, const size_t col_numbe
 	else {
 		stream << "\\" << static_cast<int>(c);
 	}
-	stream << " at (" << line_number << ", " << col_number << ")";
+	stream << " at line " << line_number;
 	return stream.str();
 }
 
 std::optional<std::string> dawn::Lexer::process(const std::string_view& source, std::vector<Token>* tokens) const
 {
-	size_t new_line_counter = 0;
-	size_t last_new_line_index = 0;
-
+	size_t new_line_counter = 1;
 	for (size_t i = 0; i < source.size(); i++) {
-		const size_t line_number = new_line_counter + 1;
-		const size_t col_number = i - last_new_line_index + 1;
-
 		// Range check
 		if (source[i] < 0 || source[i] > 127) {
-			return { error_helper(line_number, col_number, source[i]) };
+			return { error_helper(new_line_counter, source[i]) };
 		}
 
 		// Whitespace
 		if (isspace(source[i])) {
 			Token token = {};
-			token.line_number = line_number;
-			token.col_number = col_number;
+			token.line_number = new_line_counter;
 			for (; i < source.size(); i++) {
 				if (source[i] == '\n') {
 					new_line_counter += 1;
-					last_new_line_index = i;
 				}
 
 				if (isspace(source[i])) {
@@ -57,18 +50,19 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Single line comments
 		if (handle_line_comments(source, i)) {
 			Token token = {};
-			token.line_number = line_number;
-			token.col_number = col_number;
+			token.line_number = new_line_counter;
 			token.value = "\n";
 			token.type = TokenType::WHITESPACE;
 			tokens->push_back(token);
+
+			new_line_counter += 1;
 
 			i -= 1;
 			continue;
 		}
 
 		// Multiline comments
-		if (handle_multiline_comments(source, i)) {
+		if (handle_multiline_comments(source, i, new_line_counter)) {
 			i -= 1;
 			continue;
 		}
@@ -76,8 +70,7 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Identifiers and Keywords
 		if (isalpha(source[i])) {
 			Token token = {};
-			token.line_number = line_number;
-			token.col_number = col_number;
+			token.line_number = new_line_counter;
 			for (; i < source.size(); i++) {
 				if (isalnum(source[i]) || source[i] == identifier_extender) {
 					token.value.push_back(source[i]);
@@ -96,8 +89,7 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Numbers
 		if (isdigit(source[i])) {
 			Token token = {};
-			token.line_number = line_number;
-			token.col_number = col_number;
+			token.line_number = new_line_counter;
 			bool is_floating = false;
 			for (; i < source.size(); i++) {
 				const bool is_decimal_definer = (source[i] == decimal_number_definer);
@@ -121,8 +113,7 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Chars
 		if (source[i] == literal_char) {
 			Token token = {};
-			token.line_number = line_number;
-			token.col_number = col_number;
+			token.line_number = new_line_counter;
 			token.value.push_back(source[i++]);
 			for (; i < source.size(); i++) {
 				token.value.push_back(source[i]);
@@ -141,8 +132,7 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Strings
 		if (source[i] == literal_string) {
 			Token token = {};
-			token.line_number = line_number;
-			token.col_number = col_number;
+			token.line_number = new_line_counter;
 			token.value.push_back(source[i++]);
 			for (; i < source.size(); i++) {
 				token.value.push_back(source[i]);
@@ -161,8 +151,7 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Operators
 		if (isop(source[i])) {
 			Token token = {};
-			token.line_number = line_number;
-			token.col_number = col_number;
+			token.line_number = new_line_counter;
 			for (; i < source.size(); i++) {
 				token.value.push_back(source[i]);
 				if (!isop(token.value)) {
@@ -180,8 +169,7 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		// Separators
 		if (issep(source[i])) {
 			Token token = {};
-			token.line_number = line_number;
-			token.col_number = col_number;
+			token.line_number = new_line_counter;
 			token.value = std::string(1, source[i]);
 			token.type = TokenType::SEPARATOR;
 			tokens->push_back(token);
@@ -190,7 +178,7 @@ std::optional<std::string> dawn::Lexer::process(const std::string_view& source, 
 		}
 
 		// Error
-		return { error_helper(line_number, col_number, source[i]) };
+		return { error_helper(new_line_counter, source[i]) };
 	}
 	return {};
 }
@@ -218,8 +206,9 @@ bool dawn::Lexer::handle_line_comments(const std::string_view& source, size_t& i
 	return false;
 }
 
-bool dawn::Lexer::handle_multiline_comments(const std::string_view& source, size_t& i) const
+bool dawn::Lexer::handle_multiline_comments(const std::string_view& source, size_t& i, size_t& new_line_counter) const
 {
+	const size_t old_new_line_counter = new_line_counter;
 	if (multiline_comment.first.contains(source[i])) {
 		std::string left_holder = {};
 		for (; i < source.size(); i++) {
@@ -239,14 +228,22 @@ bool dawn::Lexer::handle_multiline_comments(const std::string_view& source, size
 							i -= 1;
 						}
 					}
+					if (source[i] == '\n') {
+						new_line_counter += 1;
+					}
 				}
 			}
 			if (!multiline_comment.first.contains(left_holder)) {
 				i -= left_holder.size() - 1;
+				new_line_counter = old_new_line_counter;
 				return false;
+			}
+			if (source[i] == '\n') {
+				new_line_counter += 1;
 			}
 		}
 	}
+	new_line_counter = old_new_line_counter;
 	return false;
 }
 
@@ -420,6 +417,6 @@ std::ostream& operator<<(std::ostream& stream, const dawn::Token& token)
 	else {
 		stream << token.value;
 	}
-	stream << ", " << token.type << ", (" << token.line_number << ", " << token.col_number << ")]";
+	stream << ", " << token.type << ", {" << token.line_number << "}]";
 	return stream;
 }

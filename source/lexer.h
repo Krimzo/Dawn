@@ -23,7 +23,6 @@ namespace dawn {
 		TokenType type = {};
 		std::string value = {};
 		size_t line_number = 0;
-		size_t col_number = 0;
 
 		Token() = default;
 	};
@@ -55,7 +54,7 @@ namespace dawn {
 	private:
 		// Helper
 		bool handle_line_comments(const std::string_view& source, size_t& i) const;
-		bool handle_multiline_comments(const std::string_view& source, size_t& i) const;
+		bool handle_multiline_comments(const std::string_view& source, size_t& i, size_t& new_line_counter) const;
 
 		// Keywords
 		bool iskey(const std::string& data) const;

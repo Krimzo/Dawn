@@ -37,6 +37,9 @@ def primitives_examp() {
 }
 
 // Variable example
+let A = 16;
+var B: float = 23.0;
+
 def vars_examp() {
 	let a = 5;                 // implicit type, constant, int, 5
 	var b: int = 6;            // explicit type, variable, int, 6
