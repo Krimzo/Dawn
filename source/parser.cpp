@@ -144,12 +144,12 @@ std::shared_ptr<dawn::GlobalASTNode> dawn::Parser::parse_global()
 
 std::shared_ptr<dawn::ScopeASTNode> dawn::Parser::parse_scope()
 {
-	return nullptr;
+	return log_error("parse SCOPE not implemented");
 }
 
 std::shared_ptr<dawn::ASTNode> dawn::Parser::parse_expression()
 {
-	return nullptr;
+	return log_error("parse EXPRESSION not implemented");;
 }
 
 // Parser helpers
@@ -187,40 +187,40 @@ std::shared_ptr<dawn::InternalASTNode> dawn::Parser::parse_internal()
 	consume_token();
 
 	// Internal scope
-	return nullptr;
+	return log_error("parse INTERNAL not implemented");
 }
 
 std::shared_ptr<dawn::LetASTNode> dawn::Parser::parse_let()
 {
-	return nullptr;
+	return log_error("parse LET not implemented");
 }
 
 std::shared_ptr<dawn::VarASTNode> dawn::Parser::parse_var()
 {
-	return nullptr;
+	return log_error("parse VAR not implemented");
 }
 
 std::shared_ptr<dawn::DefASTNode> dawn::Parser::parse_def()
 {
-	return nullptr;
+	return log_error("parse DEF not implemented");
 }
 
 std::shared_ptr<dawn::EnumASTNode> dawn::Parser::parse_enum()
 {
-	return nullptr;
+	return log_error("parse ENUM not implemented");
 }
 
 std::shared_ptr<dawn::StructASTNode> dawn::Parser::parse_struct()
 {
-	return nullptr;
+	return log_error("parse STRUCT not implemented");
 }
 
 std::shared_ptr<dawn::InterfaceASTNode> dawn::Parser::parse_interface()
 {
-	return nullptr;
+	return log_error("parse INTERFACE not implemented");
 }
 
 std::shared_ptr<dawn::ClassASTNode> dawn::Parser::parse_class()
 {
-	return nullptr;
+	return log_error("parse CLASS not implemented");
 }

@@ -7,7 +7,7 @@
 
 
 static constexpr bool TEST_FROM_FILE = true;
-static constexpr bool DEBUG_LEXER = true;
+static constexpr bool DEBUG_LEXER = false;
 static constexpr bool DEBUG_IGNORE_WHITESPACE = true;
 
 int main()
