@@ -11,45 +11,48 @@ namespace dawn {
 		Parser() = default;
 
 		// Errors
-		bool has_errors() const;
+		Bool has_errors() const;
+		const Array<String>& get_errors() const;
 		void print_errors() const;
-		const std::vector<std::string>& get_errors() const;
 
 		// Prepare tokens
-		void assign_tokens(const std::vector<Token>& tokens);
+		void assign_tokens(const Array<Token>& tokens);
 
 		// Parser
-		std::shared_ptr<GlobalASTNode> parse_global();
-		std::shared_ptr<ScopeASTNode> parse_scope();
-		std::shared_ptr<ASTNode> parse_expression();
+		Object<GlobalASTNode> parse_global();
+		Object<ASTNode> parse_scope();
 
 		// Parse specific
-		std::shared_ptr<ModuleASTNode> parse_module();
-		std::shared_ptr<InternalASTNode> parse_internal();
-		std::shared_ptr<LetASTNode> parse_let();
-		std::shared_ptr<VarASTNode> parse_var();
-		std::shared_ptr<DefASTNode> parse_def();
-		std::shared_ptr<EnumASTNode> parse_enum();
-		std::shared_ptr<StructASTNode> parse_struct();
-		std::shared_ptr<InterfaceASTNode> parse_interface();
-		std::shared_ptr<ClassASTNode> parse_class();
+		Object<ModuleASTNode> parse_module();
+		Object<InternalASTNode> parse_internal();
+		Object<InterfaceASTNode> parse_interface();
+		Object<ClassASTNode> parse_class();
+		Object<StructASTNode> parse_struct();
+		Object<EnumASTNode> parse_enum();
+		Object<DefASTNode> parse_def();
+		Object<LetASTNode> parse_let();
+		Object<VarASTNode> parse_var();
+		Object<TypeASTNode> parse_type();
+
+		// Expressions
+		Object<ASTNode> parse_expression(const Array<Token>& tokens);
 
 	private:
-		std::vector<std::string> m_errors = {};
-		std::vector<Token> m_tokens = {};
-		std::vector<Token>::iterator m_current = {};
+		Array<String> m_errors = {};
+		Array<Token> m_tokens = {};
+		Array<Token>::iterator m_current = {};
 
 		template<typename... Args>
 		nullptr_t log_error(const Args&... args)
 		{
-			std::stringstream stream = {};
+			StringStream stream;
 			(stream << ... << args);
 			m_errors.push_back(stream.str());
 			return nullptr;
 		}
 
 		template<TokenType Type>
-		bool peek_token(const std::string& value = {})
+		Bool peek_token(const String& value = {})
 		{
 			if (m_current == m_tokens.end()) { return false; }
 			if (m_current->type != Type) { return false; }
@@ -58,9 +61,9 @@ namespace dawn {
 		}
 
 		template<TokenType Type>
-		bool peek_token(const char value)
+		Bool peek_token(const Char value)
 		{
-			return peek_token<Type>(std::string(1, value));
+			return peek_token<Type>(String(1, value));
 		}
 
 		inline Token consume_token()

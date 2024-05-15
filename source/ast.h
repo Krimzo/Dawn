@@ -1,123 +1,155 @@
 #pragma once
 
-#include "cpp_helper.h"
+#include "t.h"
 
 
 namespace dawn {
 	// Declarations
-	struct GlobalASTNode;
-	struct ScopeASTNode;
-	struct ModuleASTNode;
-	struct InternalASTNode;
-	struct LetASTNode;
-	struct VarASTNode;
-	struct DefASTNode;
-	struct EnumASTNode;
-	struct StructASTNode;
-	struct InterfaceASTNode;
-	struct ClassASTNode;
+	class ModuleASTNode;
+	class GlobalASTNode;
+	class InternalASTNode;
+	class InterfaceASTNode;
+	class ClassASTNode;
+	class StructASTNode;
+	class EnumASTNode;
+	class TypeASTNode;
+	class DefASTNode;
+	class LetASTNode;
+	class VarASTNode;
 
 	// Base
-	struct ASTNode
+	class ASTNode
 	{
+	public:
 		ASTNode() = default;
 		virtual ~ASTNode() = default;
 	};
+}
 
+namespace dawn {
 	// Definitions
-	struct GlobalASTNode : public ASTNode
+	class ModuleASTNode : public ASTNode
 	{
-		std::shared_ptr<ModuleASTNode> module;
-		std::vector<std::shared_ptr<InternalASTNode>> internals;
-		std::vector<std::shared_ptr<InterfaceASTNode>> interfaces;
-		std::vector<std::shared_ptr<ClassASTNode>> classes;
-		std::vector<std::shared_ptr<StructASTNode>> structs;
-		std::vector<std::shared_ptr<EnumASTNode>> enums;
-		std::vector<std::shared_ptr<DefASTNode>> defs;
-		std::vector<std::shared_ptr<VarASTNode>> vars;
-		std::vector<std::shared_ptr<LetASTNode>> lets;
+	public:
+		String name;
 	};
 
-	struct ScopeASTNode : public ASTNode
+	class GlobalASTNode : public ASTNode
 	{
-		std::vector<std::shared_ptr<ASTNode>> instructions;
+	public:
+		Object<ModuleASTNode> module;
+		Object<InternalASTNode> internal;
+		Array<Object<InterfaceASTNode>> interfaces;
+		Array<Object<ClassASTNode>> classes;
+		Array<Object<StructASTNode>> structs;
+		Array<Object<EnumASTNode>> enums;
+		Array<Object<DefASTNode>> defs;
+		Array<Object<LetASTNode>> lets;
+		Array<Object<VarASTNode>> vars;
 	};
 
-	struct ModuleASTNode : public ASTNode
+	class InternalASTNode : public ASTNode
 	{
-		std::string module_name;
+	public:
+		Array<Object<InterfaceASTNode>> interfaces;
+		Array<Object<ClassASTNode>> classes;
+		Array<Object<StructASTNode>> structs;
+		Array<Object<EnumASTNode>> enums;
+		Array<Object<DefASTNode>> defs;
+		Array<Object<LetASTNode>> lets;
+		Array<Object<VarASTNode>> vars;
 	};
 
-	struct InternalASTNode : public ASTNode
+	class InterfaceASTNode : public ASTNode
 	{
-		std::vector<std::shared_ptr<InterfaceASTNode>> interfaces;
-		std::vector<std::shared_ptr<ClassASTNode>> classes;
-		std::vector<std::shared_ptr<StructASTNode>> structs;
-		std::vector<std::shared_ptr<EnumASTNode>> enums;
-		std::vector<std::shared_ptr<DefASTNode>> defs;
-		std::vector<std::shared_ptr<VarASTNode>> vars;
-		std::vector<std::shared_ptr<LetASTNode>> lets;
+	public:
+		String name;
+		Array<Object<DefASTNode>> methods;
 	};
 
-	struct LetASTNode : public ASTNode
+	class ClassASTNode : public ASTNode
 	{
-		std::string name;
-		std::string type;
-		std::shared_ptr<ASTNode> value;
+	public:
+		String name;
+		Object<InternalASTNode> internal;
+		Array<Object<InterfaceASTNode>> interfaces;
+		Array<Object<VarASTNode>> members;
+		Array<Object<DefASTNode>> constructors;
+		Object<DefASTNode> destructor;
+		Array<Object<DefASTNode>> methods;
 	};
 
-	struct VarASTNode : public ASTNode
+	class StructASTNode : public ASTNode
 	{
-		std::string name;
-		std::string type;
-		std::shared_ptr<ASTNode> value;
+	public:
+		String name;
+		Array<Object<VarASTNode>> members;
 	};
 
-	struct DefASTNode : public ASTNode
+	class EnumASTNode : public ASTNode
 	{
-		std::string name;
-		std::unordered_map<std::string, std::pair<std::string, std::shared_ptr<ASTNode>>> args;
-		std::string return_type;
-		std::shared_ptr<ScopeASTNode> scope;
+	public:
+		String name;
+		Object<TypeASTNode> super_type;
+		Array<Object<LetASTNode>> values;
 	};
 
-	struct EnumASTNode : public ASTNode
+	class DefASTNode : public ASTNode
 	{
-		std::string name;
-		std::string type;
-		std::unordered_map<std::string, std::shared_ptr<ASTNode>> values;
+	public:
+		String name;
+		Array<Object<LetASTNode>> args;
+		Object<TypeASTNode> return_type;
+		Object<ASTNode> body;
 	};
 
-	struct StructASTNode : public ASTNode
+	class LetASTNode : public ASTNode
 	{
-		std::string name;
-		std::unordered_map<std::string, std::pair<std::string, std::shared_ptr<ASTNode>>> members;
+	public:
+		String name;
+		Object<TypeASTNode> type;
+		Object<ASTNode> value;
 	};
 
-	struct InterfaceASTNode : public ASTNode
+	class VarASTNode : public ASTNode
 	{
-		std::string name;
-		std::vector<std::shared_ptr<DefASTNode>> methods;
+	public:
+		String name;
+		Object<TypeASTNode> type;
+		Object<ASTNode> value;
 	};
 
-	struct ClassASTNode : public ASTNode
+	// Type
+	enum PointerType
 	{
-		std::string name;
+		NONE = 0,
+		VAR,
+		LET,
+	};
+
+	class TypeASTNode : public ASTNode
+	{
+	public:
+		String name;
+		PointerType pointer_type;
+	};
+}
+
+namespace dawn {
+	class BoolASTNode;
+	class IntASTNode;
+	class UIntASTNode;
+	class FloatASTNode;
+	class CharASTNode;
+	class StringASTNode;
+
+	class OperatorASTNode : public ASTNode
+	{
+	public:
+		OperatorASTNode() = default;
+
 		
-		// Interfaces
-		std::unordered_set<std::string> interfaces;
-		std::vector<std::shared_ptr<DefASTNode>> implemented_methods;
-
-		// Members
-		std::unordered_map<std::string, std::pair<std::string, std::shared_ptr<ASTNode>>> members;
-		std::unordered_map<std::string, std::pair<std::string, std::shared_ptr<ASTNode>>> internal_members;
-
-		// Init/deinit
-		std::vector<std::shared_ptr<DefASTNode>> constructors;
-		std::shared_ptr<ScopeASTNode> destructor;
-
-		// Methods
-		std::vector<std::shared_ptr<DefASTNode>> methods;
-		std::vector<std::shared_ptr<DefASTNode>> internal_methods;
 	};
+
+
 }

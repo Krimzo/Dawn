@@ -11,23 +11,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\ast.cpp" />
-    <ClCompile Include="source\display_helper.cpp" />
-    <ClCompile Include="source\engine.cpp" />
-    <ClCompile Include="source\file_helper.cpp" />
+    <ClCompile Include="source\helper.cpp" />
     <ClCompile Include="source\lexer.cpp" />
-    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\_main.cpp" />
     <ClCompile Include="source\parser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\ast.h" />
-    <ClInclude Include="source\cpp_helper.h" />
-    <ClInclude Include="source\display_helper.h" />
+    <ClInclude Include="source\helper.h" />
     <ClInclude Include="source\engine.h" />
-    <ClInclude Include="source\file_helper.h" />
     <ClInclude Include="source\lexer.h" />
     <ClInclude Include="source\parser.h" />
     <ClInclude Include="source\syntax.h" />
+    <ClInclude Include="source\t.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

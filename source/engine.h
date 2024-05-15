@@ -7,9 +7,5 @@ namespace dawn {
 	class Engine
 	{
 	public:
-
-
-	private:
-
 	};
 }

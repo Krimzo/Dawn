@@ -1,4 +1,4 @@
-#include "display_helper.h"
+#include "helper.h"
 #include <windows.h>
 
 
@@ -18,29 +18,30 @@ dawn::Color dawn::get_token_color(const Token& token)
 	return {};
 }
 
-void dawn::display_colored(const std::vector<Token>& tokens)
+void dawn::display_colored(const Array<Token>& tokens)
 {
 	for (auto& token : tokens) {
-		std::cout << get_token_color(token);
+		std::wcout << get_token_color(token);
 		if (token.type == TokenType::WHITESPACE) {
 			for (auto c : token.value) {
 				if (c == '\t') {
-					std::cout << "    ";
+					std::wcout << "    ";
 				}
 				else {
-					std::cout << c;
+					std::wcout << c;
 				}
 			}
 		}
 		else {
-			std::cout << token.value;
+			std::wcout << token.value;
 		}
 	}
-	std::cout << Color(205, 205, 205); // Reset console colors
+	std::wcout << Color(205, 205, 205); // Reset console colors
 }
 
-std::ostream& operator<<(std::ostream& stream, const dawn::Color& color)
+std::wostream& operator<<(std::wostream& stream, const dawn::Color& color)
 {
-	stream << "\033[38;2;" << ((int) color.r) << ";" << ((int) color.g) << ";" << ((int) color.b) << "m";
+	using namespace dawn;
+	stream << "\033[38;2;" << Int(color.r) << ";" << Int(color.g) << ";" << Int(color.b) << "m";
 	return stream;
 }

@@ -21,8 +21,8 @@ namespace dawn {
 	struct Token
 	{
 		TokenType type = {};
-		std::string value = {};
-		size_t line_number = 0;
+		String value = {};
+		UInt line_number = 0;
 
 		Token() = default;
 	};
@@ -32,41 +32,41 @@ namespace dawn {
 	class Lexer
 	{
 	public:
-		std::unordered_set<std::string> keywords = {};
-		std::unordered_set<std::string> operators = {};
-		std::unordered_set<char> separators = {};
+		Set<String> keywords = {};
+		Set<String> operators = {};
+		Set<Char> separators = {};
 
-		char identifier_extender = 0;
-		char decimal_number_definer = 0;
+		Char identifier_extender = 0;
+		Char decimal_number_definer = 0;
 
-		char literal_char = 0;
-		char literal_string = 0;
+		Char literal_char = 0;
+		Char literal_string = 0;
 
-		std::string line_comment = {};
-		std::pair<std::string, std::string> multiline_comment = {};
+		String line_comment = {};
+		Pair<String, String> multiline_comment = {};
 
 		Lexer() = default;
 
-		std::optional<std::string> process(const std::string_view& source, std::vector<Token>* tokens) const;
+		Optional<String> process(const StringView& source, Array<Token>* tokens) const;
 
 		void load_defualt_dawn();
 
 	private:
 		// Helper
-		bool handle_line_comments(const std::string_view& source, size_t& i) const;
-		bool handle_multiline_comments(const std::string_view& source, size_t& i, size_t& new_line_counter) const;
+		Bool handle_line_comments(const StringView& source, UInt& i) const;
+		Bool handle_multiline_comments(const StringView& source, UInt& i, UInt& new_line_counter) const;
 
 		// Keywords
-		bool iskey(const std::string& data) const;
+		Bool iskey(const String& data) const;
 
 		// Operators
-		bool isop(const std::string& data) const;
-		bool isop(const char value) const;
+		Bool isop(const String& data) const;
+		Bool isop(const Char value) const;
 
 		// Separators
-		bool issep(const char value) const;
+		Bool issep(const Char value) const;
 	};
 }
 
-std::ostream& operator<<(std::ostream& stream, const dawn::TokenType type);
-std::ostream& operator<<(std::ostream& stream, const dawn::Token& token);
+std::wostream& operator<<(std::wostream& stream, const dawn::TokenType type);
+std::wostream& operator<<(std::wostream& stream, const dawn::Token& token);
