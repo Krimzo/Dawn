@@ -1,78 +1,144 @@
 #include "lexer.h"
 
 
-static dawn::String error_helper(const dawn::UInt line_number, const dawn::Char c)
+static dawn::String error_helper(const dawn::Int line_number, const dawn::Char c)
 {
-	dawn::StringStream stream;
+	using namespace dawn;
+
+	StringStream stream;
 	stream << "Lexer error: Unknown char ";
 	if (c > 32 && c < 127) {
 		stream << c;
 	}
 	else {
-		stream << "\\" << dawn::Int(c);
+		stream << "\\" << Int(c);
 	}
 	stream << " at line " << line_number;
 	return stream.str();
 }
 
-dawn::Optional<dawn::String> dawn::Lexer::process(const StringView& source, Array<Token>* tokens) const
+dawn::LanguageDef dawn::LanguageDef::default_def()
 {
-	UInt new_line_counter = 1;
-	for (UInt i = 0; i < source.size(); i++) {
-		// Range check
-		if (source[i] < 0 || source[i] > 127) {
-			return { error_helper(new_line_counter, source[i]) };
-		}
+	LanguageDef result;
+	result.keywords = {
+		(String) kw_module,
+		(String) kw_import,
+		(String) kw_internal,
+		(String) kw_func,
+		(String) kw_return,
+		(String) kw_let,
+		(String) kw_var,
+		(String) kw_null,
+		(String) kw_new,
+		(String) kw_if,
+		(String) kw_else,
+		(String) kw_elif,
+		(String) kw_switch,
+		(String) kw_case,
+		(String) kw_default,
+		(String) kw_for,
+		(String) kw_while,
+		(String) kw_loop,
+		(String) kw_continue,
+		(String) kw_break,
+		(String) kw_enum,
+		(String) kw_struct,
+		(String) kw_interface,
+		(String) kw_implement,
+		(String) kw_class,
+		(String) kw_init,
+		(String) kw_deinit,
+		(String) kw_self,
+		(String) kw_int,
+		(String) kw_float,
+		(String) kw_char,
+		(String) kw_string,
+		(String) kw_bool,
+		(String) kw_true,
+		(String) kw_false,
+	};
+	result.operators = {
+		(String) op_add,
+		(String) op_sub,
+		(String) op_mul,
+		(String) op_div,
+		(String) op_pow,
+		(String) op_mod,
+		(String) op_add_as,
+		(String) op_sub_as,
+		(String) op_mul_as,
+		(String) op_div_as,
+		(String) op_pow_as,
+		(String) op_mod_as,
+		(String) op_not,
+		(String) op_and,
+		(String) op_or,
+		(String) op_eq,
+		(String) op_not_eq,
+		(String) op_less,
+		(String) op_great,
+		(String) op_less_eq,
+		(String) op_great_eq,
+		(String) op_address,
+		(String) op_access,
+	};
+	result.separators = {
+		(String) sep_assign,
+		(String) sep_split,
+		(String) sep_express,
+		(String) sep_access,
+		(String) sep_static_access,
+		(String) sep_def_open,
+		(String) sep_def_close,
+		(String) sep_scope_open,
+		(String) sep_scope_close,
+		(String) sep_array_open,
+		(String) sep_array_close,
+	};
+	result.identifier_extender = misc_iden_ex;
+	result.decimal_separator = misc_dec_ex;
+	result.literal_char = misc_lit_char;
+	result.literal_string = misc_lit_str;
+	result.line_comment = misc_line_comm;
+	result.multiline_comment = misc_multiline_comm;
+	return result;
+}
 
-		// Whitespace
+dawn::Opt<dawn::String> dawn::Lexer::tokenize(const StringView& source, Array<Token>& tokens) const
+{
+	Int line_counter = 1;
+	for (Int i = 0; i < (Int) source.size(); i++) {
+		if (source[i] < 0 || source[i] > 127)
+			return { error_helper(line_counter, source[i]) };
+
 		if (isspace(source[i])) {
-			Token token = {};
-			token.line_number = new_line_counter;
-			for (; i < source.size(); i++) {
+			for (; i < (Int) source.size(); i++) {
 				if (source[i] == '\n') {
-					new_line_counter += 1;
+					line_counter += 1;
 				}
-
-				if (isspace(source[i])) {
-					token.value.push_back(source[i]);
-				}
-				else {
+				if (!isspace(source[i]))
 					break;
-				}
 			}
-			token.type = TokenType::WHITESPACE;
-			tokens->push_back(token);
-
 			i -= 1;
 			continue;
 		}
 
-		// Single line comments
 		if (handle_line_comments(source, i)) {
-			Token token = {};
-			token.line_number = new_line_counter;
-			token.value = L"\n";
-			token.type = TokenType::WHITESPACE;
-			tokens->push_back(token);
-
-			new_line_counter += 1;
-
+			line_counter += 1;
 			i -= 1;
 			continue;
 		}
 
-		// Multiline comments
-		if (handle_multiline_comments(source, i, new_line_counter)) {
+		if (handle_multiline_comments(source, i, line_counter)) {
 			i -= 1;
 			continue;
 		}
 
-		// Identifiers and Keywords
 		if (isalpha(source[i])) {
-			Token token = {};
-			token.line_number = new_line_counter;
-			for (; i < source.size(); i++) {
-				if (isalnum(source[i]) || source[i] == identifier_extender) {
+			Token token;
+			token.line_number = line_counter;
+			for (; i < (Int) source.size(); i++) {
+				if (isalnum(source[i]) || source[i] == lang_def.identifier_extender) {
 					token.value.push_back(source[i]);
 				}
 				else {
@@ -80,19 +146,17 @@ dawn::Optional<dawn::String> dawn::Lexer::process(const StringView& source, Arra
 				}
 			}
 			token.type = iskey(token.value) ? TokenType::KEYWORD : TokenType::IDENTIFIER;
-			tokens->push_back(token);
-
+			tokens.push_back(token);
 			i -= 1;
 			continue;
 		}
 
-		// Numbers
 		if (isdigit(source[i])) {
-			Token token = {};
-			token.line_number = new_line_counter;
+			Token token;
+			token.line_number = line_counter;
 			Bool is_floating = false;
-			for (; i < source.size(); i++) {
-				const Bool is_decimal_definer = (source[i] == decimal_number_definer);
+			for (; i < (Int) source.size(); i++) {
+				const Bool is_decimal_definer = (source[i] == lang_def.decimal_separator);
 				if (isdigit(source[i]) || (!is_floating && is_decimal_definer)) {
 					token.value.push_back(source[i]);
 				}
@@ -103,56 +167,50 @@ dawn::Optional<dawn::String> dawn::Lexer::process(const StringView& source, Arra
 					is_floating = true;
 				}
 			}
-			token.type = is_floating ? TokenType::FLOAT : TokenType::INTEGER;
-			tokens->push_back(token);
-
+			token.type = is_floating ? TokenType::FLOAT : TokenType::INT;
+			tokens.push_back(token);
 			i -= 1;
 			continue;
 		}
 
-		// Chars
-		if (source[i] == literal_char) {
+		if (source[i] == lang_def.literal_char) {
 			Token token = {};
-			token.line_number = new_line_counter;
+			token.line_number = line_counter;
 			token.value.push_back(source[i++]);
-			for (; i < source.size(); i++) {
+			for (; i < (Int) source.size(); i++) {
 				token.value.push_back(source[i]);
-				if (source[i] == literal_char) {
+				if (source[i] == lang_def.literal_char) {
 					i += 1;
 					break;
 				}
 			}
 			token.type = TokenType::CHAR;
-			tokens->push_back(token);
-
+			tokens.push_back(token);
 			i -= 1;
 			continue;
 		}
 
-		// Strings
-		if (source[i] == literal_string) {
+		if (source[i] == lang_def.literal_string) {
 			Token token = {};
-			token.line_number = new_line_counter;
+			token.line_number = line_counter;
 			token.value.push_back(source[i++]);
-			for (; i < source.size(); i++) {
+			for (; i < (Int) source.size(); i++) {
 				token.value.push_back(source[i]);
-				if (source[i] == literal_string) {
+				if (source[i] == lang_def.literal_string) {
 					i += 1;
 					break;
 				}
 			}
 			token.type = TokenType::STRING;
-			tokens->push_back(token);
-
+			tokens.push_back(token);
 			i -= 1;
 			continue;
 		}
 
-		// Operators
-		if (isop(source[i])) {
+		if (isop(String(1, source[i]))) {
 			Token token = {};
-			token.line_number = new_line_counter;
-			for (; i < source.size(); i++) {
+			token.line_number = line_counter;
+			for (; i < (Int) source.size(); i++) {
 				token.value.push_back(source[i]);
 				if (!isop(token.value)) {
 					token.value.pop_back();
@@ -160,44 +218,40 @@ dawn::Optional<dawn::String> dawn::Lexer::process(const StringView& source, Arra
 				}
 			}
 			token.type = TokenType::OPERATOR;
-			tokens->push_back(token);
-
+			tokens.push_back(token);
 			i -= 1;
 			continue;
 		}
 
-		// Separators
-		if (issep(source[i])) {
+		if (issep(String(1, source[i]))) {
 			Token token = {};
-			token.line_number = new_line_counter;
+			token.line_number = line_counter;
 			token.value = String(1, source[i]);
 			token.type = TokenType::SEPARATOR;
-			tokens->push_back(token);
-
+			tokens.push_back(token);
 			continue;
 		}
 
-		// Error
-		return { error_helper(new_line_counter, source[i]) };
+		return { error_helper(line_counter, source[i]) };
 	}
 	return {};
 }
 
-dawn::Bool dawn::Lexer::handle_line_comments(const StringView& source, UInt& i) const
+dawn::Bool dawn::Lexer::handle_line_comments(const StringView& source, Int& i) const
 {
-	if (line_comment.contains(source[i])) {
+	if (lang_def.line_comment.contains(source[i])) {
 		String temp_holder = {};
-		for (; i < source.size(); i++) {
+		for (; i < (Int) source.size(); i++) {
 			temp_holder.push_back(source[i]);
-			if (temp_holder == line_comment) {
-				for (; i < source.size(); i++) {
+			if (temp_holder == lang_def.line_comment) {
+				for (; i < (Int) source.size(); i++) {
 					if (source[i] == '\n') {
 						i += 1;
 						return true;
 					}
 				}
 			}
-			if (!line_comment.contains(temp_holder)) {
+			if (!lang_def.line_comment.contains(temp_holder)) {
 				i -= temp_holder.size() - 1;
 				return false;
 			}
@@ -206,219 +260,87 @@ dawn::Bool dawn::Lexer::handle_line_comments(const StringView& source, UInt& i) 
 	return false;
 }
 
-dawn::Bool dawn::Lexer::handle_multiline_comments(const StringView& source, UInt& i, UInt& new_line_counter) const
+dawn::Bool dawn::Lexer::handle_multiline_comments(const StringView& source, Int& i, Int& line_counter) const
 {
-	const UInt old_new_line_counter = new_line_counter;
-	if (multiline_comment.first.contains(source[i])) {
+	const Int old_line_counter = line_counter;
+	if (lang_def.multiline_comment.first.contains(source[i])) {
 		String left_holder = {};
-		for (; i < source.size(); i++) {
+		for (; i < (Int) source.size(); i++) {
 			left_holder.push_back(source[i]);
-			if (left_holder == multiline_comment.first) {
+			if (left_holder == lang_def.multiline_comment.first) {
 				String right_holder = {};
-				for (; i < source.size(); i++) {
-					const Bool had_contained = !right_holder.empty() && multiline_comment.second.contains(right_holder);
+				for (; i < (Int) source.size(); i++) {
+					const Bool had_contained = !right_holder.empty() && lang_def.multiline_comment.second.contains(right_holder);
 					right_holder.push_back(source[i]);
-					if (right_holder == multiline_comment.second) {
+					if (right_holder == lang_def.multiline_comment.second) {
 						i += 1;
 						return true;
 					}
-					if (!multiline_comment.second.contains(right_holder)) {
+					if (!lang_def.multiline_comment.second.contains(right_holder)) {
 						right_holder.clear();
 						if (had_contained) {
 							i -= 1;
 						}
 					}
 					if (source[i] == '\n') {
-						new_line_counter += 1;
+						line_counter += 1;
 					}
 				}
 			}
-			if (!multiline_comment.first.contains(left_holder)) {
+			if (!lang_def.multiline_comment.first.contains(left_holder)) {
 				i -= left_holder.size() - 1;
-				new_line_counter = old_new_line_counter;
+				line_counter = old_line_counter;
 				return false;
 			}
 			if (source[i] == '\n') {
-				new_line_counter += 1;
+				line_counter += 1;
 			}
 		}
 	}
-	new_line_counter = old_new_line_counter;
+	line_counter = old_line_counter;
 	return false;
 }
 
-// Keywords
-dawn::Bool dawn::Lexer::iskey(const String& data) const
+dawn::Bool dawn::Lexer::iskey(const StringView& data) const
 {
-	return keywords.contains(data);
+	return lang_def.keywords.contains((String) data);
 }
 
-// Operators
-dawn::Bool dawn::Lexer::isop(const String& data) const
+dawn::Bool dawn::Lexer::isop(const StringView& data) const
 {
-	return operators.contains(data);
+	return lang_def.operators.contains((String) data);
 }
 
-dawn::Bool dawn::Lexer::isop(const Char value) const
+dawn::Bool dawn::Lexer::issep(const StringView& value) const
 {
-	return this->isop(String(1, value));
+	return lang_def.separators.contains((String) value);
 }
 
-// Separators
-dawn::Bool dawn::Lexer::issep(const Char value) const
+bool dawn::operator==(const dawn::Char lhs, const dawn::StringView& rhs)
 {
-	return separators.contains(value);
+	if (rhs.size() != 1)
+		return false;
+	return lhs == rhs[0];
 }
 
-void dawn::Lexer::load_defualt_dawn()
+std::wostream& dawn::operator<<(std::wostream& stream, const dawn::TokenType type)
 {
-	keywords = {
-		kw_module,
-		kw_import,
-		kw_internal,
-		kw_def,
-		kw_return,
-		kw_let,
-		kw_var,
-		kw_null,
-		kw_new,
-		kw_if,
-		kw_else,
-		kw_elif,
-		kw_switch,
-		kw_case,
-		kw_default,
-		kw_for,
-		kw_while,
-		kw_loop,
-		kw_continue,
-		kw_break,
-		kw_enum,
-		kw_struct,
-		kw_interface,
-		kw_implement,
-		kw_class,
-		kw_init,
-		kw_deinit,
-		kw_self,
-		kw_int,
-		kw_int8,
-		kw_int16,
-		kw_int32,
-		kw_int64,
-		kw_uint,
-		kw_uint8,
-		kw_uint16,
-		kw_uint32,
-		kw_uint64,
-		kw_float,
-		kw_float32,
-		kw_float64,
-		kw_char,
-		kw_string,
-		kw_bool,
-		kw_true,
-		kw_false,
-	};
-
-	operators = {
-		op_add,
-		op_sub,
-		op_mul,
-		op_div,
-		op_pow,
-		op_mod,
-		op_add_as,
-		op_sub_as,
-		op_mul_as,
-		op_div_as,
-		op_pow_as,
-		op_mod_as,
-		op_and,
-		op_or,
-		op_not,
-		op_less,
-		op_great,
-		op_eq,
-		op_not_eq,
-		op_less_eq,
-		op_great_eq,
-		op_address,
-		op_access,
-	};
-
-	separators = {
-		sep_assign,
-		sep_split,
-		sep_express,
-		sep_access,
-		sep_static_access,
-		sep_def_open,
-		sep_def_close,
-		sep_scope_open,
-		sep_scope_close,
-		sep_array_open,
-		sep_array_close,
-	};
-
-	identifier_extender = misc_iden_ex;
-	decimal_number_definer = misc_dec_ex;
-
-	literal_char = misc_lit_char;
-	literal_string = misc_lit_str;
-
-	line_comment = misc_line_comm;
-	multiline_comment = misc_multiline_comm;
-}
-
-std::wostream& operator<<(std::wostream& stream, const dawn::TokenType type)
-{
-	switch (type) {
-	case dawn::TokenType::WHITESPACE:
-		stream << "Whitespace";
-		break;
-	case dawn::TokenType::IDENTIFIER:
-		stream << "Identifier";
-		break;
-	case dawn::TokenType::KEYWORD:
-		stream << "Keyword";
-		break;
-	case dawn::TokenType::INTEGER:
-		stream << "Integer";
-		break;
-	case dawn::TokenType::FLOAT:
-		stream << "Float";
-		break;
-	case dawn::TokenType::CHAR:
-		stream << "Char";
-		break;
-	case dawn::TokenType::STRING:
-		stream << "String";
-		break;
-	case dawn::TokenType::OPERATOR:
-		stream << "Operator";
-		break;
-	case dawn::TokenType::SEPARATOR:
-		stream << "Separator";
-		break;
+	switch (type)
+	{
+	case dawn::TokenType::IDENTIFIER: stream << "Identifier"; break;
+	case dawn::TokenType::KEYWORD: stream << "Keyword"; break;
+	case dawn::TokenType::INT: stream << "Int"; break;
+	case dawn::TokenType::FLOAT: stream << "Float"; break;
+	case dawn::TokenType::CHAR: stream << "Char"; break;
+	case dawn::TokenType::STRING: stream << "String"; break;
+	case dawn::TokenType::OPERATOR: stream << "Operator"; break;
+	case dawn::TokenType::SEPARATOR: stream << "Separator"; break;
 	}
 	return stream;
 }
 
-std::wostream& operator<<(std::wostream& stream, const dawn::Token& token)
+std::wostream& dawn::operator<<(std::wostream& stream, const dawn::Token& token)
 {
-	stream << '[';
-	if (token.type == dawn::TokenType::WHITESPACE) {
-		for (dawn::UInt i = 0; i < token.value.size() - 1; i++) {
-			stream << "'\\" << static_cast<int>(token.value[i]) << "' ";
-		}
-		if (!token.value.empty()) {
-			stream << "'\\" << static_cast<int>(*--token.value.end()) << "'";
-		}
-	}
-	else {
-		stream << token.value;
-	}
-	stream << ", " << token.type << ", {" << token.line_number << "}]";
+	stream << '[' << token.value << ", " << token.type << ", {" << token.line_number << "}]";
 	return stream;
 }

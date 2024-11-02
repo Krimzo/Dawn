@@ -5,14 +5,14 @@ internal
 {
 	let only_for_module = 6;
 
-	def my_private_module_function()
+	func my_private_module_function()
 	{
 		print("super private");
 	}
 }
 
 // Primitive example
-def primitives_examp()
+func primitives_examp()
 {
 	// Integers
 	let i0:  int8 = -10; // [                -128,                 127]
@@ -46,36 +46,36 @@ def primitives_examp()
 let A = 16;
 var B: float = 23.0;
 
-def vars_examp()
+func vars_examp()
 {
 	let a = 5;                 // implicit type, constant, int, 5
 	var b: int = 6;            // explicit type, variable, int, 6
 	let c: int var* = &b;      // explicit type, constant, int variable pointer, address from b
 	let d: float = float(*c);  // explicit type, constant, float, casted value from dereferenced pointer
-	var e: float let* = null; // explicit type, variable, float constant pointer, null
+	var e: float let* = null;  // explicit type, variable, float constant pointer, null
 }
 
 // Collection example
-def collections_examp()
+func collections_examp()
 {
-	let data0: [int] = new [int; 1, 2, 3];                                         // array
-	let data1: (int) = new (int; 1, 2, 3);                                         // set
-	let data2: {int: string} = new {int: string; 1: "one", 2: "two", 3: "three" }; // map
+	let data0: [int] = new [int](1, 2, 3);                                   // array
+	let data1: (int) = new (int)(1, 2, 3);                                   // set
+	let data2: {int:string} = new {int:string}(1:"one", 2:"two", 3:"three"); // map
 }
 
 // Function example
-def sqr(a: int): int
+func sqr(a: int): int
 {
 	return a * a;
 }
 
-def *(left: string, right: int): string
+func *(left: string, right: int): string
 {
 	return left.repeat(right);
 }
 
 // If example
-def if_examp()
+func if_examp()
 {
 	let a = (5 + 1.0) * 2.;
 	if a < 10.0 {
@@ -90,7 +90,7 @@ def if_examp()
 }
 
 // Switch example
-def switch_examp()
+func switch_examp()
 {
 	let value = 16;
 	switch value {
@@ -107,16 +107,16 @@ def switch_examp()
 }
 
 // Loop example
-def loops_examp()
+func loops_examp()
 {
 	// For
-	for i: range(5) {
+	for i: 0..5 {
 		print(i);
 	}
-	for i: range(3, 6) {
+	for i: 3..6 {
 		print(i);
 	}
-	for value: new [int; 5, 4, 3] {
+	for value: new [int](5, 4, 3) {
 		print(value);
 	}
 
@@ -150,7 +150,7 @@ struct ExampleStruct
 	age: int;
 }
 
-def pod_objects_example()
+func pod_objects_example()
 {
 	let someone = ExampleEnum:ME;
 	let somone_value: int = someone.value;
@@ -206,7 +206,7 @@ class Person: Living
 		return self->name;
 	}
 
-	internal
+	private
 	{
 		m_id: int = 6;
 
@@ -217,12 +217,12 @@ class Person: Living
 	}
 }
 
-def class_objects_examp()
+func class_objects_examp()
 {
 	let person0 = new Person();
 	var person1: Person = new Person("Timmy");
 	
-	var living: [Living let*] = new [Living let*; &person0];
+	var living: [Living let*] = new [Living let*](&person0);
 	living.push(&person1);
 
 	for alive: living {

@@ -7,14 +7,14 @@ internal
 	let only_this_module: int = 6;
 }
 
-def main()
+func main()
 {
-	let a = 5;
+	let a = 5.0;
 	let b = a * 2;
 	print(b);
 }
 
-def sqr(a: int): int
+func sqr(a: int): int
 {
 	return a * a;
 }

@@ -11,19 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\helper.cpp" />
     <ClCompile Include="source\lexer.cpp" />
-    <ClCompile Include="source\_main.cpp" />
-    <ClCompile Include="source\parser.cpp" />
+    <ClCompile Include="source\util.cpp" />
+    <ClCompile Include="source\_dawn.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\ast.h" />
-    <ClInclude Include="source\helper.h" />
-    <ClInclude Include="source\engine.h" />
     <ClInclude Include="source\lexer.h" />
-    <ClInclude Include="source\parser.h" />
     <ClInclude Include="source\syntax.h" />
     <ClInclude Include="source\t.h" />
+    <ClInclude Include="source\util.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -58,6 +54,16 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\out\</OutDir>
+    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\inter\</IntDir>
+    <TargetName>dawn</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\out\</OutDir>
+    <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\inter\</IntDir>
+    <TargetName>dawn</TargetName>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -67,6 +73,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)source\</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -84,6 +91,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)source\</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
