@@ -47,7 +47,7 @@ namespace dawn {
 	{
 		LanguageDef lang_def = LanguageDef::default_def();
 
-		Opt<String> tokenize(const StringView& source, Array<Token>& tokens) const;
+		Opt<String> split(const StringView& source, Array<Token>& tokens) const;
 
 	private:
 		Bool handle_line_comments(const StringView& source, Int& i) const;

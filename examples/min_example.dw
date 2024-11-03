@@ -9,9 +9,13 @@ internal
 
 func main()
 {
-	let a = 5.0;
-	let b = a * 2;
-	print(b);
+	let a: int = 5;
+	var b: int = 5;
+	var ptr: int let* = &a;
+	let pptr: int let* var* = &ptr;
+
+	let ref: int let& = a;
+	let ref2: int var& = b;
 }
 
 func sqr(a: int): int

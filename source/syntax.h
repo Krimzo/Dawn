@@ -64,7 +64,6 @@ namespace dawn {
 	inline constexpr StringView op_less_eq = L"<=";
 	inline constexpr StringView op_great_eq = L">=";
 	inline constexpr StringView op_address = L"&";
-	inline constexpr StringView op_access = L"->";
 }
 
 namespace dawn {
@@ -93,7 +92,7 @@ namespace dawn {
 namespace dawn {
 	inline const Map<String, Int> precedences = {
 		{ (String) sep_static_access, 1 },
-		{ (String) op_access, 2 },
+		{ (String) sep_access, 2 },
 		{ (String) op_address, 3 },
 		{ (String) op_not, 3 },
 		{ (String) op_pow, 4 },

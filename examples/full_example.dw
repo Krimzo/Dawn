@@ -154,8 +154,6 @@ func pod_objects_example()
 {
 	let someone = ExampleEnum:ME;
 	let somone_value: int = someone.value;
-
-	let object0 = ExampleStruct("John", 16);
 	let object1 = ExampleStruct{ age: 12, name: "Billy" };
 }
 
@@ -177,18 +175,18 @@ class Person: Living
 
 	init(name: string)
 	{
-		self->name = name;
+		self.name = name;
 		print("Created person \{name}.");
 	}
 
-	deinit
+	deinit()
 	{
 		print("Removed person \{name}.");
 	}
 
 	implement get_age(): int
 	{
-		return self->age;
+		return self.age;
 	}
 
 	var myself_var_method(): Person var*
@@ -203,7 +201,7 @@ class Person: Living
 
 	let who(): string
 	{
-		return self->name;
+		return self.name;
 	}
 
 	private
@@ -226,7 +224,7 @@ func class_objects_examp()
 	living.push(&person1);
 
 	for alive: living {
-		let age = alive->get_age();
+		let age = alive.get_age();
 		print(age);
 	}
 }

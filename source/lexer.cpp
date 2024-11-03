@@ -80,7 +80,6 @@ dawn::LanguageDef dawn::LanguageDef::default_def()
 		(String) op_less_eq,
 		(String) op_great_eq,
 		(String) op_address,
-		(String) op_access,
 	};
 	result.separators = {
 		(String) sep_assign,
@@ -104,7 +103,7 @@ dawn::LanguageDef dawn::LanguageDef::default_def()
 	return result;
 }
 
-dawn::Opt<dawn::String> dawn::Lexer::tokenize(const StringView& source, Array<Token>& tokens) const
+dawn::Opt<dawn::String> dawn::Lexer::split(const StringView& source, Array<Token>& tokens) const
 {
 	Int line_counter = 1;
 	for (Int i = 0; i < (Int) source.size(); i++) {
@@ -234,7 +233,7 @@ dawn::Opt<dawn::String> dawn::Lexer::tokenize(const StringView& source, Array<To
 
 		return { error_helper(line_counter, source[i]) };
 	}
-	return {};
+	return std::nullopt;
 }
 
 dawn::Bool dawn::Lexer::handle_line_comments(const StringView& source, Int& i) const
@@ -264,11 +263,11 @@ dawn::Bool dawn::Lexer::handle_multiline_comments(const StringView& source, Int&
 {
 	const Int old_line_counter = line_counter;
 	if (lang_def.multiline_comment.first.contains(source[i])) {
-		String left_holder = {};
+		String left_holder;
 		for (; i < (Int) source.size(); i++) {
 			left_holder.push_back(source[i]);
 			if (left_holder == lang_def.multiline_comment.first) {
-				String right_holder = {};
+				String right_holder;
 				for (; i < (Int) source.size(); i++) {
 					const Bool had_contained = !right_holder.empty() && lang_def.multiline_comment.second.contains(right_holder);
 					right_holder.push_back(source[i]);
