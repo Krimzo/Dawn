@@ -4,5 +4,5 @@
 
 
 namespace dawn {
-	String read_file(const StringView& path);
+	String read_file(const StringRef& path);
 }

@@ -1,24 +1,14 @@
 module min_example;
 
-let something_global: int = 12;
+/*
 
-internal
-{
-	let only_this_module: int = 6;
+var ____wwasd = 12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2);
+
+internal {
+	var only_this_module: float = 6;
 }
 
-func main()
-{
-	let a: int = 5;
-	var b: int = 5;
-	var ptr: int let* = &a;
-	let pptr: int let* var* = &ptr;
-
-	let ref: int let& = a;
-	let ref2: int var& = b;
+func main() {
 }
 
-func sqr(a: int): int
-{
-	return a * a;
-}
+*/

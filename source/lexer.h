@@ -2,6 +2,7 @@
 
 #include "syntax.h"
 
+
 namespace dawn {
 	enum struct TokenType
 	{
@@ -14,6 +15,8 @@ namespace dawn {
 		OPERATOR,
 		KEYWORD,
 	};
+
+	std::wostream& operator<<(std::wostream& stream, const TokenType type);
 }
 
 namespace dawn {
@@ -23,6 +26,8 @@ namespace dawn {
 		String value;
 		Int line_number = 0;
 	};
+
+	std::wostream& operator<<(std::wostream& stream, const Token& token);
 }
 
 namespace dawn {
@@ -31,7 +36,7 @@ namespace dawn {
 		Set<String> keywords;
 		Set<String> operators;
 		Set<String> separators;
-		String identifier_extender;
+		String identifier_separator;
 		String decimal_separator;
 		String literal_char;
 		String literal_string;
@@ -47,20 +52,38 @@ namespace dawn {
 	{
 		LanguageDef lang_def = LanguageDef::default_def();
 
-		Opt<String> split(const StringView& source, Array<Token>& tokens) const;
+		Opt<String> tokenize(const StringRef& source, Array<Token>& tokens);
 
 	private:
-		Bool handle_line_comments(const StringView& source, Int& i) const;
-		Bool handle_multiline_comments(const StringView& source, Int& i, Int& line_counter) const;
+		Bool is_space(const StringRef& source, Int i);
+		void extract_space(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
 
-		Bool iskey(const StringView& data) const;
-		Bool isop(const StringView& data) const;
-		Bool issep(const StringView& value) const;
+		Bool is_comment(const StringRef& source, Int i);
+		void extract_comment(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
+
+		Bool is_mlcomment(const StringRef& source, Int i);
+		void extract_mlcomment(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
+
+		Bool is_word(const StringRef& source, Int i);
+		void extract_word(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
+
+		Bool is_number(const StringRef& source, Int i);
+		void extract_number(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
+
+		Bool is_char(const StringRef& source, Int i);
+		void extract_char(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
+
+		Bool is_string(const StringRef& source, Int i);
+		void extract_string(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
+
+		Bool is_operator(const StringRef& data, Int i);
+		void extract_operator(const StringRef& data, Array<Token>& tokens, Int& lines, Int& i);
+
+		Bool is_separator(const StringRef& value, Int i);
+		void extract_separator(const StringRef& value, Array<Token>& tokens, Int& lines, Int& i);
 	};
 }
 
 namespace dawn {
-	bool operator==(dawn::Char lhs, const dawn::StringView& rhs);
-	std::wostream& operator<<(std::wostream& stream, const dawn::TokenType type);
-	std::wostream& operator<<(std::wostream& stream, const dawn::Token& token);
+	bool operator==(Char lhs, const StringRef& rhs);
 }

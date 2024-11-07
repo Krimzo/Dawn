@@ -58,9 +58,10 @@ func vars_examp()
 // Collection example
 func collections_examp()
 {
-	let data0: [int] = new [int](1, 2, 3);                                   // array
-	let data1: (int) = new (int)(1, 2, 3);                                   // set
-	let data2: {int:string} = new {int:string}(1:"one", 2:"two", 3:"three"); // map
+	int{5}; // init
+	int(); // cast
+	int[10]; // array
+	<< yield 5 + 2; >>;
 }
 
 // Function example
@@ -78,10 +79,10 @@ func *(left: string, right: int): string
 func if_examp()
 {
 	let a = (5 + 1.0) * 2.;
-	if a < 10.0 {
+	if a < 10.0; {
 		print("res = \{sqr(a)}");
 	}
-	elif a <= 15.0 {
+	elif a <= 15.0; {
 		print("it's less or equal to 15");
 	}
 	else {
@@ -93,7 +94,7 @@ func if_examp()
 func switch_examp()
 {
 	let value = 16;
-	switch value {
+	switch value; {
 		case 3 {
 			print("it's 3");
 		}
@@ -116,7 +117,7 @@ func loops_examp()
 	for i: 3..6 {
 		print(i);
 	}
-	for value: new [int](5, 4, 3) {
+	for value: [int](5, 4, 3) {
 		print(value);
 	}
 
@@ -165,26 +166,10 @@ interface Living
 
 class Person: Living
 {
-	name: string = "nobody";
-	age: int = 0;
+	name: string;
+	age: int;
 
-	init()
-	{
-		print("Nobody created.");
-	}
-
-	init(name: string)
-	{
-		self.name = name;
-		print("Created person \{name}.");
-	}
-
-	deinit()
-	{
-		print("Removed person \{name}.");
-	}
-
-	implement get_age(): int
+	impl get_age(): int
 	{
 		return self.age;
 	}
@@ -204,9 +189,9 @@ class Person: Living
 		return self.name;
 	}
 
-	private
+	internal
 	{
-		m_id: int = 6;
+		m_id: int;
 
 		let my_private_class_method()
 		{
@@ -217,10 +202,10 @@ class Person: Living
 
 func class_objects_examp()
 {
-	let person0 = new Person();
-	var person1: Person = new Person("Timmy");
+	let person0 = Person{};
+	var person1: Person = Person{};
 	
-	var living: [Living let*] = new [Living let*](&person0);
+	var living: [Living let*] = [Living let*](&person0);
 	living.push(&person1);
 
 	for alive: living {

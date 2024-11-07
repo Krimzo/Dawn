@@ -1,5 +1,6 @@
-#include "engine.h"
 #include "util.h"
+#include "lexer.h"
+#include "parser.h"
 
 using namespace dawn;
 
@@ -9,29 +10,23 @@ int main()
 	
 	Lexer lexer;
 	Parser parser;
-	Engine engine;
 
 	Array<Token> tokens;
-	if (auto error = lexer.split(source, tokens)) {
+	if (auto error = lexer.tokenize(source, tokens)) {
 		std::wcout << error.value() << '\n';
 		return 1;
 	}
-#if 0
+#if 1
 	for (const auto& token : tokens) {
 		std::wcout << token << '\n';
 	}
+	return 0;
 #endif
 
-	Tree tree;
-	if (auto error = parser.parse(tokens, tree)) {
+	Module module;
+	if (auto error = parser.parse(tokens, module)) {
 		std::wcout << error.value() << '\n';
 		return 2;
-	}
-
-	Any result;
-	if (auto error = engine.eval(tree, result)) {
-		std::wcout << error.value() << '\n';
-		return 3;
 	}
 
 	return 0;
