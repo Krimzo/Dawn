@@ -1,88 +1,76 @@
-// Module example
+// Module
 module full_example;
 
-internal
-{
+// Internal
+internal {
 	let only_for_module = 6;
 
-	func my_private_module_function()
-	{
+	func my_private_function() {
 		print("super private");
 	}
 }
 
-// Primitive example
-func primitives_examp()
-{
-	// Integers
-	let i0:  int8 = -10; // [                -128,                 127]
-	let i1: int16 = -20; // [              -32768,               32767]
-	let i2: int32 = -30; // [         -2147483648,          2147483647]
-	let i3: int64 = -40; // [-9223372036854775808, 9223372036854775807]
-	// int = int64
+// Primitive
+func primitives_examp() {
+	// Integer
+	let i: int = -10; // [-9223372036854775808, 9223372036854775807]
 
-	// Unsigned integers
-	let u0:  uint8 = 10; // [0,                  255]
-	let u1: uint16 = 20; // [0,                65535]
-	let u2: uint32 = 30; // [0,           4294967295]
-	let u3: uint64 = 40; // [0, 18446744073709551615]
-	// uint = uint64
-
-	// Floating
-	let f0: float32 = 6.0; // [        1.175494351E-38,         3.402823466E+38]
-	let f1: float64 = 6.0; // [2.2250738585072014E-308, 1.7976931348623158E+308]
-	// float = float64
+	// Float
+	let f: float = 6.0; // [2.2250738585072014E-308, 1.7976931348623158E+308]
 
 	// Text
 	let t0: char = 'd';
 	let t1: string = "nice";
 
-	// Bools
+	// Bool
 	let b0: bool = false;
-	let b1: bool = !b0 && u0 > 5;
+	let b1: bool = !b0 && i >= 0;
 }
 
-// Variable example
+// Variable
 let A = 16;
 var B: float = 23.0;
 
-func vars_examp()
-{
-	let a = 5;                 // implicit type, constant, int, 5
-	var b: int = 6;            // explicit type, variable, int, 6
-	let c: int var* = &b;      // explicit type, constant, int variable pointer, address from b
-	let d: float = float(*c);  // explicit type, constant, float, casted value from dereferenced pointer
-	var e: float let* = null;  // explicit type, variable, float constant pointer, null
+func vars_examp() {
+	let a = 5;                // implicit type, constant, int, 5
+	var b: int = 6;           // explicit type, variable, int, 6
+	let c: int var* = &b;     // explicit type, constant, int variable pointer, address from b
+	let d: float = float(*c); // explicit type, constant, float, casted value from dereferenced pointer
+	var e: float let* = null; // explicit type, variable, float constant pointer, null
 }
 
-// Collection example
-func collections_examp()
-{
-	int{5}; // init
-	int(); // cast
-	int[10]; // array
-	<< yield 5 + 2; >>;
+// Array
+func array_examp() {
+	let data0: int[] = int[10];			// init array, 10 elements, values 0
+	let data1: int[] = int[5; 17];		// init array,  5 elements, values 17
+	let data2: int[] = int[?; 4, 5, 6]; // init array,  3 elements, values [4, 5, 6]
 }
 
-// Function example
-func sqr(a: int): int
-{
+// Bracket
+func collections_examp() {
+	T{};            // empty init, all zeros
+	T();            // cast to T
+	T[];            // array type
+	<< yield 0; >>; // yield scope
+}
+
+// Function
+func sqr(a: int): int {
 	return a * a;
 }
 
-func *(left: string, right: int): string
-{
-	return left.repeat(right);
+// Operator
+func *(left: string, right: int): string {
+	return left->repeat(right);
 }
 
-// If example
-func if_examp()
-{
+// Logic
+func logic_examp() {
 	let a = (5 + 1.0) * 2.;
-	if a < 10.0; {
-		print("res = \{sqr(a)}");
+	if a < 10.0 {
+		print("res = " + string(sqr(a)));
 	}
-	elif a <= 15.0; {
+	elif a <= 15.0 {
 		print("it's less or equal to 15");
 	}
 	else {
@@ -90,11 +78,10 @@ func if_examp()
 	}
 }
 
-// Switch example
-func switch_examp()
-{
+// Switch
+func switch_examp() {
 	let value = 16;
-	switch value; {
+	switch value {
 		case 3 {
 			print("it's 3");
 		}
@@ -107,109 +94,96 @@ func switch_examp()
 	}
 }
 
-// Loop example
-func loops_examp()
-{
-	// For
-	for i: 0..5 {
+// For
+func for_examp() {
+	for i: 0~5 {
 		print(i);
 	}
-	for i: 3..6 {
+	for i: 3~6 {
 		print(i);
 	}
-	for value: [int](5, 4, 3) {
+	for value: int[5; 10] {
 		print(value);
 	}
+}
 
-	// While
+// While
+func while_examp() {
 	var counter = 0;
 	while counter < 10 {
 		if counter == 6 {
-			continue;
+			break;
 		}
 		counter += 1;
 	}
+}
 
-	// Loop
+// Loop
+func loop_examp() {
 	loop {
 		print("One loop run");
 		break;
 	}
 }
 
-// POD object example
-enum ExampleEnum: int
-{
-	ME(0);
-	YOU(1);
-	THEM(2);
+// Enum
+enum ExampleEnum: float {
+	ME(0.0);
+	YOU(1.1);
+	THEM(2.2);
 }
 
-struct ExampleStruct
-{
-	name: string;
-	age: int;
-}
-
-func pod_objects_example()
-{
+func enum_examp() {
 	let someone = ExampleEnum:ME;
-	let somone_value: int = someone.value;
-	let object1 = ExampleStruct{ age: 12, name: "Billy" };
+	let someone_else: ExampleEnumm = ExampleEnum:THEM;
+	let value: float = someone->value;
 }
 
-// Class object example
-interface Living
-{
+// Layer
+layer Living {
 	let get_age(): int;
 }
 
-class Person: Living
-{
+// Struct
+struct Person: Living {
 	name: string;
 	age: int;
 
-	impl get_age(): int
-	{
-		return self.age;
+	impl get_age(): int {
+		return self->age;
 	}
 
-	var myself_var_method(): Person var*
-	{
+	var self_var_method(): Person var* {
 		return self;
 	}
 
-	let myself_let_method(): Person let*
-	{
+	let self_let_method(): Person let* {
 		return self;
 	}
 
-	let who(): string
-	{
-		return self.name;
+	let who(): string {
+		return self->name;
 	}
 
-	internal
-	{
+	internal {
 		m_id: int;
 
-		let my_private_class_method()
-		{
-			print("It's lonely here.");
+		let my_private_method() {
+			print("It's lonely in here.");
 		}
 	}
 }
 
-func class_objects_examp()
-{
+func struct_examp() {
 	let person0 = Person{};
-	var person1: Person = Person{};
+	var person1: Person = Person{ name: "Krim", age: 23 };
 	
-	var living: [Living let*] = [Living let*](&person0);
-	living.push(&person1);
+	var living: Living let* [] = Living let* [0];
+	living->push(&person0);
+	living->push(&person1);
 
 	for alive: living {
-		let age = alive.get_age();
+		let age = alive->get_age();
 		print(age);
 	}
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "t.h"
+#include "util.h"
 
 
 namespace dawn {
@@ -12,7 +12,6 @@ namespace dawn {
 	inline constexpr StringRef kw_yield = L"yield";
 	inline constexpr StringRef kw_let = L"let";
 	inline constexpr StringRef kw_var = L"var";
-	inline constexpr StringRef kw_null = L"null";
 	inline constexpr StringRef kw_if = L"if";
 	inline constexpr StringRef kw_else = L"else";
 	inline constexpr StringRef kw_elif = L"elif";
@@ -25,10 +24,9 @@ namespace dawn {
 	inline constexpr StringRef kw_continue = L"continue";
 	inline constexpr StringRef kw_break = L"break";
 	inline constexpr StringRef kw_enum = L"enum";
+	inline constexpr StringRef kw_layer = L"layer";
 	inline constexpr StringRef kw_struct = L"struct";
-	inline constexpr StringRef kw_interface = L"interface";
 	inline constexpr StringRef kw_impl = L"impl";
-	inline constexpr StringRef kw_class = L"class";
 	inline constexpr StringRef kw_self = L"self";
 	inline constexpr StringRef kw_bool = L"bool";
 	inline constexpr StringRef kw_int = L"int";
@@ -37,6 +35,7 @@ namespace dawn {
 	inline constexpr StringRef kw_string = L"string";
 	inline constexpr StringRef kw_true = L"true";
 	inline constexpr StringRef kw_false = L"false";
+	inline constexpr StringRef kw_null = L"null";
 }
 
 namespace dawn {
@@ -46,54 +45,53 @@ namespace dawn {
 	inline constexpr StringRef op_div = L"/";
 	inline constexpr StringRef op_pow = L"^";
 	inline constexpr StringRef op_mod = L"%";
-	inline constexpr StringRef op_add_as = L"+=";
-	inline constexpr StringRef op_sub_as = L"-=";
-	inline constexpr StringRef op_mul_as = L"*=";
-	inline constexpr StringRef op_div_as = L"/=";
-	inline constexpr StringRef op_pow_as = L"^=";
-	inline constexpr StringRef op_mod_as = L"%=";
+	inline constexpr StringRef op_addas = L"+=";
+	inline constexpr StringRef op_subas = L"-=";
+	inline constexpr StringRef op_mulas = L"*=";
+	inline constexpr StringRef op_divas = L"/=";
+	inline constexpr StringRef op_powas = L"^=";
+	inline constexpr StringRef op_modas = L"%=";
 	inline constexpr StringRef op_not = L"!";
 	inline constexpr StringRef op_and = L"&&";
 	inline constexpr StringRef op_or = L"||";
 	inline constexpr StringRef op_eq = L"==";
-	inline constexpr StringRef op_not_eq = L"!=";
+	inline constexpr StringRef op_neq = L"!=";
 	inline constexpr StringRef op_less = L"<";
 	inline constexpr StringRef op_great = L">";
-	inline constexpr StringRef op_less_eq = L"<=";
-	inline constexpr StringRef op_great_eq = L">=";
+	inline constexpr StringRef op_lesseq = L"<=";
+	inline constexpr StringRef op_greateq = L">=";
+	inline constexpr StringRef op_assign = L"=";
+	inline constexpr StringRef op_split = L",";
 	inline constexpr StringRef op_address = L"&";
+	inline constexpr StringRef op_access = L"->";
+	inline constexpr StringRef op_link = L":";
+	inline constexpr StringRef op_range = L"~";
+	inline constexpr StringRef op_unknown = L"?";
+	inline constexpr StringRef op_expr_opn = L"(";
+	inline constexpr StringRef op_expr_cls = L")";
+	inline constexpr StringRef op_scope_opn = L"{";
+	inline constexpr StringRef op_scope_cls = L"}";
+	inline constexpr StringRef op_array_opn = L"[";
+	inline constexpr StringRef op_array_cls = L"]";
+	inline constexpr StringRef op_yield_opn = L"<<";
+	inline constexpr StringRef op_yield_cls = L">>";
+	inline constexpr StringRef op_expr_end = L";";
 }
 
 namespace dawn {
-	inline constexpr StringRef sep_assign = L"=";
-	inline constexpr StringRef sep_split = L",";
-	inline constexpr StringRef sep_end = L";";
-	inline constexpr StringRef sep_access = L".";
-	inline constexpr StringRef sep_static_access = L":";
-	inline constexpr StringRef sep_expr_open = L"(";
-	inline constexpr StringRef sep_expr_close = L")";
-	inline constexpr StringRef sep_scope_open = L"{";
-	inline constexpr StringRef sep_scope_close = L"}";
-	inline constexpr StringRef sep_array_open = L"[";
-	inline constexpr StringRef sep_array_close = L"]";
-	inline constexpr StringRef sep_yield_open = L"<<";
-	inline constexpr StringRef sep_yield_close = L">>";
-}
-
-namespace dawn {
-	inline constexpr StringRef misc_iden_sep = L"_";
-	inline constexpr StringRef misc_dec_sep = L".";
-	inline constexpr StringRef misc_lit_char = L"'";
-	inline constexpr StringRef misc_lit_str = L"\"";
-	inline constexpr StringRef misc_line_comm = L"//";
-	inline constexpr Pair<StringRef, StringRef> misc_multiline_comm = { L"/*", L"*/" };
+	inline constexpr StringRef sep_number = L".";
+	inline constexpr StringRef sep_identifier = L"_";
+	inline constexpr StringRef lit_char = L"'";
+	inline constexpr StringRef lit_string = L"\"";
+	inline constexpr StringRef comm_line = L"//";
+	inline constexpr Pair<StringRef, StringRef> comm_multiline = { L"/*", L"*/" };
 }
 
 namespace dawn {
 	inline const Map<String, Int> precedences
 	{
-		{ (String) sep_static_access, 1 },
-		{ (String) sep_access, 2 },
+		{ (String) op_link, 1 },
+		{ (String) op_access, 2 },
 		{ (String) op_address, 3 },
 		{ (String) op_not, 3 },
 		{ (String) op_pow, 4 },
@@ -104,19 +102,19 @@ namespace dawn {
 		{ (String) op_sub, 6 },
 		{ (String) op_less, 7 },
 		{ (String) op_great, 7 },
-		{ (String) op_less_eq, 7 },
-		{ (String) op_great_eq, 7 },
+		{ (String) op_lesseq, 7 },
+		{ (String) op_greateq, 7 },
 		{ (String) op_eq, 8 },
-		{ (String) op_not_eq, 8 },
+		{ (String) op_neq, 8 },
 		{ (String) op_and, 9 },
 		{ (String) op_or, 10 },
-		{ (String) sep_assign, 11 },
-		{ (String) op_add_as, 11 },
-		{ (String) op_sub_as, 11 },
-		{ (String) op_mul_as, 11 },
-		{ (String) op_div_as, 11 },
-		{ (String) op_pow_as, 11 },
-		{ (String) op_mod_as, 11 },
-		{ (String) sep_split, 12 },
+		{ (String) op_assign, 11 },
+		{ (String) op_addas, 11 },
+		{ (String) op_subas, 11 },
+		{ (String) op_mulas, 11 },
+		{ (String) op_divas, 11 },
+		{ (String) op_powas, 11 },
+		{ (String) op_modas, 11 },
+		{ (String) op_split, 12 },
 	};
 }

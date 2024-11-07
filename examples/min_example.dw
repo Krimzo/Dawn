@@ -1,14 +1,11 @@
 module min_example;
 
-/*
-
-var ____wwasd = 12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2);
+let a = 12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2);
 
 internal {
-	var only_this_module: float = 6;
+	var b: float = 6;
 }
 
-func main() {
+func main(args: string[]) {
+	print(a + b * 2);
 }
-
-*/

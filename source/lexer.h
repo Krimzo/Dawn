@@ -4,16 +4,39 @@
 
 
 namespace dawn {
+	struct LexError
+	{
+		String msg;
+
+		template<typename... Args>
+		LexError(Int line_number, Char c, const Args&... args)
+		{
+			StringStream stream;
+			stream << "Lex error at line [" << line_number
+				<< "] and char [" << from_escaping(c) << "]: ";
+			(stream << ... << args);
+			msg = stream.str();
+		}
+
+		inline operator const String& () const
+		{
+			return msg;
+		}
+	};
+
+	std::wostream& operator<<(std::wostream& stream, const LexError& error);
+}
+
+namespace dawn {
 	enum struct TokenType
 	{
-		INT = 0,
+		INTEGER = 0,
 		FLOAT,
 		CHAR,
 		STRING,
 		IDENTIFIER,
-		SEPARATOR,
-		OPERATOR,
 		KEYWORD,
+		OPERATOR,
 	};
 
 	std::wostream& operator<<(std::wostream& stream, const TokenType type);
@@ -35,55 +58,47 @@ namespace dawn {
 	{
 		Set<String> keywords;
 		Set<String> operators;
-		Set<String> separators;
-		String identifier_separator;
-		String decimal_separator;
+		String separator_identifier;
+		String separator_number;
 		String literal_char;
 		String literal_string;
-		String line_comment;
-		Pair<String, String> multiline_comment;
+		String comment_line;
+		Pair<String, String> comment_multiline;
 
-		static LanguageDef default_def();
+		static LanguageDef dawn();
 	};
 }
 
 namespace dawn {
 	struct Lexer
 	{
-		LanguageDef lang_def = LanguageDef::default_def();
+		LanguageDef lang_def = LanguageDef::dawn();
 
-		Opt<String> tokenize(const StringRef& source, Array<Token>& tokens);
+		Opt<LexError> tokenize(const StringRef& source, Array<Token>& tokens);
 
 	private:
 		Bool is_space(const StringRef& source, Int i);
-		void extract_space(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
+		Opt<LexError> extract_space(const StringRef& source, Array<Token>& tokens, Int& line, Int& i);
 
 		Bool is_comment(const StringRef& source, Int i);
-		void extract_comment(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
+		Opt<LexError> extract_comment(const StringRef& source, Array<Token>& tokens, Int& line, Int& i);
 
 		Bool is_mlcomment(const StringRef& source, Int i);
-		void extract_mlcomment(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
+		Opt<LexError> extract_mlcomment(const StringRef& source, Array<Token>& tokens, Int& line, Int& i);
 
 		Bool is_word(const StringRef& source, Int i);
-		void extract_word(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
+		Opt<LexError> extract_word(const StringRef& source, Array<Token>& tokens, Int& line, Int& i);
 
 		Bool is_number(const StringRef& source, Int i);
-		void extract_number(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
+		Opt<LexError> extract_number(const StringRef& source, Array<Token>& tokens, Int& line, Int& i);
 
 		Bool is_char(const StringRef& source, Int i);
-		void extract_char(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
+		Opt<LexError> extract_char(const StringRef& source, Array<Token>& tokens, Int& line, Int& i);
 
 		Bool is_string(const StringRef& source, Int i);
-		void extract_string(const StringRef& source, Array<Token>& tokens, Int& lines, Int& i);
+		Opt<LexError> extract_string(const StringRef& source, Array<Token>& tokens, Int& line, Int& i);
 
-		Bool is_operator(const StringRef& data, Int i);
-		void extract_operator(const StringRef& data, Array<Token>& tokens, Int& lines, Int& i);
-
-		Bool is_separator(const StringRef& value, Int i);
-		void extract_separator(const StringRef& value, Array<Token>& tokens, Int& lines, Int& i);
+		Bool is_operator(const StringRef& source, Int i);
+		Opt<LexError> extract_operator(const StringRef& source, Array<Token>& tokens, Int& line, Int& i);
 	};
-}
-
-namespace dawn {
-	bool operator==(Char lhs, const StringRef& rhs);
 }

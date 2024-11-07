@@ -4,15 +4,15 @@
 
 
 namespace dawn {
-	struct Error
+	struct ParseError
 	{
 		String msg;
 
 		template<typename... Args>
-		Error(const Token& token, const Args&... args)
+		ParseError(const Token& token, const Args&... args)
 		{
 			StringStream stream;
-			stream << "Error at token " << token << ": ";
+			stream << "Parse error at token " << token << ": ";
 			(stream << ... << args);
 			msg = stream.str();
 		}
@@ -23,7 +23,7 @@ namespace dawn {
 		}
 	};
 
-	std::wostream& operator<<(std::wostream& stream, const Error& error);
+	std::wostream& operator<<(std::wostream& stream, const ParseError& error);
 }
 
 namespace dawn {
@@ -116,19 +116,6 @@ namespace dawn {
 }
 
 namespace dawn {
-	struct StructType : Type
-	{
-		Map<String, String> fields;
-	};
-
-	struct StructValue : Value
-	{
-		String struct_type;
-		Map<String, Any> members;
-	};
-}
-
-namespace dawn {
 	struct MethodDecl
 	{
 		String name;
@@ -137,29 +124,28 @@ namespace dawn {
 		String return_type;
 	};
 
-	struct MethodDef
+	struct Method
 	{
 		MethodDecl decl;
 		Ref<Node> body;
 	};
 
-	struct InterfaceType : Type
+	struct LayerType : Type
 	{
 		Map<String, MethodDecl> methods;
 	};
 
-	struct ClassType : Type
+	struct StructType : Type
 	{
-		String name;
 		Map<String, String> fields_public;
-		Map<String, Ref<MethodDef>> methods_public;
+		Map<String, Ref<Method>> methods_public;
 		Map<String, String> fields_internal;
-		Map<String, Ref<MethodDef>> methods_internal;
+		Map<String, Ref<Method>> methods_internal;
 	};
 
-	struct ClassValue : Value
+	struct StructValue : Value
 	{
-		String class_type;
+		String struct_type;
 		Map<String, Any> members_public;
 		Map<String, Any> members_internal;
 	};
@@ -189,9 +175,8 @@ namespace dawn {
 		Map<String, Variable> variables;
 		Map<String, Function> functions;
 		Map<String, EnumType> enums;
+		Map<String, LayerType> layers;
 		Map<String, StructType> structs;
-		Map<String, InterfaceType> interfaces;
-		Map<String, ClassType> classes;
 	};
 }
 
@@ -207,31 +192,30 @@ namespace dawn {
 namespace dawn {
 	struct Parser
 	{
-		Opt<Error> parse(const Array<Token>& tokens, Module& module);
+		Opt<ParseError> parse(const Array<Token>& tokens, Module& module);
 
 	private:
 		bool m_is_module_internal = false;
-		bool m_is_class_internal = false;
+		bool m_is_struct_internal = false;
 
-		Opt<Error> parse_module_module(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
-		Opt<Error> parse_module_internal(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
-		Opt<Error> parse_module_enum(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
-		Opt<Error> parse_module_struct(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
-		Opt<Error> parse_module_interface(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
-		Opt<Error> parse_module_class(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
-		Opt<Error> parse_module_function(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
-		Opt<Error> parse_module_variable(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
+		Opt<ParseError> parse_module_module(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
+		Opt<ParseError> parse_module_internal(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
+		Opt<ParseError> parse_module_enum(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
+		Opt<ParseError> parse_module_layer(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
+		Opt<ParseError> parse_module_struct(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
+		Opt<ParseError> parse_module_function(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
+		Opt<ParseError> parse_module_variable(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
 
-		Opt<Error> parse_variable(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Variable& variable);
-		Opt<Error> parse_type(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, String& type);
-		Opt<Error> parse_expression(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Ref<Node>& tree);
+		Opt<ParseError> parse_variable(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Variable& variable);
+		Opt<ParseError> parse_type(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, String& type);
+		Opt<ParseError> parse_expression(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Ref<Node>& tree);
 
-		Opt<Error> extract_expression(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Array<Token>& tokens);
-		Opt<Error> find_least_precedence(const Array<Token>& tokens, Int& index);
-		Opt<Error> pure_expression(const Array<Token>& tokens, Ref<Node>& tree);
-		Opt<Error> expression_literal(const Token& token, Ref<Node>& tree);
-		Opt<Error> expression_identifier(const Token& token, Ref<Node>& tree);
-		Opt<Error> expression_keyword(const Token& token, Ref<Node>& tree);
+		Opt<ParseError> extract_expression(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Array<Token>& tokens);
+		Opt<ParseError> find_least_precedence(const Array<Token>& tokens, Int& index);
+		Opt<ParseError> pure_expression(const Array<Token>& tokens, Ref<Node>& tree);
+		Opt<ParseError> expression_literal(const Token& token, Ref<Node>& tree);
+		Opt<ParseError> expression_identifier(const Token& token, Ref<Node>& tree);
+		Opt<ParseError> expression_keyword(const Token& token, Ref<Node>& tree);
 	};
 }
 
@@ -285,7 +269,7 @@ namespace dawn {
 		Ref<Node> evaluate() const override;
 	};
 
-	Opt<Error> create_unary_node(const Token& token, Ref<UnaryNode>& node);
+	Opt<ParseError> create_unary_node(const Token& token, Ref<UnaryNode>& node);
 }
 
 namespace dawn {
@@ -297,7 +281,7 @@ namespace dawn {
 		virtual Ref<Node> evaluate() = 0;
 	};
 
-	struct OperatorNodeStaticAccess : OperatorNode
+	struct OperatorNodeLink : OperatorNode
 	{
 		Ref<Node> evaluate() override;
 	};
@@ -427,5 +411,5 @@ namespace dawn {
 		Ref<Node> evaluate() override;
 	};
 
-	Opt<Error> create_operator_node(const Token& token, Ref<OperatorNode>& node);
+	Opt<ParseError> create_operator_node(const Token& token, Ref<OperatorNode>& node);
 }
