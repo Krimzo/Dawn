@@ -24,7 +24,10 @@ std::wostream& dawn::operator<<(std::wostream& stream, const TokenType type)
 
 std::wostream& dawn::operator<<(std::wostream& stream, const Token& token)
 {
-	stream << "[type=" << token.type << ", value=" << token.value << ", line=" << token.line_number << "]";
+	const Color color = to_color(token.type);
+	stream << "[(" << ColoredText{ color, token.type } <<
+		") {" << ColoredText{ color, token.value } <<
+		"} <" << ColoredText{ color, token.line_number } << ">]";
 	return stream;
 }
 

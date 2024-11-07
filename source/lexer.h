@@ -39,6 +39,21 @@ namespace dawn {
 		OPERATOR,
 	};
 
+	constexpr Color to_color(TokenType type)
+	{
+		switch (type)
+		{
+		case TokenType::INTEGER: return { 181, 206, 168 };
+		case TokenType::FLOAT: return { 195, 206, 168 };
+		case TokenType::CHAR: return { 214, 157, 133 };
+		case TokenType::STRING: return { 214, 133, 133 };
+		case TokenType::IDENTIFIER: return { 86, 212, 214 };
+		case TokenType::KEYWORD: return { 86, 156, 214 };
+		case TokenType::OPERATOR: return { 255, 255, 255 };
+		}
+		return { 204, 204, 204 };
+	}
+
 	std::wostream& operator<<(std::wostream& stream, const TokenType type);
 }
 

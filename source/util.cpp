@@ -1,6 +1,31 @@
 #include "util.h"
 
 
+#ifdef _WIN32
+#include <windows.h>
+static const HANDLE _console_init = []
+{
+	DWORD mode = 0;
+	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	GetConsoleMode(handle, &mode);
+	SetConsoleMode(handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+	return handle;
+}();
+#endif
+
+std::wostream& dawn::operator<<(std::wostream& stream, const Color& color)
+{
+	stream << "\033[38;2;" << Int(color.r) << ";" << Int(color.g) << ";" << Int(color.b) << "m";
+	return stream;
+}
+
+std::wostream& dawn::operator<<(std::wostream& stream, const ColoredText& colored_text)
+{
+	static constexpr Color DEFAULT_COLOR = { 204, 204, 204 };
+	stream << colored_text.color << colored_text.text << DEFAULT_COLOR;
+	return stream;
+}
+
 dawn::Char dawn::to_escaping(const Char c)
 {
 	switch (c)
