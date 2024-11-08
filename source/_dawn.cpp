@@ -16,7 +16,7 @@ int main()
 		std::wcout << error.value() << '\n';
 		return 1;
 	}
-#if 1
+#if 0
 	for (const auto& token : tokens) {
 		std::wcout << token << '\n';
 	}

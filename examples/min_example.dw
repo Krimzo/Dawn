@@ -1,13 +1,19 @@
 module min_example;
 
-let a = 12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2);
+let a: int = 12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2);
+var b: int let& = &a;
+let c: int let& var& = &b;
+let e: ~ = ~a+3;
+//let f: int[] = int[5];
+let g: int[] let& = &f;
+//var h: float = float(a);
 
-internal {
-	var b: float = 6;
-	let c = '\\';
-	let s = "12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2)";
-}
-
-func main(args: string[]) {
-	print(a + b * 2);
-}
+//internal {
+//	var b: float = 6;
+//	let c = '\\';
+//	let s = "12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2)";
+//}
+//
+//func main(args: string[]) {
+//	print(a + b * 2);
+//}

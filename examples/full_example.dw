@@ -34,9 +34,9 @@ var B: float = 23.0;
 func vars_examp() {
 	let a = 5;                // implicit type, constant, int, 5
 	var b: int = 6;           // explicit type, variable, int, 6
-	let c: int var* = &b;     // explicit type, constant, int variable pointer, address from b
+	let c: int var& = &b;     // explicit type, constant, int variable pointer, address from b
 	let d: float = float(*c); // explicit type, constant, float, casted value from dereferenced pointer
-	var e: float let* = null; // explicit type, variable, float constant pointer, null
+	var e: float let& = null; // explicit type, variable, float constant pointer, null
 }
 
 // Array
@@ -96,7 +96,7 @@ func switch_examp() {
 
 // For
 func for_examp() {
-	for i: 0~5 {
+	for i: ~5 {
 		print(i);
 	}
 	for i: 3~6 {
@@ -153,11 +153,11 @@ struct Person: Living {
 		return self->age;
 	}
 
-	var self_var_method(): Person var* {
+	var self_var_method(): Person var& {
 		return self;
 	}
 
-	let self_let_method(): Person let* {
+	let self_let_method(): Person let& {
 		return self;
 	}
 
@@ -178,7 +178,7 @@ func struct_examp() {
 	let person0 = Person{};
 	var person1: Person = Person{ name: "Krim", age: 23 };
 	
-	var living: Living let* [] = Living let* [0];
+	var living: Living let& [] = Living let& [0];
 	living->push(&person0);
 	living->push(&person1);
 

@@ -7,6 +7,21 @@ std::wostream& dawn::operator<<(std::wostream& stream, const ParseError& error)
 	return stream;
 }
 
+dawn::Bool dawn::Space::contains_id(const StringRef& id) const
+{
+	const String id_str{ id };
+	return variables.contains(id_str) ||
+		functions.contains(id_str) ||
+		enums.contains(id_str) ||
+		layers.contains(id_str) ||
+		structs.contains(id_str);
+}
+
+dawn::Bool dawn::Module::contains_id(const StringRef& id) const
+{
+	return space_public.contains_id(id) || space_internal.contains_id(id);
+}
+
 dawn::Opt<dawn::ParseError> dawn::Parser::parse(const Array<Token>& tokens, Module& module)
 {
 	auto it = tokens.begin();
@@ -15,8 +30,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse(const Array<Token>& tokens, Modu
 	if (auto error = parse_module_module(it, end, module))
 		return error;
 
-	while (it != end)
-	{
+	while (it != end) {
 		if (it->value == kw_internal) {
 			if (auto error = parse_module_internal(it, end, module))
 				return error;
@@ -104,10 +118,10 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_variable(Array<Token>::co
 		return error;
 
 	if (m_is_module_internal) {
-		module.global_internal.variables[variable.name] = variable;
+		module.space_internal.variables[variable.name] = variable;
 	}
 	else {
-		module.global_public.variables[variable.name] = variable;
+		module.space_public.variables[variable.name] = variable;
 	}
 
 	return std::nullopt;
@@ -145,18 +159,99 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_variable(Array<Token>::const_ite
 	return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_type(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, String& type)
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_type(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Ref<Type>& type)
 {
-	if (it->type != TokenType::IDENTIFIER &&
-		it->value != kw_bool &&
-		it->value != kw_int &&
-		it->value != kw_float &&
-		it->value != kw_char &&
-		it->value != kw_string)
-		return ParseError{ *it, L"expected type" };
-	type = it->value;
+	Ref<Type> child_type;
+	if (it->value == kw_bool) {
+		child_type = std::make_shared<BoolType>();
+	}
+	else if (it->value == kw_int) {
+		child_type = std::make_shared<IntType>();
+	}
+	else if (it->value == kw_float) {
+		child_type = std::make_shared<FloatType>();
+	}
+	else if (it->value == kw_char) {
+		child_type = std::make_shared<CharType>();
+	}
+	else if (it->value == kw_string) {
+		child_type = std::make_shared<StringType>();
+	}
+	else if (it->type == TokenType::IDENTIFIER) {
+		child_type = std::make_shared<Type>();
+		child_type->name = it->value;
+	}
+	else if (it->value == op_range) {
+		child_type = std::make_shared<RangeType>();
+	}
+	else {
+		return ParseError{ *it, L"invalid type" };
+	}
 	++it;
 
+	if (it->value == op_array_opn) {
+		++it;
+
+		if (it->value != op_array_cls)
+			return ParseError{ *it, L"expected array end" };
+		++it;
+
+		auto array_type = std::make_shared<ArrayType>();
+		array_type->type = child_type;
+		child_type = array_type;
+	}
+
+	Ref<RefType> ref_type;
+	if (auto error = parse_reference_type(it, end, ref_type))
+		return error;
+
+	if (ref_type) {
+		Ref<RefType> p = ref_type;
+		while (p->type) {
+			p = std::dynamic_pointer_cast<RefType>(p->type);
+		}
+		p->type = child_type;
+		type = ref_type;
+	}
+	else {
+		type = child_type;
+	}
+	return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_reference_type(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Ref<RefType>& type)
+{
+	if (it->value != kw_let && it->value != kw_var)
+		return std::nullopt;
+
+	Ref<RefType> child_type;
+	if (it->value == kw_var) {
+		child_type = std::make_shared<VarRefType>();
+	}
+	else {
+		child_type = std::make_shared<LetRefType>();
+	}
+	++it;
+
+	if (it->value != op_ref)
+		return ParseError{ *it, L"expected reference after let or var" };
+	++it;
+
+	Ref<RefType> parent_type;
+	if (auto error = parse_reference_type(it, end, parent_type))
+		return error;
+
+	if (parent_type) {
+		Ref<RefType> p = parent_type;
+		while (p->type) {
+			p = std::dynamic_pointer_cast<RefType>(p->type);
+		}
+		p->type = child_type;
+		type = parent_type;
+	}
+	else {
+		type = child_type;
+	}
 	return std::nullopt;
 }
 
@@ -242,13 +337,12 @@ dawn::Opt<dawn::ParseError> dawn::Parser::pure_expression(const Array<Token>& to
 		}
 	}
 	else if (tokens.front().value == op_expr_opn) {
-		assert(false && "not implemented");
-	}
-	else if (tokens.front().value == op_scope_opn) {
-		assert(false && "not implemented");
-	}
-	else if (tokens.front().value == op_array_opn) {
-		assert(false && "not implemented");
+		if (tokens.back().value != op_expr_cls)
+			return ParseError{ tokens.back(), L"expected expression close" };
+		
+		auto begin = tokens.begin() + 1;
+		auto end = tokens.begin() + tokens.size() - 1;
+		return parse_expression(begin, end, tree);
 	}
 	else if (tokens.front().value == op_yield_opn) {
 		assert(false && "not implemented");
@@ -323,7 +417,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_keyword(const Token& token,
 		tree = node;
 	}
 	else if (token.value == kw_null) {
-		auto value = std::make_shared<PointerValue>();
+		auto value = std::make_shared<ReferenceValue>();
 		value->value = nullptr;
 		auto node = std::make_shared<ValueNode>();
 		node->value = value;
@@ -363,8 +457,8 @@ dawn::Opt<dawn::ParseError> dawn::Parser::extract_expression(Array<Token>::const
 
 				Array<Token>::const_iterator temp_it = it;
 				--temp_it;
-				String ignored;
-				if (auto error = parse_type(temp_it, temp_it + 1, ignored))
+				Ref<Type> _type;
+				if (auto error = parse_type(temp_it, temp_it + 1, _type))
 					break;
 			}
 		}
@@ -379,7 +473,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::extract_expression(Array<Token>::const
 dawn::Opt<dawn::ParseError> dawn::Parser::find_least_precedence(const Array<Token>& tokens, Int& index)
 {
 	Int expr_depth = 0;
-	bool was_op = false;
+	Bool was_op = false;
 	Int least_precedence = -1;
 	for (Int i = 0; i < (Int) tokens.size(); i++) {
 		const auto& token = tokens[i];
@@ -395,7 +489,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::find_least_precedence(const Array<Toke
 		if (expr_depth != 0)
 			continue;
 
-		bool is_op = precedences.contains(token.value);
+		Bool is_op = precedences.contains(token.value);
 		if (is_op && was_op)
 			continue;
 
@@ -432,7 +526,13 @@ dawn::Ref<dawn::Node> dawn::UnaryNodeNot::evaluate() const
 	return {};
 }
 
-dawn::Ref<dawn::Node> dawn::UnaryNodeAddress::evaluate() const
+dawn::Ref<dawn::Node> dawn::UnaryNodeRef::evaluate() const
+{
+	assert(false && "not implemented");
+	return {};
+}
+
+dawn::Ref<dawn::Node> dawn::UnaryNodeRange::evaluate() const
 {
 	assert(false && "not implemented");
 	return {};
@@ -449,8 +549,11 @@ dawn::Opt<dawn::ParseError> dawn::create_unary_node(const Token& token, Ref<Unar
 	else if (token.value == op_not) {
 		node = std::make_shared<UnaryNodeNot>();
 	}
-	else if (token.value == op_address) {
-		node = std::make_shared<UnaryNodeAddress>();
+	else if (token.value == op_ref) {
+		node = std::make_shared<UnaryNodeRef>();
+	}
+	else if (token.value == op_range) {
+		node = std::make_shared<UnaryNodeRange>();
 	}
 	else {
 		return ParseError{ token, L"unknown unary operator" };
@@ -471,13 +574,7 @@ dawn::Ref<dawn::Node> dawn::OperatorNodeAccess::evaluate()
 	return {};
 }
 
-dawn::Ref<dawn::Node> dawn::OperatorNodeAddress::evaluate()
-{
-	assert(false && "not implemented");
-	return {};
-}
-
-dawn::Ref<dawn::Node> dawn::OperatorNodeNot::evaluate()
+dawn::Ref<dawn::Node> dawn::OperatorNodeRange::evaluate()
 {
 	assert(false && "not implemented");
 	return {};
@@ -623,11 +720,8 @@ dawn::Opt<dawn::ParseError> dawn::create_operator_node(const Token& token, Ref<O
 	else if (token.value == op_access) {
 		node = std::make_shared<OperatorNodeAccess>();
 	}
-	else if (token.value == op_address) {
-		node = std::make_shared<OperatorNodeAddress>();
-	}
-	else if (token.value == op_not) {
-		node = std::make_shared<OperatorNodeNot>();
+	else if (token.value == op_range) {
+		node = std::make_shared<OperatorNodeRange>();
 	}
 	else if (token.value == op_pow) {
 		node = std::make_shared<OperatorNodePow>();

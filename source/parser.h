@@ -38,29 +38,56 @@ namespace dawn {
 		virtual ~Type() = default;
 	};
 
+	struct RefType : Type
+	{
+		Ref<Type> type;
+	};
+
+	struct LetRefType : RefType
+	{
+		LetRefType() { name = String(kw_let) + String(op_ref); }
+	};
+
+	struct VarRefType : RefType
+	{
+		VarRefType() { name = String(kw_var) + String(op_ref); }
+	};
+
+	struct ArrayType : Type
+	{
+		Ref<Type> type;
+
+		ArrayType() { name = String(op_array_opn) + String(op_array_cls); }
+	};
+
+	struct RangeType : Type
+	{
+		RangeType() { name = op_range; }
+	};
+
 	struct BoolType : Type
 	{
-		BoolType() { name = L"bool"; }
+		BoolType() { name = kw_bool; }
 	};
 
 	struct IntType : Type
 	{
-		IntType() { name = L"int"; }
+		IntType() { name = kw_int; }
 	};
 
 	struct FloatType : Type
 	{
-		FloatType() { name = L"float"; }
+		FloatType() { name = kw_float; }
 	};
 
 	struct CharType : Type
 	{
-		CharType() { name = L"char"; }
+		CharType() { name = kw_char; }
 	};
 
 	struct StringType : Type
 	{
-		StringType() { name = L"string"; }
+		StringType() { name = kw_string; }
 	};
 }
 
@@ -70,9 +97,9 @@ namespace dawn {
 		virtual ~Value() = default;
 	};
 
-	struct PointerValue : Value
+	struct ReferenceValue : Value
 	{
-		Pointer value = {};
+		Ref<Value> value = {};
 	};
 
 	struct BoolValue : Value
@@ -104,13 +131,13 @@ namespace dawn {
 namespace dawn {
 	struct EnumType : Type
 	{
-		String value_type;
-		Map<String, Any> values;
+		Ref<Type> type;
+		Map<String, Ref<Value>> values;
 	};
 
 	struct EnumValue : Value
 	{
-		String enum_type;
+		Ref<EnumType> parent;
 		String key;
 	};
 }
@@ -119,9 +146,9 @@ namespace dawn {
 	struct MethodDecl
 	{
 		String name;
-		bool is_var = false;
-		Array<Pair<String, String>> args;
-		String return_type;
+		Bool is_var = false;
+		Array<Pair<String, Ref<Type>>> args;
+		Ref<Type> type;
 	};
 
 	struct Method
@@ -137,17 +164,17 @@ namespace dawn {
 
 	struct StructType : Type
 	{
-		Map<String, String> fields_public;
+		Map<String, Ref<Type>> fields_public;
 		Map<String, Ref<Method>> methods_public;
-		Map<String, String> fields_internal;
+		Map<String, Ref<Type>> fields_internal;
 		Map<String, Ref<Method>> methods_internal;
 	};
 
 	struct StructValue : Value
 	{
-		String struct_type;
-		Map<String, Any> members_public;
-		Map<String, Any> members_internal;
+		Ref<StructType> parent;
+		Map<String, Ref<Value>> members_public;
+		Map<String, Ref<Value>> members_internal;
 	};
 }
 
@@ -155,28 +182,30 @@ namespace dawn {
 	struct Function
 	{
 		String name;
-		Array<Pair<String, String>> args;
-		String return_type;
+		Array<Pair<String, Ref<Type>>> args;
+		Ref<Type> type;
 		Ref<Node> body;
 	};
 
 	struct Variable
 	{
 		String name;
-		bool is_var = false;
-		String type;
+		Bool is_var = false;
+		Ref<Type> type;
 		Ref<Node> value;
 	};
 }
 
 namespace dawn {
-	struct Global
+	struct Space
 	{
 		Map<String, Variable> variables;
 		Map<String, Function> functions;
 		Map<String, EnumType> enums;
 		Map<String, LayerType> layers;
 		Map<String, StructType> structs;
+
+		Bool contains_id(const StringRef& id) const;
 	};
 }
 
@@ -184,8 +213,10 @@ namespace dawn {
 	struct Module
 	{
 		String name;
-		Global global_public;
-		Global global_internal;
+		Space space_public;
+		Space space_internal;
+
+		Bool contains_id(const StringRef& id) const;
 	};
 }
 
@@ -195,8 +226,8 @@ namespace dawn {
 		Opt<ParseError> parse(const Array<Token>& tokens, Module& module);
 
 	private:
-		bool m_is_module_internal = false;
-		bool m_is_struct_internal = false;
+		Bool m_is_module_internal = false;
+		Bool m_is_struct_internal = false;
 
 		Opt<ParseError> parse_module_module(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
 		Opt<ParseError> parse_module_internal(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
@@ -207,7 +238,8 @@ namespace dawn {
 		Opt<ParseError> parse_module_variable(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
 
 		Opt<ParseError> parse_variable(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Variable& variable);
-		Opt<ParseError> parse_type(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, String& type);
+		Opt<ParseError> parse_type(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Ref<Type>& type);
+		Opt<ParseError> parse_reference_type(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Ref<RefType>& type);
 		Opt<ParseError> parse_expression(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Ref<Node>& tree);
 
 		Opt<ParseError> extract_expression(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Array<Token>& tokens);
@@ -264,7 +296,12 @@ namespace dawn {
 		Ref<Node> evaluate() const override;
 	};
 
-	struct UnaryNodeAddress : UnaryNode
+	struct UnaryNodeRef : UnaryNode
+	{
+		Ref<Node> evaluate() const override;
+	};
+
+	struct UnaryNodeRange : UnaryNode
 	{
 		Ref<Node> evaluate() const override;
 	};
@@ -291,12 +328,7 @@ namespace dawn {
 		Ref<Node> evaluate() override;
 	};
 
-	struct OperatorNodeAddress : OperatorNode
-	{
-		Ref<Node> evaluate() override;
-	};
-
-	struct OperatorNodeNot : OperatorNode
+	struct OperatorNodeRange : OperatorNode
 	{
 		Ref<Node> evaluate() override;
 	};

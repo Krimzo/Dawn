@@ -92,7 +92,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
 		(String) op_greateq,
 		(String) op_assign,
 		(String) op_split,
-		(String) op_address,
+		(String) op_ref,
 		(String) op_access,
 		(String) op_link,
 		(String) op_range,

@@ -62,7 +62,7 @@ namespace dawn {
 	inline constexpr StringRef op_greateq = L">=";
 	inline constexpr StringRef op_assign = L"=";
 	inline constexpr StringRef op_split = L",";
-	inline constexpr StringRef op_address = L"&";
+	inline constexpr StringRef op_ref = L"&";
 	inline constexpr StringRef op_access = L"->";
 	inline constexpr StringRef op_link = L":";
 	inline constexpr StringRef op_range = L"~";
@@ -92,7 +92,7 @@ namespace dawn {
 	{
 		{ (String) op_link, 1 },
 		{ (String) op_access, 2 },
-		{ (String) op_address, 3 },
+		{ (String) op_ref, 3 },
 		{ (String) op_not, 3 },
 		{ (String) op_pow, 4 },
 		{ (String) op_mod, 4 },
@@ -108,13 +108,14 @@ namespace dawn {
 		{ (String) op_neq, 8 },
 		{ (String) op_and, 9 },
 		{ (String) op_or, 10 },
-		{ (String) op_assign, 11 },
-		{ (String) op_addas, 11 },
-		{ (String) op_subas, 11 },
-		{ (String) op_mulas, 11 },
-		{ (String) op_divas, 11 },
-		{ (String) op_powas, 11 },
-		{ (String) op_modas, 11 },
-		{ (String) op_split, 12 },
+		{ (String) op_range, 11 },
+		{ (String) op_assign, 12 },
+		{ (String) op_addas, 12 },
+		{ (String) op_subas, 12 },
+		{ (String) op_mulas, 12 },
+		{ (String) op_divas, 12 },
+		{ (String) op_powas, 12 },
+		{ (String) op_modas, 12 },
+		{ (String) op_split, 13 },
 	};
 }

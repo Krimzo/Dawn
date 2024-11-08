@@ -18,7 +18,6 @@
 
 
 namespace dawn {
-	using Pointer = void*;
 	using Bool = bool;
 	using Int = int64_t;
 	using Float = double;
