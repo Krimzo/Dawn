@@ -67,27 +67,27 @@ namespace dawn {
 
 	struct BoolType : Type
 	{
-		BoolType() { name = kw_bool; }
+		BoolType() { name = tp_bool; }
 	};
 
 	struct IntType : Type
 	{
-		IntType() { name = kw_int; }
+		IntType() { name = tp_int; }
 	};
 
 	struct FloatType : Type
 	{
-		FloatType() { name = kw_float; }
+		FloatType() { name = tp_float; }
 	};
 
 	struct CharType : Type
 	{
-		CharType() { name = kw_char; }
+		CharType() { name = tp_char; }
 	};
 
 	struct StringType : Type
 	{
-		StringType() { name = kw_string; }
+		StringType() { name = tp_string; }
 	};
 }
 
@@ -223,11 +223,13 @@ namespace dawn {
 namespace dawn {
 	struct Parser
 	{
-		Opt<ParseError> parse(const Array<Token>& tokens, Module& module);
+		Opt<ParseError> parse(Array<Token>& tokens, Module& module);
 
 	private:
 		Bool m_is_module_internal = false;
 		Bool m_is_struct_internal = false;
+
+		void prepare_tokens(Array<Token>& tokens);
 
 		Opt<ParseError> parse_module_module(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
 		Opt<ParseError> parse_module_internal(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Module& module);
@@ -242,12 +244,14 @@ namespace dawn {
 		Opt<ParseError> parse_reference_type(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Ref<RefType>& type);
 		Opt<ParseError> parse_expression(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Ref<Node>& tree);
 
-		Opt<ParseError> extract_expression(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Array<Token>& tokens);
-		Opt<ParseError> find_least_precedence(const Array<Token>& tokens, Int& index);
-		Opt<ParseError> pure_expression(const Array<Token>& tokens, Ref<Node>& tree);
-		Opt<ParseError> expression_literal(const Token& token, Ref<Node>& tree);
-		Opt<ParseError> expression_identifier(const Token& token, Ref<Node>& tree);
-		Opt<ParseError> expression_keyword(const Token& token, Ref<Node>& tree);
+		Opt<ParseError> expression_extract(Array<Token>::const_iterator& it, const Array<Token>::const_iterator& end, Array<Token>& tokens);
+		Opt<ParseError> expression_precedence(const Array<Token>& tokens, Int& index);
+		Opt<ParseError> expression_pure(const Array<Token>& tokens, Ref<Node>& tree);
+
+		Opt<ParseError> expression_single(const Token& token, Ref<Node>& tree);
+		Opt<ParseError> expression_single_literal(const Token& token, Ref<Node>& tree);
+		Opt<ParseError> expression_single_keyword(const Token& token, Ref<Node>& tree);
+		Opt<ParseError> expression_single_identifier(const Token& token, Ref<Node>& tree);
 	};
 }
 

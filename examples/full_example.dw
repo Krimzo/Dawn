@@ -11,7 +11,7 @@ internal {
 }
 
 // Primitive
-func primitives_examp() {
+func primitive_examp() {
 	// Integer
 	let i: int = -10; // [-9223372036854775808, 9223372036854775807]
 
@@ -31,12 +31,12 @@ func primitives_examp() {
 let A = 16;
 var B: float = 23.0;
 
-func vars_examp() {
+func var_examp() {
 	let a = 5;                // implicit type, constant, int, 5
 	var b: int = 6;           // explicit type, variable, int, 6
-	let c: int var& = &b;     // explicit type, constant, int variable pointer, address from b
-	let d: float = float(*c); // explicit type, constant, float, casted value from dereferenced pointer
-	var e: float let& = null; // explicit type, variable, float constant pointer, null
+	let c: int var& = &b;     // explicit type, constant, int variable reference, address from b
+	let d: float = float(c);  // explicit type, constant, float, casted value from referenced int
+	var e: float let& = null; // explicit type, variable, float constant reference, null
 }
 
 // Array
@@ -47,15 +47,16 @@ func array_examp() {
 }
 
 // Bracket
-func collections_examp() {
-	T{};            // empty init, all zeros
-	T();            // cast to T
+func bracket_examp() {
+	T{};            // struct init
+	T(value);       // cast to T
+	t();            // function call
 	T[];            // array type
 	<< yield 0; >>; // yield scope
 }
 
 // Function
-func sqr(a: int): int {
+func func_examp(a: int): int 
 	return a * a;
 }
 
@@ -68,7 +69,7 @@ func *(left: string, right: int): string {
 func logic_examp() {
 	let a = (5 + 1.0) * 2.;
 	if a < 10.0 {
-		print("res = " + string(sqr(a)));
+		print("res = " + string(a));
 	}
 	elif a <= 15.0 {
 		print("it's less or equal to 15");
@@ -153,11 +154,11 @@ struct Person: Living {
 		return self->age;
 	}
 
-	var self_var_method(): Person var& {
+	var var_method(): Person var& {
 		return self;
 	}
 
-	let self_let_method(): Person let& {
+	let let_method(): Person let& {
 		return self;
 	}
 
@@ -178,9 +179,9 @@ func struct_examp() {
 	let person0 = Person{};
 	var person1: Person = Person{ name: "Krim", age: 23 };
 	
-	var living: Living let& [] = Living let& [0];
-	living->push(&person0);
-	living->push(&person1);
+	var living: Living[] = Living[0];
+	living->push(person0);
+	living->push(person1);
 
 	for alive: living {
 		let age = alive->get_age();

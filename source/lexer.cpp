@@ -15,8 +15,10 @@ std::wostream& dawn::operator<<(std::wostream& stream, const TokenType type)
 	case TokenType::FLOAT: stream << "Float"; break;
 	case TokenType::CHAR: stream << "Char"; break;
 	case TokenType::STRING: stream << "String"; break;
-	case TokenType::IDENTIFIER: stream << "Identifier"; break;
 	case TokenType::KEYWORD: stream << "Keyword"; break;
+	case TokenType::TYPE: stream << "Type"; break;
+	case TokenType::FUNCTION: stream << "Function"; break;
+	case TokenType::NAME: stream << "Name"; break;
 	case TokenType::OPERATOR: stream << "Operator"; break;
 	}
 	return stream;
@@ -59,14 +61,16 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
 		(String) kw_struct,
 		(String) kw_impl,
 		(String) kw_self,
-		(String) kw_int,
-		(String) kw_float,
-		(String) kw_char,
-		(String) kw_string,
-		(String) kw_bool,
 		(String) kw_true,
 		(String) kw_false,
 		(String) kw_null,
+	};
+	result.types = {
+		(String) tp_bool,
+		(String) tp_int,
+		(String) tp_float,
+		(String) tp_char,
+		(String) tp_string,
 	};
 	result.operators = {
 		(String) op_add,
@@ -232,10 +236,20 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_word(const StringRef& source, Arr
 		}
 		buffer.push_back(source[i]);
 	}
-	Bool is_keyword = lang_def.keywords.contains(buffer);
+
+	TokenType type;
+	if (lang_def.keywords.contains(buffer)) {
+		type = TokenType::KEYWORD;
+	}
+	else if (iswupper(buffer.front()) || lang_def.types.contains(buffer)) {
+		type = TokenType::TYPE;
+	}
+	else {
+		type = TokenType::NAME;
+	}
 
 	Token& token = tokens.emplace_back();
-	token.type = is_keyword ? TokenType::KEYWORD : TokenType::IDENTIFIER;
+	token.type = type;
 	token.value = buffer;
 	token.line_number = line;
 

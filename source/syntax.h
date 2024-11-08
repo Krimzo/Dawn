@@ -28,14 +28,17 @@ namespace dawn {
 	inline constexpr StringRef kw_struct = L"struct";
 	inline constexpr StringRef kw_impl = L"impl";
 	inline constexpr StringRef kw_self = L"self";
-	inline constexpr StringRef kw_bool = L"bool";
-	inline constexpr StringRef kw_int = L"int";
-	inline constexpr StringRef kw_float = L"float";
-	inline constexpr StringRef kw_char = L"char";
-	inline constexpr StringRef kw_string = L"string";
 	inline constexpr StringRef kw_true = L"true";
 	inline constexpr StringRef kw_false = L"false";
 	inline constexpr StringRef kw_null = L"null";
+}
+
+namespace dawn {
+	inline constexpr StringRef tp_bool = L"bool";
+	inline constexpr StringRef tp_int = L"int";
+	inline constexpr StringRef tp_float = L"float";
+	inline constexpr StringRef tp_char = L"char";
+	inline constexpr StringRef tp_string = L"string";
 }
 
 namespace dawn {
