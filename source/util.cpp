@@ -3,59 +3,60 @@
 
 #ifdef _WIN32
 #include <windows.h>
-static const HANDLE _console_init = []
+static HANDLE _console_init = []
 {
-	DWORD mode = 0;
-	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-	GetConsoleMode(handle, &mode);
-	SetConsoleMode(handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-	return handle;
+    DWORD mode = 0;
+    HANDLE handle = GetStdHandle( STD_OUTPUT_HANDLE );
+    GetConsoleMode( handle, &mode );
+    SetConsoleMode( handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING );
+    return handle;
 }();
 #endif
 
-std::wostream& dawn::operator<<(std::wostream& stream, const Color& color)
+std::wostream& dawn::operator<<( std::wostream& stream, Color const& color )
 {
-	stream << "\033[38;2;" << Int(color.r) << ";" << Int(color.g) << ";" << Int(color.b) << "m";
-	return stream;
+    stream << "\033[38;2;" << Int( color.r ) << ";" << Int( color.g ) << ";" << Int( color.b ) << "m";
+    return stream;
 }
 
-std::wostream& dawn::operator<<(std::wostream& stream, const ColoredText& colored_text)
+std::wostream& dawn::operator<<( std::wostream& stream, ColoredText const& colored_text )
 {
-	static constexpr Color DEFAULT_COLOR = { 204, 204, 204 };
-	stream << colored_text.color << colored_text.text << DEFAULT_COLOR;
-	return stream;
+    static constexpr Color DEFAULT_COLOR = { 204, 204, 204 };
+    stream << colored_text.color << colored_text.text << DEFAULT_COLOR;
+    return stream;
 }
 
-dawn::Char dawn::to_escaping(const Char c)
+dawn::Char dawn::to_escaping( Char c )
 {
-	switch (c)
-	{
-	case L'b': return L'\b';
-	case L'f': return L'\f';
-	case L'n': return L'\n';
-	case L'r': return L'\r';
-	case L't': return L'\t';
-	}
-	return c;
+    switch ( c )
+    {
+    case L'b': return L'\b';
+    case L'f': return L'\f';
+    case L'n': return L'\n';
+    case L'r': return L'\r';
+    case L't': return L'\t';
+    }
+    return c;
 }
 
-dawn::String dawn::from_escaping(const Char c)
+dawn::String dawn::from_escaping( Char c )
 {
-	switch (c)
-	{
-	case L'\b': return L"\\b";
-	case L'\f': return L"\\f";
-	case L'\n': return L"\\n";
-	case L'\r': return L"\\r";
-	case L'\t': return L"\\t";
-	}
-	return String(1, c);
+    switch ( c )
+    {
+    case L'\b': return L"\\b";
+    case L'\f': return L"\\f";
+    case L'\n': return L"\\n";
+    case L'\r': return L"\\r";
+    case L'\t': return L"\\t";
+    }
+    return String( 1, c );
 }
 
-dawn::String dawn::read_file(const StringRef& path)
+dawn::String dawn::read_file( StringRef const& path )
 {
-	IFileStream file{ path.data() };
-	if (!file)
-		return {};
-	return (StringStream{} << file.rdbuf()).str();
+    IFileStream file{ path.data() };
+    if ( !file )
+        return {};
+
+    return (StringStream{} << file.rdbuf()).str();
 }
