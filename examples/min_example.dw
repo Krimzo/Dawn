@@ -6,7 +6,14 @@ let c: int let& var& = &b;
 let e: ~ = ~a+3;
 let f: int[] = int[5];
 let g: int[] let& = &f;
-var h: float = float(a);
+var h: float = float(((a)+b)-c);
+
+let a_arr: int[] = int[12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2)];
+let b_arr: int[] = int[5; 12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2)];
+let c_arr: int[] = int[?; 1, 12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2), 3];
+
+let a_str: Person = Person{};
+let b_str = Person{ name: "Krimzo", age: 5 * -(Person{ age: b - a, name: "da" } ^ int[?; 4, 3, a * b]) };
 
 //internal {
 //	var b: float = 6;

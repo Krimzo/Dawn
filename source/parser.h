@@ -10,10 +10,17 @@ struct ParseError
     String msg;
 
     template<typename... Args>
-    ParseError( Token const& token, Args const&... args )
+    ParseError( Opt<Token> const& token, Args const&... args )
     {
         StringStream stream;
-        stream << "Parse error at token " << token << ": ";
+        if ( token )
+        {
+            stream << "Parse error at token " << *token << ": ";
+        }
+        else
+        {
+            stream << "Parse error: ";
+        }
         (stream << ... << args);
         msg = stream.str();
     }
@@ -250,18 +257,23 @@ private:
     Opt<ParseError> parse_module_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
 
     Opt<ParseError> parse_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Variable& variable );
-    Opt<ParseError> parse_type( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Type>& type );
-    Opt<ParseError> parse_reference_type( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<RefType>& type );
-    Opt<ParseError> parse_expression( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
 
+    Opt<ParseError> parse_type( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Type>& type );
+    Opt<ParseError> type_basic( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Type>& type );
+    Opt<ParseError> type_reference( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<RefType>& type );
+
+    Opt<ParseError> parse_expression( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
     Opt<ParseError> expression_extract( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Array<Token>& tokens );
     Opt<ParseError> expression_precedence( Array<Token> const& tokens, Int& index );
     Opt<ParseError> expression_pure( Array<Token> const& tokens, Ref<Node>& tree );
-
     Opt<ParseError> expression_single( Token const& token, Ref<Node>& tree );
     Opt<ParseError> expression_single_literal( Token const& token, Ref<Node>& tree );
     Opt<ParseError> expression_single_keyword( Token const& token, Ref<Node>& tree );
     Opt<ParseError> expression_single_identifier( Token const& token, Ref<Node>& tree );
+    Opt<ParseError> expression_type( Array<Token> const& tokens, Ref<Node>& tree );
+    Opt<ParseError> expression_type_cast( Array<Token> const& tokens, Ref<Node>& tree );
+    Opt<ParseError> expression_type_make( Array<Token> const& tokens, Ref<Node>& tree );
+    Opt<ParseError> expression_type_array( Array<Token> const& tokens, Ref<Node>& tree );
 };
 }
 
@@ -280,13 +292,41 @@ struct ValueNode : Node
     Ref<Value> value;
 };
 
+struct SelfNode : Node
+{
+};
+
 struct IdentifierNode : Node
 {
     String name;
 };
 
-struct SelfNode : Node
+struct CastNode : Node
 {
+    Ref<Type> type;
+    Ref<Node> expr;
+};
+
+struct NewStructNode : Node
+{
+    Ref<Type> type;
+    Map<String, Ref<Node>> args;
+};
+
+struct NewArrayNode : Node
+{
+    enum struct InitType
+    {
+        SIZE,
+        SIZE_VAL,
+        LIST,
+    };
+
+    Ref<Type> type;
+    InitType init_type;
+    Ref<Node> size;
+    Ref<Node> _val;
+    Array<Ref<Node>> _list;
 };
 }
 
