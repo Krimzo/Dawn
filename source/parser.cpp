@@ -455,11 +455,13 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_pure( Array<Token> const& t
     }
     else if ( tokens.front().type == TokenType::FUNCTION )
     {
-        assert( false && "not implemented" );
+        if ( auto error = expression_function( tokens, tree ) )
+            return error;
     }
-    else if ( tokens.front().type == TokenType::NAME )
+    else if ( tokens.front().value == op_yield_opn )
     {
-        assert( false && "not implemented" );
+        if ( auto error = expression_yield( tokens, tree ) )
+            return error;
     }
     else if ( tokens.front().value == op_expr_opn )
     {
@@ -469,10 +471,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_pure( Array<Token> const& t
         auto begin = tokens.begin() + 1;
         auto end = tokens.begin() + tokens.size() - 1;
         return parse_expression( begin, end, tree );
-    }
-    else if ( tokens.front().value == op_yield_opn )
-    {
-        assert( false && "not implemented" );
     }
     else
     {
@@ -792,6 +790,52 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> co
 
     tree = node;
 
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::expression_function( Array<Token> const& tokens, Ref<Node>& tree )
+{
+    Array<Token>::const_iterator it = tokens.begin();
+    Ref node = std::make_shared<FunctionCallNode>();
+
+    if ( it->type != TokenType::FUNCTION )
+        return ParseError{ *it, "expected function name" };
+    node->name = it->value;
+    ++it;
+
+    if ( it->value != op_expr_opn )
+        return ParseError{ *it, "expected function open" };
+    ++it;
+
+    while ( true )
+    {
+        Array<Token> expr_tokens;
+        if ( auto error = expression_extract( it, tokens.end(), expr_tokens ) )
+            return error;
+
+        if ( expr_tokens.empty() )
+            break;
+
+        if ( it->value == op_split )
+            ++it;
+
+        Array<Token>::const_iterator expr_it = expr_tokens.begin();
+        if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->args.emplace_back() ) )
+            return error;
+    }
+
+    if ( it->value != op_expr_cls )
+        return ParseError{ *it, "expected function close" };
+    ++it;
+
+    tree = node;
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::expression_yield( Array<Token> const& tokens, Ref<Node>& tree )
+{
+    assert( false && "not impl" );
     return std::nullopt;
 }
 

@@ -11,10 +11,7 @@ struct Color
 };
 
 std::wostream& operator<<( std::wostream& stream, Color const& color );
-}
 
-namespace dawn
-{
 struct ColoredText
 {
     Color color;
@@ -31,10 +28,7 @@ struct ColoredText
 };
 
 std::wostream& operator<<( std::wostream& stream, ColoredText const& colored_text );
-}
 
-namespace dawn
-{
 Char to_escaping( Char c );
 String from_escaping( Char c );
 String read_file( StringRef const& path );

@@ -2,10 +2,11 @@
 #include "lexer.h"
 #include "parser.h"
 
-using namespace dawn;
 
 int main()
 {
+    using namespace dawn;
+
     String source = read_file( L"examples/min_example.dw" );
 
     Lexer lexer;

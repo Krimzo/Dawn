@@ -32,15 +32,9 @@ struct ParseError
 };
 
 std::wostream& operator<<( std::wostream& stream, ParseError const& error );
-}
 
-namespace dawn
-{
 struct Node;
-}
 
-namespace dawn
-{
 struct Type
 {
     String name;
@@ -99,10 +93,7 @@ struct StringType : Type
 {
     StringType() { name = tp_string; }
 };
-}
 
-namespace dawn
-{
 struct Value
 {
     virtual ~Value() = default;
@@ -137,10 +128,7 @@ struct StringValue : Value
 {
     String value = {};
 };
-}
 
-namespace dawn
-{
 struct EnumType : Type
 {
     Ref<Type> type;
@@ -152,10 +140,7 @@ struct EnumValue : Value
     Ref<EnumType> parent;
     String key;
 };
-}
 
-namespace dawn
-{
 struct MethodDecl
 {
     String name;
@@ -189,10 +174,7 @@ struct StructValue : Value
     Map<String, Ref<Value>> members_public;
     Map<String, Ref<Value>> members_internal;
 };
-}
 
-namespace dawn
-{
 struct Function
 {
     String name;
@@ -208,10 +190,7 @@ struct Variable
     Ref<Type> type;
     Ref<Node> value;
 };
-}
 
-namespace dawn
-{
 struct Space
 {
     Map<String, Variable> variables;
@@ -222,10 +201,7 @@ struct Space
 
     Bool contains_id( StringRef const& id ) const;
 };
-}
 
-namespace dawn
-{
 struct Module
 {
     String name;
@@ -234,10 +210,7 @@ struct Module
 
     Bool contains_id( StringRef const& id ) const;
 };
-}
 
-namespace dawn
-{
 struct Parser
 {
     Opt<ParseError> parse( Array<Token>& tokens, Module& module );
@@ -274,19 +247,15 @@ private:
     Opt<ParseError> expression_type_cast( Array<Token> const& tokens, Ref<Node>& tree );
     Opt<ParseError> expression_type_make( Array<Token> const& tokens, Ref<Node>& tree );
     Opt<ParseError> expression_type_array( Array<Token> const& tokens, Ref<Node>& tree );
+    Opt<ParseError> expression_function( Array<Token> const& tokens, Ref<Node>& tree );
+    Opt<ParseError> expression_yield( Array<Token> const& tokens, Ref<Node>& tree );
 };
-}
 
-namespace dawn
-{
 struct Node
 {
     virtual ~Node() = default;
 };
-}
 
-namespace dawn
-{
 struct ValueNode : Node
 {
     Ref<Value> value;
@@ -328,10 +297,13 @@ struct NewArrayNode : Node
     Ref<Node> _val;
     Array<Ref<Node>> _list;
 };
-}
 
-namespace dawn
+struct FunctionCallNode : Node
 {
+    String name;
+    Array<Ref<Node>> args;
+};
+
 struct UnaryNode : Node
 {
     Ref<Node> right;
@@ -358,10 +330,7 @@ struct UnaryNodeRange : UnaryNode
 };
 
 Opt<ParseError> create_unary_node( Token const& token, Ref<UnaryNode>& node );
-}
 
-namespace dawn
-{
 struct OperatorNode : Node
 {
     Ref<Node> left;

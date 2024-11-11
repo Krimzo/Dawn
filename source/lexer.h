@@ -26,10 +26,7 @@ struct LexError
 };
 
 std::wostream& operator<<( std::wostream& stream, LexError const& error );
-}
 
-namespace dawn
-{
 enum struct TokenType
 {
     INTEGER = 0,
@@ -61,10 +58,7 @@ constexpr Color to_color( TokenType type )
 }
 
 std::wostream& operator<<( std::wostream& stream, TokenType type );
-}
 
-namespace dawn
-{
 struct Token
 {
     TokenType type;
@@ -73,10 +67,7 @@ struct Token
 };
 
 std::wostream& operator<<( std::wostream& stream, Token const& token );
-}
 
-namespace dawn
-{
 struct LanguageDef
 {
     Set<String> keywords;
@@ -91,10 +82,7 @@ struct LanguageDef
 
     static LanguageDef dawn();
 };
-}
 
-namespace dawn
-{
 struct Lexer
 {
     LanguageDef lang_def = LanguageDef::dawn();

@@ -32,19 +32,13 @@ inline constexpr StringRef kw_self = L"self";
 inline constexpr StringRef kw_true = L"true";
 inline constexpr StringRef kw_false = L"false";
 inline constexpr StringRef kw_null = L"null";
-}
 
-namespace dawn
-{
 inline constexpr StringRef tp_bool = L"bool";
 inline constexpr StringRef tp_int = L"int";
 inline constexpr StringRef tp_float = L"float";
 inline constexpr StringRef tp_char = L"char";
 inline constexpr StringRef tp_string = L"string";
-}
 
-namespace dawn
-{
 inline constexpr StringRef op_add = L"+";
 inline constexpr StringRef op_sub = L"-";
 inline constexpr StringRef op_mul = L"*";
@@ -82,20 +76,14 @@ inline constexpr StringRef op_array_cls = L"]";
 inline constexpr StringRef op_yield_opn = L"<<";
 inline constexpr StringRef op_yield_cls = L">>";
 inline constexpr StringRef op_expr_end = L";";
-}
 
-namespace dawn
-{
 inline constexpr StringRef sep_number = L".";
 inline constexpr StringRef sep_identifier = L"_";
 inline constexpr StringRef lit_char = L"'";
 inline constexpr StringRef lit_string = L"\"";
 inline constexpr StringRef comm_line = L"//";
 inline constexpr Pair<StringRef, StringRef> comm_multiline = { L"/*", L"*/" };
-}
 
-namespace dawn
-{
 inline Map<String, Int> precedences
 {
     { (String) op_link, 1 },
