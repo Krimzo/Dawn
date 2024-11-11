@@ -216,9 +216,10 @@ struct Parser
     Opt<ParseError> parse( Array<Token>& tokens, Module& module );
 
 private:
-    Bool m_is_module_internal = false;
-    Bool m_is_struct_internal = false;
+    Bool m_parsing_module_internal = false;
+    Bool m_parsing_struct_internal = false;
 
+    void reset_state();
     void prepare_tokens( Array<Token>& tokens );
 
     Opt<ParseError> parse_module_module( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );

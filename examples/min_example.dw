@@ -15,12 +15,15 @@ let c_arr: int[] = int[?; 1, 12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2), 3];
 let a_str: Person = Person{};
 let b_str = Person{ name: "Krimzo", age: 5 * -(Person{ age: b - a, name: "da" } ^ int[?; 4, 3, a * b]) };
 
-//internal {
-//	var b: float = 6;
-//	let c = '\\';
-//	let s = "12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2)";
-//}
-//
+internal {
+	var aa: float = 6;
+	let bb = '\\';
+	let cc = "12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2)";
+}
+
+let neee = Person{ name: "Krimzo", age: 5 * -(Person{ age: b - a, name: "da" } ^ int[?; 4, 3, a * b]) };
+var haa = Person{ name: "Krimzo", age: 5 * -(Person{ age: b - a, name: "da" } ^ int[?; 4, 3, a * b]) };
+
 //func main(args: string[]) {
 //	print(a + b * 2);
 //}

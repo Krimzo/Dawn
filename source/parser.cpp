@@ -24,9 +24,10 @@ dawn::Bool dawn::Module::contains_id( StringRef const& id ) const
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse( Array<Token>& tokens, Module& module )
 {
+    reset_state();
     prepare_tokens( tokens );
-    auto it = tokens.begin();
 
+    auto it = tokens.begin();
     auto end = tokens.end();
     if ( auto error = parse_module_module( it, end, module ) )
         return error;
@@ -72,6 +73,12 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse( Array<Token>& tokens, Module& m
     return std::nullopt;
 }
 
+void dawn::Parser::reset_state()
+{
+    m_parsing_module_internal = false;
+    m_parsing_struct_internal = false;
+}
+
 void dawn::Parser::prepare_tokens( Array<Token>& tokens )
 {
     for ( Int i = 0; i < (Int) tokens.size() - 1; i++ )
@@ -101,7 +108,55 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_module( Array<Token>::con
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_internal( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
-    assert( false && "not implemented" );
+    if ( it->value != kw_internal )
+        return ParseError{ *it, "expected internal" };
+    ++it;
+
+    if ( it->value != op_scope_opn )
+        return ParseError{ *it, "expected open scope" };
+    ++it;
+
+    m_parsing_module_internal = true;
+    while ( it != end )
+    {
+        if ( it->value == op_scope_cls )
+        {
+            ++it;
+            break;
+        }
+
+        if ( it->value == kw_enum )
+        {
+            if ( auto error = parse_module_enum( it, end, module ) )
+                return error;
+        }
+        else if ( it->value == kw_layer )
+        {
+            if ( auto error = parse_module_layer( it, end, module ) )
+                return error;
+        }
+        else if ( it->value == kw_struct )
+        {
+            if ( auto error = parse_module_struct( it, end, module ) )
+                return error;
+        }
+        else if ( it->value == kw_func )
+        {
+            if ( auto error = parse_module_function( it, end, module ) )
+                return error;
+        }
+        else if ( it->value == kw_let || it->value == kw_var )
+        {
+            if ( auto error = parse_module_variable( it, end, module ) )
+                return error;
+        }
+        else
+        {
+            return ParseError{ *it, L"not allowed in internal scope" };
+        }
+    }
+    m_parsing_module_internal = false;
+
     return std::nullopt;
 }
 
@@ -138,7 +193,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_variable( Array<Token>::c
     if ( module.contains_id( variable.name ) )
         return ParseError{ {}, L"name [" + variable.name + L"] already in use" };
 
-    if ( m_is_module_internal )
+    if ( m_parsing_module_internal )
     {
         module.space_internal.variables[variable.name] = variable;
     }
