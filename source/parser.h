@@ -33,7 +33,10 @@ struct ParseError
 
 std::wostream& operator<<( std::wostream& stream, ParseError const& error );
 
-struct Node;
+struct Node
+{
+    virtual ~Node() = default;
+};
 
 struct Type
 {
@@ -129,6 +132,55 @@ struct StringValue : Value
     String value = {};
 };
 
+struct Variable
+{
+    String name;
+    Bool is_var = false;
+    Ref<Type> type;
+    Ref<Node> value;
+};
+
+struct Scope : Node
+{
+    Array<Ref<Node>> instr;
+};
+
+struct Argument
+{
+    String name;
+    Ref<Type> type;
+};
+
+struct Function
+{
+    String name;
+    Array<Argument> args;
+    Ref<Type> type;
+    Scope body;
+};
+
+struct Operator
+{
+    String name;
+    Array<Argument> args;
+    Ref<Type> type;
+    Scope body;
+};
+
+struct MethodDecl
+{
+    String name;
+    Bool is_var = false;
+    Array<Argument> args;
+    Ref<Type> type;
+};
+
+struct Method
+{
+    MethodDecl decl;
+    Scope body;
+};
+
 struct EnumType : Type
 {
     Ref<Type> type;
@@ -139,20 +191,6 @@ struct EnumValue : Value
 {
     Ref<EnumType> parent;
     String key;
-};
-
-struct MethodDecl
-{
-    String name;
-    Bool is_var = false;
-    Array<Pair<String, Ref<Type>>> args;
-    Ref<Type> type;
-};
-
-struct Method
-{
-    MethodDecl decl;
-    Ref<Node> body;
 };
 
 struct LayerType : Type
@@ -175,25 +213,10 @@ struct StructValue : Value
     Map<String, Ref<Value>> members_internal;
 };
 
-struct Function
-{
-    String name;
-    Array<Pair<String, Ref<Type>>> args;
-    Ref<Type> type;
-    Ref<Node> body;
-};
-
-struct Variable
-{
-    String name;
-    Bool is_var = false;
-    Ref<Type> type;
-    Ref<Node> value;
-};
-
 struct Space
 {
     Map<String, Variable> variables;
+    Map<String, Operator> operators;
     Map<String, Function> functions;
     Map<String, EnumType> enums;
     Map<String, LayerType> layers;
@@ -224,12 +247,18 @@ private:
 
     Opt<ParseError> parse_module_module( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     Opt<ParseError> parse_module_internal( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
-    Opt<ParseError> parse_module_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
-    Opt<ParseError> parse_module_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     Opt<ParseError> parse_module_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
+    Opt<ParseError> parse_module_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
+    Opt<ParseError> parse_module_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     Opt<ParseError> parse_module_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
+    Opt<ParseError> parse_module_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     Opt<ParseError> parse_module_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
 
+    Opt<ParseError> parse_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, StructType& struct_type );
+    Opt<ParseError> parse_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, LayerType& layer_type );
+    Opt<ParseError> parse_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, EnumType& enum_type );
+    Opt<ParseError> parse_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Function& function );
+    Opt<ParseError> parse_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Operator& operato );
     Opt<ParseError> parse_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Variable& variable );
 
     Opt<ParseError> parse_type( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Type>& type );
@@ -250,11 +279,14 @@ private:
     Opt<ParseError> expression_type_array( Array<Token> const& tokens, Ref<Node>& tree );
     Opt<ParseError> expression_function( Array<Token> const& tokens, Ref<Node>& tree );
     Opt<ParseError> expression_yield( Array<Token> const& tokens, Ref<Node>& tree );
-};
 
-struct Node
-{
-    virtual ~Node() = default;
+    Opt<ParseError> parse_scope( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Scope& scope );
+    Opt<ParseError> scope_if( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
+    Opt<ParseError> scope_switch( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
+    Opt<ParseError> scope_for( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
+    Opt<ParseError> scope_while( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
+    Opt<ParseError> scope_loop( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
+    Opt<ParseError> scope_return( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
 };
 
 struct ValueNode : Node
@@ -299,10 +331,20 @@ struct NewArrayNode : Node
     Array<Ref<Node>> _list;
 };
 
+struct NewVarNode : Node
+{
+    Variable var;
+};
+
 struct FunctionCallNode : Node
 {
     String name;
     Array<Ref<Node>> args;
+};
+
+struct ReturnNode : Node
+{
+    Ref<Node> expr;
 };
 
 struct UnaryNode : Node

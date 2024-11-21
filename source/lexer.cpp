@@ -41,6 +41,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) kw_import,
         (String) kw_internal,
         (String) kw_func,
+        (String) kw_oper,
         (String) kw_return,
         (String) kw_yield,
         (String) kw_let,
@@ -247,7 +248,7 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_word( StringRef const& source, Ar
     String buffer;
     for ( ; i < (Int) source.size(); i++ )
     {
-        if ( !is_word( source, i ) )
+        if ( !iswdigit( source[i] ) && !is_word( source, i ) )
         {
             --i;
             break;

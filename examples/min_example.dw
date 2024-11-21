@@ -19,11 +19,19 @@ internal {
 	var aa: float = 6;
 	let bb = '\\';
 	let cc = "12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2)";
+
+	func sqr(val: int): int {
+		var result: int = 0;
+		result = val * val;
+		return result;
+	}
 }
 
 let neee = Person{ name: "Krimzo", age: 5 * -(Person{ age: b - a, name: "da" } ^ int[?; 4, 3, a * b]) };
 var haa = Person{ name: "Krimzo", age: 5 * -(Person{ age: b - a, name: "da" } ^ int[?; 4, 3, a * b]) };
 
-//func main(args: string[]) {
-//	print(a + b * 2);
-//}
+func main(args: string[]) {
+	var a = 5;
+	a = sqr(a);
+	print(a);
+}

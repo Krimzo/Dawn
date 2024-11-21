@@ -28,8 +28,8 @@ func primitive_examp() {
 }
 
 // Variable
-let A = 16;
-var B: float = 23.0;
+let a = 16;
+var b: float = 23.0;
 
 func var_examp() {
 	let a = 5;                // implicit type, constant, int, 5
@@ -48,20 +48,20 @@ func array_examp() {
 
 // Bracket
 func bracket_examp() {
-	T{};            // struct init
-	T(value);       // cast to T
-	t();            // function call
-	T[];            // array type
-	<< yield 0; >>; // yield scope
+	//T{};            // struct init
+	//T(value);       // cast to T
+	//t();            // function call
+	//T[];            // array type
+	//<< yield 0; >>; // yield scope
 }
 
 // Function
-func func_examp(a: int): int 
+func func_examp(a: int): int {
 	return a * a;
 }
 
 // Operator
-func *(left: string, right: int): string {
+oper *(left: string, right: int): string {
 	return left->repeat(right);
 }
 

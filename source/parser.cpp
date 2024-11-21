@@ -11,6 +11,7 @@ dawn::Bool dawn::Space::contains_id( StringRef const& id ) const
 {
     String id_str{ id };
     return variables.contains( id_str ) ||
+        operators.contains( id_str ) ||
         functions.contains( id_str ) ||
         enums.contains( id_str ) ||
         layers.contains( id_str ) ||
@@ -57,6 +58,11 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse( Array<Token>& tokens, Module& m
         else if ( it->value == kw_func )
         {
             if ( auto error = parse_module_function( it, end, module ) )
+                return error;
+        }
+        else if ( it->value == kw_oper )
+        {
+            if ( auto error = parse_module_operator( it, end, module ) )
                 return error;
         }
         else if ( it->value == kw_let || it->value == kw_var )
@@ -125,9 +131,9 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_internal( Array<Token>::c
             break;
         }
 
-        if ( it->value == kw_enum )
+        if ( it->value == kw_struct )
         {
-            if ( auto error = parse_module_enum( it, end, module ) )
+            if ( auto error = parse_module_struct( it, end, module ) )
                 return error;
         }
         else if ( it->value == kw_layer )
@@ -135,14 +141,19 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_internal( Array<Token>::c
             if ( auto error = parse_module_layer( it, end, module ) )
                 return error;
         }
-        else if ( it->value == kw_struct )
+        else if ( it->value == kw_enum )
         {
-            if ( auto error = parse_module_struct( it, end, module ) )
+            if ( auto error = parse_module_enum( it, end, module ) )
                 return error;
         }
         else if ( it->value == kw_func )
         {
             if ( auto error = parse_module_function( it, end, module ) )
+                return error;
+        }
+        else if ( it->value == kw_oper )
+        {
+            if ( auto error = parse_module_operator( it, end, module ) )
                 return error;
         }
         else if ( it->value == kw_let || it->value == kw_var )
@@ -160,27 +171,108 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_internal( Array<Token>::c
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
-    assert( false && "not implemented" );
+    StructType struct_type;
+    if ( auto error = parse_struct( it, end, struct_type ) )
+        return error;
+
+    if ( module.contains_id( struct_type.name ) )
+        return ParseError{ {}, L"name [" + struct_type.name + L"] already in use" };
+
+    if ( m_parsing_module_internal )
+    {
+        module.space_internal.structs[struct_type.name] = struct_type;
+    }
+    else
+    {
+        module.space_public.structs[struct_type.name] = struct_type;
+    }
+
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
-    assert( false && "not implemented" );
+    LayerType layer_type;
+    if ( auto error = parse_layer( it, end, layer_type ) )
+        return error;
+
+    if ( module.contains_id( layer_type.name ) )
+        return ParseError{ {}, L"name [" + layer_type.name + L"] already in use" };
+
+    if ( m_parsing_module_internal )
+    {
+        module.space_internal.layers[layer_type.name] = layer_type;
+    }
+    else
+    {
+        module.space_public.layers[layer_type.name] = layer_type;
+    }
+
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
-    assert( false && "not implemented" );
+    EnumType enum_type;
+    if ( auto error = parse_enum( it, end, enum_type ) )
+        return error;
+
+    if ( module.contains_id( enum_type.name ) )
+        return ParseError{ {}, L"name [" + enum_type.name + L"] already in use" };
+
+    if ( m_parsing_module_internal )
+    {
+        module.space_internal.enums[enum_type.name] = enum_type;
+    }
+    else
+    {
+        module.space_public.enums[enum_type.name] = enum_type;
+    }
+
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
-    assert( false && "not implemented" );
+    Function function;
+    if ( auto error = parse_function( it, end, function ) )
+        return error;
+
+    if ( module.contains_id( function.name ) )
+        return ParseError{ {}, L"name [" + function.name + L"] already in use" };
+
+    if ( m_parsing_module_internal )
+    {
+        module.space_internal.functions[function.name] = function;
+    }
+    else
+    {
+        module.space_public.functions[function.name] = function;
+    }
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+{
+    Operator operato;
+    if ( auto error = parse_operator( it, end, operato ) )
+        return error;
+
+    if ( module.contains_id( operato.name ) )
+        return ParseError{ {}, L"name [" + operato.name + L"] already in use" };
+
+    if ( m_parsing_module_internal )
+    {
+        module.space_internal.operators[operato.name] = operato;
+    }
+    else
+    {
+        module.space_public.operators[operato.name] = operato;
+    }
+
     return std::nullopt;
 }
 
@@ -202,6 +294,91 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_variable( Array<Token>::c
         module.space_public.variables[variable.name] = variable;
     }
 
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, StructType& struct_type )
+{
+    assert( false && "not impl" );
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, LayerType& layer_type )
+{
+    assert( false && "not impl" );
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, EnumType& enum_type )
+{
+    assert( false && "not impl" );
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Function& function )
+{
+    if ( it->value != kw_func )
+        return ParseError{ *it, "expected function" };
+    ++it;
+
+    if ( it->type != TokenType::FUNCTION )
+        return ParseError{ *it, "expected function name" };
+    function.name = it->value;
+    ++it;
+
+    if ( it->value != op_expr_opn )
+        return ParseError{ *it, "expected open expr" };
+    ++it;
+
+    Set<String> args;
+
+    while ( true )
+    {
+        if ( it->value == op_expr_cls )
+        {
+            ++it;
+            break;
+        }
+
+        if ( it->type != TokenType::NAME )
+            return ParseError{ *it, "expected arg name" };
+        String name = it->value;
+        ++it;
+
+        if ( it->value != op_link )
+            return ParseError{ *it, "expected link op" };
+        ++it;
+
+        Ref<Type> type;
+        if ( auto error = parse_type( it, end, type ) )
+            return error;
+
+        if ( args.contains( name ) )
+            return ParseError{ *it, "argument [", name, "] already defined" };
+        args.insert( name );
+
+        function.args.emplace_back( std::move( name ), std::move( type ) );
+
+        if ( it->value == op_split )
+            ++it;
+    }
+
+    if ( it->value == op_link )
+    {
+        ++it;
+        if ( auto error = parse_type( it, end, function.type ) )
+            return error;
+    }
+
+    if ( auto error = parse_scope( it, end, function.body ) )
+        return error;
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Operator& operato )
+{
+    assert( false && "not impl" );
     return std::nullopt;
 }
 
@@ -483,7 +660,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_precedence( Array<Token> co
             continue;
 
         Int prec = precedences.at( token.value );
-        if ( prec <= least_precedence )
+        if ( prec < least_precedence )
             continue;
 
         least_precedence = prec;
@@ -891,6 +1068,149 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_function( Array<Token> cons
 dawn::Opt<dawn::ParseError> dawn::Parser::expression_yield( Array<Token> const& tokens, Ref<Node>& tree )
 {
     assert( false && "not impl" );
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_scope( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Scope& scope )
+{
+    if ( it->value != op_scope_opn )
+        return ParseError{ *it, "expected scope open" };
+    ++it;
+
+    Set<String> vars;
+
+    while ( true )
+    {
+        if ( it->value == op_scope_cls )
+        {
+            ++it;
+            break;
+        }
+
+        if ( it->value == kw_let || it->value == kw_var )
+        {
+            Ref node = std::make_shared<NewVarNode>();
+            if ( auto error = parse_variable( it, end, node->var ) )
+                return error;
+
+            if ( vars.contains( node->var.name ) )
+                return ParseError{ *it, "variable [", node->var.name, "] already defined" };
+            vars.insert( node->var.name );
+
+            scope.instr.push_back( node );
+        }
+        else if ( it->value == kw_if )
+        {
+            Ref<Node> expr;
+            if ( auto error = scope_if( it, end, expr ) )
+                return error;
+            scope.instr.push_back( std::move( expr ) );
+        }
+        else if ( it->value == kw_switch )
+        {
+            Ref<Node> expr;
+            if ( auto error = scope_switch( it, end, expr ) )
+                return error;
+            scope.instr.push_back( std::move( expr ) );
+        }
+        else if ( it->value == kw_for )
+        {
+            Ref<Node> expr;
+            if ( auto error = scope_for( it, end, expr ) )
+                return error;
+            scope.instr.push_back( std::move( expr ) );
+        }
+        else if ( it->value == kw_while )
+        {
+            Ref<Node> expr;
+            if ( auto error = scope_while( it, end, expr ) )
+                return error;
+            scope.instr.push_back( std::move( expr ) );
+        }
+        else if ( it->value == kw_loop )
+        {
+            Ref<Node> expr;
+            if ( auto error = scope_loop( it, end, expr ) )
+                return error;
+            scope.instr.push_back( std::move( expr ) );
+        }
+        else if ( it->value == kw_return )
+        {
+            Ref<Node> expr;
+            if ( auto error = scope_return( it, end, expr ) )
+                return error;
+            scope.instr.push_back( std::move( expr ) );
+        }
+        else if ( it->value == op_scope_opn )
+        {
+            Ref<Scope> chld_scp = std::make_shared<Scope>();
+            if ( auto error = parse_scope( it, end, *chld_scp ) )
+                return error;
+            scope.instr.push_back( chld_scp );
+        }
+        else
+        {
+            Ref<Node> expr;
+            if ( auto error = parse_expression( it, end, expr ) )
+                return error;
+
+            if ( it->value != op_expr_end )
+                return ParseError{ *it, "expected expression end" };
+            ++it;
+
+            scope.instr.push_back( std::move( expr ) );
+        }
+    }
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::scope_if( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
+{
+    assert( false && "not impl" );
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::scope_switch( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
+{
+    assert( false && "not impl" );
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::scope_for( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
+{
+    assert( false && "not impl" );
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::scope_while( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
+{
+    assert( false && "not impl" );
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::scope_loop( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
+{
+    assert( false && "not impl" );
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::scope_return( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
+{
+    if ( it->value != kw_return )
+        return ParseError{ *it, "expected return" };
+    ++it;
+
+    Ref node = std::make_shared<ReturnNode>();
+    if ( auto error = parse_expression( it, end, node->expr ) )
+        return error;
+
+    if ( it->value != op_expr_end )
+        return ParseError{ *it, "expected expression end" };
+    ++it;
+
+    tree = node;
+
     return std::nullopt;
 }
 
