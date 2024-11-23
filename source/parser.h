@@ -15,17 +15,17 @@ struct ParseError
         StringStream stream;
         if ( token )
         {
-            stream << "Parse error at token " << *token << ": ";
+            stream << L"Parse error at token " << *token << L": ";
         }
         else
         {
-            stream << "Parse error: ";
+            stream << L"Parse error: ";
         }
         (stream << ... << args);
         msg = stream.str();
     }
 
-    inline operator String const& () const
+    inline operator auto& () const
     {
         return msg;
     }
@@ -107,27 +107,32 @@ struct ReferenceValue : Value
     Ref<Value> value = {};
 };
 
-struct BoolValue : Value
+struct ArrayValue : Value, Makeable<ArrayValue>
+{
+    Array<Ref<Value>> data = {};
+};
+
+struct BoolValue : Value, Makeable<BoolValue>
 {
     Bool value = {};
 };
 
-struct IntValue : Value
+struct IntValue : Value, Makeable<IntValue>
 {
     Int value = {};
 };
 
-struct FloatValue : Value
+struct FloatValue : Value, Makeable<FloatValue>
 {
     Float value = {};
 };
 
-struct CharValue : Value
+struct CharValue : Value, Makeable<CharValue>
 {
     Char value = {};
 };
 
-struct StringValue : Value
+struct StringValue : Value, Makeable<StringValue>
 {
     String value = {};
 };
@@ -187,7 +192,7 @@ struct EnumType : Type
     Map<String, Ref<Value>> values;
 };
 
-struct EnumValue : Value
+struct EnumValue : Value, Makeable<EnumValue>
 {
     Ref<EnumType> parent;
     String key;
@@ -206,7 +211,7 @@ struct StructType : Type
     Map<String, Ref<Method>> methods_internal;
 };
 
-struct StructValue : Value
+struct StructValue : Value, Makeable<StructValue>
 {
     Ref<StructType> parent;
     Map<String, Ref<Value>> members_public;

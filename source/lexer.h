@@ -13,13 +13,13 @@ struct LexError
     LexError( Int line_number, Char c, Args const&... args )
     {
         StringStream stream;
-        stream << "Lex error at line [" << line_number
-            << "] and char [" << from_escaping( c ) << "]: ";
+        stream << L"Lex error at line [" << line_number
+            << L"] and char [" << from_escaping( c ) << L"]: ";
         (stream << ... << args);
         msg = stream.str();
     }
 
-    inline operator String const& () const
+    inline operator auto& () const
     {
         return msg;
     }

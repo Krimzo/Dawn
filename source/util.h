@@ -29,6 +29,21 @@ struct ColoredText
 
 std::wostream& operator<<( std::wostream& stream, ColoredText const& colored_text );
 
+template<typename T>
+struct Makeable
+{
+    static Ref<T> make()
+    {
+        return std::make_shared<T>();
+    }
+};
+
+template<typename... Args>
+void print( Args const&... args )
+{
+    (std::wcout << ... << args) << '\n';
+}
+
 Char to_escaping( Char c );
 String from_escaping( Char c );
 String read_file( StringRef const& path );

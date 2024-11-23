@@ -15,7 +15,7 @@ static HANDLE _console_init = []
 
 std::wostream& dawn::operator<<( std::wostream& stream, Color const& color )
 {
-    stream << "\033[38;2;" << Int( color.r ) << ";" << Int( color.g ) << ";" << Int( color.b ) << "m";
+    stream << L"\033[38;2;" << Int( color.r ) << L";" << Int( color.g ) << L";" << Int( color.b ) << L"m";
     return stream;
 }
 

@@ -11,12 +11,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\engine.cpp" />
     <ClCompile Include="source\lexer.cpp" />
     <ClCompile Include="source\parser.cpp" />
     <ClCompile Include="source\util.cpp" />
     <ClCompile Include="source\dawn.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\engine.h" />
     <ClInclude Include="source\lexer.h" />
     <ClInclude Include="source\parser.h" />
     <ClInclude Include="source\syntax.h" />

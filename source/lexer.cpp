@@ -11,15 +11,15 @@ std::wostream& dawn::operator<<( std::wostream& stream, TokenType type )
 {
     switch ( type )
     {
-    case TokenType::INTEGER: stream << "Integer"; break;
-    case TokenType::FLOAT: stream << "Float"; break;
-    case TokenType::CHAR: stream << "Char"; break;
-    case TokenType::STRING: stream << "String"; break;
-    case TokenType::KEYWORD: stream << "Keyword"; break;
-    case TokenType::TYPE: stream << "Type"; break;
-    case TokenType::FUNCTION: stream << "Function"; break;
-    case TokenType::NAME: stream << "Name"; break;
-    case TokenType::OPERATOR: stream << "Operator"; break;
+    case TokenType::INTEGER: stream << L"Integer"; break;
+    case TokenType::FLOAT: stream << L"Float"; break;
+    case TokenType::CHAR: stream << L"Char"; break;
+    case TokenType::STRING: stream << L"String"; break;
+    case TokenType::KEYWORD: stream << L"Keyword"; break;
+    case TokenType::TYPE: stream << L"Type"; break;
+    case TokenType::FUNCTION: stream << L"Function"; break;
+    case TokenType::NAME: stream << L"Name"; break;
+    case TokenType::OPERATOR: stream << L"Operator"; break;
     }
     return stream;
 }
@@ -27,9 +27,9 @@ std::wostream& dawn::operator<<( std::wostream& stream, TokenType type )
 std::wostream& dawn::operator<<( std::wostream& stream, Token const& token )
 {
     Color color = to_color( token.type );
-    stream << "[(" << ColoredText{ color, token.type } <<
-        ") {" << ColoredText{ color, token.value } <<
-        "} <" << ColoredText{ color, token.line_number } << ">]";
+    stream << L"[(" << ColoredText{ color, token.type } <<
+        L") {" << ColoredText{ color, token.value } <<
+        L"} <" << ColoredText{ color, token.line_number } << L">]";
     return stream;
 }
 
@@ -168,7 +168,7 @@ dawn::Opt<dawn::LexError> dawn::Lexer::tokenize( StringRef const& source, Array<
         }
         else
         {
-            return LexError{ line, source[i], "unexpected character" };
+            return LexError{ line, source[i], L"unexpected character" };
         }
     }
 
@@ -292,7 +292,7 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_number( StringRef const& source, 
         if ( source.substr( i ).starts_with( lang_def.separator_number ) )
         {
             if ( is_float )
-                return LexError{ line, source[i], "invalid float number" };
+                return LexError{ line, source[i], L"invalid float number" };
 
             is_float = true;
         }
@@ -305,7 +305,7 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_number( StringRef const& source, 
     }
 
     if ( buffer == lang_def.separator_number )
-        return LexError{ line, source[i], "invalid number" };
+        return LexError{ line, source[i], L"invalid number" };
 
     Token& token = tokens.emplace_back();
     token.type = is_float ? TokenType::FLOAT : TokenType::INTEGER;
@@ -323,16 +323,16 @@ dawn::Bool dawn::Lexer::is_char( StringRef const& source, Int i )
 dawn::Opt<dawn::LexError> dawn::Lexer::extract_char( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
 {
     if ( source.substr( i ).size() < 3 )
-        return LexError{ line, source[i], "char literal too short" };
+        return LexError{ line, source[i], L"char literal too short" };
 
     String buffer;
     if ( source[i + 1] == L'\\' )
     {
         if ( source.substr( i ).size() < 4 )
-            return LexError{ line, source[i], "escaping char too short" };
+            return LexError{ line, source[i], L"escaping char too short" };
 
         if ( !is_char( source, i + 3 ) )
-            return LexError{ line, source[i], "invalid escaping char literal" };
+            return LexError{ line, source[i], L"invalid escaping char literal" };
 
         Char c = to_escaping( source[i + 2] );
         buffer = String( 1, c );
@@ -341,7 +341,7 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_char( StringRef const& source, Ar
     else
     {
         if ( !is_char( source, i + 2 ) )
-            return LexError{ line, source[i], "invalid char literal" };
+            return LexError{ line, source[i], L"invalid char literal" };
 
         Char c = source[i + 1];
         buffer = String( 1, c );
@@ -380,7 +380,7 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_string( StringRef const& source, 
         {
             auto view = source.substr( i );
             if ( view.size() < 2 )
-                return LexError{ line, source[i], "string escaping char too short" };
+                return LexError{ line, source[i], L"string escaping char too short" };
 
             Char c = to_escaping( view[1] );
             buffer.push_back( c );
@@ -425,7 +425,7 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_operator( StringRef const& source
     i += op_size - 1;
 
     if ( !closest_op )
-        return LexError{ line, source[i], "unknown operator" };
+        return LexError{ line, source[i], L"unknown operator" };
 
     Token& token = tokens.emplace_back();
     token.type = TokenType::OPERATOR;

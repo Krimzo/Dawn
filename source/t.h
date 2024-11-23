@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <typeinfo>
+#include <functional>
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
@@ -15,6 +16,7 @@
 #include <memory>
 #include <print>
 #include <variant>
+#include <ranges>
 
 
 namespace dawn
@@ -38,6 +40,10 @@ template<typename T1, typename T2> using Pair = std::pair<T1, T2>;
 template<typename T> using Ref = std::shared_ptr<T>;
 
 template<typename T> using Array = std::vector<T>;
+template<typename T> using List = std::list<T>;
 template<typename K> using Set = std::unordered_set<K>;
 template<typename K, typename V> using Map = std::unordered_map<K, V>;
+
+template<typename T> using ListRef = std::initializer_list<T>;
+template<typename T> using Func = std::function<T>;
 }

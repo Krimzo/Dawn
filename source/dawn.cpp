@@ -1,6 +1,7 @@
 #include "util.h"
 #include "lexer.h"
 #include "parser.h"
+#include "engine.h"
 
 
 int main()
@@ -11,25 +12,37 @@ int main()
 
     Lexer lexer;
     Parser parser;
+    Engine engine;
 
     Array<Token> tokens;
     if ( auto error = lexer.tokenize( source, tokens ) )
     {
-        std::wcout << error.value() << '\n';
+        print( error.value() );
         return 1;
     }
 
-#if 0
-    for ( auto& token : tokens )
-        std::wcout << token << '\n';
-    return 0;
-#endif
+    if constexpr ( false )
+        for ( auto& token : tokens )
+            print( token );
 
     Module module;
     if ( auto error = parser.parse( tokens, module ) )
     {
-        std::wcout << error.value() << '\n';
+        print( error.value() );
         return 2;
+    }
+
+    if ( auto error = engine.load( module ) )
+    {
+        print( error.value() );
+        return 3;
+    }
+
+    Ref<Value> retval;
+    if ( auto error = engine.exec( L"main", { ArrayValue::make() }, retval ) )
+    {
+        print( error.value() );
+        return 4;
     }
 
     return 0;

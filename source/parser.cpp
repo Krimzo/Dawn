@@ -11,7 +11,6 @@ dawn::Bool dawn::Space::contains_id( StringRef const& id ) const
 {
     String id_str{ id };
     return variables.contains( id_str ) ||
-        operators.contains( id_str ) ||
         functions.contains( id_str ) ||
         enums.contains( id_str ) ||
         layers.contains( id_str ) ||
@@ -115,11 +114,11 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_module( Array<Token>::con
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_internal( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
     if ( it->value != kw_internal )
-        return ParseError{ *it, "expected internal" };
+        return ParseError{ *it, L"expected internal" };
     ++it;
 
     if ( it->value != op_scope_opn )
-        return ParseError{ *it, "expected open scope" };
+        return ParseError{ *it, L"expected open scope" };
     ++it;
 
     m_parsing_module_internal = true;
@@ -299,35 +298,35 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_variable( Array<Token>::c
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, StructType& struct_type )
 {
-    assert( false && "not impl" );
+    assert( false && L"not impl" );
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, LayerType& layer_type )
 {
-    assert( false && "not impl" );
+    assert( false && L"not impl" );
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, EnumType& enum_type )
 {
-    assert( false && "not impl" );
+    assert( false && L"not impl" );
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Function& function )
 {
     if ( it->value != kw_func )
-        return ParseError{ *it, "expected function" };
+        return ParseError{ *it, L"expected function" };
     ++it;
 
     if ( it->type != TokenType::FUNCTION )
-        return ParseError{ *it, "expected function name" };
+        return ParseError{ *it, L"expected function name" };
     function.name = it->value;
     ++it;
 
     if ( it->value != op_expr_opn )
-        return ParseError{ *it, "expected open expr" };
+        return ParseError{ *it, L"expected open expr" };
     ++it;
 
     Set<String> args;
@@ -341,12 +340,12 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_function( Array<Token>::const_it
         }
 
         if ( it->type != TokenType::NAME )
-            return ParseError{ *it, "expected arg name" };
+            return ParseError{ *it, L"expected arg name" };
         String name = it->value;
         ++it;
 
         if ( it->value != op_link )
-            return ParseError{ *it, "expected link op" };
+            return ParseError{ *it, L"expected link op" };
         ++it;
 
         Ref<Type> type;
@@ -354,7 +353,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_function( Array<Token>::const_it
             return error;
 
         if ( args.contains( name ) )
-            return ParseError{ *it, "argument [", name, "] already defined" };
+            return ParseError{ *it, L"argument [", name, L"] already defined" };
         args.insert( name );
 
         function.args.emplace_back( std::move( name ), std::move( type ) );
@@ -378,7 +377,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_function( Array<Token>::const_it
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Operator& operato )
 {
-    assert( false && "not impl" );
+    assert( false && L"not impl" );
     return std::nullopt;
 }
 
@@ -857,7 +856,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type( Array<Token> const& t
     }
     else
     {
-        return ParseError{ second_token, "unknown type usage" };
+        return ParseError{ second_token, L"unknown type usage" };
     }
 
     return std::nullopt;
@@ -872,7 +871,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_cast( Array<Token> con
         return error;
 
     if ( it->value != op_expr_opn )
-        return ParseError{ *it, "expected expression open" };
+        return ParseError{ *it, L"expected expression open" };
     ++it;
 
     Array<Token> expr_tokens;
@@ -880,14 +879,14 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_cast( Array<Token> con
         return error;
 
     if ( expr_tokens.empty() )
-        return ParseError{ *it, "expected expression" };
+        return ParseError{ *it, L"expected expression" };
 
     Array<Token>::const_iterator expr_it = expr_tokens.begin();
     if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->expr ) )
         return error;
 
     if ( it->value != op_expr_cls )
-        return ParseError{ *it, "expected expression close" };
+        return ParseError{ *it, L"expected expression close" };
     ++it;
 
     tree = node;
@@ -904,7 +903,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_make( Array<Token> con
         return error;
 
     if ( it->value != op_scope_opn )
-        return ParseError{ *it, "expected expression open" };
+        return ParseError{ *it, L"expected expression open" };
     ++it;
 
     while ( true )
@@ -913,7 +912,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_make( Array<Token> con
             break;
 
         if ( it->type != TokenType::NAME )
-            return ParseError{ *it, "expected field name" };
+            return ParseError{ *it, L"expected field name" };
 
         String name = it->value;
         if ( node->args.contains( name ) )
@@ -921,7 +920,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_make( Array<Token> con
         ++it;
 
         if ( it->value != op_link )
-            return ParseError{ *it, "expected bind operator" };
+            return ParseError{ *it, L"expected bind operator" };
         ++it;
 
         Array<Token> expr_tokens;
@@ -929,7 +928,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_make( Array<Token> con
             return error;
 
         if ( expr_tokens.empty() )
-            return ParseError{ *it, "expected expression" };
+            return ParseError{ *it, L"expected expression" };
 
         if ( it->value == op_split )
             ++it;
@@ -954,7 +953,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> co
         return error;
 
     if ( it->value != op_array_opn )
-        return ParseError{ *it, "expected array size expression" };
+        return ParseError{ *it, L"expected array size expression" };
     ++it;
 
     Array<Token> expr_tokens;
@@ -962,12 +961,12 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> co
         return error;
 
     if ( expr_tokens.empty() )
-        return ParseError{ *it, "expected array size expression" };
+        return ParseError{ *it, L"expected array size expression" };
 
     if ( expr_tokens.front().value == op_unknown )
     {
         if ( it->value != op_expr_end )
-            return ParseError{ *it, "expected expression end" };
+            return ParseError{ *it, L"expected expression end" };
         ++it;
 
         while ( true )
@@ -1018,7 +1017,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> co
     }
 
     if ( it->value != op_array_cls )
-        return ParseError{ *it, "expected array end" };
+        return ParseError{ *it, L"expected array end" };
 
     tree = node;
 
@@ -1031,12 +1030,12 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_function( Array<Token> cons
     Ref node = std::make_shared<FunctionCallNode>();
 
     if ( it->type != TokenType::FUNCTION )
-        return ParseError{ *it, "expected function name" };
+        return ParseError{ *it, L"expected function name" };
     node->name = it->value;
     ++it;
 
     if ( it->value != op_expr_opn )
-        return ParseError{ *it, "expected function open" };
+        return ParseError{ *it, L"expected function open" };
     ++it;
 
     while ( true )
@@ -1057,7 +1056,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_function( Array<Token> cons
     }
 
     if ( it->value != op_expr_cls )
-        return ParseError{ *it, "expected function close" };
+        return ParseError{ *it, L"expected function close" };
     ++it;
 
     tree = node;
@@ -1067,14 +1066,14 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_function( Array<Token> cons
 
 dawn::Opt<dawn::ParseError> dawn::Parser::expression_yield( Array<Token> const& tokens, Ref<Node>& tree )
 {
-    assert( false && "not impl" );
+    assert( false && L"not impl" );
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_scope( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Scope& scope )
 {
     if ( it->value != op_scope_opn )
-        return ParseError{ *it, "expected scope open" };
+        return ParseError{ *it, L"expected scope open" };
     ++it;
 
     Set<String> vars;
@@ -1094,7 +1093,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_scope( Array<Token>::const_itera
                 return error;
 
             if ( vars.contains( node->var.name ) )
-                return ParseError{ *it, "variable [", node->var.name, "] already defined" };
+                return ParseError{ *it, L"variable [", node->var.name, L"] already defined" };
             vars.insert( node->var.name );
 
             scope.instr.push_back( node );
@@ -1155,7 +1154,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_scope( Array<Token>::const_itera
                 return error;
 
             if ( it->value != op_expr_end )
-                return ParseError{ *it, "expected expression end" };
+                return ParseError{ *it, L"expected expression end" };
             ++it;
 
             scope.instr.push_back( std::move( expr ) );
@@ -1167,38 +1166,38 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_scope( Array<Token>::const_itera
 
 dawn::Opt<dawn::ParseError> dawn::Parser::scope_if( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
 {
-    assert( false && "not impl" );
+    assert( false && L"not impl" );
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::Parser::scope_switch( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
 {
-    assert( false && "not impl" );
+    assert( false && L"not impl" );
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::Parser::scope_for( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
 {
-    assert( false && "not impl" );
+    assert( false && L"not impl" );
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::Parser::scope_while( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
 {
-    assert( false && "not impl" );
+    assert( false && L"not impl" );
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::Parser::scope_loop( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
 {
-    assert( false && "not impl" );
+    assert( false && L"not impl" );
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::Parser::scope_return( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
 {
     if ( it->value != kw_return )
-        return ParseError{ *it, "expected return" };
+        return ParseError{ *it, L"expected return" };
     ++it;
 
     Ref node = std::make_shared<ReturnNode>();
@@ -1206,7 +1205,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_return( Array<Token>::const_iter
         return error;
 
     if ( it->value != op_expr_end )
-        return ParseError{ *it, "expected expression end" };
+        return ParseError{ *it, L"expected expression end" };
     ++it;
 
     tree = node;
