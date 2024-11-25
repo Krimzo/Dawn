@@ -100,41 +100,57 @@ struct StringType : Type
 struct Value
 {
     virtual ~Value() = default;
+
+    virtual String to_string() const = 0;
 };
 
 struct ReferenceValue : Value
 {
     Ref<Value> value = {};
+
+    String to_string() const override;
 };
 
 struct ArrayValue : Value, Makeable<ArrayValue>
 {
     Array<Ref<Value>> data = {};
+
+    String to_string() const override;
 };
 
 struct BoolValue : Value, Makeable<BoolValue>
 {
     Bool value = {};
+
+    String to_string() const override;
 };
 
 struct IntValue : Value, Makeable<IntValue>
 {
     Int value = {};
+
+    String to_string() const override;
 };
 
 struct FloatValue : Value, Makeable<FloatValue>
 {
     Float value = {};
+
+    String to_string() const override;
 };
 
 struct CharValue : Value, Makeable<CharValue>
 {
     Char value = {};
+
+    String to_string() const override;
 };
 
 struct StringValue : Value, Makeable<StringValue>
 {
     String value = {};
+
+    String to_string() const override;
 };
 
 struct Variable
@@ -142,7 +158,7 @@ struct Variable
     String name;
     Bool is_var = false;
     Ref<Type> type;
-    Ref<Node> value;
+    Ref<Node> expr;
 };
 
 struct Scope : Node
@@ -196,6 +212,8 @@ struct EnumValue : Value, Makeable<EnumValue>
 {
     Ref<EnumType> parent;
     String key;
+
+    String to_string() const override;
 };
 
 struct LayerType : Type
@@ -216,6 +234,8 @@ struct StructValue : Value, Makeable<StructValue>
     Ref<StructType> parent;
     Map<String, Ref<Value>> members_public;
     Map<String, Ref<Value>> members_internal;
+
+    String to_string() const override;
 };
 
 struct Space
@@ -478,10 +498,6 @@ struct OperatorNodePowAs : OperatorNode
 };
 
 struct OperatorNodeModAs : OperatorNode
-{
-};
-
-struct OperatorNodeSplit : OperatorNode
 {
 };
 

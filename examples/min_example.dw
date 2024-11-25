@@ -1,24 +1,10 @@
 module min_example;
 
-let a: int = 12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2);
-var b: int let& = &a;
-let c: int let& var& = &b;
-let e: ~ = ~a+3;
-let f: int[] = int[5];
-let g: int[] let& = &f;
-var h: float = float(((a)+b)-c);
-
-let a_arr: int[] = int[12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2)];
-let b_arr: int[] = int[5; 12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2)];
-let c_arr: int[] = int[?; 1, 12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2), 3];
-
-let a_str: Person = Person{};
-let b_str = Person{ name: "Krimzo", age: 5 * -(Person{ age: b - a, name: "da" } ^ int[?; 4, 3, a * b]) };
+let a = 12 % ( (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2) );
+var b = -a * 2;
 
 internal {
-	var aa: float = 6;
-	let bb = '\\';
-	let cc = "12 % (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2)";
+	let c = b * 17.9;
 
 	func sqr(val: int): int {
 		var result: int = 0;
@@ -27,11 +13,8 @@ internal {
 	}
 }
 
-let neee = Person{ name: "Krimzo", age: 5 * -(Person{ age: b - a, name: "da" } ^ int[?; 4, 3, a * b]) };
-var haa = Person{ name: "Krimzo", age: 5 * -(Person{ age: b - a, name: "da" } ^ int[?; 4, 3, a * b]) };
-
 func main(args: string[]) {
-	var a = 5;
+	var a = c;
 	a = sqr(a);
 	print(a);
 }

@@ -7,6 +7,64 @@ std::wostream& dawn::operator<<( std::wostream& stream, ParseError const& error 
     return stream;
 }
 
+dawn::String dawn::ReferenceValue::to_string() const
+{
+    if ( value )
+        return value->to_string();
+    return L"null";
+}
+
+dawn::String dawn::ArrayValue::to_string() const
+{
+    if ( data.empty() )
+        return L"[]";
+
+    StringStream stream;
+    stream << L"[";
+    for ( Int i = 0; i < (Int) data.size() - 1; i++ )
+        stream << data[i]->to_string() << L", ";
+    stream << data.back()->to_string() << L"]";
+
+    return stream.str();
+}
+
+dawn::String dawn::BoolValue::to_string() const
+{
+    if ( value )
+        return L"true";
+    return L"false";
+}
+
+dawn::String dawn::IntValue::to_string() const
+{
+    return std::to_wstring( value );
+}
+
+dawn::String dawn::FloatValue::to_string() const
+{
+    return std::to_wstring( value );
+}
+
+dawn::String dawn::CharValue::to_string() const
+{
+    return String( 1, value );
+}
+
+dawn::String dawn::StringValue::to_string() const
+{
+    return value;
+}
+
+dawn::String dawn::EnumValue::to_string() const
+{
+    return parent->name + L":" + key;
+}
+
+dawn::String dawn::StructValue::to_string() const
+{
+    return parent->name + L"{}";
+}
+
 dawn::Bool dawn::Space::contains_id( StringRef const& id ) const
 {
     String id_str{ id };
@@ -404,7 +462,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_variable( Array<Token>::const_it
         return ParseError{ *it, L"expected variable assignment" };
     ++it;
 
-    if ( auto error = parse_expression( it, end, variable.value ) )
+    if ( auto error = parse_expression( it, end, variable.expr ) )
         return error;
 
     if ( it->value != op_expr_end )
@@ -1340,10 +1398,6 @@ dawn::Opt<dawn::ParseError> dawn::create_operator_node( Token const& token, Ref<
     else if ( token.value == op_modas )
     {
         node = std::make_shared<OperatorNodeModAs>();
-    }
-    else if ( token.value == op_split )
-    {
-        node = std::make_shared<OperatorNodeSplit>();
     }
     else
     {

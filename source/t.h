@@ -43,7 +43,4 @@ template<typename T> using Array = std::vector<T>;
 template<typename T> using List = std::list<T>;
 template<typename K> using Set = std::unordered_set<K>;
 template<typename K, typename V> using Map = std::unordered_map<K, V>;
-
-template<typename T> using ListRef = std::initializer_list<T>;
-template<typename T> using Func = std::function<T>;
 }
