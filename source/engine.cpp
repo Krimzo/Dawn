@@ -59,6 +59,68 @@ dawn::Bool dawn::Engine::get_global( String const& var_name, Ref<Value>& value )
     return true;
 }
 
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Array<Ref<Value>> const& args, Ref<Value>& retval )
+{
+    if ( func.args.size() != args.size() )
+        return EngineError{ "invalid argument count" };
+
+    for ( Int i = 0; i < (Int) args.size(); i++ )
+    {
+        EngineVar arg;
+        arg.name = func.args[i].name;
+        arg.is_var = false;
+        arg.type = func.args[i].type;
+        arg.value = args[i];
+        m_variables.push( arg.name, arg );
+    }
+
+    if ( auto error = handle_scope( func.body, retval ) )
+        return error;
+
+    m_variables.pop( (Int) args.size() );
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_scope( Scope const& scope, Ref<Value>& retval )
+{
+    Int push_count = 0;
+
+    for ( auto& instr : scope.instr )
+    {
+        Bool didbrk = false;
+        if ( auto error = handle_instr( instr, retval, push_count, didbrk ) )
+            return error;
+        if ( didbrk )
+            break;
+    }
+
+    m_variables.pop( push_count );
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_instr( Ref<Node> const& node, Ref<Value>& retval, Int& push_count, Bool& didbrk )
+{
+    if ( auto nd = dynamic_cast<NewVarNode*>(node.get()) )
+        return handle_new_var_instr( *nd, push_count );
+
+    if ( auto nd = dynamic_cast<ReturnNode*>(node.get()) )
+    {
+        if ( auto error = handle_expr( nd->expr, retval ) )
+            return error;
+
+        didbrk = true;
+        return std::nullopt;
+    }
+
+    Ref<Value> _val;
+    if ( auto error = handle_expr( node, _val ) )
+        return error;
+
+    return std::nullopt;
+}
+
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_expr( Ref<Node> const& node, Ref<Value>& value )
 {
     if ( auto nd = dynamic_cast<ValueNode*>(node.get()) )
@@ -79,57 +141,10 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_expr( Ref<Node> const& node, R
     if ( auto nd = dynamic_cast<PrintNode*>(node.get()) )
         return handle_print_node( *nd, value );
 
+    if ( auto scp = dynamic_cast<Scope*>(node.get()) )
+        return handle_scope( *scp, value );
+
     return EngineError{ "Unknown expr node type: ", typeid(*node).name() };
-}
-
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_instr( Ref<Node> const& node, Ref<Value>& retval, Bool& didret )
-{
-    if ( auto nd = dynamic_cast<NewVarNode*>(node.get()) )
-        return handle_new_var_instr( *nd );
-
-    if ( auto nd = dynamic_cast<ReturnNode*>(node.get()) )
-    {
-        if ( auto error = handle_expr( nd->expr, retval ) )
-            return error;
-
-        didret = true;
-        return std::nullopt;
-    }
-
-    Ref<Value> _val;
-    if ( auto error = handle_expr( node, _val ) )
-        return error;
-
-    return std::nullopt;
-}
-
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Array<Ref<Value>> const& args, Ref<Value>& retval )
-{
-    if ( func.args.size() != args.size() )
-        return EngineError{ "invalid argument count" };
-
-    for ( Int i = 0; i < (Int) args.size(); i++ )
-    {
-        EngineVar arg;
-        arg.name = func.args[i].name;
-        arg.is_var = false;
-        arg.type = func.args[i].type;
-        arg.value = args[i];
-        m_variables.push( arg.name, arg );
-    }
-
-    for ( auto& instr : func.body.instr )
-    {
-        Bool didret = false;
-        if ( auto error = handle_instr( instr, retval, didret ) )
-            return error;
-        if ( didret )
-            break;
-    }
-
-    m_variables.pop( (Int) args.size() );
-
-    return std::nullopt;
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_val_node( ValueNode const& node, Ref<Value>& value )
@@ -164,11 +179,17 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func_call_node( FunctionCallNo
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_print_node( PrintNode const& node, Ref<Value>& value )
 {
-    Ref<Value> val;
-    if ( auto error = handle_expr( node.expr, val ) )
-        return error;
+    String result;
+    for ( auto& arg : node.args )
+    {
+        Ref<Value> val;
+        if ( auto error = handle_expr( arg, val ) )
+            return error;
+        result += val->to_string();
+    }
 
-    print( val->to_string() );
+    print( result );
+
     return std::nullopt;
 }
 
@@ -178,236 +199,76 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_un_node( UnaryNode const& node
     if ( auto error = handle_expr( node.right, right ) )
         return error;
 
-    if ( auto val = dynamic_cast<IntValue*>(right.get()) )
-    {
-        if ( auto error = handle_un_int( typeid(node), val->value, value ) )
-            return error;
-    }
-    else if ( auto val = dynamic_cast<FloatValue*>(right.get()) )
-    {
-        if ( auto error = handle_un_float( typeid(node), val->value, value ) )
-            return error;
-    }
+    if ( typeid(node) == typeid(UnaryNodePlus) )
+        value = +(*right);
+    else if ( typeid(node) == typeid(UnaryNodeMinus) )
+        value = -(*right);
+    //else if ( typeid(node) == typeid(UnaryNodeNot) )
+    //    value = !(*right);
+    //else if ( typeid(node) == typeid(UnaryNodeRef) )
+    //    value = &(*right);
+    //else if ( typeid(node) == typeid(UnaryNodeRange) )
+    //    value = ~(*right);
     else
-    {
-        return EngineError{ "unary operators support only ints and floats" };
-    }
+        return EngineError{ "Unknown unary node type: ", typeid(node).name() };
 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_un_int( type_info const& node_type, Int right, Ref<Value>& value )
-{
-    if ( typeid(UnaryNodePlus) == node_type )
-    {
-        auto val = IntValue::make();
-        val->value = +right;
-        value = val;
-        return std::nullopt;
-    }
-
-    if ( typeid(UnaryNodeMinus) == node_type )
-    {
-        auto val = IntValue::make();
-        val->value = -right;
-        value = val;
-        return std::nullopt;
-    }
-
-    return EngineError{ "unsupported int unary operator" };
-}
-
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_un_float( type_info const& node_type, Float right, Ref<Value>& value )
-{
-    if ( typeid(UnaryNodePlus) == node_type )
-    {
-        auto val = FloatValue::make();
-        val->value = +right;
-        value = val;
-        return std::nullopt;
-    }
-
-    if ( typeid(UnaryNodeMinus) == node_type )
-    {
-        auto val = FloatValue::make();
-        val->value = -right;
-        value = val;
-        return std::nullopt;
-    }
-
-    return EngineError{ "unsupported float unary operator" };
-}
-
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& node, Ref<Value>& value )
 {
-    Ref<Value> right;
-    if ( auto error = handle_expr( node.right, right ) )
-        return error;
-
-    Opt<Int> right_int;
-    Opt<Float> right_float;
-
-    if ( auto val = dynamic_cast<IntValue*>(right.get()) )
-        right_int = val->value;
-    else if ( auto val = dynamic_cast<FloatValue*>(right.get()) )
-        right_float = val->value;
-    else
-        return EngineError{ "operators support only ints and floats" };
-
-    if ( auto op_node = dynamic_cast<OperatorNodeAssign const*>(&node) )
-    {
-        auto id_node = dynamic_cast<IdentifierNode const*>(op_node->left.get());
-        if ( !id_node )
-            return EngineError{ "only identifiers can be assigned to" };
-
-        auto var = m_variables.get( id_node->name );
-        if ( !var )
-            return EngineError{ L"variable [", id_node->name, L"] doesn't exist" };
-
-        var->value = right;
-        return std::nullopt;
-    }
+    if ( auto nd = dynamic_cast<AssignNode const*>(&node) )
+        return handle_as_node( *nd, value );
 
     Ref<Value> left;
     if ( auto error = handle_expr( node.left, left ) )
         return error;
 
-    Opt<Int> left_int;
-    Opt<Float> left_float;
+    Ref<Value> right;
+    if ( auto error = handle_expr( node.right, right ) )
+        return error;
 
-    if ( auto val = dynamic_cast<IntValue*>(left.get()) )
-        left_int = val->value;
-    else if ( auto val = dynamic_cast<FloatValue*>(left.get()) )
-        left_float = val->value;
+    if ( typeid(node) == typeid(OperatorNodeAdd) )
+        value = (*left) + (*right);
+    else if ( typeid(node) == typeid(OperatorNodeSub) )
+        value = (*left) - (*right);
+    else if ( typeid(node) == typeid(OperatorNodeMul) )
+        value = (*left) * (*right);
+    else if ( typeid(node) == typeid(OperatorNodeDiv) )
+        value = (*left) / (*right);
+    else if ( typeid(node) == typeid(OperatorNodePow) )
+        value = (*left) ^ (*right);
+    else if ( typeid(node) == typeid(OperatorNodeMod) )
+        value = (*left) % (*right);
     else
-        return EngineError{ "operators support only ints and floats" };
-
-    if ( left_int && right_int )
-    {
-        if ( auto error = handle_op_int( typeid(node), *left_int, *right_int, value ) )
-            return error;
-    }
-    else
-    {
-        if ( left_int )
-            left_float = (Float) *left_int;
-        else if ( right_int )
-            right_float = (Float) *right_int;
-
-        if ( auto error = handle_op_float( typeid(node), *left_float, *right_float, value ) )
-            return error;
-    }
+        return EngineError{ "Unknown operator node type: ", typeid(node).name() };
 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_int( type_info const& node_type, Int left, Int right, Ref<Value>& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& node, Ref<Value>& value )
 {
-    if ( typeid(OperatorNodePow) == node_type )
-    {
-        auto val = IntValue::make();
-        val->value = (Int) std::pow( left, right );
-        value = val;
-        return std::nullopt;
-    }
+    auto id = dynamic_cast<IdentifierNode const*>(node.left.get());
+    if ( !id )
+        return EngineError{ "left value of assign must be an identifier" };
 
-    if ( typeid(OperatorNodeMod) == node_type )
-    {
-        auto val = IntValue::make();
-        val->value = left % right;
-        value = val;
-        return std::nullopt;
-    }
+    Ref<Value> right;
+    if ( auto error = handle_expr( node.right, right ) )
+        return error;
 
-    if ( typeid(OperatorNodeMul) == node_type )
-    {
-        auto val = IntValue::make();
-        val->value = left * right;
-        value = val;
-        return std::nullopt;
-    }
+    auto var = m_variables.get( id->name );
+    if ( !var )
+        return EngineError{ "variable [", id->name, L"] doesn't exist" };
 
-    if ( typeid(OperatorNodeDiv) == node_type )
-    {
-        auto val = IntValue::make();
-        val->value = left / right;
-        value = val;
-        return std::nullopt;
-    }
+    if ( !var->is_var )
+        return EngineError{ "variable [", id->name, L"] is a constant" };
 
-    if ( typeid(OperatorNodeAdd) == node_type )
-    {
-        auto val = IntValue::make();
-        val->value = left + right;
-        value = val;
-        return std::nullopt;
-    }
+    var->value = std::move( right );
 
-    if ( typeid(OperatorNodeSub) == node_type )
-    {
-        auto val = IntValue::make();
-        val->value = left - right;
-        value = val;
-        return std::nullopt;
-    }
-
-    return EngineError{ "unsupported int operator" };
+    return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_float( type_info const& node_type, Float left, Float right, Ref<Value>& value )
-{
-    if ( typeid(OperatorNodePow) == node_type )
-    {
-        auto val = FloatValue::make();
-        val->value = (Float) std::pow( left, right );
-        value = val;
-        return std::nullopt;
-    }
-
-    if ( typeid(OperatorNodeMod) == node_type )
-    {
-        auto val = FloatValue::make();
-        val->value = (Float) std::remainder( left, right );
-        value = val;
-        return std::nullopt;
-    }
-
-    if ( typeid(OperatorNodeMul) == node_type )
-    {
-        auto val = FloatValue::make();
-        val->value = left * right;
-        value = val;
-        return std::nullopt;
-    }
-
-    if ( typeid(OperatorNodeDiv) == node_type )
-    {
-        auto val = FloatValue::make();
-        val->value = left / right;
-        value = val;
-        return std::nullopt;
-    }
-
-    if ( typeid(OperatorNodeAdd) == node_type )
-    {
-        auto val = FloatValue::make();
-        val->value = left + right;
-        value = val;
-        return std::nullopt;
-    }
-
-    if ( typeid(OperatorNodeSub) == node_type )
-    {
-        auto val = FloatValue::make();
-        val->value = left - right;
-        value = val;
-        return std::nullopt;
-    }
-
-    return EngineError{ "unsupported float operator" };
-}
-
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_new_var_instr( NewVarNode const& node )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_new_var_instr( NewVarNode const& node, Int& push_count )
 {
     Ref<Value> value;
     if ( auto error = handle_expr( node.var.expr, value ) )
@@ -419,6 +280,8 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_new_var_instr( NewVarNode cons
     var.type = node.var.type;
     var.value = value;
     m_variables.push( node.var.name, var );
+
+    ++push_count;
 
     return std::nullopt;
 }

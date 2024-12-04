@@ -16,14 +16,19 @@
     <ClCompile Include="source\parser.cpp" />
     <ClCompile Include="source\util.cpp" />
     <ClCompile Include="source\dawn.cpp" />
+    <ClCompile Include="source\values.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\engine.h" />
     <ClInclude Include="source\lexer.h" />
+    <ClInclude Include="source\nodes.h" />
     <ClInclude Include="source\parser.h" />
     <ClInclude Include="source\syntax.h" />
     <ClInclude Include="source\t.h" />
+    <ClInclude Include="source\types.h" />
     <ClInclude Include="source\util.h" />
+    <ClInclude Include="source\valtype.h" />
+    <ClInclude Include="source\values.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -7,64 +7,6 @@ std::wostream& dawn::operator<<( std::wostream& stream, ParseError const& error 
     return stream;
 }
 
-dawn::String dawn::ReferenceValue::to_string() const
-{
-    if ( value )
-        return value->to_string();
-    return L"null";
-}
-
-dawn::String dawn::ArrayValue::to_string() const
-{
-    if ( data.empty() )
-        return L"[]";
-
-    StringStream stream;
-    stream << L"[";
-    for ( Int i = 0; i < (Int) data.size() - 1; i++ )
-        stream << data[i]->to_string() << L", ";
-    stream << data.back()->to_string() << L"]";
-
-    return stream.str();
-}
-
-dawn::String dawn::BoolValue::to_string() const
-{
-    if ( value )
-        return L"true";
-    return L"false";
-}
-
-dawn::String dawn::IntValue::to_string() const
-{
-    return std::to_wstring( value );
-}
-
-dawn::String dawn::FloatValue::to_string() const
-{
-    return std::to_wstring( value );
-}
-
-dawn::String dawn::CharValue::to_string() const
-{
-    return String( 1, value );
-}
-
-dawn::String dawn::StringValue::to_string() const
-{
-    return value;
-}
-
-dawn::String dawn::EnumValue::to_string() const
-{
-    return parent->name + L":" + key;
-}
-
-dawn::String dawn::StructValue::to_string() const
-{
-    return parent->name + L"{}";
-}
-
 dawn::Bool dawn::Module::contains_id( StringRef const& id ) const
 {
     String id_str{ id };
@@ -745,10 +687,8 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_keyword( Token const
     }
     else if ( token.value == kw_null )
     {
-        auto value = std::make_shared<ReferenceValue>();
-        value->value = nullptr;
         auto node = std::make_shared<ValueNode>();
-        node->value = value;
+        node->value = nullptr;
         tree = node;
     }
     else if ( token.value == kw_self )
@@ -999,7 +939,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_function( Array<Token> cons
     if ( node->name == L"print" )
     {
         auto print_nd = std::make_shared<PrintNode>();
-        print_nd->expr = node->args[0];
+        print_nd->args = node->args;
         tree = print_nd;
     }
     else
@@ -1261,31 +1201,31 @@ dawn::Opt<dawn::ParseError> dawn::create_operator_node( Token const& token, Ref<
     }
     else if ( token.value == op_assign )
     {
-        node = std::make_shared<OperatorNodeAssign>();
+        node = std::make_shared<AssignNode>();
     }
     else if ( token.value == op_addas )
     {
-        node = std::make_shared<OperatorNodeAddAs>();
+        node = std::make_shared<AssignNodeAdd>();
     }
     else if ( token.value == op_subas )
     {
-        node = std::make_shared<OperatorNodeSubAs>();
+        node = std::make_shared<AssignNodeSub>();
     }
     else if ( token.value == op_mulas )
     {
-        node = std::make_shared<OperatorNodeMulAs>();
+        node = std::make_shared<AssignNodeMul>();
     }
     else if ( token.value == op_divas )
     {
-        node = std::make_shared<OperatorNodeDivAs>();
+        node = std::make_shared<AssignNodeDiv>();
     }
     else if ( token.value == op_powas )
     {
-        node = std::make_shared<OperatorNodePowAs>();
+        node = std::make_shared<AssignNodePow>();
     }
     else if ( token.value == op_modas )
     {
-        node = std::make_shared<OperatorNodeModAs>();
+        node = std::make_shared<AssignNodeMod>();
     }
     else
     {

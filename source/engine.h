@@ -79,9 +79,10 @@ private:
     Stack<LayerType> m_layers;
     Stack<StructType> m_structs;
 
-    Opt<EngineError> handle_expr( Ref<Node> const& node, Ref<Value>& value );
-    Opt<EngineError> handle_instr( Ref<Node> const& node, Ref<Value>& retval, Bool& didret );
     Opt<EngineError> handle_func( Function const& func, Array<Ref<Value>> const& args, Ref<Value>& retval );
+    Opt<EngineError> handle_scope( Scope const& scope, Ref<Value>& retval );
+    Opt<EngineError> handle_instr( Ref<Node> const& node, Ref<Value>& retval, Int& push_count, Bool& didbrk );
+    Opt<EngineError> handle_expr( Ref<Node> const& node, Ref<Value>& value );
 
     Opt<EngineError> handle_val_node( ValueNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_id_node( IdentifierNode const& node, Ref<Value>& value );
@@ -89,13 +90,9 @@ private:
     Opt<EngineError> handle_print_node( PrintNode const& node, Ref<Value>& value );
 
     Opt<EngineError> handle_un_node( UnaryNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_un_int( type_info const& node_type, Int right, Ref<Value>& value );
-    Opt<EngineError> handle_un_float( type_info const& node_type, Float right, Ref<Value>& value );
-
     Opt<EngineError> handle_op_node( OperatorNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_op_int( type_info const& node_type, Int left, Int right, Ref<Value>& value );
-    Opt<EngineError> handle_op_float( type_info const& node_type, Float left, Float right, Ref<Value>& value );
+    Opt<EngineError> handle_as_node( AssignNode const& node, Ref<Value>& value );
 
-    Opt<EngineError> handle_new_var_instr( NewVarNode const& node );
+    Opt<EngineError> handle_new_var_instr( NewVarNode const& node, Int& push_count );
 };
 }
