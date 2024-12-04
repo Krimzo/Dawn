@@ -7,79 +7,41 @@ std::wostream& dawn::operator<<( std::wostream& stream, EngineError const& error
     return stream;
 }
 
-void dawn::Stack::push( StackVal const& val )
-{
-    m_data.emplace_back( val );
-}
-
-void dawn::Stack::pop( Int n )
-{
-    m_data.resize( m_data.size() - n );
-}
-
-dawn::StackVal const& dawn::Stack::peek() const
-{
-    return m_data.back();
-}
-
-dawn::Ref<dawn::Value> dawn::Stack::get( StringRef const& name ) const
-{
-    for ( Int i = m_data.size() - 1; i >= 0; i-- )
-    {
-        if ( m_data[i].name == name )
-            return m_data[i].value;
-    }
-    return {};
-}
-
 dawn::Opt<dawn::EngineError> dawn::Engine::load( Module const& module )
 {
-    if ( m_modules.contains( module.name ) )
-        return EngineError{ L"module [", module.name, L"] already loaded" };
-
-    Set<String> keys;
-    keys.insert( std::views::keys( module.space_public.variables ).begin(), std::views::keys( module.space_public.variables ).end() );
-    keys.insert( std::views::keys( module.space_public.functions ).begin(), std::views::keys( module.space_public.functions ).end() );
-    keys.insert( std::views::keys( module.space_public.enums ).begin(), std::views::keys( module.space_public.enums ).end() );
-    keys.insert( std::views::keys( module.space_public.layers ).begin(), std::views::keys( module.space_public.layers ).end() );
-    keys.insert( std::views::keys( module.space_public.structs ).begin(), std::views::keys( module.space_public.structs ).end() );
-
-    for ( auto& key : keys )
+    auto helper_func = [this]( auto& out_coll, auto const& in_coll )
     {
-        for ( auto& [_, mod] : m_modules )
-        {
-            if ( mod.contains_id( key ) )
-                return EngineError{ L"[", key, L"] already exists" };
-        }
-    }
+        for ( auto& [key, part] : in_coll )
+            out_coll.push( key, part );
+    };
 
-    m_modules[module.name] = module;
-    for ( auto& [name, node] : module.space_public.variables )
+    helper_func( m_functions, module.functions );
+    helper_func( m_enums, module.enums );
+    helper_func( m_layers, module.layers );
+    helper_func( m_structs, module.structs );
+
+    for ( auto& [key, var] : module.variables )
     {
         Ref<Value> value;
-        if ( auto error = handle_expr( node.expr, value ) )
+        if ( auto error = handle_expr( var.expr, value ) )
             return error;
-        m_stack.push( { name, value } );
+
+        EngineVar eng_var;
+        eng_var.name = var.name;
+        eng_var.is_var = var.is_var;
+        eng_var.type = var.type;
+        eng_var.value = value;
+        m_variables.push( key, eng_var );
     }
 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::exec( String const& func_name, Array<Ref<Value>> const& args, Ref<Value>& retval )
+dawn::Opt<dawn::EngineError> dawn::Engine::exec( String const& func_name, Array<Ref<Value>> const& args, Ref<Value>& retval, Bool allow_internal )
 {
-    Function* func = nullptr;
-    for ( auto& [_, mod] : m_modules )
-    {
-        auto& functions = mod.space_public.functions;
-        if ( functions.contains( func_name ) )
-        {
-            func = &functions.at( func_name );
-            break;
-        }
-    }
-
+    auto* func = m_functions.get( func_name );
     if ( !func )
-        return EngineError{ L"function doesn't exist" };
+        return EngineError{ L"function [", func_name, L"] doesn't exist" };
 
     if ( auto error = handle_func( *func, args, retval ) )
         return error;
@@ -87,9 +49,14 @@ dawn::Opt<dawn::EngineError> dawn::Engine::exec( String const& func_name, Array<
     return std::nullopt;
 }
 
-dawn::Ref<dawn::Value> dawn::Engine::get_global( String const& var_name )
+dawn::Bool dawn::Engine::get_global( String const& var_name, Ref<Value>& value )
 {
-    return m_stack.get( var_name );
+    auto* ptr = m_variables.get( var_name );
+    if ( !ptr )
+        return false;
+
+    value = ptr->value;
+    return true;
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_expr( Ref<Node> const& node, Ref<Value>& value )
@@ -106,12 +73,33 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_expr( Ref<Node> const& node, R
     if ( auto nd = dynamic_cast<IdentifierNode*>(node.get()) )
         return handle_id_node( *nd, value );
 
+    if ( auto nd = dynamic_cast<FunctionCallNode*>(node.get()) )
+        return handle_func_call_node( *nd, value );
+
+    if ( auto nd = dynamic_cast<PrintNode*>(node.get()) )
+        return handle_print_node( *nd, value );
+
     return EngineError{ "Unknown expr node type: ", typeid(*node).name() };
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_instr( Ref<Node> const& node, Ref<Value>& retval )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_instr( Ref<Node> const& node, Ref<Value>& retval, Bool& didret )
 {
-    assert( false && "not impl" );
+    if ( auto nd = dynamic_cast<NewVarNode*>(node.get()) )
+        return handle_new_var_instr( *nd );
+
+    if ( auto nd = dynamic_cast<ReturnNode*>(node.get()) )
+    {
+        if ( auto error = handle_expr( nd->expr, retval ) )
+            return error;
+
+        didret = true;
+        return std::nullopt;
+    }
+
+    Ref<Value> _val;
+    if ( auto error = handle_expr( node, _val ) )
+        return error;
+
     return std::nullopt;
 }
 
@@ -121,15 +109,25 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Ar
         return EngineError{ "invalid argument count" };
 
     for ( Int i = 0; i < (Int) args.size(); i++ )
-        m_stack.push( { func.args[i].name, args[i] } );
+    {
+        EngineVar arg;
+        arg.name = func.args[i].name;
+        arg.is_var = false;
+        arg.type = func.args[i].type;
+        arg.value = args[i];
+        m_variables.push( arg.name, arg );
+    }
 
     for ( auto& instr : func.body.instr )
     {
-        if ( auto error = handle_instr( instr, retval ) )
+        Bool didret = false;
+        if ( auto error = handle_instr( instr, retval, didret ) )
             return error;
+        if ( didret )
+            break;
     }
 
-    m_stack.pop( (Int) args.size() );
+    m_variables.pop( (Int) args.size() );
 
     return std::nullopt;
 }
@@ -137,12 +135,40 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Ar
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_val_node( ValueNode const& node, Ref<Value>& value )
 {
     value = node.value;
+
     return std::nullopt;
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_id_node( IdentifierNode const& node, Ref<Value>& value )
 {
-    value = m_stack.get( node.name );
+    auto* ptr = m_variables.get( node.name );
+    if ( !ptr )
+        return EngineError{ L"variable [", node.name, L"] doesn't exist" };
+
+    value = ptr->value;
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_func_call_node( FunctionCallNode const& node, Ref<Value>& value )
+{
+    Array<Ref<Value>> args;
+    for ( auto& arg : node.args )
+    {
+        Ref<Value> val;
+        if ( auto error = handle_expr( arg, val ) )
+            return error;
+        args.emplace_back( std::move( val ) );
+    }
+    return exec( node.name, args, value, true );
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_print_node( PrintNode const& node, Ref<Value>& value )
+{
+    Ref<Value> val;
+    if ( auto error = handle_expr( node.expr, val ) )
+        return error;
+
+    print( val->to_string() );
     return std::nullopt;
 }
 
@@ -214,19 +240,6 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_un_float( type_info const& nod
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& node, Ref<Value>& value )
 {
-    Ref<Value> left;
-    if ( auto error = handle_expr( node.left, left ) )
-        return error;
-
-    Opt<Int> left_int;
-    Opt<Float> left_float;
-
-    if ( auto val = dynamic_cast<IntValue*>(left.get()) )
-        left_int = val->value;
-    else if ( auto val = dynamic_cast<FloatValue*>(left.get()) )
-        left_float = val->value;
-    else return EngineError{ "operators support only ints and floats" };
-
     Ref<Value> right;
     if ( auto error = handle_expr( node.right, right ) )
         return error;
@@ -238,7 +251,36 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& n
         right_int = val->value;
     else if ( auto val = dynamic_cast<FloatValue*>(right.get()) )
         right_float = val->value;
-    else return EngineError{ "operators support only ints and floats" };
+    else
+        return EngineError{ "operators support only ints and floats" };
+
+    if ( auto op_node = dynamic_cast<OperatorNodeAssign const*>(&node) )
+    {
+        auto id_node = dynamic_cast<IdentifierNode const*>(op_node->left.get());
+        if ( !id_node )
+            return EngineError{ "only identifiers can be assigned to" };
+
+        auto var = m_variables.get( id_node->name );
+        if ( !var )
+            return EngineError{ L"variable [", id_node->name, L"] doesn't exist" };
+
+        var->value = right;
+        return std::nullopt;
+    }
+
+    Ref<Value> left;
+    if ( auto error = handle_expr( node.left, left ) )
+        return error;
+
+    Opt<Int> left_int;
+    Opt<Float> left_float;
+
+    if ( auto val = dynamic_cast<IntValue*>(left.get()) )
+        left_int = val->value;
+    else if ( auto val = dynamic_cast<FloatValue*>(left.get()) )
+        left_float = val->value;
+    else
+        return EngineError{ "operators support only ints and floats" };
 
     if ( left_int && right_int )
     {
@@ -363,4 +405,20 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_float( type_info const& nod
     }
 
     return EngineError{ "unsupported float operator" };
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_new_var_instr( NewVarNode const& node )
+{
+    Ref<Value> value;
+    if ( auto error = handle_expr( node.var.expr, value ) )
+        return error;
+
+    EngineVar var;
+    var.name = node.var.name;
+    var.is_var = node.var.is_var;
+    var.type = node.var.type;
+    var.value = value;
+    m_variables.push( node.var.name, var );
+
+    return std::nullopt;
 }

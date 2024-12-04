@@ -65,7 +65,7 @@ dawn::String dawn::StructValue::to_string() const
     return parent->name + L"{}";
 }
 
-dawn::Bool dawn::Space::contains_id( StringRef const& id ) const
+dawn::Bool dawn::Module::contains_id( StringRef const& id ) const
 {
     String id_str{ id };
     return variables.contains( id_str ) ||
@@ -75,14 +75,8 @@ dawn::Bool dawn::Space::contains_id( StringRef const& id ) const
         structs.contains( id_str );
 }
 
-dawn::Bool dawn::Module::contains_id( StringRef const& id ) const
-{
-    return space_public.contains_id( id ) || space_internal.contains_id( id );
-}
-
 dawn::Opt<dawn::ParseError> dawn::Parser::parse( Array<Token>& tokens, Module& module )
 {
-    reset_state();
     prepare_tokens( tokens );
 
     auto it = tokens.begin();
@@ -92,12 +86,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse( Array<Token>& tokens, Module& m
 
     while ( it != end )
     {
-        if ( it->value == kw_internal )
-        {
-            if ( auto error = parse_module_internal( it, end, module ) )
-                return error;
-        }
-        else if ( it->value == kw_enum )
+        if ( it->value == kw_enum )
         {
             if ( auto error = parse_module_enum( it, end, module ) )
                 return error;
@@ -136,12 +125,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse( Array<Token>& tokens, Module& m
     return std::nullopt;
 }
 
-void dawn::Parser::reset_state()
-{
-    m_parsing_module_internal = false;
-    m_parsing_struct_internal = false;
-}
-
 void dawn::Parser::prepare_tokens( Array<Token>& tokens )
 {
     for ( Int i = 0; i < (Int) tokens.size() - 1; i++ )
@@ -169,65 +152,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_module( Array<Token>::con
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_internal( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
-{
-    if ( it->value != kw_internal )
-        return ParseError{ *it, L"expected internal" };
-    ++it;
-
-    if ( it->value != op_scope_opn )
-        return ParseError{ *it, L"expected open scope" };
-    ++it;
-
-    m_parsing_module_internal = true;
-    while ( it != end )
-    {
-        if ( it->value == op_scope_cls )
-        {
-            ++it;
-            break;
-        }
-
-        if ( it->value == kw_struct )
-        {
-            if ( auto error = parse_module_struct( it, end, module ) )
-                return error;
-        }
-        else if ( it->value == kw_layer )
-        {
-            if ( auto error = parse_module_layer( it, end, module ) )
-                return error;
-        }
-        else if ( it->value == kw_enum )
-        {
-            if ( auto error = parse_module_enum( it, end, module ) )
-                return error;
-        }
-        else if ( it->value == kw_func )
-        {
-            if ( auto error = parse_module_function( it, end, module ) )
-                return error;
-        }
-        else if ( it->value == kw_oper )
-        {
-            if ( auto error = parse_module_operator( it, end, module ) )
-                return error;
-        }
-        else if ( it->value == kw_let || it->value == kw_var )
-        {
-            if ( auto error = parse_module_variable( it, end, module ) )
-                return error;
-        }
-        else
-        {
-            return ParseError{ *it, L"not allowed in internal scope" };
-        }
-    }
-    m_parsing_module_internal = false;
-
-    return std::nullopt;
-}
-
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
     StructType struct_type;
@@ -237,14 +161,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_struct( Array<Token>::con
     if ( module.contains_id( struct_type.name ) )
         return ParseError{ {}, L"name [" + struct_type.name + L"] already in use" };
 
-    if ( m_parsing_module_internal )
-    {
-        module.space_internal.structs[struct_type.name] = struct_type;
-    }
-    else
-    {
-        module.space_public.structs[struct_type.name] = struct_type;
-    }
+    module.structs[struct_type.name] = struct_type;
 
     return std::nullopt;
 }
@@ -258,14 +175,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_layer( Array<Token>::cons
     if ( module.contains_id( layer_type.name ) )
         return ParseError{ {}, L"name [" + layer_type.name + L"] already in use" };
 
-    if ( m_parsing_module_internal )
-    {
-        module.space_internal.layers[layer_type.name] = layer_type;
-    }
-    else
-    {
-        module.space_public.layers[layer_type.name] = layer_type;
-    }
+    module.layers[layer_type.name] = layer_type;
 
     return std::nullopt;
 }
@@ -279,14 +189,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_enum( Array<Token>::const
     if ( module.contains_id( enum_type.name ) )
         return ParseError{ {}, L"name [" + enum_type.name + L"] already in use" };
 
-    if ( m_parsing_module_internal )
-    {
-        module.space_internal.enums[enum_type.name] = enum_type;
-    }
-    else
-    {
-        module.space_public.enums[enum_type.name] = enum_type;
-    }
+    module.enums[enum_type.name] = enum_type;
 
     return std::nullopt;
 }
@@ -300,14 +203,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_function( Array<Token>::c
     if ( module.contains_id( function.name ) )
         return ParseError{ {}, L"name [" + function.name + L"] already in use" };
 
-    if ( m_parsing_module_internal )
-    {
-        module.space_internal.functions[function.name] = function;
-    }
-    else
-    {
-        module.space_public.functions[function.name] = function;
-    }
+    module.functions[function.name] = function;
 
     return std::nullopt;
 }
@@ -318,17 +214,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_operator( Array<Token>::c
     if ( auto error = parse_operator( it, end, operato ) )
         return error;
 
-    if ( module.contains_id( operato.name ) )
-        return ParseError{ {}, L"name [" + operato.name + L"] already in use" };
-
-    if ( m_parsing_module_internal )
-    {
-        module.space_internal.operators[operato.name] = operato;
-    }
-    else
-    {
-        module.space_public.operators[operato.name] = operato;
-    }
+    module.operators[operato.name] = operato;
 
     return std::nullopt;
 }
@@ -342,14 +228,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_variable( Array<Token>::c
     if ( module.contains_id( variable.name ) )
         return ParseError{ {}, L"name [" + variable.name + L"] already in use" };
 
-    if ( m_parsing_module_internal )
-    {
-        module.space_internal.variables[variable.name] = variable;
-    }
-    else
-    {
-        module.space_public.variables[variable.name] = variable;
-    }
+    module.variables[variable.name] = variable;
 
     return std::nullopt;
 }
@@ -1117,7 +996,16 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_function( Array<Token> cons
         return ParseError{ *it, L"expected function close" };
     ++it;
 
-    tree = node;
+    if ( node->name == L"print" )
+    {
+        auto print_nd = std::make_shared<PrintNode>();
+        print_nd->expr = node->args[0];
+        tree = print_nd;
+    }
+    else
+    {
+        tree = node;
+    }
 
     return std::nullopt;
 }

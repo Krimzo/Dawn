@@ -2,19 +2,16 @@ module min_example;
 
 let a = 12 % ( (3 * (5)) ^ -(5.0 / 2.) * -(5 * 2) );
 var b = -a * 2;
-
-internal {
-	let c = b * 17.9;
-
-	func sqr(val: int): int {
-		var result: int = 0;
-		result = val * val;
-		return result;
-	}
-}
+let c = b * 17.9;
 
 func main(args: string[]) {
 	var a = c;
 	a = sqr(a);
 	print(a);
+}
+
+func sqr(val: int): int {
+	var result: int = 0;
+	result = val * val;
+	return result;
 }

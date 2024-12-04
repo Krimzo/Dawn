@@ -1,15 +1,6 @@
 // Module
 module full_example;
 
-// Internal
-internal {
-	let only_for_module = 6;
-
-	func my_private_function() {
-		print("super private");
-	}
-}
-
 // Primitive
 func primitive_examp() {
 	// Integer
@@ -164,14 +155,6 @@ struct Person: Living {
 
 	let who(): string {
 		return self->name;
-	}
-
-	internal {
-		m_id: int;
-
-		let my_private_method() {
-			print("It's lonely in here.");
-		}
 	}
 }
 

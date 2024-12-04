@@ -21,9 +21,11 @@ int main()
         return 1;
     }
 
-    if constexpr ( false )
+    if /* PRINT TOKENS */ constexpr ( 0 )
+    {
         for ( auto& token : tokens )
             print( token );
+    }
 
     Module module;
     if ( auto error = parser.parse( tokens, module ) )
@@ -38,11 +40,24 @@ int main()
         return 3;
     }
 
-    Ref<Value> retval;
-    if ( auto error = engine.exec( L"main", { ArrayValue::make() }, retval ) )
+    if /* GET VALUE */ constexpr ( 0 )
     {
-        print( error.value() );
-        return 4;
+        Ref<Value> a_val, b_val;
+        if ( !engine.get_global( L"a", a_val ) || !engine.get_global( L"b", b_val ) )
+            return 4;
+
+        print( L"a = ", a_val->to_string() );
+        print( L"b = ", b_val->to_string() );
+    }
+
+    if /* CALL FUNCTION */ constexpr ( 1 )
+    {
+        Ref<Value> retval;
+        if ( auto error = engine.exec( L"main", { ArrayValue::make() }, retval ) )
+        {
+            print( error.value() );
+            return 5;
+        }
     }
 
     return 0;

@@ -7,7 +7,6 @@ namespace dawn
 {
 inline constexpr StringRef kw_module = L"module";
 inline constexpr StringRef kw_import = L"import";
-inline constexpr StringRef kw_internal = L"internal";
 inline constexpr StringRef kw_func = L"func";
 inline constexpr StringRef kw_oper = L"oper";
 inline constexpr StringRef kw_return = L"return";

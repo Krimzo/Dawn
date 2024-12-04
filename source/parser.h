@@ -238,8 +238,9 @@ struct StructValue : Value, Makeable<StructValue>
     String to_string() const override;
 };
 
-struct Space
+struct Module
 {
+    String name;
     Map<String, Variable> variables;
     Map<String, Operator> operators;
     Map<String, Function> functions;
@@ -250,28 +251,14 @@ struct Space
     Bool contains_id( StringRef const& id ) const;
 };
 
-struct Module
-{
-    String name;
-    Space space_public;
-    Space space_internal;
-
-    Bool contains_id( StringRef const& id ) const;
-};
-
 struct Parser
 {
     Opt<ParseError> parse( Array<Token>& tokens, Module& module );
 
 private:
-    Bool m_parsing_module_internal = false;
-    Bool m_parsing_struct_internal = false;
-
-    void reset_state();
     void prepare_tokens( Array<Token>& tokens );
 
     Opt<ParseError> parse_module_module( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
-    Opt<ParseError> parse_module_internal( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     Opt<ParseError> parse_module_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     Opt<ParseError> parse_module_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     Opt<ParseError> parse_module_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
@@ -368,6 +355,11 @@ struct FunctionCallNode : Node
 };
 
 struct ReturnNode : Node
+{
+    Ref<Node> expr;
+};
+
+struct PrintNode : Node
 {
     Ref<Node> expr;
 };

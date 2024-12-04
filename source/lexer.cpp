@@ -39,7 +39,6 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
     result.keywords = {
         (String) kw_module,
         (String) kw_import,
-        (String) kw_internal,
         (String) kw_func,
         (String) kw_oper,
         (String) kw_return,
