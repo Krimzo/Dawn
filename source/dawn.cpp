@@ -43,7 +43,7 @@ int main()
     if /* GET VALUE */ constexpr ( 0 )
     {
         Ref<Value> a_val, b_val;
-        if ( !engine.get_global( L"a", a_val ) || !engine.get_global( L"b", b_val ) )
+        if ( !engine.get( L"a", a_val ) || !engine.get( L"b", b_val ) )
             return 4;
 
         print( L"a = ", a_val->to_string() );

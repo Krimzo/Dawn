@@ -4,42 +4,42 @@
 // bool
 dawn::Ref<dawn::Value> dawn::BoolValue::operator+() const
 {
-    throw "bool + not supported";
+    return _chaos( "+bool not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::BoolValue::operator-() const
 {
-    throw "bool - not supported";
+    return _chaos( "-bool not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::BoolValue::operator+( Value const& other ) const
 {
-    throw "bool + not supported";
+    return _chaos( "bool + not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::BoolValue::operator-( Value const& other ) const
 {
-    throw "bool - not supported";
+    return _chaos( "bool - not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::BoolValue::operator*( Value const& other ) const
 {
-    throw "bool * not supported";
+    return _chaos( "bool * not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::BoolValue::operator/( Value const& other ) const
 {
-    throw "bool / not supported";
+    return _chaos( "bool / not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::BoolValue::operator^( Value const& other ) const
 {
-    throw "bool ^ not supported";
+    return _chaos( "bool ^ not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::BoolValue::operator%( Value const& other ) const
 {
-    throw "bool % not supported";
+    return _chaos( "bool % not supported" );
 }
 
 dawn::Bool dawn::BoolValue::to_bool() const
@@ -109,7 +109,7 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator+( Value const& other ) const
         return result;
     }
 
-    throw "int + " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "int + ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator-( Value const& other ) const
@@ -128,7 +128,7 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator-( Value const& other ) const
         return result;
     }
 
-    throw "int - " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "int - ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator*( Value const& other ) const
@@ -147,7 +147,7 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator*( Value const& other ) const
         return result;
     }
 
-    throw "int * " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "int * ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator/( Value const& other ) const
@@ -166,7 +166,7 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator/( Value const& other ) const
         return result;
     }
 
-    throw "int / " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "int / ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator^( Value const& other ) const
@@ -185,7 +185,7 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator^( Value const& other ) const
         return result;
     }
 
-    throw "int ^ " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "int ^ ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator%( Value const& other ) const
@@ -204,7 +204,7 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator%( Value const& other ) const
         return result;
     }
 
-    throw "int ^ " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "int ^ ", typeid(other).name(), " not supported" );
 }
 
 dawn::Bool dawn::IntValue::to_bool() const
@@ -270,7 +270,7 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator+( Value const& other ) const
         return result;
     }
 
-    throw "float + " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "float + ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator-( Value const& other ) const
@@ -289,7 +289,7 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator-( Value const& other ) const
         return result;
     }
 
-    throw "float - " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "float - ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator*( Value const& other ) const
@@ -308,7 +308,7 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator*( Value const& other ) const
         return result;
     }
 
-    throw "float * " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "float * ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator/( Value const& other ) const
@@ -327,7 +327,7 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator/( Value const& other ) const
         return result;
     }
 
-    throw "float / " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "float / ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator^( Value const& other ) const
@@ -346,7 +346,7 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator^( Value const& other ) const
         return result;
     }
 
-    throw "float ^ " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "float ^ ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator%( Value const& other ) const
@@ -365,7 +365,7 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator%( Value const& other ) const
         return result;
     }
 
-    throw "float % " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "float % ", typeid(other).name(), " not supported" );
 }
 
 dawn::Bool dawn::FloatValue::to_bool() const
@@ -385,7 +385,7 @@ dawn::Float dawn::FloatValue::to_float() const
 
 dawn::Char dawn::FloatValue::to_char() const
 {
-    throw "float to char not supported";
+    return (Char) value;
 }
 
 dawn::String dawn::FloatValue::to_string() const
@@ -403,42 +403,42 @@ dawn::Ref<dawn::Value> dawn::FloatValue::clone() const
 // char
 dawn::Ref<dawn::Value> dawn::CharValue::operator+() const
 {
-    throw "char + not supported";
+    return _chaos( "+char not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::CharValue::operator-() const
 {
-    throw "char - not supported";
+    return _chaos( "-char not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::CharValue::operator+( Value const& other ) const
 {
-    throw "char + " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "char + ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::CharValue::operator-( Value const& other ) const
 {
-    throw "char - " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "char - ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::CharValue::operator*( Value const& other ) const
 {
-    throw "char * " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "char * ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::CharValue::operator/( Value const& other ) const
 {
-    throw "char / " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "char / ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::CharValue::operator^( Value const& other ) const
 {
-    throw "char ^ " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "char ^ ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::CharValue::operator%( Value const& other ) const
 {
-    throw "char % " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "char % ", typeid(other).name(), " not supported" );
 }
 
 dawn::Bool dawn::CharValue::to_bool() const
@@ -453,7 +453,7 @@ dawn::Int dawn::CharValue::to_int() const
 
 dawn::Float dawn::CharValue::to_float() const
 {
-    throw "char to float not supported";
+    return (Float) value;
 }
 
 dawn::Char dawn::CharValue::to_char() const
@@ -476,12 +476,12 @@ dawn::Ref<dawn::Value> dawn::CharValue::clone() const
 // string
 dawn::Ref<dawn::Value> dawn::StringValue::operator+() const
 {
-    throw "string + not supported";
+    return _chaos( "+string not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StringValue::operator-() const
 {
-    throw "string - not supported";
+    return _chaos( "-string not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StringValue::operator+( Value const& other ) const
@@ -493,32 +493,32 @@ dawn::Ref<dawn::Value> dawn::StringValue::operator+( Value const& other ) const
         return result;
     }
 
-    throw "string + " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "string + ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StringValue::operator-( Value const& other ) const
 {
-    throw "string - " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "string - ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StringValue::operator*( Value const& other ) const
 {
-    throw "string * " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "string * ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StringValue::operator/( Value const& other ) const
 {
-    throw "string / " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "string / ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StringValue::operator^( Value const& other ) const
 {
-    throw "string ^ " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "string ^ ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StringValue::operator%( Value const& other ) const
 {
-    throw "string % " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "string % ", typeid(other).name(), " not supported" );
 }
 
 dawn::Bool dawn::StringValue::to_bool() const
@@ -538,7 +538,7 @@ dawn::Float dawn::StringValue::to_float() const
 
 dawn::Char dawn::StringValue::to_char() const
 {
-    throw "string to char not supported";
+    return value.front();
 }
 
 dawn::String dawn::StringValue::to_string() const
@@ -556,62 +556,66 @@ dawn::Ref<dawn::Value> dawn::StringValue::clone() const
 // enum
 dawn::Ref<dawn::Value> dawn::EnumValue::operator+() const
 {
-    throw "enum + not supported";
+    return _chaos( "+enum not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::EnumValue::operator-() const
 {
-    throw "enum - not supported";
+    return _chaos( "-enum not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::EnumValue::operator+( Value const& other ) const
 {
-    throw "enum + " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "enum + ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::EnumValue::operator-( Value const& other ) const
 {
-    throw "enum - " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "enum - ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::EnumValue::operator*( Value const& other ) const
 {
-    throw "enum * " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "enum * ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::EnumValue::operator/( Value const& other ) const
 {
-    throw "enum / " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "enum / ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::EnumValue::operator^( Value const& other ) const
 {
-    throw "enum ^ " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "enum ^ ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::EnumValue::operator%( Value const& other ) const
 {
-    throw "enum % " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "enum % ", typeid(other).name(), " not supported" );
 }
 
 dawn::Bool dawn::EnumValue::to_bool() const
 {
-    throw "enum to bool not supported";
+    _chaos( "enum to bool not supported" );
+    return {};
 }
 
 dawn::Int dawn::EnumValue::to_int() const
 {
-    throw "enum to int not supported";
+    _chaos( "enum to int not supported" );
+    return {};
 }
 
 dawn::Float dawn::EnumValue::to_float() const
 {
-    throw "enum to float not supported";
+    _chaos( "enum to float not supported" );
+    return {};
 }
 
 dawn::Char dawn::EnumValue::to_char() const
 {
-    throw "enum to char not supported";
+    _chaos( "enum to char not supported" );
+    return {};
 }
 
 dawn::String dawn::EnumValue::to_string() const
@@ -630,62 +634,67 @@ dawn::Ref<dawn::Value> dawn::EnumValue::clone() const
 // struct
 dawn::Ref<dawn::Value> dawn::StructValue::operator+() const
 {
-    throw "struct + not supported";
+    return _chaos( "+struct not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StructValue::operator-() const
 {
-    throw "struct - not supported";
+    return _chaos( "-struct not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StructValue::operator+( Value const& other ) const
 {
-    throw "struct + " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "struct + ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StructValue::operator-( Value const& other ) const
 {
-    throw "struct - " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "struct - ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StructValue::operator*( Value const& other ) const
 {
-    throw "struct * " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "struct * ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StructValue::operator/( Value const& other ) const
 {
-    throw "struct / " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "struct / ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StructValue::operator^( Value const& other ) const
 {
-    throw "struct ^ " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "struct ^ ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StructValue::operator%( Value const& other ) const
 {
-    throw "struct % " + (std::string) typeid(other).name() + " not supported";
+    _chaos( "struct % ", typeid(other).name(), " not supported" );
+    return {};
 }
 
 dawn::Bool dawn::StructValue::to_bool() const
 {
-    throw "struct to bool not supported";
+    _chaos( "struct to bool not supported" );
+    return {};
 }
 
 dawn::Int dawn::StructValue::to_int() const
 {
-    throw "struct to int not supported";
+    _chaos( "struct to int not supported" );
+    return {};
 }
 
 dawn::Float dawn::StructValue::to_float() const
 {
-    throw "struct to float not supported";
+    _chaos( "struct to float not supported" );
+    return {};
 }
 
 dawn::Char dawn::StructValue::to_char() const
 {
-    throw "struct to char not supported";
+    _chaos( "struct to char not supported" );
+    return {};
 }
 
 dawn::String dawn::StructValue::to_string() const
@@ -705,12 +714,12 @@ dawn::Ref<dawn::Value> dawn::StructValue::clone() const
 // array
 dawn::Ref<dawn::Value> dawn::ArrayValue::operator+() const
 {
-    throw "array + not supported";
+    return _chaos( "+array not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::ArrayValue::operator-() const
 {
-    throw "array - not supported";
+    return _chaos( "-array not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::ArrayValue::operator+( Value const& other ) const
@@ -726,52 +735,56 @@ dawn::Ref<dawn::Value> dawn::ArrayValue::operator+( Value const& other ) const
         return result;
     }
 
-    throw "array + " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "array + ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::ArrayValue::operator-( Value const& other ) const
 {
-    throw "array - " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "array - ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::ArrayValue::operator*( Value const& other ) const
 {
-    throw "array * " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "array * ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::ArrayValue::operator/( Value const& other ) const
 {
-    throw "array / " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "array / ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::ArrayValue::operator^( Value const& other ) const
 {
-    throw "array ^ " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "array ^ ", typeid(other).name(), " not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::ArrayValue::operator%( Value const& other ) const
 {
-    throw "array % " + (std::string) typeid(other).name() + " not supported";
+    return _chaos( "array % ", typeid(other).name(), " not supported" );
 }
 
 dawn::Bool dawn::ArrayValue::to_bool() const
 {
-    throw "array to bool not supported";
+    _chaos( "array to bool not supported" );
+    return {};
 }
 
 dawn::Int dawn::ArrayValue::to_int() const
 {
-    throw "array to int not supported";
+    _chaos( "array to int not supported" );
+    return {};
 }
 
 dawn::Float dawn::ArrayValue::to_float() const
 {
-    throw "array to float not supported";
+    _chaos( "array to float not supported" );
+    return {};
 }
 
 dawn::Char dawn::ArrayValue::to_char() const
 {
-    throw "array to char not supported";
+    _chaos( "array to char not supported" );
+    return {};
 }
 
 dawn::String dawn::ArrayValue::to_string() const

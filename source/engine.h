@@ -69,7 +69,7 @@ struct Engine
 {
     Opt<EngineError> load( Module const& module );
     Opt<EngineError> exec( String const& func_name, Array<Ref<Value>> const& args, Ref<Value>& retval, Bool allow_internal = false );
-    Bool get_global( String const& var_name, Ref<Value>& value );
+    Bool get( String const& var_name, Ref<Value>& value );
 
 private:
     Stack<EngineVar> m_variables;
@@ -86,13 +86,12 @@ private:
 
     Opt<EngineError> handle_val_node( ValueNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_id_node( IdentifierNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_func_call_node( FunctionCallNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_print_node( PrintNode const& node, Ref<Value>& value );
-
+    Opt<EngineError> handle_var_instr( VariableNode const& node, Int& push_count );
+    Opt<EngineError> handle_cast_node( CastNode const& node, Ref<Value>& value );
+    Opt<EngineError> handle_func_node( FunctionNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_un_node( UnaryNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_op_node( OperatorNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_as_node( AssignNode const& node, Ref<Value>& value );
-
-    Opt<EngineError> handle_new_var_instr( NewVarNode const& node, Int& push_count );
+    Opt<EngineError> handle_print_node( PrintNode const& node, Ref<Value>& value );
 };
 }

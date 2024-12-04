@@ -39,9 +39,24 @@ struct Makeable
 };
 
 template<typename... Args>
+String format( Args const&... args )
+{
+    StringStream stream;
+    (stream << ... << args);
+    return stream.str();
+}
+
+template<typename... Args>
 void print( Args const&... args )
 {
     (std::wcout << ... << args) << '\n';
+}
+
+template<typename... Args>
+nullptr_t _chaos( Args const&... args )
+{
+    throw format( args... );
+    return nullptr;
 }
 
 Char to_escaping( Char c );

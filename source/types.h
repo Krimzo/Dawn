@@ -6,6 +6,11 @@
 namespace dawn
 {
 // sub-types
+struct Scope : Node
+{
+    Array<Ref<Node>> instr;
+};
+
 struct Variable
 {
     String name;
@@ -20,11 +25,6 @@ struct Argument
     Ref<Type> type;
 };
 
-struct Scope : Node
-{
-    Array<Ref<Node>> instr;
-};
-
 struct Function
 {
     String name;
@@ -33,51 +33,16 @@ struct Function
     Scope body;
 };
 
-struct Operator
+struct Operator : Function
 {
-    String name;
-    Array<Argument> args;
-    Ref<Type> type;
-    Scope body;
 };
 
-struct Method
+struct Method : Function
 {
-    String name;
     Bool is_var = false;
-    Array<Argument> args;
-    Ref<Type> type;
-    Scope body;
 };
 
 // types
-struct RefType : Type
-{
-    Ref<Type> type;
-};
-
-struct LetRefType : RefType
-{
-    LetRefType() { name = String( kw_let ) + String( op_ref ); }
-};
-
-struct VarRefType : RefType
-{
-    VarRefType() { name = String( kw_var ) + String( op_ref ); }
-};
-
-struct ArrayType : Type
-{
-    Ref<Type> type;
-
-    ArrayType() { name = String( op_array_opn ) + String( op_array_cls ); }
-};
-
-struct RangeType : Type
-{
-    RangeType() { name = op_range; }
-};
-
 struct BoolType : Type
 {
     BoolType() { name = tp_bool; }
@@ -120,5 +85,33 @@ struct StructType : Type
     Map<String, Ref<Method>> methods_public;
     Map<String, Ref<Type>> fields_internal;
     Map<String, Ref<Method>> methods_internal;
+};
+
+// cmplx types
+struct ArrayType : Type
+{
+    Ref<Type> type;
+
+    ArrayType() { name = String( op_array_opn ) + String( op_array_cls ); }
+};
+
+struct RangeType : Type
+{
+    RangeType() { name = op_range; }
+};
+
+struct RefType : Type
+{
+    Ref<Type> type;
+};
+
+struct LetRefType : RefType
+{
+    LetRefType() { name = String( kw_let ) + String( op_ref ); }
+};
+
+struct VarRefType : RefType
+{
+    VarRefType() { name = String( kw_var ) + String( op_ref ); }
 };
 }

@@ -904,7 +904,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> co
 dawn::Opt<dawn::ParseError> dawn::Parser::expression_function( Array<Token> const& tokens, Ref<Node>& tree )
 {
     Array<Token>::const_iterator it = tokens.begin();
-    Ref node = std::make_shared<FunctionCallNode>();
+    Ref node = std::make_shared<FunctionNode>();
 
     if ( it->type != TokenType::FUNCTION )
         return ParseError{ *it, L"expected function name" };
@@ -974,7 +974,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_scope( Array<Token>::const_itera
 
         if ( it->value == kw_let || it->value == kw_var )
         {
-            Ref node = std::make_shared<NewVarNode>();
+            Ref node = std::make_shared<VariableNode>();
             if ( auto error = parse_variable( it, end, node->var ) )
                 return error;
 

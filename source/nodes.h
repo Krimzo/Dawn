@@ -47,12 +47,12 @@ struct NewArrayNode : Node
     Array<Ref<Node>> _list;
 };
 
-struct NewVarNode : Node
+struct VariableNode : Node
 {
     Variable var;
 };
 
-struct FunctionCallNode : Node
+struct FunctionNode : Node
 {
     String name;
     Array<Ref<Node>> args;
