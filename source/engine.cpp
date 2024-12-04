@@ -263,7 +263,22 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& nod
     if ( !var->is_var )
         return EngineError{ "variable [", id->name, L"] is a constant" };
 
-    var->value = std::move( right );
+    if ( typeid(node) == typeid(AssignNodeAdd) )
+        var->value = (*var->value) + (*right);
+    else if ( typeid(node) == typeid(AssignNodeSub) )
+        var->value = (*var->value) - (*right);
+    else if ( typeid(node) == typeid(AssignNodeMul) )
+        var->value = (*var->value) * (*right);
+    else if ( typeid(node) == typeid(AssignNodeDiv) )
+        var->value = (*var->value) / (*right);
+    else if ( typeid(node) == typeid(AssignNodePow) )
+        var->value = (*var->value) ^ (*right);
+    else if ( typeid(node) == typeid(AssignNodeMod) )
+        var->value = (*var->value) % (*right);
+    else
+        var->value = std::move( right );
+
+    value = var->value;
 
     return std::nullopt;
 }
