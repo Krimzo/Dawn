@@ -528,12 +528,24 @@ dawn::Bool dawn::StringValue::to_bool() const
 
 dawn::Int dawn::StringValue::to_int() const
 {
-    return std::stoll( value );
+    auto optres = parse_int( value );
+    if ( !optres )
+    {
+        _chaos( "string \"", value, "\" to int failed" );
+        return {};
+    }
+    return *optres;
 }
 
 dawn::Float dawn::StringValue::to_float() const
 {
-    return std::stod( value );
+    auto optres = parse_float( value );
+    if ( !optres )
+    {
+        _chaos( "string \"", value, "\" to float failed" );
+        return {};
+    }
+    return *optres;
 }
 
 dawn::Char dawn::StringValue::to_char() const

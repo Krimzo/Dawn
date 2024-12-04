@@ -62,4 +62,7 @@ nullptr_t _chaos( Args const&... args )
 Char to_escaping( Char c );
 String from_escaping( Char c );
 String read_file( StringRef const& path );
+
+Opt<Int> parse_int( StringRef const& data );
+Opt<Float> parse_float( StringRef const& data );
 }

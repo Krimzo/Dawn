@@ -192,38 +192,45 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_cast_node( CastNode const& nod
     if ( auto error = handle_expr( node.expr, expr ) )
         return error;
 
-    if ( node.type->name == tp_bool )
+    try
     {
-        auto val = BoolValue::make();
-        val->value = expr->to_bool();
-        value = val;
+        if ( node.type->name == tp_bool )
+        {
+            auto val = BoolValue::make();
+            val->value = expr->to_bool();
+            value = val;
+        }
+        else if ( node.type->name == tp_int )
+        {
+            auto val = IntValue::make();
+            val->value = expr->to_int();
+            value = val;
+        }
+        else if ( node.type->name == tp_float )
+        {
+            auto val = FloatValue::make();
+            val->value = expr->to_float();
+            value = val;
+        }
+        else if ( node.type->name == tp_char )
+        {
+            auto val = CharValue::make();
+            val->value = expr->to_char();
+            value = val;
+        }
+        else if ( node.type->name == tp_string )
+        {
+            auto val = StringValue::make();
+            val->value = expr->to_string();
+            value = val;
+        }
+        else
+            return EngineError{ "Unknown cast type: ", node.type->name };
     }
-    else if ( node.type->name == tp_int )
+    catch ( String& msg )
     {
-        auto val = IntValue::make();
-        val->value = expr->to_int();
-        value = val;
+        return EngineError{ msg };
     }
-    else if ( node.type->name == tp_float )
-    {
-        auto val = FloatValue::make();
-        val->value = expr->to_float();
-        value = val;
-    }
-    else if ( node.type->name == tp_char )
-    {
-        auto val = CharValue::make();
-        val->value = expr->to_char();
-        value = val;
-    }
-    else if ( node.type->name == tp_string )
-    {
-        auto val = StringValue::make();
-        val->value = expr->to_string();
-        value = val;
-    }
-    else
-        return EngineError{ "Unknown cast type: ", node.type->name };
 
     return std::nullopt;
 }

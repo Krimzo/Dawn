@@ -7,7 +7,14 @@ let c = b * 2;
 func main(args: string[]) {
 	var a = c;
 	a += sqr(b);
-	print(a);
+
+	let test = float("17.9");
+	print(test);
+
+	var value = "some: ";
+	value += string(a % test);
+	
+	print(value);
 }
 
 func sqr(val: int): int {

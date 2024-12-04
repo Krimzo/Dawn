@@ -60,3 +60,29 @@ dawn::String dawn::read_file( StringRef const& path )
 
     return (StringStream{} << file.rdbuf()).str();
 }
+
+dawn::Opt<dawn::Int> dawn::parse_int( StringRef const& data )
+{
+    if ( data.empty() )
+        return std::nullopt;
+
+    Char* last_char = nullptr;
+    Int result = std::wcstoll( data.data(), &last_char, 10 );
+    if ( last_char != data.data() + data.size() )
+        return std::nullopt;
+
+    return { result };
+}
+
+dawn::Opt<dawn::Float> dawn::parse_float( StringRef const& data )
+{
+    if ( data.empty() )
+        return std::nullopt;
+
+    Char* last_char = nullptr;
+    Float result = std::wcstod( data.data(), &last_char );
+    if ( last_char != data.data() + data.size() )
+        return std::nullopt;
+
+    return { result };
+}
