@@ -74,7 +74,7 @@ func logic_examp() {
 func switch_examp() {
 	let value = 16;
 	switch value {
-		case 3 {
+		case 1, 2, 3 {
 			print("it's 3");
 		}
 		case 14 {
@@ -88,11 +88,14 @@ func switch_examp() {
 
 // For
 func for_examp() {
-	for i: ~5 {
+	for i: ~10 {
 		print(i);
 	}
 	for i: 3~6 {
 		print(i);
+	}
+	for c: "some text" {
+		print(c);
 	}
 	for value: int[5; 10] {
 		print(value);
@@ -127,8 +130,8 @@ enum ExampleEnum: float {
 
 func enum_examp() {
 	let someone = ExampleEnum:ME;
-	let someone_else: ExampleEnumm = ExampleEnum:THEM;
-	let value: float = someone->value;
+	let someone_else: ExampleEnum = ExampleEnum:THEM;
+	let value: float = someone->val;
 }
 
 // Layer
@@ -146,11 +149,11 @@ struct Person: Living {
 	}
 
 	var var_method(): Person var& {
-		return self;
+		return &self;
 	}
 
 	let let_method(): Person let& {
-		return self;
+		return &self;
 	}
 
 	let who(): string {

@@ -65,4 +65,6 @@ String read_file( StringRef const& path );
 
 Opt<Int> parse_int( StringRef const& data );
 Opt<Float> parse_float( StringRef const& data );
+
+Float mymod( Float left, Float right );
 }
