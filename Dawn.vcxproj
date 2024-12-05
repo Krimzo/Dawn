@@ -12,10 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\engine.cpp" />
+    <ClCompile Include="source\engine_defaults.cpp" />
     <ClCompile Include="source\lexer.cpp" />
     <ClCompile Include="source\parser.cpp" />
     <ClCompile Include="source\util.cpp" />
     <ClCompile Include="source\dawn.cpp" />
+    <ClCompile Include="source\valtype.cpp" />
     <ClCompile Include="source\values.cpp" />
   </ItemGroup>
   <ItemGroup>

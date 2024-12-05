@@ -52,12 +52,7 @@ void print( Args const&... args )
     (std::wcout << ... << args) << '\n';
 }
 
-template<typename... Args>
-nullptr_t _chaos( Args const&... args )
-{
-    throw format( args... );
-    return nullptr;
-}
+#define PANIC(...) throw format( __VA_ARGS__ );
 
 Char to_escaping( Char c );
 String from_escaping( Char c );

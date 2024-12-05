@@ -16,23 +16,37 @@ struct Value
 {
     virtual ~Value() = default;
 
-    virtual Ref<Value> operator+() const = 0;
-    virtual Ref<Value> operator-() const = 0;
-
-    virtual Ref<Value> operator+( Value const& other ) const = 0;
-    virtual Ref<Value> operator-( Value const& other ) const = 0;
-    virtual Ref<Value> operator*( Value const& other ) const = 0;
-    virtual Ref<Value> operator/( Value const& other ) const = 0;
-    virtual Ref<Value> operator^( Value const& other ) const = 0;
-    virtual Ref<Value> operator%( Value const& other ) const = 0;
-
-    virtual Bool to_bool() const = 0;
-    virtual Int to_int() const = 0;
-    virtual Float to_float() const = 0;
-    virtual Char to_char() const = 0;
-    virtual String to_string() const = 0;
-
+    virtual StringRef const& type() const = 0;
     virtual Ref<Value> clone() const = 0;
+
+    virtual Ref<Value> operator-() const;
+    virtual Ref<Value> operator+( Value const& other ) const;
+    virtual Ref<Value> operator-( Value const& other ) const;
+    virtual Ref<Value> operator*( Value const& other ) const;
+    virtual Ref<Value> operator/( Value const& other ) const;
+    virtual Ref<Value> operator^( Value const& other ) const;
+    virtual Ref<Value> operator%( Value const& other ) const;
+
+    virtual Int operator<=>( Value const& other ) const;
+    virtual Ref<Value> operator==( Value const& other ) const final;
+    virtual Ref<Value> operator!=( Value const& other ) const final;
+    virtual Ref<Value> operator<( Value const& other ) const final;
+    virtual Ref<Value> operator>( Value const& other ) const final;
+    virtual Ref<Value> operator<=( Value const& other ) const final;
+    virtual Ref<Value> operator>=( Value const& other ) const final;
+
+    virtual Ref<Value> operator!() const final;
+    virtual Ref<Value> operator&&( Value const& other ) const final;
+    virtual Ref<Value> operator||( Value const& other ) const final;
+
+    virtual Ref<Value> operator>>( Value const& other ) const;
+    virtual Ref<Value> operator~() const final;
+
+    virtual Bool to_bool() const;
+    virtual Int to_int() const;
+    virtual Float to_float() const;
+    virtual Char to_char() const;
+    virtual String to_string() const;
 };
 
 struct Node

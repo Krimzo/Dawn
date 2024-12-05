@@ -1,19 +1,36 @@
 module min_example;
 
 func main() {
-	if {
-		print("if");
-		return;
-	}
-	elif false {
-		print("first elif");
-	}
-	elif true {
-		print("second elif");
-		return;
+	let a = 9;
+	if a < 0 {
+		if check_val(a) { 
+			print("a is neg and more than 5");
+		}
+		else {
+			print("a is neg and lesseq than 5");
+		}
 	}
 	else {
-		print("else");
+		if check_val(a) { 
+			print("a is pos and more than 5");
+		}
+		else {
+			print("a is pos and lesseq than 5");
+		}
 	}
-	print("done");
+
+	print("-----");
+
+	print("sqrt(a) = ", sqrt(a));
+	print("sin(a) = ", sin(a));
+	print("cos(a) = ", cos(a));
+
+	print("-----");
+
+	print("rand integer: ", rand_int(100));
+	print("rand float: ", rand_flt());
+}
+
+func check_val(value: int): bool {
+	return abs(value) > 5;
 }

@@ -636,7 +636,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_literal( Token const
 {
     if ( token.type == TokenType::INTEGER )
     {
-        auto value = std::make_shared<IntValue>();
+        auto value = IntValue::make();
         value->value = std::stoll( token.value );
         auto node = std::make_shared<ValueNode>();
         node->value = value;
@@ -644,7 +644,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_literal( Token const
     }
     else if ( token.type == TokenType::FLOAT )
     {
-        auto value = std::make_shared<FloatValue>();
+        auto value = FloatValue::make();
         value->value = std::stod( token.value );
         auto node = std::make_shared<ValueNode>();
         node->value = value;
@@ -652,7 +652,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_literal( Token const
     }
     else if ( token.type == TokenType::CHAR )
     {
-        auto value = std::make_shared<CharValue>();
+        auto value = CharValue::make();
         value->value = token.value[0];
         auto node = std::make_shared<ValueNode>();
         node->value = value;
@@ -660,7 +660,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_literal( Token const
     }
     else if ( token.type == TokenType::STRING )
     {
-        auto value = std::make_shared<StringValue>();
+        auto value = StringValue::make();
         value->value = token.value;
         auto node = std::make_shared<ValueNode>();
         node->value = value;
@@ -678,7 +678,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_keyword( Token const
 {
     if ( token.value == kw_true )
     {
-        auto value = std::make_shared<BoolValue>();
+        auto value = BoolValue::make();
         value->value = true;
         auto node = std::make_shared<ValueNode>();
         node->value = value;
@@ -686,7 +686,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_keyword( Token const
     }
     else if ( token.value == kw_false )
     {
-        auto value = std::make_shared<BoolValue>();
+        auto value = BoolValue::make();
         value->value = false;
         auto node = std::make_shared<ValueNode>();
         node->value = value;

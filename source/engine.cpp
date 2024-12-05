@@ -7,27 +7,6 @@ std::wostream& dawn::operator<<( std::wostream& stream, EngineError const& error
     return stream;
 }
 
-void dawn::Engine::load_default_mods()
-{
-    bind_func( L"format", []( Array<Ref<Value>> const& args ) -> Ref<Value>
-    {
-        StringStream stream;
-        for ( auto& arg : args )
-            stream << arg->to_string();
-        auto result = StringValue::make();
-        result->value = stream.str();
-        return result;
-    } );
-    bind_func( L"print", []( Array<Ref<Value>> const& args ) -> Ref<Value>
-    {
-        StringStream stream;
-        for ( auto& arg : args )
-            stream << arg->to_string();
-        print( stream.str() );
-        return nullptr;
-    } );
-}
-
 dawn::Opt<dawn::EngineError> dawn::Engine::load_mod( Module const& module )
 {
     auto helper_func = [this]( auto& out_coll, auto const& in_coll )
@@ -98,7 +77,14 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Ar
 {
     if ( func.body.index() == 1 )
     {
-        retval = std::get<Function::CppFunc>( func.body )(args);
+        try
+        {
+            retval = std::get<Function::CppFunc>( func.body )(args);
+        }
+        catch ( String& msg )
+        {
+            return EngineError{ msg };
+        }
 
         return std::nullopt;
     }
@@ -330,15 +316,15 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_un_node( UnaryNode const& node
     try
     {
         if ( typeid(node) == typeid(UnaryNodePlus) )
-            value = +(*right);
+            value = right->clone();
         else if ( typeid(node) == typeid(UnaryNodeMinus) )
             value = -(*right);
-        //else if ( typeid(node) == typeid(UnaryNodeNot) )
-        //    value = !(*right);
-        //else if ( typeid(node) == typeid(UnaryNodeRef) )
-        //    value = &(*right);
-        //else if ( typeid(node) == typeid(UnaryNodeRange) )
-        //    value = ~(*right);
+        else if ( typeid(node) == typeid(UnaryNodeNot) )
+            value = !(*right);
+        else if ( typeid(node) == typeid(UnaryNodeRange) )
+            value = ~(*right);
+        else if ( typeid(node) == typeid(UnaryNodeRef) )
+            value = right;
         else
             return EngineError{ "Unknown unary node type: ", typeid(node).name() };
     }
@@ -377,6 +363,24 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& n
             value = (*left) ^ (*right);
         else if ( typeid(node) == typeid(OperatorNodeMod) )
             value = (*left) % (*right);
+        else if ( typeid(node) == typeid(OperatorNodeAnd) )
+            value = (*left) && (*right);
+        else if ( typeid(node) == typeid(OperatorNodeOr) )
+            value = (*left) || (*right);
+        else if ( typeid(node) == typeid(OperatorNodeEq) )
+            value = (*left) == (*right);
+        else if ( typeid(node) == typeid(OperatorNodeNotEq) )
+            value = (*left) != (*right);
+        else if ( typeid(node) == typeid(OperatorNodeLess) )
+            value = (*left) < (*right);
+        else if ( typeid(node) == typeid(OperatorNodeGreat) )
+            value = (*left) > (*right);
+        else if ( typeid(node) == typeid(OperatorNodeLessEq) )
+            value = (*left) <= (*right);
+        else if ( typeid(node) == typeid(OperatorNodeGreatEq) )
+            value = (*left) >= (*right);
+        else if ( typeid(node) == typeid(OperatorNodeRange) )
+            value = (*left) >> (*right);
         else
             return EngineError{ "Unknown operator node type: ", typeid(node).name() };
     }

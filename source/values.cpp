@@ -2,44 +2,15 @@
 
 
 // nothing
-dawn::Ref<dawn::Value> dawn::NothingValue::operator+() const
+dawn::StringRef const& dawn::NothingValue::type() const
 {
-    return _chaos( "+nothing not supported" );
+    static constexpr StringRef tp_nothing = L"nothing";
+    return tp_nothing;
 }
 
-dawn::Ref<dawn::Value> dawn::NothingValue::operator-() const
+dawn::Ref<dawn::Value> dawn::NothingValue::clone() const
 {
-    return _chaos( "-nothing not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::NothingValue::operator+( Value const& other ) const
-{
-    return _chaos( "nothing + not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::NothingValue::operator-( Value const& other ) const
-{
-    return _chaos( "nothing - not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::NothingValue::operator*( Value const& other ) const
-{
-    return _chaos( "nothing * not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::NothingValue::operator/( Value const& other ) const
-{
-    return _chaos( "nothing / not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::NothingValue::operator^( Value const& other ) const
-{
-    return _chaos( "nothing ^ not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::NothingValue::operator%( Value const& other ) const
-{
-    return _chaos( "nothing % not supported" );
+    return NothingValue::make();
 }
 
 dawn::Bool dawn::NothingValue::to_bool() const
@@ -67,50 +38,23 @@ dawn::String dawn::NothingValue::to_string() const
     return {};
 }
 
-dawn::Ref<dawn::Value> dawn::NothingValue::clone() const
-{
-    return {};
-}
-
 // bool
-dawn::Ref<dawn::Value> dawn::BoolValue::operator+() const
+dawn::StringRef const& dawn::BoolValue::type() const
 {
-    return _chaos( "+bool not supported" );
+    return tp_bool;
 }
 
-dawn::Ref<dawn::Value> dawn::BoolValue::operator-() const
+dawn::Ref<dawn::Value> dawn::BoolValue::clone() const
 {
-    return _chaos( "-bool not supported" );
+    auto result = BoolValue::make();
+    result->value = value;
+    return result;
 }
 
-dawn::Ref<dawn::Value> dawn::BoolValue::operator+( Value const& other ) const
+dawn::Int dawn::BoolValue::operator<=>( Value const& other ) const
 {
-    return _chaos( "bool + not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::BoolValue::operator-( Value const& other ) const
-{
-    return _chaos( "bool - not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::BoolValue::operator*( Value const& other ) const
-{
-    return _chaos( "bool * not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::BoolValue::operator/( Value const& other ) const
-{
-    return _chaos( "bool / not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::BoolValue::operator^( Value const& other ) const
-{
-    return _chaos( "bool ^ not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::BoolValue::operator%( Value const& other ) const
-{
-    return _chaos( "bool % not supported" );
+    auto result = value <=> other.to_bool();
+    return result._Value;
 }
 
 dawn::Bool dawn::BoolValue::to_bool() const
@@ -142,24 +86,22 @@ dawn::String dawn::BoolValue::to_string() const
     return L"false";
 }
 
-dawn::Ref<dawn::Value> dawn::BoolValue::clone() const
+// int
+dawn::StringRef const& dawn::IntValue::type() const
 {
-    auto result = std::make_shared<BoolValue>();
-    result->value = value;
-    return result;
+    return tp_int;
 }
 
-// int
-dawn::Ref<dawn::Value> dawn::IntValue::operator+() const
+dawn::Ref<dawn::Value> dawn::IntValue::clone() const
 {
-    auto result = std::dynamic_pointer_cast<IntValue>(clone());
-    result->value = +value;
+    auto result = IntValue::make();
+    result->value = value;
     return result;
 }
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator-() const
 {
-    auto result = std::dynamic_pointer_cast<IntValue>(clone());
+    auto result = IntValue::make();
     result->value = -value;
     return result;
 }
@@ -168,114 +110,134 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator+( Value const& other ) const
 {
     if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
     {
-        auto result = std::make_shared<IntValue>();
+        auto result = IntValue::make();
         result->value = value + other_int->value;
         return result;
     }
 
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = value + other_flt->value;
         return result;
     }
 
-    return _chaos( "int + ", typeid(other).name(), " not supported" );
+    return Value::operator+( other );
 }
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator-( Value const& other ) const
 {
     if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
     {
-        auto result = std::make_shared<IntValue>();
+        auto result = IntValue::make();
         result->value = value - other_int->value;
         return result;
     }
 
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = value - other_flt->value;
         return result;
     }
 
-    return _chaos( "int - ", typeid(other).name(), " not supported" );
+    return Value::operator-( other );
 }
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator*( Value const& other ) const
 {
     if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
     {
-        auto result = std::make_shared<IntValue>();
+        auto result = IntValue::make();
         result->value = value * other_int->value;
         return result;
     }
 
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = value * other_flt->value;
         return result;
     }
 
-    return _chaos( "int * ", typeid(other).name(), " not supported" );
+    return Value::operator*( other );
 }
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator/( Value const& other ) const
 {
     if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
     {
-        auto result = std::make_shared<IntValue>();
+        auto result = IntValue::make();
         result->value = value / other_int->value;
         return result;
     }
 
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = value / other_flt->value;
         return result;
     }
 
-    return _chaos( "int / ", typeid(other).name(), " not supported" );
+    return Value::operator/( other );
 }
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator^( Value const& other ) const
 {
     if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
     {
-        auto result = std::make_shared<IntValue>();
+        auto result = IntValue::make();
         result->value = (Int) std::pow( value, other_int->value );
         return result;
     }
 
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = (Float) std::pow( value, other_flt->value );
         return result;
     }
 
-    return _chaos( "int ^ ", typeid(other).name(), " not supported" );
+    return Value::operator^( other );
 }
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator%( Value const& other ) const
 {
     if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
     {
-        auto result = std::make_shared<IntValue>();
+        auto result = IntValue::make();
         result->value = value % other_int->value;
         return result;
     }
 
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = mymod( (Float) value, other_flt->value );
         return result;
     }
 
-    return _chaos( "int ^ ", typeid(other).name(), " not supported" );
+    return Value::operator%( other );
+}
+
+dawn::Int dawn::IntValue::operator<=>( Value const& other ) const
+{
+    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    {
+        auto result = to_float() <=> other_flt->value;
+        return result._Value;
+    }
+
+    auto result = value <=> other.to_int();
+    return result._Value;
+}
+
+dawn::Ref<dawn::Value> dawn::IntValue::operator>>( Value const& other ) const
+{
+    auto result = RangeValue::make();
+    result->start_incl = value;
+    result->end_excl = other.to_int();
+    return result;
 }
 
 dawn::Bool dawn::IntValue::to_bool() const
@@ -303,18 +265,16 @@ dawn::String dawn::IntValue::to_string() const
     return std::to_wstring( value );
 }
 
-dawn::Ref<dawn::Value> dawn::IntValue::clone() const
+// float
+dawn::StringRef const& dawn::FloatValue::type() const
 {
-    auto result = std::make_shared<IntValue>();
-    result->value = value;
-    return result;
+    return tp_float;
 }
 
-// float
-dawn::Ref<dawn::Value> dawn::FloatValue::operator+() const
+dawn::Ref<dawn::Value> dawn::FloatValue::clone() const
 {
-    auto result = std::dynamic_pointer_cast<FloatValue>(clone());
-    result->value = +value;
+    auto result = FloatValue::make();
+    result->value = value;
     return result;
 }
 
@@ -329,114 +289,120 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator+( Value const& other ) const
 {
     if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = value + other_int->value;
         return result;
     }
 
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = value + other_flt->value;
         return result;
     }
 
-    return _chaos( "float + ", typeid(other).name(), " not supported" );
+    return Value::operator+( other );
 }
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator-( Value const& other ) const
 {
     if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = value - other_int->value;
         return result;
     }
 
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = value - other_flt->value;
         return result;
     }
 
-    return _chaos( "float - ", typeid(other).name(), " not supported" );
+    return Value::operator-( other );
 }
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator*( Value const& other ) const
 {
     if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = value * other_int->value;
         return result;
     }
 
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = value * other_flt->value;
         return result;
     }
 
-    return _chaos( "float * ", typeid(other).name(), " not supported" );
+    return Value::operator*( other );
 }
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator/( Value const& other ) const
 {
     if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = value / other_int->value;
         return result;
     }
 
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = value / other_flt->value;
         return result;
     }
 
-    return _chaos( "float / ", typeid(other).name(), " not supported" );
+    return Value::operator/( other );
 }
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator^( Value const& other ) const
 {
     if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = std::pow( value, other_int->value );
         return result;
     }
 
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = std::pow( value, other_flt->value );
         return result;
     }
 
-    return _chaos( "float ^ ", typeid(other).name(), " not supported" );
+    return Value::operator^( other );
 }
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator%( Value const& other ) const
 {
     if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = mymod( value, (Float) other_int->value );
         return result;
     }
 
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
-        auto result = std::make_shared<FloatValue>();
+        auto result = FloatValue::make();
         result->value = mymod( value, other_flt->value );
         return result;
     }
 
-    return _chaos( "float % ", typeid(other).name(), " not supported" );
+    return Value::operator%( other );
+}
+
+dawn::Int dawn::FloatValue::operator<=>( Value const& other ) const
+{
+    auto result = value <=> other.to_float();
+    return result._Value;
 }
 
 dawn::Bool dawn::FloatValue::to_bool() const
@@ -464,57 +430,28 @@ dawn::String dawn::FloatValue::to_string() const
     return std::to_wstring( value );
 }
 
-dawn::Ref<dawn::Value> dawn::FloatValue::clone() const
+// char
+dawn::StringRef const& dawn::CharValue::type() const
 {
-    auto result = std::make_shared<FloatValue>();
+    return tp_char;
+}
+
+dawn::Ref<dawn::Value> dawn::CharValue::clone() const
+{
+    auto result = CharValue::make();
     result->value = value;
     return result;
 }
 
-// char
-dawn::Ref<dawn::Value> dawn::CharValue::operator+() const
+dawn::Int dawn::CharValue::operator<=>( Value const& other ) const
 {
-    return _chaos( "+char not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::CharValue::operator-() const
-{
-    return _chaos( "-char not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::CharValue::operator+( Value const& other ) const
-{
-    return _chaos( "char + ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::CharValue::operator-( Value const& other ) const
-{
-    return _chaos( "char - ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::CharValue::operator*( Value const& other ) const
-{
-    return _chaos( "char * ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::CharValue::operator/( Value const& other ) const
-{
-    return _chaos( "char / ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::CharValue::operator^( Value const& other ) const
-{
-    return _chaos( "char ^ ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::CharValue::operator%( Value const& other ) const
-{
-    return _chaos( "char % ", typeid(other).name(), " not supported" );
+    auto result = value <=> other.to_char();
+    return result._Value;
 }
 
 dawn::Bool dawn::CharValue::to_bool() const
 {
-    return (Bool) value;
+    return value == L'T';
 }
 
 dawn::Int dawn::CharValue::to_int() const
@@ -537,59 +474,40 @@ dawn::String dawn::CharValue::to_string() const
     return String( 1, value );
 }
 
-dawn::Ref<dawn::Value> dawn::CharValue::clone() const
+// string
+dawn::StringRef const& dawn::StringValue::type() const
 {
-    auto result = std::make_shared<CharValue>();
+    return tp_string;
+}
+
+dawn::Ref<dawn::Value> dawn::StringValue::clone() const
+{
+    auto result = StringValue::make();
     result->value = value;
     return result;
-}
-
-// string
-dawn::Ref<dawn::Value> dawn::StringValue::operator+() const
-{
-    return _chaos( "+string not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::StringValue::operator-() const
-{
-    return _chaos( "-string not supported" );
 }
 
 dawn::Ref<dawn::Value> dawn::StringValue::operator+( Value const& other ) const
 {
     if ( auto other_str = dynamic_cast<StringValue const*>(&other) )
     {
-        auto result = std::make_shared<StringValue>();
+        auto result = StringValue::make();
         result->value = value + other_str->value;
         return result;
     }
 
-    return _chaos( "string + ", typeid(other).name(), " not supported" );
+    return Value::operator+( other );
 }
 
-dawn::Ref<dawn::Value> dawn::StringValue::operator-( Value const& other ) const
+dawn::Int dawn::StringValue::operator<=>( Value const& other ) const
 {
-    return _chaos( "string - ", typeid(other).name(), " not supported" );
-}
+    if ( auto other_str = dynamic_cast<StringValue const*>(&other) )
+    {
+        auto result = value <=> other_str->value;
+        return result._Value;
+    }
 
-dawn::Ref<dawn::Value> dawn::StringValue::operator*( Value const& other ) const
-{
-    return _chaos( "string * ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::StringValue::operator/( Value const& other ) const
-{
-    return _chaos( "string / ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::StringValue::operator^( Value const& other ) const
-{
-    return _chaos( "string ^ ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::StringValue::operator%( Value const& other ) const
-{
-    return _chaos( "string % ", typeid(other).name(), " not supported" );
+    return Value::operator<=>( other );
 }
 
 dawn::Bool dawn::StringValue::to_bool() const
@@ -601,10 +519,7 @@ dawn::Int dawn::StringValue::to_int() const
 {
     auto optres = parse_int( value );
     if ( !optres )
-    {
-        _chaos( "string \"", value, "\" to int failed" );
-        return {};
-    }
+        PANIC( "string \"", value, "\" to int failed" );
     return *optres;
 }
 
@@ -612,10 +527,7 @@ dawn::Float dawn::StringValue::to_float() const
 {
     auto optres = parse_float( value );
     if ( !optres )
-    {
-        _chaos( "string \"", value, "\" to float failed" );
-        return {};
-    }
+        PANIC( "string \"", value, "\" to float failed" );
     return *optres;
 }
 
@@ -629,76 +541,19 @@ dawn::String dawn::StringValue::to_string() const
     return value;
 }
 
-dawn::Ref<dawn::Value> dawn::StringValue::clone() const
-{
-    auto result = std::make_shared<StringValue>();
-    result->value = value;
-    return result;
-}
-
 // enum
-dawn::Ref<dawn::Value> dawn::EnumValue::operator+() const
+dawn::StringRef const& dawn::EnumValue::type() const
 {
-    return _chaos( "+enum not supported" );
+    static constexpr StringRef tp_enum = L"enum";
+    return tp_enum;
 }
 
-dawn::Ref<dawn::Value> dawn::EnumValue::operator-() const
+dawn::Ref<dawn::Value> dawn::EnumValue::clone() const
 {
-    return _chaos( "-enum not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::EnumValue::operator+( Value const& other ) const
-{
-    return _chaos( "enum + ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::EnumValue::operator-( Value const& other ) const
-{
-    return _chaos( "enum - ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::EnumValue::operator*( Value const& other ) const
-{
-    return _chaos( "enum * ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::EnumValue::operator/( Value const& other ) const
-{
-    return _chaos( "enum / ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::EnumValue::operator^( Value const& other ) const
-{
-    return _chaos( "enum ^ ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::EnumValue::operator%( Value const& other ) const
-{
-    return _chaos( "enum % ", typeid(other).name(), " not supported" );
-}
-
-dawn::Bool dawn::EnumValue::to_bool() const
-{
-    _chaos( "enum to bool not supported" );
-    return {};
-}
-
-dawn::Int dawn::EnumValue::to_int() const
-{
-    _chaos( "enum to int not supported" );
-    return {};
-}
-
-dawn::Float dawn::EnumValue::to_float() const
-{
-    _chaos( "enum to float not supported" );
-    return {};
-}
-
-dawn::Char dawn::EnumValue::to_char() const
-{
-    _chaos( "enum to char not supported" );
-    return {};
+    auto result = EnumValue::make();
+    result->parent = parent;
+    result->key = key;
+    return result;
 }
 
 dawn::String dawn::EnumValue::to_string() const
@@ -706,78 +561,20 @@ dawn::String dawn::EnumValue::to_string() const
     return parent->name + L":" + key;
 }
 
-dawn::Ref<dawn::Value> dawn::EnumValue::clone() const
-{
-    auto result = std::make_shared<EnumValue>();
-    result->parent = parent;
-    result->key = key;
-    return result;
-}
-
 // struct
-dawn::Ref<dawn::Value> dawn::StructValue::operator+() const
+dawn::StringRef const& dawn::StructValue::type() const
 {
-    return _chaos( "+struct not supported" );
+    static constexpr StringRef tp_struct = L"struct";
+    return tp_struct;
 }
 
-dawn::Ref<dawn::Value> dawn::StructValue::operator-() const
+dawn::Ref<dawn::Value> dawn::StructValue::clone() const
 {
-    return _chaos( "-struct not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::StructValue::operator+( Value const& other ) const
-{
-    return _chaos( "struct + ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::StructValue::operator-( Value const& other ) const
-{
-    return _chaos( "struct - ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::StructValue::operator*( Value const& other ) const
-{
-    return _chaos( "struct * ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::StructValue::operator/( Value const& other ) const
-{
-    return _chaos( "struct / ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::StructValue::operator^( Value const& other ) const
-{
-    return _chaos( "struct ^ ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::StructValue::operator%( Value const& other ) const
-{
-    _chaos( "struct % ", typeid(other).name(), " not supported" );
-    return {};
-}
-
-dawn::Bool dawn::StructValue::to_bool() const
-{
-    _chaos( "struct to bool not supported" );
-    return {};
-}
-
-dawn::Int dawn::StructValue::to_int() const
-{
-    _chaos( "struct to int not supported" );
-    return {};
-}
-
-dawn::Float dawn::StructValue::to_float() const
-{
-    _chaos( "struct to float not supported" );
-    return {};
-}
-
-dawn::Char dawn::StructValue::to_char() const
-{
-    _chaos( "struct to char not supported" );
-    return {};
+    auto result = StructValue::make();
+    result->parent = parent;
+    for ( auto& [key, value] : members )
+        result->members[key] = value->clone();
+    return result;
 }
 
 dawn::String dawn::StructValue::to_string() const
@@ -785,31 +582,27 @@ dawn::String dawn::StructValue::to_string() const
     return parent->name + L"{}";
 }
 
-dawn::Ref<dawn::Value> dawn::StructValue::clone() const
-{
-    auto result = std::make_shared<StructValue>();
-    result->parent = parent;
-    for ( auto& [key, value] : members )
-        result->members[key] = value->clone();
-    return result;
-}
-
 // array
-dawn::Ref<dawn::Value> dawn::ArrayValue::operator+() const
+dawn::StringRef const& dawn::ArrayValue::type() const
 {
-    return _chaos( "+array not supported" );
+    static constexpr StringRef tp_array = L"array";
+    return tp_array;
 }
 
-dawn::Ref<dawn::Value> dawn::ArrayValue::operator-() const
+dawn::Ref<dawn::Value> dawn::ArrayValue::clone() const
 {
-    return _chaos( "-array not supported" );
+    auto result = ArrayValue::make();
+    result->data.reserve( data.size() );
+    for ( auto& value : data )
+        result->data.push_back( value->clone() );
+    return result;
 }
 
 dawn::Ref<dawn::Value> dawn::ArrayValue::operator+( Value const& other ) const
 {
     if ( auto other_arr = dynamic_cast<ArrayValue const*>(&other) )
     {
-        auto result = std::make_shared<ArrayValue>();
+        auto result = ArrayValue::make();
         result->data.reserve( data.size() + other_arr->data.size() );
         for ( auto& value : data )
             result->data.push_back( value->clone() );
@@ -818,56 +611,18 @@ dawn::Ref<dawn::Value> dawn::ArrayValue::operator+( Value const& other ) const
         return result;
     }
 
-    return _chaos( "array + ", typeid(other).name(), " not supported" );
+    return Value::operator+( other );
 }
 
-dawn::Ref<dawn::Value> dawn::ArrayValue::operator-( Value const& other ) const
+dawn::Int dawn::ArrayValue::operator<=>( Value const& other ) const
 {
-    return _chaos( "array - ", typeid(other).name(), " not supported" );
-}
+    if ( auto other_arr = dynamic_cast<ArrayValue const*>(&other) )
+    {
+        auto result = data <=> other_arr->data;
+        return result._Value;
+    }
 
-dawn::Ref<dawn::Value> dawn::ArrayValue::operator*( Value const& other ) const
-{
-    return _chaos( "array * ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::ArrayValue::operator/( Value const& other ) const
-{
-    return _chaos( "array / ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::ArrayValue::operator^( Value const& other ) const
-{
-    return _chaos( "array ^ ", typeid(other).name(), " not supported" );
-}
-
-dawn::Ref<dawn::Value> dawn::ArrayValue::operator%( Value const& other ) const
-{
-    return _chaos( "array % ", typeid(other).name(), " not supported" );
-}
-
-dawn::Bool dawn::ArrayValue::to_bool() const
-{
-    _chaos( "array to bool not supported" );
-    return {};
-}
-
-dawn::Int dawn::ArrayValue::to_int() const
-{
-    _chaos( "array to int not supported" );
-    return {};
-}
-
-dawn::Float dawn::ArrayValue::to_float() const
-{
-    _chaos( "array to float not supported" );
-    return {};
-}
-
-dawn::Char dawn::ArrayValue::to_char() const
-{
-    _chaos( "array to char not supported" );
-    return {};
+    return Value::operator<=>( other );
 }
 
 dawn::String dawn::ArrayValue::to_string() const
@@ -884,11 +639,21 @@ dawn::String dawn::ArrayValue::to_string() const
     return stream.str();
 }
 
-dawn::Ref<dawn::Value> dawn::ArrayValue::clone() const
+dawn::StringRef const& dawn::RangeValue::type() const
 {
-    auto result = std::make_shared<ArrayValue>();
-    result->data.reserve( data.size() );
-    for ( auto& value : data )
-        result->data.push_back( value->clone() );
+    static constexpr StringRef tp_range = L"range";
+    return tp_range;
+}
+
+dawn::Ref<dawn::Value> dawn::RangeValue::clone() const
+{
+    auto result = RangeValue::make();
+    result->start_incl = start_incl;
+    result->end_excl = end_excl;
     return result;
+}
+
+dawn::String dawn::RangeValue::to_string() const
+{
+    return format( start_incl, L"~", end_excl );
 }
