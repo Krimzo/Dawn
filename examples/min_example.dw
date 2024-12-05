@@ -1,24 +1,19 @@
 module min_example;
 
-let a = 1;
-var b = a * 2;
-let c = b * 2;
-
 func main() {
-	var a = c;
-	a += sqr(b);
-
-	let test = float("17.9");
-	print(test);
-
-	var value = "some: ";
-	value += string(a % test);
-	
-	print(value);
-}
-
-func sqr(val: int): int {
-	var result: int = 0;
-	result = val * val;
-	return result;
+	if {
+		print("if");
+		return;
+	}
+	elif false {
+		print("first elif");
+	}
+	elif true {
+		print("second elif");
+		return;
+	}
+	else {
+		print("else");
+	}
+	print("done");
 }

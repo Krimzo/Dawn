@@ -472,6 +472,15 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_extract( Array<Token>::cons
     Array<Token>::const_iterator first_it = it;
     for ( ; it != end; ++it )
     {
+        if ( it->value == op_scope_opn )
+        {
+            if ( first_it == it )
+                break;
+
+            if ( (it - 1)->type != TokenType::TYPE )
+                break;
+        }
+
         if ( it->value == op_expr_opn || it->value == op_scope_opn || it->value == op_array_opn || it->value == op_yield_opn )
         {
             ++expr_depth;
@@ -482,6 +491,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_extract( Array<Token>::cons
             if ( expr_depth < 0 )
                 break;
         }
+
         if ( expr_depth == 0 )
         {
             if ( it->value == op_expr_end )
@@ -489,15 +499,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_extract( Array<Token>::cons
 
             if ( it->value == op_split )
                 break;
-
-            if ( it->value == op_scope_opn )
-            {
-                if ( first_it == it )
-                    break;
-
-                if ( (it - 1)->type == TokenType::TYPE )
-                    break;
-            }
         }
         tokens.push_back( *it );
     }
@@ -554,7 +555,10 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_precedence( Array<Token> co
 dawn::Opt<dawn::ParseError> dawn::Parser::expression_pure( Array<Token> const& tokens, Ref<Node>& tree )
 {
     if ( tokens.empty() )
-        return ParseError{ {}, L"expected pure expression" };
+    {
+        tree = std::make_shared<NothingNode>();
+        return std::nullopt;
+    }
 
     if ( tokens.size() == 1 )
     {
@@ -688,12 +692,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_keyword( Token const
         node->value = value;
         tree = node;
     }
-    else if ( token.value == kw_null )
-    {
-        auto node = std::make_shared<ValueNode>();
-        node->value = nullptr;
-        tree = node;
-    }
     else if ( token.value == kw_self )
     {
         auto node = std::make_shared<SelfNode>();
@@ -758,9 +756,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_cast( Array<Token> con
     if ( auto error = expression_extract( it, tokens.end(), expr_tokens ) )
         return error;
 
-    if ( expr_tokens.empty() )
-        return ParseError{ *it, L"expected expression" };
-
     Array<Token>::const_iterator expr_it = expr_tokens.begin();
     if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->expr ) )
         return error;
@@ -777,7 +772,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_cast( Array<Token> con
 dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_make( Array<Token> const& tokens, Ref<Node>& tree )
 {
     Array<Token>::const_iterator it = tokens.begin();
-    Ref node = std::make_shared<NewStructNode>();
+    Ref node = std::make_shared<StructNode>();
 
     if ( auto error = type_basic( it, tokens.end(), node->type ) )
         return error;
@@ -827,7 +822,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_make( Array<Token> con
 dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> const& tokens, Ref<Node>& tree )
 {
     Array<Token>::const_iterator it = tokens.begin();
-    Ref node = std::make_shared<NewArrayNode>();
+    Ref node = std::make_shared<ArrayNode>();
 
     if ( auto error = type_basic( it, tokens.end(), node->type ) )
         return error;
@@ -841,9 +836,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> co
         return error;
 
     if ( expr_tokens.empty() )
-        return ParseError{ *it, L"expected array size expression" };
-
-    if ( expr_tokens.front().value == op_unknown )
     {
         if ( it->value != op_expr_end )
             return ParseError{ *it, L"expected expression end" };
@@ -866,7 +858,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> co
                 return error;
         }
 
-        node->init_type = NewArrayNode::InitType::LIST;
+        node->init_type = ArrayNode::InitType::LIST;
     }
     else
     {
@@ -888,11 +880,11 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> co
             if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->_val ) )
                 return error;
 
-            node->init_type = NewArrayNode::InitType::SIZE_VAL;
+            node->init_type = ArrayNode::InitType::SIZE_VAL;
         }
         else
         {
-            node->init_type = NewArrayNode::InitType::SIZE;
+            node->init_type = ArrayNode::InitType::SIZE;
         }
     }
 
@@ -1055,7 +1047,42 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_scope( Array<Token>::const_itera
 
 dawn::Opt<dawn::ParseError> dawn::Parser::scope_if( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
 {
-    assert( false && L"not impl" );
+    if ( it->value != kw_if )
+        return ParseError{ *it, L"expected if keyword" };
+    ++it;
+
+    auto node = std::make_shared<IfNode>();
+
+    if ( auto error = parse_expression( it, end, node->if_part.expr ) )
+        return error;
+    if ( auto error = parse_scope( it, end, node->if_part.scope ) )
+        return error;
+
+    while ( true )
+    {
+        if ( it->value == kw_elif )
+        {
+            ++it;
+            auto& part = node->elif_parts.emplace_back();
+            if ( auto error = parse_expression( it, end, part.expr ) )
+                return error;
+            if ( auto error = parse_scope( it, end, part.scope ) )
+                return error;
+        }
+        else if ( it->value == kw_else )
+        {
+            ++it;
+            node->else_part.emplace();
+            if ( auto error = parse_scope( it, end, node->else_part->scope ) )
+                return error;
+            break;
+        }
+        else
+            break;
+    }
+
+    tree = node;
+
     return std::nullopt;
 }
 

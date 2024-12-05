@@ -84,14 +84,16 @@ private:
     Opt<EngineError> handle_instr( Ref<Node> const& node, Ref<Value>& retval, Int& push_count, Bool& didbrk );
     Opt<EngineError> handle_expr( Ref<Node> const& node, Ref<Value>& value );
 
+    Opt<EngineError> handle_nothing_node( NothingNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_val_node( ValueNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_id_node( IdentifierNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_var_instr( VariableNode const& node, Int& push_count );
     Opt<EngineError> handle_cast_node( CastNode const& node, Ref<Value>& value );
+    Opt<EngineError> handle_var_instr( VariableNode const& node, Int& push_count );
+    Opt<EngineError> handle_id_node( IdentifierNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_func_node( FunctionNode const& node, Ref<Value>& value );
+    Opt<EngineError> handle_print_node( PrintNode const& node );
+    Opt<EngineError> handle_if_node( IfNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_un_node( UnaryNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_op_node( OperatorNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_as_node( AssignNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_print_node( PrintNode const& node, Ref<Value>& value );
 };
 }

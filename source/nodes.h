@@ -5,6 +5,10 @@
 
 namespace dawn
 {
+struct NothingNode : Node
+{
+};
+
 struct ValueNode : Node
 {
     Ref<Value> value;
@@ -25,13 +29,13 @@ struct CastNode : Node
     Ref<Node> expr;
 };
 
-struct NewStructNode : Node
+struct StructNode : Node
 {
     Ref<Type> type;
     Map<String, Ref<Node>> args;
 };
 
-struct NewArrayNode : Node
+struct ArrayNode : Node
 {
     enum struct InitType
     {
@@ -63,7 +67,20 @@ struct ReturnNode : Node
     Ref<Node> expr;
 };
 
-struct PrintNode : Node
+struct IfNode : Node
+{
+    struct Part
+    {
+        Ref<Node> expr;
+        Scope scope;
+    };
+
+    Part if_part;
+    Array<Part> elif_parts;
+    Opt<Part> else_part;
+};
+
+/* should rework */ struct PrintNode : Node
 {
     Array<Ref<Node>> args;
 };

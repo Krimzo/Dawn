@@ -63,7 +63,6 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) kw_self,
         (String) kw_true,
         (String) kw_false,
-        (String) kw_null,
     };
     result.types = {
         (String) tp_bool,
@@ -100,7 +99,6 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) op_access,
         (String) op_link,
         (String) op_range,
-        (String) op_unknown,
         (String) op_expr_opn,
         (String) op_expr_cls,
         (String) op_scope_opn,

@@ -31,7 +31,6 @@ inline constexpr StringRef kw_impl = L"impl";
 inline constexpr StringRef kw_self = L"self";
 inline constexpr StringRef kw_true = L"true";
 inline constexpr StringRef kw_false = L"false";
-inline constexpr StringRef kw_null = L"null";
 
 inline constexpr StringRef tp_bool = L"bool";
 inline constexpr StringRef tp_int = L"int";
@@ -66,7 +65,6 @@ inline constexpr StringRef op_ref = L"&";
 inline constexpr StringRef op_access = L"->";
 inline constexpr StringRef op_link = L":";
 inline constexpr StringRef op_range = L"~";
-inline constexpr StringRef op_unknown = L"?";
 inline constexpr StringRef op_expr_opn = L"(";
 inline constexpr StringRef op_expr_cls = L")";
 inline constexpr StringRef op_scope_opn = L"{";

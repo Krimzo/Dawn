@@ -1,6 +1,77 @@
 #include "values.h"
 
 
+// nothing
+dawn::Ref<dawn::Value> dawn::NothingValue::operator+() const
+{
+    return _chaos( "+nothing not supported" );
+}
+
+dawn::Ref<dawn::Value> dawn::NothingValue::operator-() const
+{
+    return _chaos( "-nothing not supported" );
+}
+
+dawn::Ref<dawn::Value> dawn::NothingValue::operator+( Value const& other ) const
+{
+    return _chaos( "nothing + not supported" );
+}
+
+dawn::Ref<dawn::Value> dawn::NothingValue::operator-( Value const& other ) const
+{
+    return _chaos( "nothing - not supported" );
+}
+
+dawn::Ref<dawn::Value> dawn::NothingValue::operator*( Value const& other ) const
+{
+    return _chaos( "nothing * not supported" );
+}
+
+dawn::Ref<dawn::Value> dawn::NothingValue::operator/( Value const& other ) const
+{
+    return _chaos( "nothing / not supported" );
+}
+
+dawn::Ref<dawn::Value> dawn::NothingValue::operator^( Value const& other ) const
+{
+    return _chaos( "nothing ^ not supported" );
+}
+
+dawn::Ref<dawn::Value> dawn::NothingValue::operator%( Value const& other ) const
+{
+    return _chaos( "nothing % not supported" );
+}
+
+dawn::Bool dawn::NothingValue::to_bool() const
+{
+    return {};
+}
+
+dawn::Int dawn::NothingValue::to_int() const
+{
+    return {};
+}
+
+dawn::Float dawn::NothingValue::to_float() const
+{
+    return {};
+}
+
+dawn::Char dawn::NothingValue::to_char() const
+{
+    return {};
+}
+
+dawn::String dawn::NothingValue::to_string() const
+{
+    return {};
+}
+
+dawn::Ref<dawn::Value> dawn::NothingValue::clone() const
+{
+    return {};
+}
+
 // bool
 dawn::Ref<dawn::Value> dawn::BoolValue::operator+() const
 {
