@@ -510,7 +510,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_extract( Array<Token>::cons
 dawn::Opt<dawn::ParseError> dawn::Parser::expression_precedence( Array<Token> const& tokens, Int& index )
 {
     Int expr_depth = 0;
-    Bool was_op = false;
+    Bool was_op = true;
     Int least_precedence = -1;
     for ( Int i = 0; i < (Int) tokens.size(); i++ )
     {
@@ -530,6 +530,9 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_precedence( Array<Token> co
             continue;
 
         Bool is_op = precedences.contains( token.value );
+        if ( is_op && index < 0 )
+            index = i;
+
         if ( is_op && was_op )
             continue;
 

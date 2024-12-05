@@ -53,7 +53,7 @@ int main()
     if /* CALL FUNCTION */ constexpr ( 1 )
     {
         Ref<Value> retval;
-        if ( auto error = engine.exec( L"main", { ArrayValue::make() }, retval ) )
+        if ( auto error = engine.exec( L"main", {}, retval ) )
         {
             print( error.value() );
             return 5;

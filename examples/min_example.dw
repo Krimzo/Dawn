@@ -4,7 +4,7 @@ let a = 1;
 var b = a * 2;
 let c = b * 2;
 
-func main(args: string[]) {
+func main() {
 	var a = c;
 	a += sqr(b);
 

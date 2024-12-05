@@ -200,7 +200,7 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator%( Value const& other ) const
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
         auto result = std::make_shared<FloatValue>();
-        result->value = mymod( value, other_flt->value );
+        result->value = mymod( (Float) value, other_flt->value );
         return result;
     }
 
@@ -354,14 +354,14 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator%( Value const& other ) const
     if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
     {
         auto result = std::make_shared<FloatValue>();
-        result->value = std::remainder( value, other_int->value );
+        result->value = mymod( value, (Float) other_int->value );
         return result;
     }
 
     if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
     {
         auto result = std::make_shared<FloatValue>();
-        result->value = std::remainder( value, other_flt->value );
+        result->value = mymod( value, other_flt->value );
         return result;
     }
 
