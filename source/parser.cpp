@@ -248,7 +248,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_function( Array<Token>::const_it
             return error;
     }
 
-    if ( auto error = parse_scope( it, end, function.body ) )
+    if ( auto error = parse_scope( it, end, std::get<Scope>( function.body ) ) )
         return error;
 
     return std::nullopt;
@@ -931,16 +931,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_function( Array<Token> cons
         return ParseError{ *it, L"expected function close" };
     ++it;
 
-    if ( node->name == L"print" )
-    {
-        auto print_nd = std::make_shared<PrintNode>();
-        print_nd->args = node->args;
-        tree = print_nd;
-    }
-    else
-    {
-        tree = node;
-    }
+    tree = node;
 
     return std::nullopt;
 }

@@ -67,18 +67,23 @@ private:
 
 struct Engine
 {
-    Opt<EngineError> load( Module const& module );
-    Opt<EngineError> exec( String const& func_name, Array<Ref<Value>> const& args, Ref<Value>& retval, Bool allow_internal = false );
-    Bool get( String const& var_name, Ref<Value>& value );
+    Stack<EngineVar> variables;
+    Stack<Operator> operators;
+    Stack<Function> functions;
+    Stack<EnumType> enums;
+    Stack<LayerType> layers;
+    Stack<StructType> structs;
+
+    void load_default_mods();
+    Opt<EngineError> load_mod( Module const& module );
+
+    void bind_func( String const& name, Function::CppFunc cpp_func );
+    Opt<EngineError> call_func( String const& name, Array<Ref<Value>> const& args, Ref<Value>& retval );
+
+    void set_var( String const& name, Ref<Value> const& value );
+    Ref<Value> get_var( String const& name );
 
 private:
-    Stack<EngineVar> m_variables;
-    Stack<Operator> m_operators;
-    Stack<Function> m_functions;
-    Stack<EnumType> m_enums;
-    Stack<LayerType> m_layers;
-    Stack<StructType> m_structs;
-
     Opt<EngineError> handle_func( Function const& func, Array<Ref<Value>> const& args, Ref<Value>& retval );
     Opt<EngineError> handle_scope( Scope const& scope, Ref<Value>& retval );
     Opt<EngineError> handle_instr( Ref<Node> const& node, Ref<Value>& retval, Int& push_count, Bool& didbrk );
@@ -90,7 +95,6 @@ private:
     Opt<EngineError> handle_var_instr( VariableNode const& node, Int& push_count );
     Opt<EngineError> handle_id_node( IdentifierNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_func_node( FunctionNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_print_node( PrintNode const& node );
     Opt<EngineError> handle_if_node( IfNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_un_node( UnaryNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_op_node( OperatorNode const& node, Ref<Value>& value );

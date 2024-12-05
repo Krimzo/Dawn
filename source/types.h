@@ -27,10 +27,12 @@ struct Argument
 
 struct Function
 {
+    using CppFunc = Func<Ref<Value>( Array<Ref<Value>> const& )>;
+
     String name;
     Array<Argument> args;
     Ref<Type> type;
-    Scope body;
+    Variant<Scope, CppFunc> body;
 };
 
 struct Operator : Function

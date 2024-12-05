@@ -7,7 +7,28 @@ std::wostream& dawn::operator<<( std::wostream& stream, EngineError const& error
     return stream;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::load( Module const& module )
+void dawn::Engine::load_default_mods()
+{
+    bind_func( L"format", []( Array<Ref<Value>> const& args ) -> Ref<Value>
+    {
+        StringStream stream;
+        for ( auto& arg : args )
+            stream << arg->to_string();
+        auto result = StringValue::make();
+        result->value = stream.str();
+        return result;
+    } );
+    bind_func( L"print", []( Array<Ref<Value>> const& args ) -> Ref<Value>
+    {
+        StringStream stream;
+        for ( auto& arg : args )
+            stream << arg->to_string();
+        print( stream.str() );
+        return nullptr;
+    } );
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::load_mod( Module const& module )
 {
     auto helper_func = [this]( auto& out_coll, auto const& in_coll )
     {
@@ -15,10 +36,10 @@ dawn::Opt<dawn::EngineError> dawn::Engine::load( Module const& module )
             out_coll.push( key, part );
     };
 
-    helper_func( m_functions, module.functions );
-    helper_func( m_enums, module.enums );
-    helper_func( m_layers, module.layers );
-    helper_func( m_structs, module.structs );
+    helper_func( functions, module.functions );
+    helper_func( enums, module.enums );
+    helper_func( layers, module.layers );
+    helper_func( structs, module.structs );
 
     for ( auto& [key, var] : module.variables )
     {
@@ -31,17 +52,25 @@ dawn::Opt<dawn::EngineError> dawn::Engine::load( Module const& module )
         eng_var.is_var = var.is_var;
         eng_var.type = var.type;
         eng_var.value = value;
-        m_variables.push( key, eng_var );
+        variables.push( key, eng_var );
     }
 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::exec( String const& func_name, Array<Ref<Value>> const& args, Ref<Value>& retval, Bool allow_internal )
+void dawn::Engine::bind_func( String const& name, Function::CppFunc cpp_func )
 {
-    auto* func = m_functions.get( func_name );
+    Function func;
+    func.name = name;
+    func.body.emplace<Function::CppFunc>( std::move( cpp_func ) );
+    functions.push( name, func );
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::call_func( String const& name, Array<Ref<Value>> const& args, Ref<Value>& retval )
+{
+    auto* func = functions.get( name );
     if ( !func )
-        return EngineError{ L"function [", func_name, L"] doesn't exist" };
+        return EngineError{ L"function [", name, L"] doesn't exist" };
 
     if ( auto error = handle_func( *func, args, retval ) )
         return error;
@@ -49,18 +78,31 @@ dawn::Opt<dawn::EngineError> dawn::Engine::exec( String const& func_name, Array<
     return std::nullopt;
 }
 
-dawn::Bool dawn::Engine::get( String const& var_name, Ref<Value>& value )
+void dawn::Engine::set_var( String const& name, Ref<Value> const& value )
 {
-    auto* ptr = m_variables.get( var_name );
-    if ( !ptr )
-        return false;
+    EngineVar var;
+    var.name = name;
+    var.is_var = true;
+    var.type;
+    var.value = value->clone();
+    variables.push( name, var );
+}
 
-    value = ptr->value;
-    return true;
+dawn::Ref<dawn::Value> dawn::Engine::get_var( String const& name )
+{
+    auto* ptr = variables.get( name );
+    return ptr ? ptr->value : nullptr;
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Array<Ref<Value>> const& args, Ref<Value>& retval )
 {
+    if ( func.body.index() == 1 )
+    {
+        retval = std::get<Function::CppFunc>( func.body )(args);
+
+        return std::nullopt;
+    }
+
     if ( func.args.size() != args.size() )
         return EngineError{ "invalid argument count for function [", func.name, L"]" };
 
@@ -71,14 +113,14 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Ar
         arg.is_var = false;
         arg.type = func.args[i].type;
         arg.value = args[i];
-        m_variables.push( arg.name, arg );
+        variables.push( arg.name, arg );
     }
 
     retval = nullptr;
-    if ( auto error = handle_scope( func.body, retval ) )
+    if ( auto error = handle_scope( std::get<Scope>( func.body ), retval ) )
         return error;
 
-    m_variables.pop( (Int) args.size() );
+    variables.pop( (Int) args.size() );
 
     return std::nullopt;
 }
@@ -96,7 +138,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_scope( Scope const& scope, Ref
             return error;
     }
 
-    m_variables.pop( push_count );
+    variables.pop( push_count );
 
     return std::nullopt;
 }
@@ -108,9 +150,6 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_instr( Ref<Node> const& node, 
 
     if ( auto nd = dynamic_cast<VariableNode*>(node.get()) )
         return handle_var_instr( *nd, push_count );
-
-    if ( auto nd = dynamic_cast<PrintNode*>(node.get()) )
-        return handle_print_node( *nd );
 
     if ( auto nd = dynamic_cast<IfNode*>(node.get()) )
         return handle_if_node( *nd, retval );
@@ -229,7 +268,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_var_instr( VariableNode const&
     var.is_var = node.var.is_var;
     var.type = node.var.type;
     var.value = value;
-    m_variables.push( node.var.name, var );
+    variables.push( node.var.name, var );
 
     ++push_count;
 
@@ -238,7 +277,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_var_instr( VariableNode const&
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_id_node( IdentifierNode const& node, Ref<Value>& value )
 {
-    auto* ptr = m_variables.get( node.name );
+    auto* ptr = variables.get( node.name );
     if ( !ptr )
         return EngineError{ L"variable [", node.name, L"] doesn't exist" };
 
@@ -257,23 +296,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func_node( FunctionNode const&
             return error;
         args.emplace_back( std::move( val ) );
     }
-    return exec( node.name, args, value, true );
-}
-
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_print_node( PrintNode const& node )
-{
-    String result;
-    for ( auto& arg : node.args )
-    {
-        Ref<Value> val;
-        if ( auto error = handle_expr( arg, val ) )
-            return error;
-        result += val->to_string();
-    }
-
-    print( result );
-
-    return std::nullopt;
+    return call_func( node.name, args, value );
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_if_node( IfNode const& node, Ref<Value>& value )
@@ -375,7 +398,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& nod
     if ( auto error = handle_expr( node.right, right ) )
         return error;
 
-    auto var = m_variables.get( id->name );
+    auto var = variables.get( id->name );
     if ( !var )
         return EngineError{ "variable [", id->name, L"] doesn't exist" };
 

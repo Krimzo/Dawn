@@ -6,14 +6,12 @@
 
 int main()
 {
+    //// PREP
     using namespace dawn;
-
     String source = read_file( L"examples/min_example.dw" );
 
+    //// LEXER
     Lexer lexer;
-    Parser parser;
-    Engine engine;
-
     Array<Token> tokens;
     if ( auto error = lexer.tokenize( source, tokens ) )
     {
@@ -27,6 +25,8 @@ int main()
             print( token );
     }
 
+    //// PARSER
+    Parser parser;
     Module module;
     if ( auto error = parser.parse( tokens, module ) )
     {
@@ -34,7 +34,11 @@ int main()
         return 2;
     }
 
-    if ( auto error = engine.load( module ) )
+    //// ENGINE
+    Engine engine;
+    engine.load_default_mods();
+
+    if ( auto error = engine.load_mod( module ) )
     {
         print( error.value() );
         return 3;
@@ -42,8 +46,9 @@ int main()
 
     if /* GET VALUE */ constexpr ( 0 )
     {
-        Ref<Value> a_val, b_val;
-        if ( !engine.get( L"a", a_val ) || !engine.get( L"b", b_val ) )
+        Ref<Value> a_val = engine.get_var( L"a" );
+        Ref<Value> b_val = engine.get_var( L"b" );
+        if ( !a_val || !b_val )
             return 4;
 
         print( L"a = ", a_val->to_string() );
@@ -53,7 +58,7 @@ int main()
     if /* CALL FUNCTION */ constexpr ( 1 )
     {
         Ref<Value> retval;
-        if ( auto error = engine.exec( L"main", {}, retval ) )
+        if ( auto error = engine.call_func( L"main", {}, retval ) )
         {
             print( error.value() );
             return 5;

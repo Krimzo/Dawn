@@ -14,46 +14,24 @@ struct ValueNode : Node
     Ref<Value> value;
 };
 
-struct SelfNode : Node
-{
-};
-
-struct IdentifierNode : Node
-{
-    String name;
-};
-
 struct CastNode : Node
 {
     Ref<Type> type;
     Ref<Node> expr;
 };
 
-struct StructNode : Node
+struct SelfNode : Node
 {
-    Ref<Type> type;
-    Map<String, Ref<Node>> args;
-};
-
-struct ArrayNode : Node
-{
-    enum struct InitType
-    {
-        SIZE,
-        SIZE_VAL,
-        LIST,
-    };
-
-    Ref<Type> type;
-    InitType init_type;
-    Ref<Node> size;
-    Ref<Node> _val;
-    Array<Ref<Node>> _list;
 };
 
 struct VariableNode : Node
 {
     Variable var;
+};
+
+struct IdentifierNode : Node
+{
+    String name;
 };
 
 struct FunctionNode : Node
@@ -80,9 +58,26 @@ struct IfNode : Node
     Opt<Part> else_part;
 };
 
-/* should rework */ struct PrintNode : Node
+struct StructNode : Node
 {
-    Array<Ref<Node>> args;
+    Ref<Type> type;
+    Map<String, Ref<Node>> args;
+};
+
+struct ArrayNode : Node
+{
+    enum struct InitType
+    {
+        SIZE,
+        SIZE_VAL,
+        LIST,
+    };
+
+    Ref<Type> type;
+    InitType init_type;
+    Ref<Node> size;
+    Ref<Node> _val;
+    Array<Ref<Node>> _list;
 };
 
 struct UnaryNode : Node
