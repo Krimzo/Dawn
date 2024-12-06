@@ -48,7 +48,7 @@ struct Stack
 
     T const& peek() const
     {
-        return m_data.back();
+        return m_data.back().second;
     }
 
     T* get( StringRef const& name )

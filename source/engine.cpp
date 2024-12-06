@@ -400,7 +400,75 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_while_node( WhileNode const& n
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node, Ref<Value>& retval, Bool& didret )
 {
-    assert( false && "not impl" );
+    Ref<Value> loop_expr;
+    if ( auto error = handle_expr( node.expr, loop_expr ) )
+        return error;
+
+    {
+        EngineVar var;
+        var.is_var = false;
+        var.name = node.var_name;
+        var.value = NothingValue::make();
+        variables.push( var.name, var );
+    }
+
+    if ( auto value_rng = dynamic_cast<RangeValue const*>(loop_expr.get()) )
+    {
+        Bool didbrk = false, didcon = false;
+        for ( auto i = value_rng->start_incl; i < value_rng->end_excl; ++i )
+        {
+            if ( didret || didbrk )
+                break;
+            if ( didcon )
+                didcon = false;
+
+            auto value = IntValue::make();
+            value->value = i;
+            variables.get( node.var_name )->value = std::move( value );
+
+            if ( auto error = handle_scope( node.scope, retval, didret, &didbrk, &didcon ) )
+                return error;
+        }
+    }
+    else if ( auto value_str = dynamic_cast<StringValue const*>(loop_expr.get()) )
+    {
+        Bool didbrk = false, didcon = false;
+        for ( Char c : value_str->value )
+        {
+            if ( didret || didbrk )
+                break;
+            if ( didcon )
+                didcon = false;
+
+            auto value = CharValue::make();
+            value->value = c;
+            variables.get( node.var_name )->value = std::move( value );
+
+            if ( auto error = handle_scope( node.scope, retval, didret, &didbrk, &didcon ) )
+                return error;
+        }
+    }
+    else if ( auto value_arr = dynamic_cast<ArrayValue const*>(loop_expr.get()) )
+    {
+        Bool didbrk = false, didcon = false;
+        for ( auto& value : value_arr->data )
+        {
+            if ( didret || didbrk )
+                break;
+            if ( didcon )
+                didcon = false;
+
+            variables.get( node.var_name )->value = value;
+
+            if ( auto error = handle_scope( node.scope, retval, didret, &didbrk, &didcon ) )
+                return error;
+        }
+    }
+    else
+        return EngineError{ "Can't for loop type: ", loop_expr->type() };
+
+    variables.pop();
+
     return std::nullopt;
 }
 

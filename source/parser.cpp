@@ -1183,7 +1183,29 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_while( Array<Token>::const_itera
 
 dawn::Opt<dawn::ParseError> dawn::Parser::scope_for( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
 {
-    assert( false && L"not impl" );
+    if ( it->value != kw_for )
+        return ParseError{ *it, L"expected for keyword" };
+    ++it;
+
+    auto node = std::make_shared<ForNode>();
+
+    if ( it->type != TokenType::NAME )
+        return ParseError{ *it, L"expected name" };
+    node->var_name = it->value;
+    ++it;
+
+    if ( it->value != op_link )
+        return ParseError{ *it, L"expected link operator" };
+    ++it;
+
+    if ( auto error = parse_expression( it, end, node->expr ) )
+        return error;
+
+    if ( auto error = parse_scope( it, end, node->scope ) )
+        return error;
+
+    tree = node;
+
     return std::nullopt;
 }
 

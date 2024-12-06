@@ -1,12 +1,15 @@
 module min_example;
 
 func main() {
-	var i = 0;
-	while i < 10 {
-		print(i);
-		i += 1;
+	for i: ~10 {
+		print(i, " -> ", check_val(i));
 	}
-	print("done");
+	for c: "haha" {
+		print(c);
+	}
+	for v: float[10] {
+		print(v);
+	}
 }
 
 func check_val(value: int): bool {

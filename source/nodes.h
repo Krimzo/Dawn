@@ -83,6 +83,9 @@ struct WhileNode : Node
 
 struct ForNode :Node
 {
+    String var_name;
+    Ref<Node> expr;
+    Scope scope;
 };
 
 struct StructNode : Node
