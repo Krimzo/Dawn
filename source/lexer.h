@@ -63,6 +63,7 @@ struct Token
 {
     TokenType type;
     String value;
+    String lit_val;
     Int line_number = 0;
 };
 

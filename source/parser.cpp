@@ -87,10 +87,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_module( Array<Token>::con
     module.name = it->value;
     ++it;
 
-    if ( it->value != op_expr_end )
-        return ParseError{ *it, L"expected expression end" };
-    ++it;
-
     return std::nullopt;
 }
 
@@ -270,6 +266,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_variable( Array<Token>::const_it
     if ( it->type != TokenType::NAME )
         return ParseError{ *it, L"expected variable name" };
     variable.name = it->value;
+    Int name_line = it->line_number;
     ++it;
 
     if ( it->value == op_link )
@@ -279,16 +276,17 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_variable( Array<Token>::const_it
             return error;
     }
 
-    if ( it->value != op_assign )
-        return ParseError{ *it, L"expected variable assignment" };
-    ++it;
+    if ( it->line_number == name_line )
+    {
+        if ( it->value != op_assign )
+            return ParseError{ *it, L"expected variable assignment" };
+        ++it;
 
-    if ( auto error = parse_expression( it, end, variable.expr ) )
-        return error;
-
-    if ( it->value != op_expr_end )
-        return ParseError{ *it, L"expected expression end" };
-    ++it;
+        if ( auto error = parse_expression( it, end, variable.expr ) )
+            return error;
+    }
+    else
+        variable.expr = std::make_shared<NothingNode>();
 
     return std::nullopt;
 }
@@ -364,9 +362,8 @@ dawn::Opt<dawn::ParseError> dawn::Parser::type_basic( Array<Token>::const_iterat
         type->name = it->value;
     }
     else
-    {
         return ParseError{ *it, L"invalid type" };
-    }
+
     ++it;
 
     return std::nullopt;
@@ -406,9 +403,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::type_reference( Array<Token>::const_it
         type = parent_type;
     }
     else
-    {
         type = child_type;
-    }
 
     return std::nullopt;
 }
@@ -470,6 +465,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_extract( Array<Token>::cons
 {
     Int expr_depth = 0;
     Array<Token>::const_iterator first_it = it;
+    Int last_line = it->line_number;
     for ( ; it != end; ++it )
     {
         if ( it->value == op_scope_opn )
@@ -494,13 +490,18 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_extract( Array<Token>::cons
 
         if ( expr_depth == 0 )
         {
-            if ( it->value == op_expr_end )
+            if ( it->line_number != last_line )
                 break;
 
             if ( it->value == op_split )
+            {
+                ++it;
                 break;
+            }
         }
+
         tokens.push_back( *it );
+        last_line = it->line_number;
     }
     if ( expr_depth > 0 )
         return ParseError{ *it, L"expected expression end" };
@@ -595,9 +596,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_pure( Array<Token> const& t
             return error;
     }
     else
-    {
         return ParseError{ tokens[0], L"unknown expression token" };
-    }
 
     return std::nullopt;
 }
@@ -642,7 +641,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_literal( Token const
     if ( token.type == TokenType::INTEGER )
     {
         auto value = IntValue::make();
-        value->value = std::stoll( token.value );
+        value->value = std::stoll( token.lit_val );
         auto node = std::make_shared<ValueNode>();
         node->value = value;
         tree = node;
@@ -650,7 +649,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_literal( Token const
     else if ( token.type == TokenType::FLOAT )
     {
         auto value = FloatValue::make();
-        value->value = std::stod( token.value );
+        value->value = std::stod( token.lit_val );
         auto node = std::make_shared<ValueNode>();
         node->value = value;
         tree = node;
@@ -658,7 +657,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_literal( Token const
     else if ( token.type == TokenType::CHAR )
     {
         auto value = CharValue::make();
-        value->value = token.value[0];
+        value->value = token.lit_val[0];
         auto node = std::make_shared<ValueNode>();
         node->value = value;
         tree = node;
@@ -666,15 +665,13 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_literal( Token const
     else if ( token.type == TokenType::STRING )
     {
         auto value = StringValue::make();
-        value->value = token.value;
+        value->value = token.lit_val;
         auto node = std::make_shared<ValueNode>();
         node->value = value;
         tree = node;
     }
     else
-    {
         return ParseError{ token, L"expected literal" };
-    }
 
     return std::nullopt;
 }
@@ -703,9 +700,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_keyword( Token const
         tree = node;
     }
     else
-    {
         return ParseError{ token, L"keyword is not an expression" };
-    }
 
     return std::nullopt;
 }
@@ -738,9 +733,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type( Array<Token> const& t
             return error;
     }
     else
-    {
         return ParseError{ second_token, L"unknown type usage" };
-    }
 
     return std::nullopt;
 }
@@ -810,9 +803,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_make( Array<Token> con
         if ( expr_tokens.empty() )
             return ParseError{ *it, L"expected expression" };
 
-        if ( it->value == op_split )
-            ++it;
-
         Array<Token>::const_iterator expr_it = expr_tokens.begin();
         if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->args[name] ) )
             return error;
@@ -841,9 +831,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> co
 
             if ( expr_tokens.empty() )
                 break;
-
-            if ( it->value == op_split )
-                ++it;
 
             Array<Token>::const_iterator expr_it = expr_tokens.begin();
             if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->LIST_list.emplace_back() ) )
@@ -902,9 +889,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_function( Array<Token> cons
 
         if ( expr_tokens.empty() )
             break;
-
-        if ( it->value == op_split )
-            ++it;
 
         Array<Token>::const_iterator expr_it = expr_tokens.begin();
         if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->args.emplace_back() ) )
@@ -1022,11 +1006,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_scope( Array<Token>::const_itera
             Ref<Node> expr;
             if ( auto error = parse_expression( it, end, expr ) )
                 return error;
-
-            if ( it->value != op_expr_end )
-                return ParseError{ *it, L"expected expression end" };
-            ++it;
-
             scope.instr.push_back( std::move( expr ) );
         }
     }
@@ -1038,15 +1017,18 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_return( Array<Token>::const_iter
 {
     if ( it->value != kw_return )
         return ParseError{ *it, L"expected return" };
+    Int last_line = it->line_number;
     ++it;
 
     Ref node = std::make_shared<ReturnNode>();
-    if ( auto error = parse_expression( it, end, node->expr ) )
-        return error;
 
-    if ( it->value != op_expr_end )
-        return ParseError{ *it, L"expected expression end" };
-    ++it;
+    if ( it->line_number == last_line )
+    {
+        if ( auto error = parse_expression( it, end, node->expr ) )
+            return error;
+    }
+    else
+        node->expr = std::make_shared<NothingNode>();
 
     tree = node;
 
@@ -1059,10 +1041,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_break( Array<Token>::const_itera
         return ParseError{ *it, L"expected break" };
     ++it;
 
-    if ( it->value != op_expr_end )
-        return ParseError{ *it, L"expected expression end" };
-    ++it;
-
     tree = std::make_shared<BreakNode>();
 
     return std::nullopt;
@@ -1072,10 +1050,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_continue( Array<Token>::const_it
 {
     if ( it->value != kw_continue )
         return ParseError{ *it, L"expected continue" };
-    ++it;
-
-    if ( it->value != op_expr_end )
-        return ParseError{ *it, L"expected expression end" };
     ++it;
 
     tree = std::make_shared<ContinueNode>();
@@ -1216,9 +1190,7 @@ dawn::Opt<dawn::ParseError> dawn::create_unary_node( Token const& token, Ref<Una
         node = std::make_shared<UnaryNodeRange>();
     }
     else
-    {
         return ParseError{ token, L"unknown unary operator" };
-    }
 
     return std::nullopt;
 }
@@ -1322,9 +1294,7 @@ dawn::Opt<dawn::ParseError> dawn::create_operator_node( Token const& token, Ref<
         node = std::make_shared<AssignNodeMod>();
     }
     else
-    {
         return ParseError{ token, L"unknown operator" };
-    }
 
     return std::nullopt;
 }

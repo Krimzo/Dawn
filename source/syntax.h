@@ -73,7 +73,6 @@ inline constexpr StringRef op_array_opn = L"[";
 inline constexpr StringRef op_array_cls = L"]";
 inline constexpr StringRef op_yield_opn = L"<<";
 inline constexpr StringRef op_yield_cls = L">>";
-inline constexpr StringRef op_expr_end = L";";
 
 inline constexpr StringRef sep_number = L".";
 inline constexpr StringRef sep_identifier = L"_";

@@ -29,6 +29,7 @@ std::wostream& dawn::operator<<( std::wostream& stream, Token const& token )
     Color color = to_color( token.type );
     stream << L"[(" << ColoredText{ color, token.type } <<
         L") {" << ColoredText{ color, token.value } <<
+        L"} {" << ColoredText{ color, token.lit_val } <<
         L"} <" << ColoredText{ color, token.line_number } << L">]";
     return stream;
 }
@@ -107,7 +108,6 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) op_array_cls,
         (String) op_yield_opn,
         (String) op_yield_cls,
-        (String) op_expr_end,
     };
     result.separator_identifier = sep_identifier;
     result.separator_number = sep_number;
@@ -306,7 +306,7 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_number( StringRef const& source, 
 
     Token& token = tokens.emplace_back();
     token.type = is_float ? TokenType::FLOAT : TokenType::INTEGER;
-    token.value = buffer;
+    token.lit_val = buffer;
     token.line_number = line;
 
     return std::nullopt;
@@ -347,7 +347,7 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_char( StringRef const& source, Ar
 
     Token& token = tokens.emplace_back();
     token.type = TokenType::CHAR;
-    token.value = buffer;
+    token.lit_val = buffer;
     token.line_number = line;
 
     return std::nullopt;
@@ -391,7 +391,7 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_string( StringRef const& source, 
 
     Token& token = tokens.emplace_back();
     token.type = TokenType::STRING;
-    token.value = buffer;
+    token.lit_val = buffer;
     token.line_number = line;
 
     return std::nullopt;

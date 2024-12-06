@@ -1,19 +1,13 @@
-module min_example;
+module min_example
 
 func main() {
-	for i: ~10 {
-		print(i, " -> ", check_val(i));
-	}
-	for c: "haha" {
-		print(c);
-	}
-	let data = int[2] + [4, 5, 6];
-	print(data);
-	for v: data {
-		print(v);
+	var data = add(int[2], [4, 5, 6])
+	data = string(data)
+	for c: data {
+		if c == ' ' || c == ',' { continue }
+		if c == '5' { break }
+		print(c)
 	}
 }
 
-func check_val(value) {
-	return abs(value) > 5;
-}
+func add(left, right) { return left + right }
