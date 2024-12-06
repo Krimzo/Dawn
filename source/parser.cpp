@@ -1164,7 +1164,20 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_loop( Array<Token>::const_iterat
 
 dawn::Opt<dawn::ParseError> dawn::Parser::scope_while( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
 {
-    assert( false && L"not impl" );
+    if ( it->value != kw_while )
+        return ParseError{ *it, L"expected while keyword" };
+    ++it;
+
+    auto node = std::make_shared<WhileNode>();
+
+    if ( auto error = parse_expression( it, end, node->expr ) )
+        return error;
+
+    if ( auto error = parse_scope( it, end, node->scope ) )
+        return error;
+
+    tree = node;
+
     return std::nullopt;
 }
 

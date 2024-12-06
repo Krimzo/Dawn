@@ -1,19 +1,11 @@
 module min_example;
 
 func main() {
-	var i = -1;
-
-	loop {
-		i += 1;
-		if i >= 25 {
-			break;
-		}
-		if i % 2 != 0 {
-			continue;
-		}
+	var i = 0;
+	while i < 10 {
 		print(i);
+		i += 1;
 	}
-
 	print("done");
 }
 

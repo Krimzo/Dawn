@@ -377,7 +377,24 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_loop_node( LoopNode const& nod
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_while_node( WhileNode const& node, Ref<Value>& retval, Bool& didret )
 {
-    assert( false && "not impl" );
+    Bool didbrk = false, didcon = false;
+    while ( true )
+    {
+        Ref<Value> check_expr;
+        if ( auto error = handle_expr( node.expr, check_expr ) )
+            return error;
+        if ( !check_expr->to_bool() )
+            break;
+
+        if ( didret || didbrk )
+            break;
+        if ( didcon )
+            didcon = false;
+
+        if ( auto error = handle_scope( node.scope, retval, didret, &didbrk, &didcon ) )
+            return error;
+    }
+
     return std::nullopt;
 }
 

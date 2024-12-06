@@ -77,6 +77,8 @@ struct LoopNode : Node
 
 struct WhileNode : Node
 {
+    Ref<Node> expr;
+    Scope scope;
 };
 
 struct ForNode :Node
