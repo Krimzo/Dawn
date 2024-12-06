@@ -3,7 +3,7 @@
 
 std::wostream& dawn::operator<<( std::wostream& stream, EngineError const& error )
 {
-    stream << error.msg;
+    stream << "Error: " << error.msg;
     return stream;
 }
 
@@ -102,8 +102,8 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Ar
         variables.push( arg.name, arg );
     }
 
-    retval = nullptr;
-    if ( auto error = handle_scope( std::get<Scope>( func.body ), retval ) )
+    Bool didret = false;
+    if ( auto error = handle_scope( std::get<Scope>( func.body ), retval, didret, nullptr, nullptr ) )
         return error;
 
     variables.pop( (Int) args.size() );
@@ -111,16 +111,19 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Ar
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_scope( Scope const& scope, Ref<Value>& retval )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_scope( Scope const& scope, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon )
 {
     Int push_count = 0;
 
-    Bool didbrk = false;
     for ( auto& instr : scope.instr )
     {
-        if ( didbrk || retval )
+        if ( didret )
             break;
-        if ( auto error = handle_instr( instr, retval, push_count, didbrk ) )
+        if ( didbrk && *didbrk )
+            break;
+        if ( didcon && *didcon )
+            break;
+        if ( auto error = handle_instr( instr, retval, push_count, didret, didbrk, didcon ) )
             return error;
     }
 
@@ -129,24 +132,37 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_scope( Scope const& scope, Ref
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_instr( Ref<Node> const& node, Ref<Value>& retval, Int& push_count, Bool& didbrk )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_instr( Ref<Node> const& node, Ref<Value>& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon )
 {
     if ( auto scp = dynamic_cast<Scope*>(node.get()) )
-        return handle_scope( *scp, retval );
+        return handle_scope( *scp, retval, didret, didbrk, didcon );
 
     if ( auto nd = dynamic_cast<VariableNode*>(node.get()) )
-        return handle_var_instr( *nd, push_count );
-
-    if ( auto nd = dynamic_cast<IfNode*>(node.get()) )
-        return handle_if_node( *nd, retval );
+        return handle_var_node( *nd, push_count );
 
     if ( auto nd = dynamic_cast<ReturnNode*>(node.get()) )
-    {
-        if ( auto error = handle_expr( nd->expr, retval ) )
-            return error;
+        return handle_return_node( *nd, retval, didret );
 
-        return std::nullopt;
-    }
+    if ( auto nd = dynamic_cast<BreakNode*>(node.get()) )
+        return handle_break_node( *nd, didbrk );
+
+    if ( auto nd = dynamic_cast<ContinueNode*>(node.get()) )
+        return handle_continue_node( *nd, didcon );
+
+    if ( auto nd = dynamic_cast<IfNode*>(node.get()) )
+        return handle_if_node( *nd, retval, didret, didbrk, didcon );
+
+    if ( auto nd = dynamic_cast<SwitchNode*>(node.get()) )
+        return handle_switch_node( *nd, retval, didret, didbrk, didcon );
+
+    if ( auto nd = dynamic_cast<LoopNode*>(node.get()) )
+        return handle_loop_node( *nd, retval, didret );
+
+    if ( auto nd = dynamic_cast<WhileNode*>(node.get()) )
+        return handle_while_node( *nd, retval, didret );
+
+    if ( auto nd = dynamic_cast<ForNode*>(node.get()) )
+        return handle_for_node( *nd, retval, didret );
 
     if ( auto error = handle_expr( node, retval ) )
         return error;
@@ -243,7 +259,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_cast_node( CastNode const& nod
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_var_instr( VariableNode const& node, Int& push_count )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_var_node( VariableNode const& node, Int& push_count )
 {
     Ref<Value> value;
     if ( auto error = handle_expr( node.var.expr, value ) )
@@ -272,7 +288,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_id_node( IdentifierNode const&
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_func_node( FunctionNode const& node, Ref<Value>& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_func_node( FunctionNode const& node, Ref<Value>& retval )
 {
     Array<Ref<Value>> args;
     for ( auto& arg : node.args )
@@ -282,28 +298,92 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func_node( FunctionNode const&
             return error;
         args.emplace_back( std::move( val ) );
     }
-    return call_func( node.name, args, value );
+    return call_func( node.name, args, retval );
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_if_node( IfNode const& node, Ref<Value>& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_return_node( ReturnNode const& node, Ref<Value>& retval, Bool& didret )
+{
+    if ( auto error = handle_expr( node.expr, retval ) )
+        return error;
+
+    didret = true;
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_break_node( BreakNode const& node, Bool* didbrk )
+{
+    if ( !didbrk )
+        return EngineError{ "break statement outside of loop" };
+
+    *didbrk = true;
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_continue_node( ContinueNode const& node, Bool* didcon )
+{
+    if ( !didcon )
+        return EngineError{ "continue statement outside of loop" };
+
+    *didcon = true;
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_if_node( IfNode const& node, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon )
 {
     Ref<Value> check_expr;
     if ( auto error = handle_expr( node.if_part.expr, check_expr ) )
         return error;
     if ( check_expr->to_bool() )
-        return handle_scope( node.if_part.scope, value );
+        return handle_scope( node.if_part.scope, retval, didret, didbrk, didcon );
 
     for ( auto& elif_part : node.elif_parts )
     {
         if ( auto error = handle_expr( elif_part.expr, check_expr ) )
             return error;
         if ( check_expr->to_bool() )
-            return handle_scope( elif_part.scope, value );
+            return handle_scope( elif_part.scope, retval, didret, didbrk, didcon );
     }
 
     if ( node.else_part )
-        return handle_scope( node.else_part->scope, value );
+        return handle_scope( node.else_part->scope, retval, didret, didbrk, didcon );
 
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_switch_node( SwitchNode const& node, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon )
+{
+    assert( false && "not impl" );
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_loop_node( LoopNode const& node, Ref<Value>& retval, Bool& didret )
+{
+    Bool didbrk = false, didcon = false;
+    while ( true )
+    {
+        if ( didret || didbrk )
+            break;
+        if ( didcon )
+            didcon = false;
+        if ( auto error = handle_scope( node.scope, retval, didret, &didbrk, &didcon ) )
+            return error;
+    }
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_while_node( WhileNode const& node, Ref<Value>& retval, Bool& didret )
+{
+    assert( false && "not impl" );
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node, Ref<Value>& retval, Bool& didret )
+{
+    assert( false && "not impl" );
     return std::nullopt;
 }
 

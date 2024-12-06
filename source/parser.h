@@ -89,12 +89,14 @@ private:
     Opt<ParseError> expression_yield( Array<Token> const& tokens, Ref<Node>& tree );
 
     Opt<ParseError> parse_scope( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Scope& scope );
+    Opt<ParseError> scope_return( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
+    Opt<ParseError> scope_break( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
+    Opt<ParseError> scope_continue( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
     Opt<ParseError> scope_if( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
     Opt<ParseError> scope_switch( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
-    Opt<ParseError> scope_for( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
-    Opt<ParseError> scope_while( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
     Opt<ParseError> scope_loop( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
-    Opt<ParseError> scope_return( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
+    Opt<ParseError> scope_while( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
+    Opt<ParseError> scope_for( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
 };
 
 Opt<ParseError> create_unary_node( Token const& token, Ref<UnaryNode>& node );

@@ -972,45 +972,59 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_scope( Array<Token>::const_itera
         }
         else if ( it->value == kw_if )
         {
-            Ref<Node> expr;
-            if ( auto error = scope_if( it, end, expr ) )
+            Ref<Node> instr;
+            if ( auto error = scope_if( it, end, instr ) )
                 return error;
-            scope.instr.push_back( std::move( expr ) );
+            scope.instr.push_back( std::move( instr ) );
         }
         else if ( it->value == kw_switch )
         {
-            Ref<Node> expr;
-            if ( auto error = scope_switch( it, end, expr ) )
+            Ref<Node> instr;
+            if ( auto error = scope_switch( it, end, instr ) )
                 return error;
-            scope.instr.push_back( std::move( expr ) );
+            scope.instr.push_back( std::move( instr ) );
         }
         else if ( it->value == kw_for )
         {
-            Ref<Node> expr;
-            if ( auto error = scope_for( it, end, expr ) )
+            Ref<Node> instr;
+            if ( auto error = scope_for( it, end, instr ) )
                 return error;
-            scope.instr.push_back( std::move( expr ) );
+            scope.instr.push_back( std::move( instr ) );
         }
         else if ( it->value == kw_while )
         {
-            Ref<Node> expr;
-            if ( auto error = scope_while( it, end, expr ) )
+            Ref<Node> instr;
+            if ( auto error = scope_while( it, end, instr ) )
                 return error;
-            scope.instr.push_back( std::move( expr ) );
+            scope.instr.push_back( std::move( instr ) );
         }
         else if ( it->value == kw_loop )
         {
-            Ref<Node> expr;
-            if ( auto error = scope_loop( it, end, expr ) )
+            Ref<Node> instr;
+            if ( auto error = scope_loop( it, end, instr ) )
                 return error;
-            scope.instr.push_back( std::move( expr ) );
+            scope.instr.push_back( std::move( instr ) );
         }
         else if ( it->value == kw_return )
         {
-            Ref<Node> expr;
-            if ( auto error = scope_return( it, end, expr ) )
+            Ref<Node> instr;
+            if ( auto error = scope_return( it, end, instr ) )
                 return error;
-            scope.instr.push_back( std::move( expr ) );
+            scope.instr.push_back( std::move( instr ) );
+        }
+        else if ( it->value == kw_break )
+        {
+            Ref<Node> instr;
+            if ( auto error = scope_break( it, end, instr ) )
+                return error;
+            scope.instr.push_back( std::move( instr ) );
+        }
+        else if ( it->value == kw_continue )
+        {
+            Ref<Node> instr;
+            if ( auto error = scope_continue( it, end, instr ) )
+                return error;
+            scope.instr.push_back( std::move( instr ) );
         }
         else if ( it->value == op_scope_opn )
         {
@@ -1032,6 +1046,55 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_scope( Array<Token>::const_itera
             scope.instr.push_back( std::move( expr ) );
         }
     }
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::scope_return( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
+{
+    if ( it->value != kw_return )
+        return ParseError{ *it, L"expected return" };
+    ++it;
+
+    Ref node = std::make_shared<ReturnNode>();
+    if ( auto error = parse_expression( it, end, node->expr ) )
+        return error;
+
+    if ( it->value != op_expr_end )
+        return ParseError{ *it, L"expected expression end" };
+    ++it;
+
+    tree = node;
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::scope_break( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
+{
+    if ( it->value != kw_break )
+        return ParseError{ *it, L"expected break" };
+    ++it;
+
+    if ( it->value != op_expr_end )
+        return ParseError{ *it, L"expected expression end" };
+    ++it;
+
+    tree = std::make_shared<BreakNode>();
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::Parser::scope_continue( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
+{
+    if ( it->value != kw_continue )
+        return ParseError{ *it, L"expected continue" };
+    ++it;
+
+    if ( it->value != op_expr_end )
+        return ParseError{ *it, L"expected expression end" };
+    ++it;
+
+    tree = std::make_shared<ContinueNode>();
 
     return std::nullopt;
 }
@@ -1083,9 +1146,19 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_switch( Array<Token>::const_iter
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::scope_for( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
+dawn::Opt<dawn::ParseError> dawn::Parser::scope_loop( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
 {
-    assert( false && L"not impl" );
+    if ( it->value != kw_loop )
+        return ParseError{ *it, L"expected loop keyword" };
+    ++it;
+
+    auto node = std::make_shared<LoopNode>();
+
+    if ( auto error = parse_scope( it, end, node->scope ) )
+        return error;
+
+    tree = node;
+
     return std::nullopt;
 }
 
@@ -1095,28 +1168,9 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_while( Array<Token>::const_itera
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::scope_loop( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
+dawn::Opt<dawn::ParseError> dawn::Parser::scope_for( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
 {
     assert( false && L"not impl" );
-    return std::nullopt;
-}
-
-dawn::Opt<dawn::ParseError> dawn::Parser::scope_return( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
-{
-    if ( it->value != kw_return )
-        return ParseError{ *it, L"expected return" };
-    ++it;
-
-    Ref node = std::make_shared<ReturnNode>();
-    if ( auto error = parse_expression( it, end, node->expr ) )
-        return error;
-
-    if ( it->value != op_expr_end )
-        return ParseError{ *it, L"expected expression end" };
-    ++it;
-
-    tree = node;
-
     return std::nullopt;
 }
 

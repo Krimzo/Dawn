@@ -85,17 +85,24 @@ struct Engine
 
 private:
     Opt<EngineError> handle_func( Function const& func, Array<Ref<Value>> const& args, Ref<Value>& retval );
-    Opt<EngineError> handle_scope( Scope const& scope, Ref<Value>& retval );
-    Opt<EngineError> handle_instr( Ref<Node> const& node, Ref<Value>& retval, Int& push_count, Bool& didbrk );
+    Opt<EngineError> handle_scope( Scope const& scope, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon );
+    Opt<EngineError> handle_instr( Ref<Node> const& node, Ref<Value>& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon );
     Opt<EngineError> handle_expr( Ref<Node> const& node, Ref<Value>& value );
 
     Opt<EngineError> handle_nothing_node( NothingNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_val_node( ValueNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_cast_node( CastNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_var_instr( VariableNode const& node, Int& push_count );
+    Opt<EngineError> handle_var_node( VariableNode const& node, Int& push_count );
     Opt<EngineError> handle_id_node( IdentifierNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_func_node( FunctionNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_if_node( IfNode const& node, Ref<Value>& value );
+    Opt<EngineError> handle_func_node( FunctionNode const& node, Ref<Value>& retval );
+    Opt<EngineError> handle_return_node( ReturnNode const& node, Ref<Value>& retval, Bool& didret );
+    Opt<EngineError> handle_break_node( BreakNode const& node, Bool* didbrk );
+    Opt<EngineError> handle_continue_node( ContinueNode const& node, Bool* didcon );
+    Opt<EngineError> handle_if_node( IfNode const& node, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon );
+    Opt<EngineError> handle_switch_node( SwitchNode const& node, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon );
+    Opt<EngineError> handle_loop_node( LoopNode const& node, Ref<Value>& retval, Bool& didret );
+    Opt<EngineError> handle_while_node( WhileNode const& node, Ref<Value>& retval, Bool& didret );
+    Opt<EngineError> handle_for_node( ForNode const& node, Ref<Value>& retval, Bool& didret );
     Opt<EngineError> handle_un_node( UnaryNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_op_node( OperatorNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_as_node( AssignNode const& node, Ref<Value>& value );

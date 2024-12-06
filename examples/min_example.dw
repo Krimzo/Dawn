@@ -1,34 +1,20 @@
 module min_example;
 
 func main() {
-	let a = 9;
-	if a < 0 {
-		if check_val(a) { 
-			print("a is neg and more than 5");
+	var i = -1;
+
+	loop {
+		i += 1;
+		if i >= 25 {
+			break;
 		}
-		else {
-			print("a is neg and lesseq than 5");
+		if i % 2 != 0 {
+			continue;
 		}
-	}
-	else {
-		if check_val(a) { 
-			print("a is pos and more than 5");
-		}
-		else {
-			print("a is pos and lesseq than 5");
-		}
+		print(i);
 	}
 
-	print("-----");
-
-	print("sqrt(a) = ", sqrt(a));
-	print("sin(a) = ", sin(a));
-	print("cos(a) = ", cos(a));
-
-	print("-----");
-
-	print("rand integer: ", rand_int(100));
-	print("rand float: ", rand_flt());
+	print("done");
 }
 
 func check_val(value: int): bool {

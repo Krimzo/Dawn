@@ -45,6 +45,14 @@ struct ReturnNode : Node
     Ref<Node> expr;
 };
 
+struct BreakNode : Node
+{
+};
+
+struct ContinueNode : Node
+{
+};
+
 struct IfNode : Node
 {
     struct Part
@@ -56,6 +64,23 @@ struct IfNode : Node
     Part if_part;
     Array<Part> elif_parts;
     Opt<Part> else_part;
+};
+
+struct SwitchNode : Node
+{
+};
+
+struct LoopNode : Node
+{
+    Scope scope;
+};
+
+struct WhileNode : Node
+{
+};
+
+struct ForNode :Node
+{
 };
 
 struct StructNode : Node
