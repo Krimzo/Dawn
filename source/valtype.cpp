@@ -2,6 +2,11 @@
 #include "values.h"
 
 
+dawn::Ref<dawn::Value> dawn::Type::construct() const
+{
+    PANIC( "type [", name, "] can't be constructed" );
+}
+
 dawn::Ref<dawn::Value> dawn::Value::operator-() const
 {
     PANIC( "unary - for [", type(), "] not supported" );

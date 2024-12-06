@@ -91,6 +91,7 @@ private:
 
     Opt<EngineError> handle_nothing_node( NothingNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_val_node( ValueNode const& node, Ref<Value>& value );
+    Opt<EngineError> handle_array_node( ArrayNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_cast_node( CastNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_var_node( VariableNode const& node, Int& push_count );
     Opt<EngineError> handle_id_node( IdentifierNode const& node, Ref<Value>& value );

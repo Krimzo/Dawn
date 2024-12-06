@@ -7,11 +7,13 @@ func main() {
 	for c: "haha" {
 		print(c);
 	}
-	for v: float[10] {
+	let data = int[2] + [4, 5, 6];
+	print(data);
+	for v: data {
 		print(v);
 	}
 }
 
-func check_val(value: int): bool {
+func check_val(value) {
 	return abs(value) > 5;
 }

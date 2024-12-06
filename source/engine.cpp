@@ -75,11 +75,15 @@ dawn::Ref<dawn::Value> dawn::Engine::get_var( String const& name )
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Array<Ref<Value>> const& args, Ref<Value>& retval )
 {
+    retval = NothingValue::make();
+
     if ( func.body.index() == 1 )
     {
         try
         {
             retval = std::get<Function::CppFunc>( func.body )(args);
+            if ( !retval )
+                retval = NothingValue::make();
         }
         catch ( String& msg )
         {
@@ -178,6 +182,9 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_expr( Ref<Node> const& node, R
     if ( auto nd = dynamic_cast<ValueNode*>(node.get()) )
         return handle_val_node( *nd, value );
 
+    if ( auto nd = dynamic_cast<ArrayNode*>(node.get()) )
+        return handle_array_node( *nd, value );
+
     if ( auto nd = dynamic_cast<CastNode*>(node.get()) )
         return handle_cast_node( *nd, value );
 
@@ -206,6 +213,41 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_nothing_node( NothingNode cons
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_val_node( ValueNode const& node, Ref<Value>& value )
 {
     value = node.value;
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_array_node( ArrayNode const& node, Ref<Value>& value )
+{
+    auto result = ArrayValue::make();
+
+    if ( node.init_type == ArrayNode::InitType::SIZE )
+    {
+        Ref<Value> size_expr;
+        if ( auto error = handle_expr( node.SIZE_size, size_expr ) )
+            return error;
+
+        Int size = size_expr->to_int();
+        if ( size < 0 )
+            return EngineError{ "Array size cannot be negative" };
+
+        result->data.resize( size );
+        for ( auto& val : result->data )
+            val = node.SIZE_type->construct();
+    }
+    else
+    {
+        result->data.reserve( node.LIST_list.size() );
+        for ( auto& expr : node.LIST_list )
+        {
+            Ref<Value> val;
+            if ( auto error = handle_expr( expr, val ) )
+                return error;
+            result->data.push_back( std::move( val ) );
+        }
+    }
+
+    value = result;
 
     return std::nullopt;
 }

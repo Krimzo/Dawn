@@ -48,45 +48,60 @@ struct Method : Function
 struct BoolType : Type
 {
     BoolType() { name = tp_bool; }
+
+    Ref<Value> construct() const override;
 };
 
 struct IntType : Type
 {
     IntType() { name = tp_int; }
+
+    Ref<Value> construct() const override;
 };
 
 struct FloatType : Type
 {
     FloatType() { name = tp_float; }
+
+    Ref<Value> construct() const override;
 };
 
 struct CharType : Type
 {
     CharType() { name = tp_char; }
+
+    Ref<Value> construct() const override;
 };
 
 struct StringType : Type
 {
     StringType() { name = tp_string; }
+
+    Ref<Value> construct() const override;
 };
 
 struct EnumType : Type
 {
-    Ref<Type> type;
-    Map<String, Ref<Value>> values;
+    Ref<Type> val_type;
+    Array<Pair<String, Ref<Value>>> keys;
+
+    Ref<Value> construct() const override;
 };
 
 struct LayerType : Type
 {
-    Map<String, Method> methods;
+    Array<Method> methods;
+
+    Ref<Value> construct() const override;
 };
 
 struct StructType : Type
 {
-    Map<String, Ref<Type>> fields_public;
-    Map<String, Ref<Method>> methods_public;
-    Map<String, Ref<Type>> fields_internal;
-    Map<String, Ref<Method>> methods_internal;
+    Array<Ref<LayerType>> layers;
+    Array<Ref<Variable>> fields;
+    Array<Ref<Method>> methods;
+
+    Ref<Value> construct() const override;
 };
 
 // cmplx types
@@ -95,25 +110,28 @@ struct ArrayType : Type
     Ref<Type> type;
 
     ArrayType() { name = String( op_array_opn ) + String( op_array_cls ); }
+
+    Ref<Value> construct() const override;
 };
 
 struct RangeType : Type
 {
     RangeType() { name = op_range; }
+
+    Ref<Value> construct() const override;
 };
 
 struct RefType : Type
 {
+    enum struct Kind
+    {
+        LET = 0,
+        VAR,
+    };
+
     Ref<Type> type;
-};
+    Kind kind = Kind::LET;
 
-struct LetRefType : RefType
-{
-    LetRefType() { name = String( kw_let ) + String( op_ref ); }
-};
-
-struct VarRefType : RefType
-{
-    VarRefType() { name = String( kw_var ) + String( op_ref ); }
+    Ref<Value> construct() const override;
 };
 }

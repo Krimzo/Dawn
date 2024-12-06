@@ -99,15 +99,13 @@ struct ArrayNode : Node
     enum struct InitType
     {
         SIZE,
-        SIZE_VAL,
         LIST,
     };
 
-    Ref<Type> type;
     InitType init_type;
-    Ref<Node> size;
-    Ref<Node> _val;
-    Array<Ref<Node>> _list;
+    Ref<Type> SIZE_type;
+    Ref<Node> SIZE_size;
+    Array<Ref<Node>> LIST_list;
 };
 
 struct UnaryNode : Node
