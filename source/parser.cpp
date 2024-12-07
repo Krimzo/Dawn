@@ -640,12 +640,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_cast( Array<Token> con
         return ParseError{ *it, L"expected expression open" };
     ++it;
 
-    Array<Token> expr_tokens;
-    if ( auto error = expression_extract( it, tokens.end(), expr_tokens ) )
-        return error;
-
-    Array<Token>::const_iterator expr_it = expr_tokens.begin();
-    if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->expr ) )
+    if ( auto error = parse_expression( it, tokens.end(), node->expr ) )
         return error;
 
     if ( it->value != op_expr_cls )
@@ -686,15 +681,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_make( Array<Token> con
             return ParseError{ *it, L"expected bind operator" };
         ++it;
 
-        Array<Token> expr_tokens;
-        if ( auto error = expression_extract( it, tokens.end(), expr_tokens ) )
-            return error;
-
-        if ( expr_tokens.empty() )
-            return ParseError{ *it, L"expected expression" };
-
-        Array<Token>::const_iterator expr_it = expr_tokens.begin();
-        if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->args[name] ) )
+        if ( auto error = parse_expression( it, tokens.end(), node->args[name] ) )
             return error;
     }
     ++it;
@@ -715,15 +702,10 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> co
 
         while ( true )
         {
-            Array<Token> expr_tokens;
-            if ( auto error = expression_extract( it, tokens.end(), expr_tokens ) )
-                return error;
-
-            if ( expr_tokens.empty() )
+            if ( it->value == op_array_cls )
                 break;
 
-            Array<Token>::const_iterator expr_it = expr_tokens.begin();
-            if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->LIST_list.emplace_back() ) )
+            if ( auto error = parse_expression( it, tokens.end(), node->LIST_list.emplace_back() ) )
                 return error;
         }
 
@@ -741,12 +723,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> co
             return ParseError{ *it, L"expected array size expression" };
         ++it;
 
-        Array<Token> expr_tokens;
-        if ( auto error = expression_extract( it, tokens.end(), expr_tokens ) )
-            return error;
-
-        Array<Token>::const_iterator expr_it = expr_tokens.begin();
-        if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->SIZE_size_expr ) )
+        if ( auto error = parse_expression( it, tokens.end(), node->SIZE_size_expr ) )
             return error;
 
         node->init_type = ArrayNode::InitType::SIZE;
@@ -776,15 +753,10 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_function( Array<Token> cons
 
     while ( true )
     {
-        Array<Token> expr_tokens;
-        if ( auto error = expression_extract( it, tokens.end(), expr_tokens ) )
-            return error;
-
-        if ( expr_tokens.empty() )
+        if ( it->value == op_expr_cls )
             break;
 
-        Array<Token>::const_iterator expr_it = expr_tokens.begin();
-        if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->args.emplace_back() ) )
+        if ( auto error = parse_expression( it, tokens.end(), node->args.emplace_back() ) )
             return error;
     }
 
@@ -987,6 +959,12 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_if( Array<Token>::const_iterator
 
 dawn::Opt<dawn::ParseError> dawn::Parser::scope_switch( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
 {
+    if ( it->value != kw_switch )
+        return ParseError{ *it, L"expected switch keyword" };
+    ++it;
+
+
+
     assert( false && L"not impl" );
     return std::nullopt;
 }

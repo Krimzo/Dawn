@@ -661,7 +661,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& nod
 
     auto left_ref = dynamic_cast<RefValue const*>(left.get());
     if ( !left_ref )
-        return EngineError{ "Can't assign to ", left->type() };
+        return EngineError{ "Can't assign to [", left->type(), "]" };
 
     Ref<Value> right;
     if ( auto error = handle_expr( node.right, right ) )

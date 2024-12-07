@@ -134,8 +134,13 @@ dawn::Ref<dawn::Value> dawn::BoolValue::clone() const
 
 dawn::Int dawn::BoolValue::operator<=>( Value const& other ) const
 {
-    auto result = value <=> other.to_bool();
-    return result._Value;
+    if ( other.type() == tp_bool )
+    {
+        auto result = value <=> other.to_bool();
+        return result._Value;
+    }
+
+    return Value::operator<=>( other );
 }
 
 dawn::Bool dawn::BoolValue::to_bool() const
@@ -156,8 +161,8 @@ dawn::Float dawn::BoolValue::to_float() const
 dawn::Char dawn::BoolValue::to_char() const
 {
     if ( value )
-        return L'T';
-    return L'F';
+        return L't';
+    return L'f';
 }
 
 dawn::String dawn::BoolValue::to_string() const
@@ -303,14 +308,19 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator%( Value const& other ) const
 
 dawn::Int dawn::IntValue::operator<=>( Value const& other ) const
 {
+    if ( other.type() == tp_int )
+    {
+        auto result = value <=> other.to_int();
+        return result._Value;
+    }
+
     if ( other.type() == tp_float )
     {
         auto result = to_float() <=> other.to_float();
         return result._Value;
     }
 
-    auto result = value <=> other.to_int();
-    return result._Value;
+    return Value::operator<=>( other );
 }
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator>>( Value const& other ) const
@@ -482,8 +492,19 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator%( Value const& other ) const
 
 dawn::Int dawn::FloatValue::operator<=>( Value const& other ) const
 {
-    auto result = value <=> other.to_float();
-    return result._Value;
+    if ( other.type() == tp_float )
+    {
+        auto result = value <=> other.to_float();
+        return result._Value;
+    }
+
+    if ( other.type() == tp_int )
+    {
+        auto result = value <=> other.to_float();
+        return result._Value;
+    }
+
+    return Value::operator<=>( other );
 }
 
 dawn::Bool dawn::FloatValue::to_bool() const
@@ -508,7 +529,10 @@ dawn::Char dawn::FloatValue::to_char() const
 
 dawn::String dawn::FloatValue::to_string() const
 {
-    return std::to_wstring( value );
+    String result = format( value );
+    if ( std::to_wstring( Int( value ) ) == result )
+        result += L".0";
+    return result;
 }
 
 // char
@@ -526,13 +550,18 @@ dawn::Ref<dawn::Value> dawn::CharValue::clone() const
 
 dawn::Int dawn::CharValue::operator<=>( Value const& other ) const
 {
-    auto result = value <=> other.to_char();
-    return result._Value;
+    if ( other.type() == tp_char )
+    {
+        auto result = value <=> other.to_char();
+        return result._Value;
+    }
+
+    return Value::operator<=>( other );
 }
 
 dawn::Bool dawn::CharValue::to_bool() const
 {
-    return value == L'T';
+    return value == L't';
 }
 
 dawn::Int dawn::CharValue::to_int() const
