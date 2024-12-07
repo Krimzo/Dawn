@@ -5,19 +5,6 @@
 
 namespace dawn
 {
-struct Type;
-struct Value;
-struct Node;
-
-struct Type
-{
-    String name;
-
-    virtual ~Type() = default;
-
-    virtual Ref<Value> construct() const;
-};
-
 struct Value
 {
     virtual ~Value() = default;

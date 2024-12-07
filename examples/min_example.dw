@@ -1,21 +1,21 @@
 func main() {
-	let upper_limit = 10
-	let half = upper_limit / 2
-
-	let data = [rand_int(upper_limit), rand_int(upper_limit), rand_int(upper_limit), rand_int(upper_limit)]
-	for let value : data {
-		verify(value, half)
+	var data = "no way"
+	ref p = data
+	ref pp = p
+	ref ppp = (pp += p)
+	for let c : ppp {
+		print(c)
 	}
+
+	return
+
+	var a = (2 + 3) * 2
+	ref b = alter(a)
+	b += -3
+	print(a)
+	print(b)
 }
 
-func verify(ref p, let check) {
-	if p > check {
-		print(value, " is larger than ", check)
-	}
-	elif p == check {
-		print(value, " is same as ", check)
-	}
-	else {
-		print(value, " is smaller than ", check)
-	}
+func alter(ref val) {
+	return (val *= 2)
 }

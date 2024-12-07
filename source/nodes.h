@@ -16,7 +16,7 @@ struct ValueNode : Node
 
 struct CastNode : Node
 {
-    Ref<Type> type;
+    String type;
     Ref<Node> expr;
 };
 
@@ -90,7 +90,7 @@ struct ForNode :Node
 
 struct StructNode : Node
 {
-    Ref<Type> type;
+    String type;
     Map<String, Ref<Node>> args;
 };
 
@@ -103,8 +103,8 @@ struct ArrayNode : Node
     };
 
     InitType init_type;
-    Ref<Type> SIZE_type;
-    Ref<Node> SIZE_size;
+    Ref<Node> SIZE_value_expr;
+    Ref<Node> SIZE_size_expr;
     Array<Ref<Node>> LIST_list;
 };
 

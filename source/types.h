@@ -1,19 +1,13 @@
 #pragma once
 
-#include "valtype.h"
+#include "valnode.h"
 
 
 namespace dawn
 {
-// sub-types
-struct Scope : Node
-{
-    Array<Ref<Node>> instr;
-};
-
 struct Variable
 {
-    enum struct Type
+    enum struct Kind
     {
         LET = 0,
         VAR,
@@ -21,8 +15,13 @@ struct Variable
     };
 
     String name;
-    Type type = Type::LET;
+    Kind kind = Kind::LET;
     Ref<Node> expr;
+};
+
+struct Scope : Node
+{
+    Array<Ref<Node>> instr;
 };
 
 struct Function
@@ -43,94 +42,23 @@ struct Method : Function
     Bool is_var = false;
 };
 
-// types
-struct BoolType : Type
+struct Enum
 {
-    BoolType() { name = tp_bool; }
-
-    Ref<Value> construct() const override;
-};
-
-struct IntType : Type
-{
-    IntType() { name = tp_int; }
-
-    Ref<Value> construct() const override;
-};
-
-struct FloatType : Type
-{
-    FloatType() { name = tp_float; }
-
-    Ref<Value> construct() const override;
-};
-
-struct CharType : Type
-{
-    CharType() { name = tp_char; }
-
-    Ref<Value> construct() const override;
-};
-
-struct StringType : Type
-{
-    StringType() { name = tp_string; }
-
-    Ref<Value> construct() const override;
-};
-
-struct EnumType : Type
-{
-    Ref<Type> val_type;
+    String name;
     Array<Pair<String, Ref<Value>>> keys;
-
-    Ref<Value> construct() const override;
 };
 
-struct LayerType : Type
+struct Layer
 {
+    String name;
     Array<Method> methods;
-
-    Ref<Value> construct() const override;
 };
 
-struct StructType : Type
+struct Struct
 {
-    Array<Ref<LayerType>> layers;
+    String name;
+    Array<Ref<Layer>> layers;
     Array<Ref<Variable>> fields;
     Array<Ref<Method>> methods;
-
-    Ref<Value> construct() const override;
-};
-
-// cmplx types
-struct ArrayType : Type
-{
-    Ref<Type> type;
-
-    ArrayType() { name = String( op_array_opn ) + String( op_array_cls ); }
-
-    Ref<Value> construct() const override;
-};
-
-struct RangeType : Type
-{
-    RangeType() { name = op_range; }
-
-    Ref<Value> construct() const override;
-};
-
-struct RefType : Type
-{
-    enum struct Kind
-    {
-        LET = 0,
-        VAR,
-    };
-
-    Ref<Type> type;
-    Kind kind = Kind::LET;
-
-    Ref<Value> construct() const override;
 };
 }

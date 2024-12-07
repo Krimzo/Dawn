@@ -101,11 +101,11 @@ dawn::Opt<dawn::EngineError> dawn::Engine::add_var( Variable const& var )
         return error;
 
     Ref<EngineVariable> eng_var;
-    if ( var.type == Variable::Type::LET )
+    if ( var.kind == Variable::Kind::LET )
     {
         eng_var = std::make_shared<EngineVariableLet>( value );
     }
-    else if ( var.type == Variable::Type::VAR )
+    else if ( var.kind == Variable::Kind::VAR )
     {
         eng_var = std::make_shared<EngineVariableVar>( value );
     }
@@ -167,7 +167,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Ar
     {
         Variable arg;
         arg.name = func.args[i].name;
-        arg.type = func.args[i].type;
+        arg.kind = func.args[i].kind;
         arg.expr = args[i];
 
         if ( auto error = add_var( arg ) )
@@ -291,17 +291,21 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_array_node( ArrayNode const& n
 
     if ( node.init_type == ArrayNode::InitType::SIZE )
     {
-        Ref<Value> size_expr;
-        if ( auto error = handle_expr( node.SIZE_size, size_expr ) )
+        Ref<Value> size_val;
+        if ( auto error = handle_expr( node.SIZE_size_expr, size_val ) )
             return error;
 
-        Int size = size_expr->to_int();
+        Int size = size_val->to_int();
         if ( size < 0 )
             return EngineError{ "Array size cannot be negative" };
 
+        Ref<Value> value_val;
+        if ( auto error = handle_expr( node.SIZE_value_expr, value_val ) )
+            return error;
+
         result->data.resize( size );
         for ( auto& val : result->data )
-            val = node.SIZE_type->construct();
+            val = value_val->clone();
     }
     else
     {
@@ -328,38 +332,28 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_cast_node( CastNode const& nod
 
     try
     {
-        if ( node.type->name == tp_bool )
+        if ( node.type == tp_bool )
         {
-            auto val = BoolValue::make();
-            val->value = expr->to_bool();
-            value = val;
+            value = make_bool_value( expr->to_bool() );
         }
-        else if ( node.type->name == tp_int )
+        else if ( node.type == tp_int )
         {
-            auto val = IntValue::make();
-            val->value = expr->to_int();
-            value = val;
+            value = make_int_value( expr->to_int() );
         }
-        else if ( node.type->name == tp_float )
+        else if ( node.type == tp_float )
         {
-            auto val = FloatValue::make();
-            val->value = expr->to_float();
-            value = val;
+            value = make_float_value( expr->to_float() );
         }
-        else if ( node.type->name == tp_char )
+        else if ( node.type == tp_char )
         {
-            auto val = CharValue::make();
-            val->value = expr->to_char();
-            value = val;
+            value = make_char_value( expr->to_char() );
         }
-        else if ( node.type->name == tp_string )
+        else if ( node.type == tp_string )
         {
-            auto val = StringValue::make();
-            val->value = expr->to_string();
-            value = val;
+            value = make_string_value( expr->to_string() );
         }
         else
-            return EngineError{ "Unknown cast type: ", node.type->name };
+            return EngineError{ "Unknown cast type: ", node.type };
     }
     catch ( String& msg )
     {
@@ -507,7 +501,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node,
     if ( auto error = handle_expr( node_cpy.expr, loop_expr ) )
         return error;
 
-    while ( auto ref_val = dynamic_cast<RefValue const*>(loop_expr.get()) )
+    if ( auto ref_val = dynamic_cast<RefValue const*>(loop_expr.get()) )
         loop_expr = ref_val->eng_var->get_value();
 
     if ( auto value_rng = dynamic_cast<RangeValue const*>(loop_expr.get()) )
@@ -711,10 +705,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& nod
             return error;
     }
 
-    auto result = RefValue::make();
-    result->eng_var = var;
-
-    value = result;
+    value = left;
 
     return std::nullopt;
 }

@@ -1,11 +1,6 @@
-#include "valtype.h"
+#include "valnode.h"
 #include "values.h"
 
-
-dawn::Ref<dawn::Value> dawn::Type::construct() const
-{
-    PANIC( "type [", name, "] can't be constructed" );
-}
 
 dawn::Ref<dawn::Value> dawn::Value::operator-() const
 {

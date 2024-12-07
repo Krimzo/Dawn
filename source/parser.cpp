@@ -18,13 +18,13 @@ dawn::Bool dawn::Module::contains_id( StringRef const& id ) const
     if ( std::find_if( functions.begin(), functions.end(), [&]( Function const& func ) { return func.name == id; } ) != functions.end() )
         return true;
 
-    if ( std::find_if( enums.begin(), enums.end(), [&]( EnumType const& enu ) { return enu.name == id; } ) != enums.end() )
+    if ( std::find_if( enums.begin(), enums.end(), [&]( Enum const& enu ) { return enu.name == id; } ) != enums.end() )
         return true;
 
-    if ( std::find_if( layers.begin(), layers.end(), [&]( LayerType const& layer ) { return layer.name == id; } ) != layers.end() )
+    if ( std::find_if( layers.begin(), layers.end(), [&]( Layer const& layer ) { return layer.name == id; } ) != layers.end() )
         return true;
 
-    if ( std::find_if( structs.begin(), structs.end(), [&]( StructType const& str ) { return str.name == id; } ) != structs.end() )
+    if ( std::find_if( structs.begin(), structs.end(), [&]( Struct const& struc ) { return struc.name == id; } ) != structs.end() )
         return true;
 
     return false;
@@ -89,42 +89,42 @@ void dawn::Parser::prepare_tokens( Array<Token>& tokens )
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_global_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
-    StructType struct_type;
-    if ( auto error = parse_struct( it, end, struct_type ) )
+    Struct struc;
+    if ( auto error = parse_struct( it, end, struc ) )
         return error;
 
-    if ( module.contains_id( struct_type.name ) )
-        return ParseError{ {}, L"name [" + struct_type.name + L"] already in use" };
+    if ( module.contains_id( struc.name ) )
+        return ParseError{ {}, L"name [" + struc.name + L"] already in use" };
 
-    module.structs.push_back( struct_type );
+    module.structs.push_back( struc );
 
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_global_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
-    LayerType layer_type;
-    if ( auto error = parse_layer( it, end, layer_type ) )
+    Layer layer;
+    if ( auto error = parse_layer( it, end, layer ) )
         return error;
 
-    if ( module.contains_id( layer_type.name ) )
-        return ParseError{ {}, L"name [" + layer_type.name + L"] already in use" };
+    if ( module.contains_id( layer.name ) )
+        return ParseError{ {}, L"name [" + layer.name + L"] already in use" };
 
-    module.layers.push_back( layer_type );
+    module.layers.push_back( layer );
 
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_global_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
-    EnumType enum_type;
-    if ( auto error = parse_enum( it, end, enum_type ) )
+    Enum enu;
+    if ( auto error = parse_enum( it, end, enu ) )
         return error;
 
-    if ( module.contains_id( enum_type.name ) )
-        return ParseError{ {}, L"name [" + enum_type.name + L"] already in use" };
+    if ( module.contains_id( enu.name ) )
+        return ParseError{ {}, L"name [" + enu.name + L"] already in use" };
 
-    module.enums.push_back( enum_type );
+    module.enums.push_back( enu );
 
     return std::nullopt;
 }
@@ -168,19 +168,19 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_global_variable( Array<Token>::c
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, StructType& struct_type )
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Struct& struc )
 {
     assert( false && L"not impl" );
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, LayerType& layer_type )
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Layer& layer )
 {
     assert( false && L"not impl" );
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, EnumType& enum_type )
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Enum& enu )
 {
     assert( false && L"not impl" );
     return std::nullopt;
@@ -216,11 +216,11 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_function( Array<Token>::const_it
         if ( it->value != kw_let && it->value != kw_var && it->value != kw_ref )
             return ParseError{ *it, L"expected let, var or ref keywords" };
         if ( it->value == kw_let )
-            arg.type = Variable::Type::LET;
+            arg.kind = Variable::Kind::LET;
         else if ( it->value == kw_var )
-            arg.type = Variable::Type::VAR;
+            arg.kind = Variable::Kind::VAR;
         else
-            arg.type = Variable::Type::REF;
+            arg.kind = Variable::Kind::REF;
         ++it;
 
         if ( it->type != TokenType::NAME )
@@ -255,11 +255,11 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_variable( Array<Token>::const_it
     if ( it->value != kw_let && it->value != kw_var && it->value != kw_ref )
         return ParseError{ *it, L"expected let, var or ref keywords" };
     if ( it->value == kw_let )
-        variable.type = Variable::Type::LET;
+        variable.kind = Variable::Kind::LET;
     else if ( it->value == kw_var )
-        variable.type = Variable::Type::VAR;
+        variable.kind = Variable::Kind::VAR;
     else
-        variable.type = Variable::Type::REF;
+        variable.kind = Variable::Kind::REF;
     ++it;
 
     if ( it->type != TokenType::NAME )
@@ -283,40 +283,18 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_variable( Array<Token>::const_it
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::type_basic( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Type>& type )
+dawn::Opt<dawn::ParseError> dawn::Parser::type_basic( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, String& type )
 {
-    if ( it->value == tp_bool )
-    {
-        type = std::make_shared<BoolType>();
-    }
-    else if ( it->value == tp_int )
-    {
-        type = std::make_shared<IntType>();
-    }
-    else if ( it->value == tp_float )
-    {
-        type = std::make_shared<FloatType>();
-    }
-    else if ( it->value == tp_char )
-    {
-        type = std::make_shared<CharType>();
-    }
-    else if ( it->value == tp_string )
-    {
-        type = std::make_shared<StringType>();
-    }
-    else if ( it->value == op_range )
-    {
-        type = std::make_shared<RangeType>();
-    }
-    else if ( it->type == TokenType::TYPE )
-    {
-        type = std::make_shared<Type>();
-        type->name = it->value;
-    }
-    else
+    if ( it->value != tp_bool
+        && it->value != tp_int
+        && it->value != tp_float
+        && it->value != tp_char
+        && it->value != tp_string
+        && it->value != op_range
+        && it->type != TokenType::TYPE )
         return ParseError{ *it, L"invalid type" };
 
+    type = it->value;
     ++it;
 
     return std::nullopt;
@@ -753,8 +731,11 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> co
     }
     else
     {
-        if ( auto error = type_basic( it, tokens.end(), node->SIZE_type ) )
+        String val_type;
+        if ( auto error = type_basic( it, tokens.end(), val_type ) )
             return error;
+
+        node->SIZE_value_expr = make_def_type_expr( val_type );
 
         if ( it->value != op_array_opn )
             return ParseError{ *it, L"expected array size expression" };
@@ -765,7 +746,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_array( Array<Token> co
             return error;
 
         Array<Token>::const_iterator expr_it = expr_tokens.begin();
-        if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->SIZE_size ) )
+        if ( auto error = parse_expression( expr_it, expr_tokens.end(), node->SIZE_size_expr ) )
             return error;
 
         node->init_type = ArrayNode::InitType::SIZE;
@@ -1056,11 +1037,11 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_for( Array<Token>::const_iterato
     if ( it->value != kw_let && it->value != kw_var && it->value != kw_ref )
         return ParseError{ *it, L"expected let, var or ref keywords" };
     if ( it->value == kw_let )
-        node->var.type = Variable::Type::LET;
+        node->var.kind = Variable::Kind::LET;
     else if ( it->value == kw_var )
-        node->var.type = Variable::Type::VAR;
+        node->var.kind = Variable::Kind::VAR;
     else
-        node->var.type = Variable::Type::REF;
+        node->var.kind = Variable::Kind::REF;
     ++it;
 
     if ( it->type != TokenType::NAME )
@@ -1209,4 +1190,27 @@ dawn::Opt<dawn::ParseError> dawn::create_operator_node( Token const& token, Ref<
         return ParseError{ token, L"unknown operator" };
 
     return std::nullopt;
+}
+
+dawn::Ref<dawn::Node> dawn::make_def_type_expr( StringRef const& type )
+{
+    if ( type == tp_bool )
+        return make_bool_literal( {} );
+
+    if ( type == tp_int )
+        return make_int_literal( {} );
+
+    if ( type == tp_float )
+        return make_float_literal( {} );
+
+    if ( type == tp_char )
+        return make_char_literal( {} );
+
+    if ( type == tp_string )
+        return make_string_literal( {} );
+
+    if ( type == op_range )
+        return make_value_literal( RangeValue::make() );
+
+    return make_value_literal( NothingValue::make() );
 }

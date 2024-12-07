@@ -103,9 +103,9 @@ struct Engine
     Stack<Ref<EngineVariable>> variables;
     Stack<Operator> operators;
     Stack<Function> functions;
-    Stack<EnumType> enums;
-    Stack<LayerType> layers;
-    Stack<StructType> structs;
+    Stack<Enum> enums;
+    Stack<Layer> layers;
+    Stack<Struct> structs;
 
     void load_default_mods();
     Opt<EngineError> load_mod( Module const& module );

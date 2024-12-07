@@ -146,7 +146,7 @@ struct StringValue : Value, Makeable<StringValue>
 
 struct EnumValue : Value, Makeable<EnumValue>
 {
-    EnumType const* parent = nullptr;
+    Enum const* parent = nullptr;
     String key;
 
     StringRef const& type() const override;
@@ -157,7 +157,7 @@ struct EnumValue : Value, Makeable<EnumValue>
 
 struct StructValue : Value, Makeable<StructValue>
 {
-    StructType const* parent = nullptr;
+    Struct const* parent = nullptr;
     Map<String, Ref<Value>> members;
 
     StringRef const& type() const override;

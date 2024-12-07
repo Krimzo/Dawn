@@ -190,17 +190,17 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator-() const
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator+( Value const& other ) const
 {
-    if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
+    if ( other.type() == tp_int )
     {
         auto result = IntValue::make();
-        result->value = value + other_int->value;
+        result->value = value + other.to_int();
         return result;
     }
 
-    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    if ( other.type() == tp_float )
     {
         auto result = FloatValue::make();
-        result->value = value + other_flt->value;
+        result->value = value + other.to_float();
         return result;
     }
 
@@ -209,17 +209,17 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator+( Value const& other ) const
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator-( Value const& other ) const
 {
-    if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
+    if ( other.type() == tp_int )
     {
         auto result = IntValue::make();
-        result->value = value - other_int->value;
+        result->value = value - other.to_int();
         return result;
     }
 
-    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    if ( other.type() == tp_float )
     {
         auto result = FloatValue::make();
-        result->value = value - other_flt->value;
+        result->value = value - other.to_float();
         return result;
     }
 
@@ -228,17 +228,17 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator-( Value const& other ) const
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator*( Value const& other ) const
 {
-    if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
+    if ( other.type() == tp_int )
     {
         auto result = IntValue::make();
-        result->value = value * other_int->value;
+        result->value = value * other.to_int();
         return result;
     }
 
-    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    if ( other.type() == tp_float )
     {
         auto result = FloatValue::make();
-        result->value = value * other_flt->value;
+        result->value = value * other.to_float();
         return result;
     }
 
@@ -247,17 +247,17 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator*( Value const& other ) const
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator/( Value const& other ) const
 {
-    if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
+    if ( other.type() == tp_int )
     {
         auto result = IntValue::make();
-        result->value = value / other_int->value;
+        result->value = value / other.to_int();
         return result;
     }
 
-    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    if ( other.type() == tp_float )
     {
         auto result = FloatValue::make();
-        result->value = value / other_flt->value;
+        result->value = value / other.to_float();
         return result;
     }
 
@@ -266,17 +266,17 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator/( Value const& other ) const
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator^( Value const& other ) const
 {
-    if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
+    if ( other.type() == tp_int )
     {
         auto result = IntValue::make();
-        result->value = (Int) std::pow( value, other_int->value );
+        result->value = (Int) std::pow( value, other.to_int() );
         return result;
     }
 
-    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    if ( other.type() == tp_float )
     {
         auto result = FloatValue::make();
-        result->value = (Float) std::pow( value, other_flt->value );
+        result->value = (Float) std::pow( value, other.to_float() );
         return result;
     }
 
@@ -285,17 +285,17 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator^( Value const& other ) const
 
 dawn::Ref<dawn::Value> dawn::IntValue::operator%( Value const& other ) const
 {
-    if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
+    if ( other.type() == tp_int )
     {
         auto result = IntValue::make();
-        result->value = value % other_int->value;
+        result->value = value % other.to_int();
         return result;
     }
 
-    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    if ( other.type() == tp_float )
     {
         auto result = FloatValue::make();
-        result->value = mymod( (Float) value, other_flt->value );
+        result->value = mymod( (Float) value, other.to_float() );
         return result;
     }
 
@@ -304,9 +304,9 @@ dawn::Ref<dawn::Value> dawn::IntValue::operator%( Value const& other ) const
 
 dawn::Int dawn::IntValue::operator<=>( Value const& other ) const
 {
-    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    if ( other.type() == tp_float )
     {
-        auto result = to_float() <=> other_flt->value;
+        auto result = to_float() <=> other.to_float();
         return result._Value;
     }
 
@@ -362,24 +362,24 @@ dawn::Ref<dawn::Value> dawn::FloatValue::clone() const
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator-() const
 {
-    auto result = std::dynamic_pointer_cast<FloatValue>(clone());
+    auto result = FloatValue::make();
     result->value = -value;
     return result;
 }
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator+( Value const& other ) const
 {
-    if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
+    if ( other.type() == tp_int )
     {
         auto result = FloatValue::make();
-        result->value = value + other_int->value;
+        result->value = value + other.to_int();
         return result;
     }
 
-    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    if ( other.type() == tp_float )
     {
         auto result = FloatValue::make();
-        result->value = value + other_flt->value;
+        result->value = value + other.to_float();
         return result;
     }
 
@@ -388,17 +388,17 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator+( Value const& other ) const
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator-( Value const& other ) const
 {
-    if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
+    if ( other.type() == tp_int )
     {
         auto result = FloatValue::make();
-        result->value = value - other_int->value;
+        result->value = value - other.to_int();
         return result;
     }
 
-    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    if ( other.type() == tp_float )
     {
         auto result = FloatValue::make();
-        result->value = value - other_flt->value;
+        result->value = value - other.to_float();
         return result;
     }
 
@@ -407,17 +407,17 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator-( Value const& other ) const
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator*( Value const& other ) const
 {
-    if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
+    if ( other.type() == tp_int )
     {
         auto result = FloatValue::make();
-        result->value = value * other_int->value;
+        result->value = value * other.to_int();
         return result;
     }
 
-    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    if ( other.type() == tp_float )
     {
         auto result = FloatValue::make();
-        result->value = value * other_flt->value;
+        result->value = value * other.to_float();
         return result;
     }
 
@@ -426,17 +426,17 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator*( Value const& other ) const
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator/( Value const& other ) const
 {
-    if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
+    if ( other.type() == tp_int )
     {
         auto result = FloatValue::make();
-        result->value = value / other_int->value;
+        result->value = value / other.to_int();
         return result;
     }
 
-    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    if ( other.type() == tp_float )
     {
         auto result = FloatValue::make();
-        result->value = value / other_flt->value;
+        result->value = value / other.to_float();
         return result;
     }
 
@@ -445,17 +445,17 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator/( Value const& other ) const
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator^( Value const& other ) const
 {
-    if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
+    if ( other.type() == tp_int )
     {
         auto result = FloatValue::make();
-        result->value = std::pow( value, other_int->value );
+        result->value = std::pow( value, other.to_int() );
         return result;
     }
 
-    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    if ( other.type() == tp_float )
     {
         auto result = FloatValue::make();
-        result->value = std::pow( value, other_flt->value );
+        result->value = std::pow( value, other.to_float() );
         return result;
     }
 
@@ -464,17 +464,17 @@ dawn::Ref<dawn::Value> dawn::FloatValue::operator^( Value const& other ) const
 
 dawn::Ref<dawn::Value> dawn::FloatValue::operator%( Value const& other ) const
 {
-    if ( auto other_int = dynamic_cast<IntValue const*>(&other) )
+    if ( other.type() == tp_int )
     {
         auto result = FloatValue::make();
-        result->value = mymod( value, (Float) other_int->value );
+        result->value = mymod( value, (Float) other.to_int() );
         return result;
     }
 
-    if ( auto other_flt = dynamic_cast<FloatValue const*>(&other) )
+    if ( other.type() == tp_float )
     {
         auto result = FloatValue::make();
-        result->value = mymod( value, other_flt->value );
+        result->value = mymod( value, other.to_float() );
         return result;
     }
 
@@ -571,10 +571,10 @@ dawn::Ref<dawn::Value> dawn::StringValue::clone() const
 
 dawn::Ref<dawn::Value> dawn::StringValue::operator+( Value const& other ) const
 {
-    if ( auto other_str = dynamic_cast<StringValue const*>(&other) )
+    if ( other.type() == tp_string )
     {
         auto result = StringValue::make();
-        result->value = value + other_str->value;
+        result->value = value + other.to_string();
         return result;
     }
 
@@ -583,9 +583,9 @@ dawn::Ref<dawn::Value> dawn::StringValue::operator+( Value const& other ) const
 
 dawn::Int dawn::StringValue::operator<=>( Value const& other ) const
 {
-    if ( auto other_str = dynamic_cast<StringValue const*>(&other) )
+    if ( other.type() == tp_string )
     {
-        auto result = value <=> other_str->value;
+        auto result = value <=> other.to_string();
         return result._Value;
     }
 
