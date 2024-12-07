@@ -19,4 +19,3 @@ func verify(ref p, let check) {
 		print(value, " is smaller than ", check)
 	}
 }
-

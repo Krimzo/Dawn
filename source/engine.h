@@ -58,7 +58,7 @@ struct EngineVariableVar : EngineVariable
 
 struct EngineVariableRef : EngineVariable
 {
-    Ref<EngineVariable> ref_var_ptr;
+    Ref<EngineVariable> ref_var;
 
     EngineVariableRef() = default;
 

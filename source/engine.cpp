@@ -30,12 +30,12 @@ dawn::Opt<dawn::EngineError> dawn::EngineVariableVar::set_value( Ref<Value> cons
 
 dawn::Ref<dawn::Value> const& dawn::EngineVariableRef::get_value() const
 {
-    return ref_var_ptr->get_value();
+    return ref_var->get_value();
 }
 
 dawn::Opt<dawn::EngineError> dawn::EngineVariableRef::set_value( Ref<Value> const& value )
 {
-    return ref_var_ptr->set_value( value );
+    return ref_var->set_value( value );
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::load_mod( Module const& module )
@@ -115,9 +115,9 @@ dawn::Opt<dawn::EngineError> dawn::Engine::add_var( Variable const& var )
         if ( !ref_val )
             return EngineError{ L"variable [", var.name, L"] can't reference [", value->type(), L"]" };
 
-        auto val = std::make_shared<EngineVariableRef>();
-        val->ref_var_ptr = ref_val->eng_var;
-        eng_var = val;
+        auto var = std::make_shared<EngineVariableRef>();
+        var->ref_var = ref_val->eng_var;
+        eng_var = var;
     }
 
     variables.push( var.name, eng_var );
