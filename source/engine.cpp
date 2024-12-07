@@ -133,7 +133,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::add_var( Variable const& var )
     }
     else
     {
-        auto ref_val = dynamic_cast<RefValue*>(value.get());
+        auto ref_val = dynamic_cast<RefValue const*>(value.get());
         if ( !ref_val )
             return EngineError{ L"variable [", var.name, L"] can't reference [", value->type(), L"]" };
 

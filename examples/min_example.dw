@@ -1,15 +1,2 @@
 func main() {
-	var a = 5
-	let b = a
-	
-	print("a = ", a)
-	print("b = ", b)
-	
-	ref p = a
-	ref pp = p
-	ref ppp = pp
-	ppp *= 12
-
-	print("a = ", a)
-	print("b = ", b)
 }

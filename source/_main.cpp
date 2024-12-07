@@ -6,7 +6,6 @@ int main( int argc, char** argv )
     using namespace dawn;
 
     Dawn dawn;
-
     if ( auto error = dawn.eval_file( L"examples/min_example.dw" ) )
     {
         print( error.value() );
