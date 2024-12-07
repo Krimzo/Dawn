@@ -30,11 +30,17 @@ inline constexpr StringRef kw_self = L"self";
 inline constexpr StringRef kw_true = L"true";
 inline constexpr StringRef kw_false = L"false";
 
+inline constexpr StringRef tp_nothing = L"nothing";
 inline constexpr StringRef tp_bool = L"bool";
 inline constexpr StringRef tp_int = L"int";
 inline constexpr StringRef tp_float = L"float";
 inline constexpr StringRef tp_char = L"char";
 inline constexpr StringRef tp_string = L"string";
+inline constexpr StringRef tp_enum = L"enum";
+inline constexpr StringRef tp_layer = L"layer";
+inline constexpr StringRef tp_struct = L"struct";
+inline constexpr StringRef tp_array = L"array";
+inline constexpr StringRef tp_range = L"range";
 
 inline constexpr StringRef op_add = L"+";
 inline constexpr StringRef op_sub = L"-";

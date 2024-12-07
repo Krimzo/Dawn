@@ -86,7 +86,6 @@ dawn::String dawn::RefValue::to_string() const
 // nothing
 dawn::StringRef const& dawn::NothingValue::type() const
 {
-    static constexpr StringRef tp_nothing = L"nothing";
     return tp_nothing;
 }
 
@@ -626,7 +625,6 @@ dawn::String dawn::StringValue::to_string() const
 // enum
 dawn::StringRef const& dawn::EnumValue::type() const
 {
-    static constexpr StringRef tp_enum = L"enum";
     return tp_enum;
 }
 
@@ -646,7 +644,6 @@ dawn::String dawn::EnumValue::to_string() const
 // struct
 dawn::StringRef const& dawn::StructValue::type() const
 {
-    static constexpr StringRef tp_struct = L"struct";
     return tp_struct;
 }
 
@@ -667,7 +664,6 @@ dawn::String dawn::StructValue::to_string() const
 // array
 dawn::StringRef const& dawn::ArrayValue::type() const
 {
-    static constexpr StringRef tp_array = L"array";
     return tp_array;
 }
 
@@ -723,7 +719,6 @@ dawn::String dawn::ArrayValue::to_string() const
 
 dawn::StringRef const& dawn::RangeValue::type() const
 {
-    static constexpr StringRef tp_range = L"range";
     return tp_range;
 }
 

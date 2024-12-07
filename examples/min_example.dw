@@ -1,14 +1,4 @@
 func main() {
-	var data = "no way"
-	ref p = data
-	ref pp = p
-	ref ppp = (pp += p)
-	for let c : ppp {
-		print(c)
-	}
-
-	return
-
 	var a = (2 + 3) * 2
 	ref b = alter(a)
 	b += -3

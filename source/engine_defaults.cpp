@@ -56,19 +56,11 @@ void dawn::Engine::load_default_mods()
         if ( args.size() != 1 )
             PANIC( "abs expects 1 argument" );
 
-        if ( auto node_int = dynamic_cast<IntValue const*>(args[0].get()) )
-        {
-            auto result = IntValue::make();
-            result->value = std::abs( node_int->value );
-            return result;
-        }
+        if ( args[0]->type() == tp_int )
+            return make_int_value( std::abs( args[0]->to_int() ) );
 
-        if ( auto node_flt = dynamic_cast<FloatValue const*>(args[0].get()) )
-        {
-            auto result = FloatValue::make();
-            result->value = std::abs( node_flt->value );
-            return result;
-        }
+        if ( args[0]->type() == tp_float )
+            return make_float_value( std::abs( args[0]->to_float() ) );
 
         PANIC( "abs expects an int or float" );
     } );
