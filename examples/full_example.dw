@@ -1,87 +1,76 @@
-// Module
-module full_example;
-
 // Primitive
 func primitive_examp() {
+	// Bool
+	let b0 = false
+	let b1 = !b0 && i >= 0
+
 	// Integer
-	let i: int = -10; // [-9223372036854775808, 9223372036854775807]
+	let i = -10 // [-9223372036854775808, 9223372036854775807]
 
 	// Float
-	let f: float = 6.0; // [2.2250738585072014E-308, 1.7976931348623158E+308]
+	let f = 6.0 // [2.2250738585072014E-308, 1.7976931348623158E+308]
 
-	// Text
-	let t0: char = 'd';
-	let t1: string = "nice";
+	// Char
+	let t0 = 'd'
 
-	// Bool
-	let b0: bool = false;
-	let b1: bool = !b0 && i >= 0;
+	// String
+	let t1 = "nice"
 }
 
 // Variable
-let a = 16;
-var b: float = 23.0;
-
-func var_examp() {
-	let a = 5;                // implicit type, constant, int, 5
-	var b: int = 6;           // explicit type, variable, int, 6
-	let c: int var& = &b;     // explicit type, constant, int variable reference, address from b
-	let d: float = float(c);  // explicit type, constant, float, casted value from referenced int
-	var e: float let& = null; // explicit type, variable, float constant reference, null
-}
+let a = 16	 // constant, int, 5
+var b = 23.0 // variable, int, 6
 
 // Array
 func array_examp() {
-	let data0: int[] = int[10];        // init array, 10 elements, values 0
-	let data1: int[] = int[5; 17];	   // init array,  5 elements, values 17
-	let data2: int[] = int[; 4, 5, 6]; // init array,  3 elements, values [4, 5, 6]
+	let data0 = int[10]   // array, 10 elements, values 0
+	let data2 = [4, 5, 6] // array,  3 elements, values [4, 5, 6]
 }
 
 // Bracket
 func bracket_examp() {
-	//T{};            // struct init
-	//T(value);       // cast to T
-	//t();            // function call
-	//T[];            // array type
-	//<< yield 0; >>; // yield scope
+	//T{}            // struct init
+	//T(value)       // cast to T
+	//t()            // function call
+	//T[value]       // array init
 }
 
 // Function
-func func_examp(a: int): int {
-	return a * a;
+func func_examp(a) {
+	return a * a
 }
 
 // Operator
-oper *(left: string, right: int): string {
-	return left->repeat(right);
+oper *(left, right) {
+	return left->repeat(right)
 }
 
 // Logic
 func logic_examp() {
-	let a = (5 + 1.0) * 2.;
+	let a = (5 + 1.0) * 2.
 	if a < 10.0 {
-		print("res = " + string(a));
+		print("res = " + string(a))
 	}
 	elif a <= 15.0 {
-		print("it's less or equal to 15");
+		print("it's less or equal to 15")
 	}
 	else {
-		print("it's more than 15");
+		print("it's more than 15")
 	}
 }
 
 // Switch
 func switch_examp() {
-	let value = 16;
+	let value = 16
 	switch value {
 		case 1, 2, 3 {
-			print("it's 3");
+			print("it's 3")
 		}
 		case 14 {
-			print("it's 14");
+			print("it's 14")
 		}
 		default {
-			print("it's something that im not aware of");
+			print("it's something that im not aware of")
 		}
 	}
 }
@@ -89,88 +78,88 @@ func switch_examp() {
 // For
 func for_examp() {
 	for i: ~10 {
-		print(i);
+		print(i)
 	}
 	for i: 3~6 {
-		print(i);
+		print(i)
 	}
 	for c: "some text" {
-		print(c);
+		print(c)
 	}
-	for value: int[5; 10] {
-		print(value);
+	for value: int[5] {
+		print(value)
 	}
 }
 
 // While
 func while_examp() {
-	var counter = 0;
+	var counter = 0
 	while counter < 10 {
 		if counter == 6 {
-			break;
+			break
 		}
-		counter += 1;
+		counter += 1
 	}
 }
 
 // Loop
 func loop_examp() {
 	loop {
-		print("One loop run");
-		break;
+		print("One loop run")
+		break
 	}
 }
 
 // Enum
-enum ExampleEnum: float {
-	ME(0.0);
-	YOU(1.1);
-	THEM(2.2);
+enum ExampleEnum {
+	me(0.0),
+	you("1.1"),
+	them(2.2),
 }
 
 func enum_examp() {
-	let someone = ExampleEnum:ME;
-	let someone_else: ExampleEnum = ExampleEnum:THEM;
-	let value: float = someone->val;
+	let someone = ExampleEnum->me
+	let someone_else = ExampleEnum->you
+	let value = someone->val
 }
 
 // Layer
 layer Living {
-	let get_age(): int;
+	let get_age()
 }
 
 // Struct
 struct Person: Living {
-	name: string;
-	age: int;
+	name,
+	age,
 
-	impl get_age(): int {
-		return self->age;
+	impl get_age() {
+		return self->age
 	}
 
-	var var_method(): Person var& {
-		return &self;
+	var var_method() {
+		return self
 	}
 
-	let let_method(): Person let& {
-		return &self;
+	let let_method() {
+		return self
 	}
 
-	let who(): string {
-		return self->name;
+	let who() {
+		return self->name
 	}
 }
 
 func struct_examp() {
-	let person0 = Person{};
-	var person1: Person = Person{ name: "Krim", age: 23 };
+	let person0 = Person{}
+	var person1 = Person{ name: "Krim", age: 23 }
 	
-	var living: Living[] = Living[0];
-	living->push(person0);
-	living->push(person1);
+	var living = Living[]
+	living->push(person0)
+	living->push(person1)
 
 	for alive: living {
-		let age = alive->get_age();
-		print(age);
+		let age = alive->get_age()
+		print(age)
 	}
 }

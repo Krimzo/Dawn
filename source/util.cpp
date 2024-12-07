@@ -52,13 +52,12 @@ dawn::String dawn::from_escaping( Char c )
     return String( 1, c );
 }
 
-dawn::String dawn::read_file( StringRef const& path )
+dawn::Opt<dawn::String> dawn::read_file( StringRef const& path )
 {
     IFileStream file{ path.data() };
     if ( !file )
-        return {};
-
-    return (StringStream{} << file.rdbuf()).str();
+        return std::nullopt;
+    return { (StringStream{} << file.rdbuf()).str() };
 }
 
 dawn::Opt<dawn::Int> dawn::parse_int( StringRef const& data )

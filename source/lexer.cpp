@@ -38,12 +38,9 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
 {
     LanguageDef result;
     result.keywords = {
-        (String) kw_module,
-        (String) kw_import,
         (String) kw_func,
         (String) kw_oper,
         (String) kw_return,
-        (String) kw_yield,
         (String) kw_let,
         (String) kw_var,
         (String) kw_if,
@@ -106,8 +103,6 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) op_scope_cls,
         (String) op_array_opn,
         (String) op_array_cls,
-        (String) op_yield_opn,
-        (String) op_yield_cls,
     };
     result.separator_identifier = sep_identifier;
     result.separator_number = sep_number;

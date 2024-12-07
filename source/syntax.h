@@ -5,12 +5,9 @@
 
 namespace dawn
 {
-inline constexpr StringRef kw_module = L"module";
-inline constexpr StringRef kw_import = L"import";
 inline constexpr StringRef kw_func = L"func";
 inline constexpr StringRef kw_oper = L"oper";
 inline constexpr StringRef kw_return = L"return";
-inline constexpr StringRef kw_yield = L"yield";
 inline constexpr StringRef kw_let = L"let";
 inline constexpr StringRef kw_var = L"var";
 inline constexpr StringRef kw_if = L"if";
@@ -71,8 +68,6 @@ inline constexpr StringRef op_scope_opn = L"{";
 inline constexpr StringRef op_scope_cls = L"}";
 inline constexpr StringRef op_array_opn = L"[";
 inline constexpr StringRef op_array_cls = L"]";
-inline constexpr StringRef op_yield_opn = L"<<";
-inline constexpr StringRef op_yield_cls = L">>";
 
 inline constexpr StringRef sep_number = L".";
 inline constexpr StringRef sep_identifier = L"_";

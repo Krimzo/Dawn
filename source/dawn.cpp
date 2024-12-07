@@ -1,69 +1,51 @@
-#include "util.h"
-#include "lexer.h"
-#include "parser.h"
-#include "engine.h"
+#include "dawn.h"
 
 
-int main()
+dawn::Dawn::Dawn()
 {
-    //// PREP
-    using namespace dawn;
-    String source = read_file( L"examples/min_example.dw" );
+    m_engine.load_default_mods();
+}
 
-    //// LEXER
-    Lexer lexer;
+dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source )
+{
     Array<Token> tokens;
-    if ( auto error = lexer.tokenize( source, tokens ) )
-    {
-        print( error.value() );
-        return 1;
-    }
+    if ( auto error = m_lexer.tokenize( source, tokens ) )
+        return error->msg;
 
-    if /* PRINT TOKENS */ constexpr ( 0 )
-    {
-        for ( auto& token : tokens )
-            print( token );
-    }
-
-    //// PARSER
-    Parser parser;
     Module module;
-    if ( auto error = parser.parse( tokens, module ) )
-    {
-        print( error.value() );
-        return 2;
-    }
+    if ( auto error = m_parser.parse( tokens, module ) )
+        return error->msg;
 
-    //// ENGINE
-    Engine engine;
-    engine.load_default_mods();
+    if ( auto error = m_engine.load_mod( module ) )
+        return error->msg;
 
-    if ( auto error = engine.load_mod( module ) )
-    {
-        print( error.value() );
-        return 3;
-    }
+    return std::nullopt;
+}
 
-    if /* GET VALUE */ constexpr ( 0 )
-    {
-        Ref<Value> a_val = engine.get_var( L"a" );
-        Ref<Value> b_val = engine.get_var( L"b" );
-        if ( !a_val || !b_val )
-            return 4;
+dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path )
+{
+    auto source = read_file( path );
+    if ( !source )
+        return format( "file [", path, "] could not be opened" );
+    return eval( *source );
+}
 
-        print( L"a = ", a_val->to_string() );
-        print( L"b = ", b_val->to_string() );
-    }
+void dawn::Dawn::bind_func( String const& name, Function::CppFunc cpp_func )
+{
+    m_engine.bind_func( name, cpp_func );
+}
 
-    if /* CALL FUNCTION */ constexpr ( 1 )
-    {
-        Ref<Value> retval;
-        if ( auto error = engine.call_func( L"main", {}, retval ) )
-        {
-            print( error.value() );
-            return 5;
-        }
-    }
+dawn::Opt<dawn::EngineError> dawn::Dawn::call_func( String const& name, Array<Ref<Value>> const& args, Ref<Value>& retval )
+{
+    return m_engine.call_func( name, args, retval );
+}
 
-    return 0;
+void dawn::Dawn::set_var( String const& name, Ref<Value> const& value )
+{
+    m_engine.set_var( name, value );
+}
+
+dawn::Ref<dawn::Value> dawn::Dawn::get_var( String const& name )
+{
+    return m_engine.get_var( name );
 }

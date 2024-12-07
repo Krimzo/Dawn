@@ -1,13 +1,6 @@
-module min_example
-
 func main() {
-	var data = add(int[2], [4, 5, 6])
-	data = string(data)
-	for c: data {
-		if c == ' ' || c == ',' { continue }
-		if c == '5' { break }
-		print(c)
-	}
+	let data = int[]
+	print(data)
 }
 
 func add(left, right) { return left + right }

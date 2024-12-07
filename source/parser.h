@@ -36,7 +36,6 @@ std::wostream& operator<<( std::wostream& stream, ParseError const& error );
 
 struct Module
 {
-    String name;
     Map<String, Variable> variables;
     Map<String, Operator> operators;
     Map<String, Function> functions;
@@ -54,13 +53,12 @@ struct Parser
 private:
     void prepare_tokens( Array<Token>& tokens );
 
-    Opt<ParseError> parse_module_module( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
-    Opt<ParseError> parse_module_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
-    Opt<ParseError> parse_module_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
-    Opt<ParseError> parse_module_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
-    Opt<ParseError> parse_module_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
-    Opt<ParseError> parse_module_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
-    Opt<ParseError> parse_module_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
+    Opt<ParseError> parse_global_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
+    Opt<ParseError> parse_global_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
+    Opt<ParseError> parse_global_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
+    Opt<ParseError> parse_global_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
+    Opt<ParseError> parse_global_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
+    Opt<ParseError> parse_global_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
 
     Opt<ParseError> parse_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, StructType& struct_type );
     Opt<ParseError> parse_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, LayerType& layer_type );
@@ -86,7 +84,6 @@ private:
     Opt<ParseError> expression_type_make( Array<Token> const& tokens, Ref<Node>& tree );
     Opt<ParseError> expression_type_array( Array<Token> const& tokens, Ref<Node>& tree );
     Opt<ParseError> expression_function( Array<Token> const& tokens, Ref<Node>& tree );
-    Opt<ParseError> expression_yield( Array<Token> const& tokens, Ref<Node>& tree );
 
     Opt<ParseError> parse_scope( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Scope& scope );
     Opt<ParseError> scope_return( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );

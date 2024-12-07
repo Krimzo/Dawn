@@ -20,8 +20,10 @@
     <ClCompile Include="source\dawn.cpp" />
     <ClCompile Include="source\valtype.cpp" />
     <ClCompile Include="source\values.cpp" />
+    <ClCompile Include="source\_main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\dawn.h" />
     <ClInclude Include="source\engine.h" />
     <ClInclude Include="source\lexer.h" />
     <ClInclude Include="source\nodes.h" />

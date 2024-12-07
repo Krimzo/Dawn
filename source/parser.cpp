@@ -23,39 +23,37 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse( Array<Token>& tokens, Module& m
 
     auto it = tokens.begin();
     auto end = tokens.end();
-    if ( auto error = parse_module_module( it, end, module ) )
-        return error;
 
     while ( it != end )
     {
         if ( it->value == kw_enum )
         {
-            if ( auto error = parse_module_enum( it, end, module ) )
+            if ( auto error = parse_global_enum( it, end, module ) )
                 return error;
         }
         else if ( it->value == kw_layer )
         {
-            if ( auto error = parse_module_layer( it, end, module ) )
+            if ( auto error = parse_global_layer( it, end, module ) )
                 return error;
         }
         else if ( it->value == kw_struct )
         {
-            if ( auto error = parse_module_struct( it, end, module ) )
+            if ( auto error = parse_global_struct( it, end, module ) )
                 return error;
         }
         else if ( it->value == kw_func )
         {
-            if ( auto error = parse_module_function( it, end, module ) )
+            if ( auto error = parse_global_function( it, end, module ) )
                 return error;
         }
         else if ( it->value == kw_oper )
         {
-            if ( auto error = parse_module_operator( it, end, module ) )
+            if ( auto error = parse_global_operator( it, end, module ) )
                 return error;
         }
         else if ( it->value == kw_let || it->value == kw_var )
         {
-            if ( auto error = parse_module_variable( it, end, module ) )
+            if ( auto error = parse_global_variable( it, end, module ) )
                 return error;
         }
         else
@@ -76,21 +74,7 @@ void dawn::Parser::prepare_tokens( Array<Token>& tokens )
     }
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_module( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
-{
-    if ( it->value != kw_module )
-        return ParseError{ *it, L"expected module keyword" };
-    ++it;
-
-    if ( it->type != TokenType::NAME )
-        return ParseError{ *it, L"expected module name" };
-    module.name = it->value;
-    ++it;
-
-    return std::nullopt;
-}
-
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_global_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
     StructType struct_type;
     if ( auto error = parse_struct( it, end, struct_type ) )
@@ -104,7 +88,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_struct( Array<Token>::con
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_global_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
     LayerType layer_type;
     if ( auto error = parse_layer( it, end, layer_type ) )
@@ -118,7 +102,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_layer( Array<Token>::cons
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_global_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
     EnumType enum_type;
     if ( auto error = parse_enum( it, end, enum_type ) )
@@ -132,7 +116,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_enum( Array<Token>::const
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_global_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
     Function function;
     if ( auto error = parse_function( it, end, function ) )
@@ -146,7 +130,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_function( Array<Token>::c
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_global_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
     Operator operato;
     if ( auto error = parse_operator( it, end, operato ) )
@@ -157,7 +141,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_operator( Array<Token>::c
     return std::nullopt;
 }
 
-dawn::Opt<dawn::ParseError> dawn::Parser::parse_module_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+dawn::Opt<dawn::ParseError> dawn::Parser::parse_global_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
 {
     Variable variable;
     if ( auto error = parse_variable( it, end, variable ) )
@@ -410,6 +394,12 @@ dawn::Opt<dawn::ParseError> dawn::Parser::type_reference( Array<Token>::const_it
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_expression( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree )
 {
+    if ( it == end )
+    {
+        tree = std::make_shared<NothingNode>();
+        return std::nullopt;
+    }
+
     Array<Token> expr_tokens;
     if ( auto error = expression_extract( it, end, expr_tokens ) )
         return error;
@@ -477,11 +467,11 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_extract( Array<Token>::cons
                 break;
         }
 
-        if ( it->value == op_expr_opn || it->value == op_scope_opn || it->value == op_array_opn || it->value == op_yield_opn )
+        if ( it->value == op_expr_opn || it->value == op_scope_opn || it->value == op_array_opn )
         {
             ++expr_depth;
         }
-        else if ( it->value == op_expr_cls || it->value == op_scope_cls || it->value == op_array_cls || it->value == op_yield_cls )
+        else if ( it->value == op_expr_cls || it->value == op_scope_cls || it->value == op_array_cls )
         {
             --expr_depth;
             if ( expr_depth < 0 )
@@ -518,11 +508,11 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_precedence( Array<Token> co
     {
         auto& token = tokens[i];
 
-        if ( token.value == op_expr_opn || token.value == op_scope_opn || token.value == op_array_opn || token.value == op_yield_opn )
+        if ( token.value == op_expr_opn || token.value == op_scope_opn || token.value == op_array_opn )
         {
             ++expr_depth;
         }
-        else if ( token.value == op_expr_cls || token.value == op_scope_cls || token.value == op_array_cls || token.value == op_yield_cls )
+        else if ( token.value == op_expr_cls || token.value == op_scope_cls || token.value == op_array_cls )
         {
             --expr_depth;
             if ( expr_depth < 0 )
@@ -574,11 +564,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_pure( Array<Token> const& t
     else if ( tokens.front().type == TokenType::FUNCTION )
     {
         if ( auto error = expression_function( tokens, tree ) )
-            return error;
-    }
-    else if ( tokens.front().value == op_yield_opn )
-    {
-        if ( auto error = expression_yield( tokens, tree ) )
             return error;
     }
     else if ( tokens.front().value == op_expr_opn )
@@ -901,12 +886,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_function( Array<Token> cons
 
     tree = node;
 
-    return std::nullopt;
-}
-
-dawn::Opt<dawn::ParseError> dawn::Parser::expression_yield( Array<Token> const& tokens, Ref<Node>& tree )
-{
-    assert( false && L"not impl" );
     return std::nullopt;
 }
 
