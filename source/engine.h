@@ -38,32 +38,35 @@ protected:
 
 struct EngineVariableLet : EngineVariable
 {
-    const Ref<Value> value;
-
-    inline EngineVariableLet( Ref<Value> const& value ) : value( value ) {}
+    EngineVariableLet( Ref<Value> const& value );
 
     Ref<Value> const& get_value() const override;
     Opt<EngineError> set_value( Ref<Value> const& value ) override;
+
+private:
+    Ref<Value> m_value;
 };
 
 struct EngineVariableVar : EngineVariable
 {
-    Ref<Value> value;
-
-    inline EngineVariableVar( Ref<Value> const& value ) : value( value ) {}
+    EngineVariableVar( Ref<Value> const& value );
 
     Ref<Value> const& get_value() const override;
     Opt<EngineError> set_value( Ref<Value> const& value ) override;
+
+private:
+    Ref<Value> m_value;
 };
 
 struct EngineVariableRef : EngineVariable
 {
-    Ref<EngineVariable> ref_var;
-
-    EngineVariableRef() = default;
+    EngineVariableRef( Ref<EngineVariable> const& ref_var );
 
     Ref<Value> const& get_value() const override;
     Opt<EngineError> set_value( Ref<Value> const& value ) override;
+
+private:
+    Ref<EngineVariable> m_ref_var;
 };
 
 template<typename T>

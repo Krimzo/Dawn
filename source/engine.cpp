@@ -7,9 +7,17 @@ std::wostream& dawn::operator<<( std::wostream& stream, EngineError const& error
     return stream;
 }
 
+dawn::EngineVariableLet::EngineVariableLet( Ref<Value> const& value )
+{
+    if ( auto ref_val = dynamic_cast<RefValue const*>(value.get()) )
+        m_value = ref_val->eng_var->get_value();
+    else
+        m_value = value;
+}
+
 dawn::Ref<dawn::Value> const& dawn::EngineVariableLet::get_value() const
 {
-    return value;
+    return m_value;
 }
 
 dawn::Opt<dawn::EngineError> dawn::EngineVariableLet::set_value( Ref<Value> const& value )
@@ -17,25 +25,39 @@ dawn::Opt<dawn::EngineError> dawn::EngineVariableLet::set_value( Ref<Value> cons
     return EngineError{ "Cannot set value of a let variable" };
 }
 
+dawn::EngineVariableVar::EngineVariableVar( Ref<Value> const& value )
+{
+    set_value( value );
+}
+
 dawn::Ref<dawn::Value> const& dawn::EngineVariableVar::get_value() const
 {
-    return value;
+    return m_value;
 }
 
 dawn::Opt<dawn::EngineError> dawn::EngineVariableVar::set_value( Ref<Value> const& value )
 {
-    this->value = value;
+    if ( auto ref_val = dynamic_cast<RefValue const*>(value.get()) )
+        m_value = ref_val->eng_var->get_value();
+    else
+        m_value = value;
+
     return std::nullopt;
+}
+
+dawn::EngineVariableRef::EngineVariableRef( Ref<EngineVariable> const& ref_var )
+{
+    m_ref_var = ref_var;
 }
 
 dawn::Ref<dawn::Value> const& dawn::EngineVariableRef::get_value() const
 {
-    return ref_var->get_value();
+    return m_ref_var->get_value();
 }
 
 dawn::Opt<dawn::EngineError> dawn::EngineVariableRef::set_value( Ref<Value> const& value )
 {
-    return ref_var->set_value( value );
+    return m_ref_var->set_value( value );
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::load_mod( Module const& module )
@@ -115,9 +137,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::add_var( Variable const& var )
         if ( !ref_val )
             return EngineError{ L"variable [", var.name, L"] can't reference [", value->type(), L"]" };
 
-        auto var = std::make_shared<EngineVariableRef>();
-        var->ref_var = ref_val->eng_var;
-        eng_var = var;
+        eng_var = std::make_shared<EngineVariableRef>( ref_val->eng_var );
     }
 
     variables.push( var.name, eng_var );

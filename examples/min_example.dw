@@ -1,34 +1,15 @@
 func main() {
 	var a = 5
-	//ref p = a
-	var b = a
-
-	print(a)
-	print(b)
-
-	a = 98
-
-	//var c = alter(p, b)
-	//c ^= 2
+	let b = a
 	
-	print(a)
-	print(b)
+	print("a = ", a)
+	print("b = ", b)
+	
+	ref p = a
+	ref pp = p
+	ref ppp = pp
+	ppp *= 12
 
-	//let a = 5
-	//switch a {
-	//	case 1, 2, 3 {
-	//		print("first case")
-	//	}
-	//	case 4, 5 {
-	//		print("second case")
-	//	}
-	//	default {
-	//		print("default")
-	//	}
-	//}
-}
-
-func alter(ref value, var other) {
-	//value += other
-	//return value
+	print("a = ", a)
+	print("b = ", b)
 }
