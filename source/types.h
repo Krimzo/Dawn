@@ -13,16 +13,16 @@ struct Scope : Node
 
 struct Variable
 {
-    String name;
-    Bool is_var = false;
-    Ref<Type> type;
-    Ref<Node> expr;
-};
+    enum struct Type
+    {
+        LET = 0,
+        VAR,
+        REF,
+    };
 
-struct Argument
-{
     String name;
-    Ref<Type> type;
+    Type type = Type::LET;
+    Ref<Node> expr;
 };
 
 struct Function
@@ -30,8 +30,7 @@ struct Function
     using CppFunc = Func<Ref<Value>( Array<Ref<Value>> const& )>;
 
     String name;
-    Array<Argument> args;
-    Ref<Type> type;
+    Array<Variable> args;
     Variant<Scope, CppFunc> body;
 };
 

@@ -36,12 +36,12 @@ std::wostream& operator<<( std::wostream& stream, ParseError const& error );
 
 struct Module
 {
-    Map<String, Variable> variables;
-    Map<String, Operator> operators;
-    Map<String, Function> functions;
-    Map<String, EnumType> enums;
-    Map<String, LayerType> layers;
-    Map<String, StructType> structs;
+    Array<Variable> variables;
+    Array<Operator> operators;
+    Array<Function> functions;
+    Array<EnumType> enums;
+    Array<LayerType> layers;
+    Array<StructType> structs;
 
     Bool contains_id( StringRef const& id ) const;
 };
@@ -67,9 +67,7 @@ private:
     Opt<ParseError> parse_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Operator& operato );
     Opt<ParseError> parse_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Variable& variable );
 
-    Opt<ParseError> parse_type( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Type>& type );
     Opt<ParseError> type_basic( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Type>& type );
-    Opt<ParseError> type_reference( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<RefType>& type );
 
     Opt<ParseError> parse_expression( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
     Opt<ParseError> expression_extract( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Array<Token>& tokens );

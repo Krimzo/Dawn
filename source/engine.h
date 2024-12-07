@@ -25,12 +25,45 @@ struct EngineError
 
 std::wostream& operator<<( std::wostream& stream, EngineError const& error );
 
-struct EngineVar
+struct EngineVariable
 {
-    String name;
-    Bool is_var = false;
-    Ref<Type> type;
+    virtual ~EngineVariable() = default;
+
+    virtual Ref<Value> const& get_value() const = 0;
+    virtual Opt<EngineError> set_value( Ref<Value> const& value ) = 0;
+
+protected:
+    EngineVariable() = default;
+};
+
+struct EngineVariableLet : EngineVariable
+{
+    const Ref<Value> value;
+
+    inline EngineVariableLet( Ref<Value> const& value ) : value( value ) {}
+
+    Ref<Value> const& get_value() const override;
+    Opt<EngineError> set_value( Ref<Value> const& value ) override;
+};
+
+struct EngineVariableVar : EngineVariable
+{
     Ref<Value> value;
+
+    inline EngineVariableVar( Ref<Value> const& value ) : value( value ) {}
+
+    Ref<Value> const& get_value() const override;
+    Opt<EngineError> set_value( Ref<Value> const& value ) override;
+};
+
+struct EngineVariableRef : EngineVariable
+{
+    Ref<EngineVariable> ref_var_ptr;
+
+    EngineVariableRef() = default;
+
+    Ref<Value> const& get_value() const override;
+    Opt<EngineError> set_value( Ref<Value> const& value ) override;
 };
 
 template<typename T>
@@ -53,21 +86,21 @@ struct Stack
 
     T* get( StringRef const& name )
     {
-        for ( Int i = (Int) m_data.size() - 1; i >= 0; i-- )
+        for ( auto it = m_data.rbegin(); it != m_data.rend(); ++it )
         {
-            if ( m_data[i].first == name )
-                return &m_data[i].second;
+            if ( it->first == name )
+                return &it->second;
         }
         return nullptr;
     }
 
 private:
-    Array<Pair<String, T>> m_data;
+    List<Pair<String, T>> m_data;
 };
 
 struct Engine
 {
-    Stack<EngineVar> variables;
+    Stack<Ref<EngineVariable>> variables;
     Stack<Operator> operators;
     Stack<Function> functions;
     Stack<EnumType> enums;
@@ -78,13 +111,14 @@ struct Engine
     Opt<EngineError> load_mod( Module const& module );
 
     void bind_func( String const& name, Function::CppFunc cpp_func );
-    Opt<EngineError> call_func( String const& name, Array<Ref<Value>> const& args, Ref<Value>& retval );
+    Opt<EngineError> call_func( String const& name, Array<Ref<Node>> const& args, Ref<Value>& retval );
 
-    void set_var( String const& name, Ref<Value> const& value );
-    Ref<Value> get_var( String const& name );
+    void add_var( String const& name, Bool is_var, Ref<Value> const& value );
+    Opt<EngineError> add_var( Variable const& var );
+    EngineVariable* get_var( String const& name );
 
 private:
-    Opt<EngineError> handle_func( Function const& func, Array<Ref<Value>> const& args, Ref<Value>& retval );
+    Opt<EngineError> handle_func( Function const& func, Array<Ref<Node>> const& args, Ref<Value>& retval );
     Opt<EngineError> handle_scope( Scope const& scope, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon );
     Opt<EngineError> handle_instr( Ref<Node> const& node, Ref<Value>& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon );
     Opt<EngineError> handle_expr( Ref<Node> const& node, Ref<Value>& value );

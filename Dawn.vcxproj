@@ -14,6 +14,7 @@
     <ClCompile Include="source\engine.cpp" />
     <ClCompile Include="source\engine_defaults.cpp" />
     <ClCompile Include="source\lexer.cpp" />
+    <ClCompile Include="source\nodes.cpp" />
     <ClCompile Include="source\parser.cpp" />
     <ClCompile Include="source\types.cpp" />
     <ClCompile Include="source\util.cpp" />

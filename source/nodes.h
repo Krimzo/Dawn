@@ -83,7 +83,7 @@ struct WhileNode : Node
 
 struct ForNode :Node
 {
-    String var_name;
+    Variable var;
     Ref<Node> expr;
     Scope scope;
 };
@@ -122,10 +122,6 @@ struct UnaryNodeMinus : UnaryNode
 };
 
 struct UnaryNodeNot : UnaryNode
-{
-};
-
-struct UnaryNodeRef : UnaryNode
 {
 };
 
@@ -234,4 +230,18 @@ struct AssignNodePow : AssignNode
 struct AssignNodeMod : AssignNode
 {
 };
+
+Ref<Node> make_value_literal( Ref<Value> const& value );
+
+Ref<Node> make_bool_literal( Bool value );
+Ref<Node> make_int_literal( Int value );
+Ref<Node> make_float_literal( Float value );
+Ref<Node> make_char_literal( Char value );
+Ref<Node> make_string_literal( StringRef const& value );
+
+Ref<Value> make_bool_value( Bool value );
+Ref<Value> make_int_value( Int value );
+Ref<Value> make_float_value( Float value );
+Ref<Value> make_char_value( Char value );
+Ref<Value> make_string_value( StringRef const& value );
 }

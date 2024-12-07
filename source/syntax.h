@@ -10,6 +10,7 @@ inline constexpr StringRef kw_oper = L"oper";
 inline constexpr StringRef kw_return = L"return";
 inline constexpr StringRef kw_let = L"let";
 inline constexpr StringRef kw_var = L"var";
+inline constexpr StringRef kw_ref = L"ref";
 inline constexpr StringRef kw_if = L"if";
 inline constexpr StringRef kw_else = L"else";
 inline constexpr StringRef kw_elif = L"elif";
@@ -58,7 +59,6 @@ inline constexpr StringRef op_lesseq = L"<=";
 inline constexpr StringRef op_greateq = L">=";
 inline constexpr StringRef op_assign = L"=";
 inline constexpr StringRef op_split = L",";
-inline constexpr StringRef op_ref = L"&";
 inline constexpr StringRef op_access = L"->";
 inline constexpr StringRef op_link = L":";
 inline constexpr StringRef op_range = L"~";
@@ -80,7 +80,6 @@ inline Map<String, Int> precedences
 {
     { (String) op_link, 1 },
     { (String) op_access, 2 },
-    { (String) op_ref, 3 },
     { (String) op_not, 3 },
     { (String) op_pow, 4 },
     { (String) op_mod, 4 },

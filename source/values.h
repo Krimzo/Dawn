@@ -5,6 +5,34 @@
 
 namespace dawn
 {
+struct EngineVariable;
+
+struct RefValue : Value, Makeable<RefValue>
+{
+    StringRef const& type() const override;
+    Ref<Value> clone() const override;
+
+    Ref<EngineVariable> eng_var;
+
+    Ref<Value> operator-() const override;
+    Ref<Value> operator+( Value const& other ) const override;
+    Ref<Value> operator-( Value const& other ) const override;
+    Ref<Value> operator*( Value const& other ) const override;
+    Ref<Value> operator/( Value const& other ) const override;
+    Ref<Value> operator^( Value const& other ) const override;
+    Ref<Value> operator%( Value const& other ) const override;
+
+    Int operator<=>( Value const& other ) const override;
+
+    Ref<Value> operator>>( Value const& other ) const override;
+
+    Bool to_bool() const override;
+    Int to_int() const override;
+    Float to_float() const override;
+    Char to_char() const override;
+    String to_string() const override;
+};
+
 struct NothingValue : Value, Makeable<NothingValue>
 {
     StringRef const& type() const override;

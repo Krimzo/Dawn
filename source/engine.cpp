@@ -7,31 +7,54 @@ std::wostream& dawn::operator<<( std::wostream& stream, EngineError const& error
     return stream;
 }
 
+dawn::Ref<dawn::Value> const& dawn::EngineVariableLet::get_value() const
+{
+    return value;
+}
+
+dawn::Opt<dawn::EngineError> dawn::EngineVariableLet::set_value( Ref<Value> const& value )
+{
+    return EngineError{ "Cannot set value of a let variable" };
+}
+
+dawn::Ref<dawn::Value> const& dawn::EngineVariableVar::get_value() const
+{
+    return value;
+}
+
+dawn::Opt<dawn::EngineError> dawn::EngineVariableVar::set_value( Ref<Value> const& value )
+{
+    this->value = value;
+    return std::nullopt;
+}
+
+dawn::Ref<dawn::Value> const& dawn::EngineVariableRef::get_value() const
+{
+    return ref_var_ptr->get_value();
+}
+
+dawn::Opt<dawn::EngineError> dawn::EngineVariableRef::set_value( Ref<Value> const& value )
+{
+    return ref_var_ptr->set_value( value );
+}
+
 dawn::Opt<dawn::EngineError> dawn::Engine::load_mod( Module const& module )
 {
     auto helper_func = [this]( auto& out_coll, auto const& in_coll )
     {
-        for ( auto& [key, part] : in_coll )
-            out_coll.push( key, part );
+        for ( auto& entry : in_coll )
+            out_coll.push( entry.name, entry );
     };
 
-    helper_func( functions, module.functions );
     helper_func( enums, module.enums );
     helper_func( layers, module.layers );
     helper_func( structs, module.structs );
+    helper_func( functions, module.functions );
 
-    for ( auto& [key, var] : module.variables )
+    for ( auto& entry : module.variables )
     {
-        Ref<Value> value;
-        if ( auto error = handle_expr( var.expr, value ) )
+        if ( auto error = add_var( entry ) )
             return error;
-
-        EngineVar eng_var;
-        eng_var.name = var.name;
-        eng_var.is_var = var.is_var;
-        eng_var.type = var.type;
-        eng_var.value = value;
-        variables.push( key, eng_var );
     }
 
     return std::nullopt;
@@ -45,7 +68,7 @@ void dawn::Engine::bind_func( String const& name, Function::CppFunc cpp_func )
     functions.push( name, func );
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::call_func( String const& name, Array<Ref<Value>> const& args, Ref<Value>& retval )
+dawn::Opt<dawn::EngineError> dawn::Engine::call_func( String const& name, Array<Ref<Node>> const& args, Ref<Value>& retval )
 {
     auto* func = functions.get( name );
     if ( !func )
@@ -57,31 +80,75 @@ dawn::Opt<dawn::EngineError> dawn::Engine::call_func( String const& name, Array<
     return std::nullopt;
 }
 
-void dawn::Engine::set_var( String const& name, Ref<Value> const& value )
+void dawn::Engine::add_var( String const& name, Bool is_var, Ref<Value> const& value )
 {
-    EngineVar var;
-    var.name = name;
-    var.is_var = true;
-    var.type;
-    var.value = value->clone();
-    variables.push( name, var );
+    Ref<EngineVariable> eng_var;
+    if ( !is_var )
+    {
+        eng_var = std::make_shared<EngineVariableLet>( value );
+    }
+    else
+    {
+        eng_var = std::make_shared<EngineVariableVar>( value );
+    }
+    variables.push( name, eng_var );
 }
 
-dawn::Ref<dawn::Value> dawn::Engine::get_var( String const& name )
+dawn::Opt<dawn::EngineError> dawn::Engine::add_var( Variable const& var )
+{
+    Ref<Value> value;
+    if ( auto error = handle_expr( var.expr, value ) )
+        return error;
+
+    Ref<EngineVariable> eng_var;
+    if ( var.type == Variable::Type::LET )
+    {
+        eng_var = std::make_shared<EngineVariableLet>( value );
+    }
+    else if ( var.type == Variable::Type::VAR )
+    {
+        eng_var = std::make_shared<EngineVariableVar>( value );
+    }
+    else
+    {
+        auto ref_val = dynamic_cast<RefValue*>(value.get());
+        if ( !ref_val )
+            return EngineError{ L"variable [", var.name, L"] can't reference [", value->type(), L"]" };
+
+        auto val = std::make_shared<EngineVariableRef>();
+        val->ref_var_ptr = ref_val->eng_var;
+        eng_var = val;
+    }
+
+    variables.push( var.name, eng_var );
+
+    return std::nullopt;
+}
+
+dawn::EngineVariable* dawn::Engine::get_var( String const& name )
 {
     auto* ptr = variables.get( name );
-    return ptr ? ptr->value : nullptr;
+    return ptr ? ptr->get() : nullptr;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Array<Ref<Value>> const& args, Ref<Value>& retval )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Array<Ref<Node>> const& args, Ref<Value>& retval )
 {
     retval = NothingValue::make();
 
     if ( func.body.index() == 1 )
     {
+        Array<Ref<Value>> arg_values;
+        for ( auto& arg : args )
+        {
+            Ref<Value> value;
+            if ( auto error = handle_expr( arg, value ) )
+                return error;
+            arg_values.push_back( std::move( value ) );
+        }
+
         try
         {
-            retval = std::get<Function::CppFunc>( func.body )(args);
+            retval = std::get<Function::CppFunc>( func.body )(arg_values);
             if ( !retval )
                 retval = NothingValue::make();
         }
@@ -98,12 +165,13 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Ar
 
     for ( Int i = 0; i < (Int) args.size(); i++ )
     {
-        EngineVar arg;
+        Variable arg;
         arg.name = func.args[i].name;
-        arg.is_var = false;
         arg.type = func.args[i].type;
-        arg.value = args[i];
-        variables.push( arg.name, arg );
+        arg.expr = args[i];
+
+        if ( auto error = add_var( arg ) )
+            return error;
     }
 
     Bool didret = false;
@@ -303,16 +371,8 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_cast_node( CastNode const& nod
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_var_node( VariableNode const& node, Int& push_count )
 {
-    Ref<Value> value;
-    if ( auto error = handle_expr( node.var.expr, value ) )
+    if ( auto error = add_var( node.var ) )
         return error;
-
-    EngineVar var;
-    var.name = node.var.name;
-    var.is_var = node.var.is_var;
-    var.type = node.var.type;
-    var.value = value;
-    variables.push( node.var.name, var );
 
     ++push_count;
 
@@ -325,22 +385,21 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_id_node( IdentifierNode const&
     if ( !ptr )
         return EngineError{ L"variable [", node.name, L"] doesn't exist" };
 
-    value = ptr->value;
+    auto result = RefValue::make();
+    result->eng_var = *ptr;
+
+    value = result;
 
     return std::nullopt;
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_func_node( FunctionNode const& node, Ref<Value>& retval )
 {
-    Array<Ref<Value>> args;
-    for ( auto& arg : node.args )
-    {
-        Ref<Value> val;
-        if ( auto error = handle_expr( arg, val ) )
-            return error;
-        args.emplace_back( std::move( val ) );
-    }
-    return call_func( node.name, args, retval );
+    auto* func = functions.get( node.name );
+    if ( !func )
+        return EngineError{ L"function [", node.name, L"] doesn't exist" };
+
+    return handle_func( *func, node.args, retval );
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_return_node( ReturnNode const& node, Ref<Value>& retval, Bool& didret )
@@ -442,17 +501,14 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_while_node( WhileNode const& n
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node, Ref<Value>& retval, Bool& didret )
 {
+    ForNode node_cpy = node;
+
     Ref<Value> loop_expr;
-    if ( auto error = handle_expr( node.expr, loop_expr ) )
+    if ( auto error = handle_expr( node_cpy.expr, loop_expr ) )
         return error;
 
-    {
-        EngineVar var;
-        var.is_var = false;
-        var.name = node.var_name;
-        var.value = NothingValue::make();
-        variables.push( var.name, var );
-    }
+    while ( auto ref_val = dynamic_cast<RefValue const*>(loop_expr.get()) )
+        loop_expr = ref_val->eng_var->get_value();
 
     if ( auto value_rng = dynamic_cast<RangeValue const*>(loop_expr.get()) )
     {
@@ -464,12 +520,14 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node,
             if ( didcon )
                 didcon = false;
 
-            auto value = IntValue::make();
-            value->value = i;
-            variables.get( node.var_name )->value = std::move( value );
-
-            if ( auto error = handle_scope( node.scope, retval, didret, &didbrk, &didcon ) )
+            node_cpy.var.expr = make_int_literal( i );
+            if ( auto error = add_var( node_cpy.var ) )
                 return error;
+
+            if ( auto error = handle_scope( node_cpy.scope, retval, didret, &didbrk, &didcon ) )
+                return error;
+
+            variables.pop();
         }
     }
     else if ( auto value_str = dynamic_cast<StringValue const*>(loop_expr.get()) )
@@ -482,12 +540,14 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node,
             if ( didcon )
                 didcon = false;
 
-            auto value = CharValue::make();
-            value->value = c;
-            variables.get( node.var_name )->value = std::move( value );
-
-            if ( auto error = handle_scope( node.scope, retval, didret, &didbrk, &didcon ) )
+            node_cpy.var.expr = make_char_literal( c );
+            if ( auto error = add_var( node_cpy.var ) )
                 return error;
+
+            if ( auto error = handle_scope( node_cpy.scope, retval, didret, &didbrk, &didcon ) )
+                return error;
+
+            variables.pop();
         }
     }
     else if ( auto value_arr = dynamic_cast<ArrayValue const*>(loop_expr.get()) )
@@ -500,16 +560,18 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node,
             if ( didcon )
                 didcon = false;
 
-            variables.get( node.var_name )->value = value;
-
-            if ( auto error = handle_scope( node.scope, retval, didret, &didbrk, &didcon ) )
+            node_cpy.var.expr = make_value_literal( value );
+            if ( auto error = add_var( node_cpy.var ) )
                 return error;
+
+            if ( auto error = handle_scope( node_cpy.scope, retval, didret, &didbrk, &didcon ) )
+                return error;
+
+            variables.pop();
         }
     }
     else
         return EngineError{ "Can't for loop type: ", loop_expr->type() };
-
-    variables.pop();
 
     return std::nullopt;
 }
@@ -530,8 +592,6 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_un_node( UnaryNode const& node
             value = !(*right);
         else if ( typeid(node) == typeid(UnaryNodeRange) )
             value = ~(*right);
-        else if ( typeid(node) == typeid(UnaryNodeRef) )
-            value = right;
         else
             return EngineError{ "Unknown unary node type: ", typeid(node).name() };
     }
@@ -601,37 +661,60 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& n
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& node, Ref<Value>& value )
 {
-    auto id = dynamic_cast<IdentifierNode const*>(node.left.get());
-    if ( !id )
-        return EngineError{ "left value of assign must be an identifier" };
+    Ref<Value> left;
+    if ( auto error = handle_expr( node.left, left ) )
+        return error;
+
+    auto left_ref = dynamic_cast<RefValue const*>(left.get());
+    if ( !left_ref )
+        return EngineError{ "Can't assign to ", left->type() };
 
     Ref<Value> right;
     if ( auto error = handle_expr( node.right, right ) )
         return error;
 
-    auto var = variables.get( id->name );
-    if ( !var )
-        return EngineError{ "variable [", id->name, L"] doesn't exist" };
-
-    if ( !var->is_var )
-        return EngineError{ "variable [", id->name, L"] is a constant" };
+    auto& var = left_ref->eng_var;
 
     if ( typeid(node) == typeid(AssignNodeAdd) )
-        var->value = (*var->value) + (*right);
+    {
+        if ( auto error = var->set_value( *var->get_value() + (*right) ) )
+            return error;
+    }
     else if ( typeid(node) == typeid(AssignNodeSub) )
-        var->value = (*var->value) - (*right);
+    {
+        if ( auto error = var->set_value( *var->get_value() - (*right) ) )
+            return error;
+    }
     else if ( typeid(node) == typeid(AssignNodeMul) )
-        var->value = (*var->value) * (*right);
+    {
+        if ( auto error = var->set_value( *var->get_value() * (*right) ) )
+            return error;
+    }
     else if ( typeid(node) == typeid(AssignNodeDiv) )
-        var->value = (*var->value) / (*right);
+    {
+        if ( auto error = var->set_value( *var->get_value() / (*right) ) )
+            return error;
+    }
     else if ( typeid(node) == typeid(AssignNodePow) )
-        var->value = (*var->value) ^ (*right);
+    {
+        if ( auto error = var->set_value( *var->get_value() ^ (*right) ) )
+            return error;
+    }
     else if ( typeid(node) == typeid(AssignNodeMod) )
-        var->value = (*var->value) % (*right);
+    {
+        if ( auto error = var->set_value( *var->get_value() % (*right) ) )
+            return error;
+    }
     else
-        var->value = std::move( right );
+    {
+        if ( auto error = var->set_value( std::move( right ) ) )
+            return error;
+    }
 
-    value = var->value;
+    auto result = RefValue::make();
+    result->eng_var = var;
+
+    value = result;
 
     return std::nullopt;
 }

@@ -1,5 +1,87 @@
 #include "values.h"
+#include "engine.h"
 
+
+// ref
+dawn::StringRef const& dawn::RefValue::type() const
+{
+    return eng_var->get_value()->type();
+}
+
+dawn::Ref<dawn::Value> dawn::RefValue::clone() const
+{
+    return eng_var->get_value()->clone();
+}
+
+dawn::Ref<dawn::Value> dawn::RefValue::operator-() const
+{
+    return eng_var->get_value()->operator-();
+}
+
+dawn::Ref<dawn::Value> dawn::RefValue::operator+( Value const& other ) const
+{
+    return eng_var->get_value()->operator+( other );
+}
+
+dawn::Ref<dawn::Value> dawn::RefValue::operator-( Value const& other ) const
+{
+    return eng_var->get_value()->operator-( other );
+}
+
+dawn::Ref<dawn::Value> dawn::RefValue::operator*( Value const& other ) const
+{
+    return eng_var->get_value()->operator*( other );
+}
+
+dawn::Ref<dawn::Value> dawn::RefValue::operator/( Value const& other ) const
+{
+    return eng_var->get_value()->operator/( other );
+}
+
+dawn::Ref<dawn::Value> dawn::RefValue::operator^( Value const& other ) const
+{
+    return eng_var->get_value()->operator^( other );
+}
+
+dawn::Ref<dawn::Value> dawn::RefValue::operator%( Value const& other ) const
+{
+    return eng_var->get_value()->operator%( other );
+}
+
+dawn::Int dawn::RefValue::operator<=>( Value const& other ) const
+{
+    return eng_var->get_value()->operator<=>( other );
+}
+
+dawn::Ref<dawn::Value> dawn::RefValue::operator>>( Value const& other ) const
+{
+    return eng_var->get_value()->operator>>( other );
+}
+
+dawn::Bool dawn::RefValue::to_bool() const
+{
+    return eng_var->get_value()->to_bool();
+}
+
+dawn::Int dawn::RefValue::to_int() const
+{
+    return eng_var->get_value()->to_int();
+}
+
+dawn::Float dawn::RefValue::to_float() const
+{
+    return eng_var->get_value()->to_float();
+}
+
+dawn::Char dawn::RefValue::to_char() const
+{
+    return eng_var->get_value()->to_char();
+}
+
+dawn::String dawn::RefValue::to_string() const
+{
+    return eng_var->get_value()->to_string();
+}
 
 // nothing
 dawn::StringRef const& dawn::NothingValue::type() const
