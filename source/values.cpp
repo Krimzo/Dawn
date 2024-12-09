@@ -485,7 +485,7 @@ dawn::RawValue dawn::StructValue::clone() const
     auto result = std::make_shared<StructValue>();
     result->parent = parent;
     for ( auto& [key, value] : members )
-        result->members[key].set_value( value.get_value()->clone() );
+        result->members[key].set_value( value.value()->clone() );
     return result;
 }
 
@@ -499,7 +499,7 @@ dawn::String dawn::StructValue::to_string() const
     for ( auto it = members.begin(); it != members.end(); it++ )
     {
         auto& [key, value] = *it;
-        stream << key << L": " << value.get_value()->to_string();
+        stream << key << L": " << value.value()->to_string();
         Map<String, ValueBox>::const_iterator next_it = it;
         ++next_it;
         stream << (next_it == members.end() ? L" }" : L", ");
@@ -518,7 +518,7 @@ dawn::RawValue dawn::ArrayValue::clone() const
     auto result = std::make_shared<ArrayValue>();
     result->data.reserve( data.size() );
     for ( auto& value : data )
-        result->data.emplace_back().set_value( value.get_value()->clone() );
+        result->data.emplace_back().set_value( value.value()->clone() );
     return result;
 }
 
@@ -529,9 +529,9 @@ dawn::RawValue dawn::ArrayValue::operator+( Value const& other ) const
         auto result = std::make_shared<ArrayValue>();
         result->data.reserve( data.size() + other_arr->data.size() );
         for ( auto& value : data )
-            result->data.emplace_back().set_value( value.get_value()->clone() );
+            result->data.emplace_back().set_value( value.value()->clone() );
         for ( auto& value : other_arr->data )
-            result->data.emplace_back().set_value( value.get_value()->clone() );
+            result->data.emplace_back().set_value( value.value()->clone() );
         return result;
     }
 
@@ -551,8 +551,8 @@ dawn::String dawn::ArrayValue::to_string() const
     StringStream stream;
     stream << L"[";
     for ( Int i = 0; i < (Int) data.size() - 1; i++ )
-        stream << data[i].get_value()->to_string() << L", ";
-    stream << data.back().get_value()->to_string() << L"]";
+        stream << data[i].value()->to_string() << L", ";
+    stream << data.back().value()->to_string() << L"]";
 
     return stream.str();
 }

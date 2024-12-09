@@ -19,7 +19,7 @@ struct Dawn
     Opt<EngineError> call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval );
 
     void add_var( String const& name, Bool is_var, RawValue const& value );
-    EngineVariable* get_var( String const& name );
+    ValueBox* get_var( String const& name );
 
 private:
     Lexer m_lexer;

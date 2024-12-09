@@ -45,7 +45,7 @@ void dawn::Dawn::add_var( String const& name, Bool is_var, RawValue const& value
     m_engine.add_var( name, is_var, value );
 }
 
-dawn::EngineVariable* dawn::Dawn::get_var( String const& name )
+dawn::ValueBox* dawn::Dawn::get_var( String const& name )
 {
     return m_engine.get_var( name );
 }

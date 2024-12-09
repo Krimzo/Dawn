@@ -123,21 +123,18 @@ dawn::String dawn::Value::to_string() const
 }
 
 dawn::ValueBox::ValueBox()
-    : ValueBox( Type::VAR )
+    : ValueBox( Type::LET, make_nothing_value() )
 {}
 
-dawn::ValueBox::ValueBox( Type type )
-    : m_type( type )
+dawn::ValueBox::ValueBox( Type type, RawValue const& value )
 {
-    m_value_ref = std::make_shared<RawValue>();
-    set_value( make_nothing_value() );
+    m_value_ref = std::make_shared<RawValue>( value );
+    m_type = Type::VAR;
+    set_value( value );
+    m_type = type;
 }
 
-dawn::ValueBox::ValueBox( Type type, Ref<RawValue> const& value_ref )
-    : m_type( type ), m_value_ref( value_ref )
-{}
-
-dawn::RawValue const& dawn::ValueBox::get_value() const
+dawn::RawValue const& dawn::ValueBox::value() const
 {
     return *m_value_ref;
 }

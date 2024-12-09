@@ -15,7 +15,7 @@ void dawn::Engine::load_default_mods()
     {
         StringStream stream;
         for ( auto& arg : args )
-            stream << arg.get_value()->to_string();
+            stream << arg.value()->to_string();
 
         return make_string_value( stream.str() );
     } );
@@ -24,7 +24,7 @@ void dawn::Engine::load_default_mods()
     {
         StringStream stream;
         for ( auto& arg : args )
-            stream << arg.get_value()->to_string();
+            stream << arg.value()->to_string();
         print( stream.str() );
         return nullptr;
     } );
@@ -34,7 +34,7 @@ void dawn::Engine::load_default_mods()
         if ( args.size() != 1 )
             PANIC( "rand_int expects 1 argument" );
 
-        return make_int_value( RAND_ENGINE() % args[0].get_value()->to_int() );
+        return make_int_value( RAND_ENGINE() % args[0].value()->to_int() );
     } );
 
     bind_func( L"rand_flt", []( Array<ValueBox> const& args ) -> RawValue
@@ -51,11 +51,11 @@ void dawn::Engine::load_default_mods()
         if ( args.size() != 1 )
             PANIC( "abs expects 1 argument" );
 
-        if ( args[0].get_value()->type() == tp_int )
-            return make_int_value( std::abs( args[0].get_value()->to_int() ) );
+        if ( args[0].value()->type() == tp_int )
+            return make_int_value( std::abs( args[0].value()->to_int() ) );
 
-        if ( args[0].get_value()->type() == tp_float )
-            return make_float_value( std::abs( args[0].get_value()->to_float() ) );
+        if ( args[0].value()->type() == tp_float )
+            return make_float_value( std::abs( args[0].value()->to_float() ) );
 
         PANIC( "abs expects an int or float" );
     } );
@@ -65,7 +65,7 @@ void dawn::Engine::load_default_mods()
         if ( args.size() != 1 )
             PANIC( "sqrt expects 1 argument" );
 
-        return make_float_value( std::sqrt( args[0].get_value()->to_float() ) );
+        return make_float_value( std::sqrt( args[0].value()->to_float() ) );
     } );
 
     bind_func( L"sin", []( Array<ValueBox> const& args ) -> RawValue
@@ -73,7 +73,7 @@ void dawn::Engine::load_default_mods()
         if ( args.size() != 1 )
             PANIC( "sin expects 1 argument" );
 
-        return make_float_value( std::sin( args[0].get_value()->to_float() ) );
+        return make_float_value( std::sin( args[0].value()->to_float() ) );
     } );
 
     bind_func( L"cos", []( Array<ValueBox> const& args ) -> RawValue
@@ -81,6 +81,6 @@ void dawn::Engine::load_default_mods()
         if ( args.size() != 1 )
             PANIC( "cos expects 1 argument" );
 
-        return make_float_value( std::cos( args[0].get_value()->to_float() ) );
+        return make_float_value( std::cos( args[0].value()->to_float() ) );
     } );
 }

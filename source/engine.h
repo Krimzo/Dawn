@@ -25,46 +25,6 @@ struct EngineError
 
 std::wostream& operator<<( std::wostream& stream, EngineError const& error );
 
-struct EngineVariable
-{
-    virtual ~EngineVariable() = default;
-
-    virtual ValueBox get_ref_value() const = 0;
-
-protected:
-    EngineVariable() = default;
-};
-
-struct EngineVariableLet : EngineVariable
-{
-    EngineVariableLet( RawValue const& value );
-
-    ValueBox get_ref_value() const override;
-
-private:
-    const Ref<RawValue> m_value;
-};
-
-struct EngineVariableVar : EngineVariable
-{
-    EngineVariableVar( RawValue const& value );
-
-    ValueBox get_ref_value() const override;
-
-private:
-    const Ref<RawValue> m_value;
-};
-
-struct EngineVariableRef : EngineVariable
-{
-    EngineVariableRef( ValueBox const& value_ref );
-
-    ValueBox get_ref_value() const override;
-
-private:
-    ValueBox m_value_ref;
-};
-
 template<typename T>
 struct Stack
 {
@@ -99,7 +59,7 @@ private:
 
 struct Engine
 {
-    Stack<Ref<EngineVariable>> variables;
+    Stack<ValueBox> variables;
     Stack<Function> functions;
     Stack<Enum> enums;
     Stack<Struct> structs;
@@ -111,8 +71,9 @@ struct Engine
     Opt<EngineError> call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval );
 
     void add_var( String const& name, Bool is_var, RawValue const& value );
+    void add_var( Variable const& var, ValueBox const& value );
     Opt<EngineError> add_var( Variable const& var );
-    EngineVariable* get_var( String const& name );
+    ValueBox* get_var( String const& name );
 
 private:
     Opt<EngineError> handle_func( Function const& func, Array<Ref<Node>> const& args, ValueBox& retval );

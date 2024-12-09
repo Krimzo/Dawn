@@ -55,15 +55,14 @@ struct ValueBox
 {
     enum struct Type
     {
-        LET,
+        LET = 0,
         VAR,
     };
 
     ValueBox();
-    ValueBox( Type type );
-    ValueBox( Type type, Ref<RawValue> const& value_ref );
+    ValueBox( Type type, RawValue const& value );
 
-    RawValue const& get_value() const;
+    RawValue const& value() const;
     void set_value( RawValue const& value );
 
 private:
