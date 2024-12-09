@@ -16,11 +16,11 @@ struct ParseError
         StringStream stream;
         if ( token )
         {
-            stream << L"Parse error at token " << *token << L": ";
+            stream << L"Parser error at token " << *token << L": ";
         }
         else
         {
-            stream << L"Parse error: ";
+            stream << L"Parser error: ";
         }
         (stream << ... << args);
         msg = stream.str();

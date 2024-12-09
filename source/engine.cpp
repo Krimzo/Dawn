@@ -3,7 +3,7 @@
 
 std::wostream& dawn::operator<<( std::wostream& stream, EngineError const& error )
 {
-    stream << "Error: " << error.msg;
+    stream << error.msg;
     return stream;
 }
 

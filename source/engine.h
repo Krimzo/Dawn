@@ -13,6 +13,7 @@ struct EngineError
     EngineError( Args const&... args )
     {
         StringStream stream;
+        stream << "Engine error: ";
         (stream << ... << args);
         msg = stream.str();
     }
