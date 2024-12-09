@@ -68,6 +68,15 @@ struct IfNode : Node
 
 struct SwitchNode : Node
 {
+    struct Part
+    {
+        Array<Ref<Node>> exprs;
+        Scope scope;
+    };
+
+    Ref<Node> main_expr;
+    Array<Part> cases;
+    Opt<Scope> def_scope;
 };
 
 struct LoopNode : Node

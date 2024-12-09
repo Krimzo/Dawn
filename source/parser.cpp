@@ -963,9 +963,57 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_switch( Array<Token>::const_iter
         return ParseError{ *it, L"expected switch keyword" };
     ++it;
 
+    auto node = std::make_shared<SwitchNode>();
 
+    if ( auto error = parse_expression( it, end, node->main_expr ) )
+        return error;
 
-    assert( false && L"not impl" );
+    if ( it->value != op_scope_opn )
+        return ParseError{ *it, L"expected scope open" };
+    ++it;
+
+    while ( true )
+    {
+        if ( it->value == op_scope_cls )
+        {
+            ++it;
+            break;
+        }
+
+        if ( it->value == kw_case )
+        {
+            ++it;
+
+            auto& casee = node->cases.emplace_back();
+            while ( true )
+            {
+                if ( it->value == op_scope_opn )
+                    break;
+
+                if ( auto error = parse_expression( it, end, casee.exprs.emplace_back() ) )
+                    return error;
+            }
+
+            if ( auto error = parse_scope( it, end, casee.scope ) )
+                return error;
+        }
+        else if ( it->value == kw_default )
+        {
+            ++it;
+
+            if ( node->def_scope )
+                return ParseError{ *it, L"default already defined" };
+
+            auto& scope = node->def_scope.emplace();
+            if ( auto error = parse_scope( it, end, scope ) )
+                return error;
+        }
+        else
+            return ParseError{ *it, L"expected case or default" };
+    }
+
+    tree = node;
+
     return std::nullopt;
 }
 

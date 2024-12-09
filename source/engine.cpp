@@ -470,7 +470,35 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_if_node( IfNode const& node, R
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_switch_node( SwitchNode const& node, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon )
 {
-    assert( false && "not impl" );
+    Ref<Value> check_expr;
+    if ( auto error = handle_expr( node.main_expr, check_expr ) )
+        return error;
+
+    for ( auto& case_part : node.cases )
+    {
+        for ( auto& expr : case_part.exprs )
+        {
+            Ref<Value> val;
+            if ( auto error = handle_expr( expr, val ) )
+                return error;
+
+            if ( (*check_expr == *val)->to_bool() )
+            {
+                if ( auto error = handle_scope( case_part.scope, retval, didret, didbrk, didcon ) )
+                    return error;
+                goto func_end;
+            }
+        }
+    }
+
+    if ( node.def_scope )
+    {
+        if ( auto error = handle_scope( *node.def_scope, retval, didret, didbrk, didcon ) )
+            return error;
+    }
+
+func_end:
+
     return std::nullopt;
 }
 

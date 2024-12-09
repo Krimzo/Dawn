@@ -1,2 +1,20 @@
 func main() {
+	for let i : ~10 {
+		let result = test_func(i)
+		print("result[", i, "] = ", result)
+	}
+}
+
+func test_func(let val) {
+	switch val {
+		case 1 {
+			return "first case"
+		}
+		case 4, 5 {
+			return "second case"
+		}
+		default {
+			return "default"
+		}
+	}
 }
