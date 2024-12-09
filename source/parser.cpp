@@ -144,7 +144,65 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_type( Array<Token>::const_iterat
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Struct& struc )
 {
-    assert( false && L"not impl" );
+    if ( it->value != kw_struct )
+        return ParseError{ *it, L"expected struct" };
+    ++it;
+
+    if ( !it->is_custom_type() )
+        return ParseError{ *it, L"expected struct name" };
+    struc.name = it->value;
+    ++it;
+
+    if ( it->value != op_scope_opn )
+        return ParseError{ *it, L"expected scope open" };
+    ++it;
+
+    while ( true )
+    {
+        if ( it->value == op_scope_cls )
+        {
+            ++it;
+            break;
+        }
+
+        if ( it->type == TokenType::NAME )
+        {
+            auto& field = struc.fields.emplace_back();
+            field.kind = Variable::Kind::VAR;
+            field.name = it->value;
+            ++it;
+
+            if ( it->value == op_assign )
+            {
+                ++it;
+                if ( auto error = parse_expression( it, end, field.expr ) )
+                    return error;
+            }
+            else
+            {
+                if ( it->value != op_split )
+                    return ParseError{ *it, L"expected split" };
+                ++it;
+                field.expr = std::make_shared<NothingNode>();
+            }
+        }
+        else if ( it->value == kw_func )
+        {
+            auto& method = struc.methods.emplace_back();
+            if ( auto error = parse_function( it, end, method ) )
+                return error;
+
+            Variable self_var;
+            self_var.kind = Variable::Kind::LET;
+            self_var.expr = std::make_shared<NothingNode>();
+            self_var.name = kw_self;
+
+            method.args.insert( method.args.begin(), self_var );
+        }
+        else
+            return ParseError{ *it, L"expected field name or function" };
+    }
+
     return std::nullopt;
 }
 
@@ -531,7 +589,8 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_keyword( Token const
     }
     else if ( token.value == kw_self )
     {
-        auto node = std::make_shared<SelfNode>();
+        auto node = std::make_shared<IdentifierNode>();
+        node->name = kw_self;
         tree = node;
     }
     else
@@ -602,8 +661,10 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_make( Array<Token> con
     Array<Token>::const_iterator it = tokens.begin();
     Ref node = std::make_shared<StructNode>();
 
-    if ( auto error = parse_type( it, tokens.end(), node->type ) )
-        return error;
+    if ( !it->is_custom_type() )
+        return ParseError{ *it, L"expected custom type" };
+    node->type = it->value;
+    ++it;
 
     if ( it->value != op_scope_opn )
         return ParseError{ *it, L"expected expression open" };
@@ -1061,11 +1122,7 @@ dawn::Opt<dawn::ParseError> dawn::create_unary_node( Token const& token, Ref<Una
 
 dawn::Opt<dawn::ParseError> dawn::create_operator_node( Token const& token, Ref<OperatorNode>& node )
 {
-    if ( token.value == op_link )
-    {
-        node = std::make_shared<OperatorNodeLink>();
-    }
-    else if ( token.value == op_access )
+    if ( token.value == op_access )
     {
         node = std::make_shared<OperatorNodeAccess>();
     }

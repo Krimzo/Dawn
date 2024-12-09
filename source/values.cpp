@@ -687,7 +687,20 @@ dawn::Ref<dawn::Value> dawn::StructValue::clone() const
 
 dawn::String dawn::StructValue::to_string() const
 {
-    return parent->name + L"{}";
+    if ( members.empty() )
+        return parent->name + L"{}";
+
+    StringStream stream;
+    stream << parent->name << L"{ ";
+    for ( auto it = members.begin(); it != members.end(); it++ )
+    {
+        auto& [key, value] = *it;
+        stream << key << L": " << value->to_string();
+        Map<String, Ref<Value>>::const_iterator next_it = it;
+        ++next_it;
+        stream << (next_it == members.end() ? L" }" : L", ");
+    }
+    return stream.str();
 }
 
 // array

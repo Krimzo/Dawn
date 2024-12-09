@@ -20,10 +20,6 @@ struct CastNode : Node
     Ref<Node> expr;
 };
 
-struct SelfNode : Node
-{
-};
-
 struct VariableNode : Node
 {
     Variable var;
@@ -142,10 +138,6 @@ struct OperatorNode : Node
 {
     Ref<Node> left;
     Ref<Node> right;
-};
-
-struct OperatorNodeLink : OperatorNode
-{
 };
 
 struct OperatorNodeAccess : OperatorNode

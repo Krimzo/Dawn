@@ -65,6 +65,8 @@ struct Token
     String value;
     String lit_val;
     Int line_number = 0;
+
+    Bool is_custom_type() const;
 };
 
 std::wostream& operator<<( std::wostream& stream, Token const& token );

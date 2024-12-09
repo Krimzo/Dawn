@@ -127,6 +127,7 @@ private:
     Opt<EngineError> handle_nothing_node( NothingNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_val_node( ValueNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_array_node( ArrayNode const& node, Ref<Value>& value );
+    Opt<EngineError> handle_struct_node( StructNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_cast_node( CastNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_var_node( VariableNode const& node, Int& push_count );
     Opt<EngineError> handle_id_node( IdentifierNode const& node, Ref<Value>& value );
@@ -141,6 +142,7 @@ private:
     Opt<EngineError> handle_for_node( ForNode const& node, Ref<Value>& retval, Bool& didret );
     Opt<EngineError> handle_un_node( UnaryNode const& node, Ref<Value>& value );
     Opt<EngineError> handle_op_node( OperatorNode const& node, Ref<Value>& value );
+    Opt<EngineError> handle_ac_node( OperatorNodeAccess const& node, Ref<Value>& value );
     Opt<EngineError> handle_as_node( AssignNode const& node, Ref<Value>& value );
 };
 }

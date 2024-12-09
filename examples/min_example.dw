@@ -1,20 +1,18 @@
 func main() {
-	for let i : ~10 {
-		let result = test_func(i)
-		print("result[", i, "] = ", result)
-	}
+	let person = Person{ name: "Krim", age: 23 }
+	//alter(person->age)
+	person->who()
 }
 
-func test_func(let val) {
-	switch val {
-		case 1 {
-			return "first case"
-		}
-		case 4, 5 {
-			return "second case"
-		}
-		default {
-			return "default"
-		}
+func alter(ref val) {
+	val *= 5
+}
+
+struct Person {
+	name = "wasd",
+	age = 2 * 2,
+	
+	func who() {
+		print(self->name, " is ", self->age, " years old")
 	}
 }

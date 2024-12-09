@@ -272,6 +272,9 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_expr( Ref<Node> const& node, R
     if ( auto nd = dynamic_cast<ArrayNode*>(node.get()) )
         return handle_array_node( *nd, value );
 
+    if ( auto nd = dynamic_cast<StructNode*>(node.get()) )
+        return handle_struct_node( *nd, value );
+
     if ( auto nd = dynamic_cast<CastNode*>(node.get()) )
         return handle_cast_node( *nd, value );
 
@@ -336,6 +339,45 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_array_node( ArrayNode const& n
                 return error;
             result->data.push_back( std::move( val ) );
         }
+    }
+
+    value = result;
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_struct_node( StructNode const& node, Ref<Value>& value )
+{
+    Struct* struc = structs.get( node.type );
+    if ( !struc )
+        return EngineError{ "struct [", node.type, L"] doesn't exist" };
+
+    auto result = StructValue::make();
+    result->parent = struc;
+
+    for ( auto& struc_field : struc->fields )
+    {
+        auto& field = result->members[struc_field.name];
+        if ( node.args.contains( struc_field.name ) )
+            continue;
+
+        Ref<Value> val;
+        if ( auto error = handle_expr( struc_field.expr, val ) )
+            return error;
+
+        field = std::move( val );
+    }
+
+    for ( auto& [arg_name, arg_expr] : node.args )
+    {
+        Ref<Value> expr_val;
+        if ( auto error = handle_expr( arg_expr, expr_val ) )
+            return error;
+
+        if ( !result->members.contains( arg_name ) )
+            return EngineError{ "field [", arg_name, L"] doesn't exist in struct [", node.type, L"]" };
+
+        result->members.at( arg_name ) = std::move( expr_val );
     }
 
     value = result;
@@ -646,6 +688,9 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_un_node( UnaryNode const& node
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& node, Ref<Value>& value )
 {
+    if ( auto nd = dynamic_cast<OperatorNodeAccess const*>(&node) )
+        return handle_ac_node( *nd, value );
+
     if ( auto nd = dynamic_cast<AssignNode const*>(&node) )
         return handle_as_node( *nd, value );
 
@@ -696,6 +741,47 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& n
     {
         return EngineError{ msg };
     }
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_node( OperatorNodeAccess const& node, Ref<Value>& value )
+{
+    Ref<Value> left;
+    if ( auto error = handle_expr( node.left, left ) )
+        return error;
+
+    if ( auto ref_val = dynamic_cast<RefValue const*>(left.get()) )
+        left = ref_val->eng_var->get_value();
+
+    auto struc_val = dynamic_cast<StructValue const*>(left.get());
+    if ( !struc_val )
+        return EngineError{ "Can't access member of [", left->type(), "]" };
+
+    if ( auto id_node = dynamic_cast<IdentifierNode const*>(node.right.get()) )
+    {
+        if ( !struc_val->members.contains( id_node->name ) )
+            return EngineError{ "Member [", id_node->name, "] doesn't exist" };
+
+        value = struc_val->members.at( id_node->name );
+    }
+    else if ( auto func_node = dynamic_cast<FunctionNode const*>(node.right.get()) )
+    {
+        auto method_ptr = struc_val->parent->get_method( func_node->name );
+        if ( !method_ptr )
+            return EngineError{ "Method [", func_node->name, "] doesn't exist" };
+
+        auto self_val = std::make_shared<ValueNode>();
+        self_val->value = left;
+
+        Array<Ref<Node>> args = { self_val };
+        args.insert( args.end(), func_node->args.begin(), func_node->args.end() );
+
+        if ( auto error = handle_func( *method_ptr, args, value ) )
+            return error;
+    }
+    else
+        return EngineError{ "Struct access must be an identifier or function call" };
 
     return std::nullopt;
 }

@@ -24,6 +24,13 @@ std::wostream& dawn::operator<<( std::wostream& stream, TokenType type )
     return stream;
 }
 
+dawn::Bool dawn::Token::is_custom_type() const
+{
+    if ( value.empty() )
+        return false;
+    return iswupper( value.front() );
+}
+
 std::wostream& dawn::operator<<( std::wostream& stream, Token const& token )
 {
     Color color = to_color( token.type );
