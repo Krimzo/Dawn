@@ -29,8 +29,7 @@ struct EngineVariable
 {
     virtual ~EngineVariable() = default;
 
-    virtual Ref<Value> const& get_value() const = 0;
-    virtual Opt<EngineError> set_value( Ref<Value> const& value ) = 0;
+    virtual ValueBox get_ref_value() const = 0;
 
 protected:
     EngineVariable() = default;
@@ -38,35 +37,32 @@ protected:
 
 struct EngineVariableLet : EngineVariable
 {
-    EngineVariableLet( Ref<Value> const& value );
+    EngineVariableLet( RawValue const& value );
 
-    Ref<Value> const& get_value() const override;
-    Opt<EngineError> set_value( Ref<Value> const& value ) override;
+    ValueBox get_ref_value() const override;
 
 private:
-    Ref<Value> m_value;
+    const Ref<RawValue> m_value;
 };
 
 struct EngineVariableVar : EngineVariable
 {
-    EngineVariableVar( Ref<Value> const& value );
+    EngineVariableVar( RawValue const& value );
 
-    Ref<Value> const& get_value() const override;
-    Opt<EngineError> set_value( Ref<Value> const& value ) override;
+    ValueBox get_ref_value() const override;
 
 private:
-    Ref<Value> m_value;
+    const Ref<RawValue> m_value;
 };
 
 struct EngineVariableRef : EngineVariable
 {
-    EngineVariableRef( Ref<EngineVariable> const& ref_var );
+    EngineVariableRef( ValueBox const& value_ref );
 
-    Ref<Value> const& get_value() const override;
-    Opt<EngineError> set_value( Ref<Value> const& value ) override;
+    ValueBox get_ref_value() const override;
 
 private:
-    Ref<EngineVariable> m_ref_var;
+    ValueBox m_value_ref;
 };
 
 template<typename T>
@@ -112,37 +108,36 @@ struct Engine
     Opt<EngineError> load_mod( Module const& module );
 
     void bind_func( String const& name, Function::CppFunc cpp_func );
-    Opt<EngineError> call_func( String const& name, Array<Ref<Node>> const& args, Ref<Value>& retval );
+    Opt<EngineError> call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval );
 
-    void add_var( String const& name, Bool is_var, Ref<Value> const& value );
+    void add_var( String const& name, Bool is_var, RawValue const& value );
     Opt<EngineError> add_var( Variable const& var );
     EngineVariable* get_var( String const& name );
 
 private:
-    Opt<EngineError> handle_func( Function const& func, Array<Ref<Node>> const& args, Ref<Value>& retval );
-    Opt<EngineError> handle_scope( Scope const& scope, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon );
-    Opt<EngineError> handle_instr( Ref<Node> const& node, Ref<Value>& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon );
-    Opt<EngineError> handle_expr( Ref<Node> const& node, Ref<Value>& value );
+    Opt<EngineError> handle_func( Function const& func, Array<Ref<Node>> const& args, ValueBox& retval );
+    Opt<EngineError> handle_scope( Scope const& scope, ValueBox& retval, Bool& didret, Bool* didbrk, Bool* didcon );
+    Opt<EngineError> handle_instr( Ref<Node> const& node, ValueBox& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon );
+    Opt<EngineError> handle_expr( Ref<Node> const& node, ValueBox& value );
 
-    Opt<EngineError> handle_nothing_node( NothingNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_val_node( ValueNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_array_node( ArrayNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_struct_node( StructNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_cast_node( CastNode const& node, Ref<Value>& value );
+    Opt<EngineError> handle_val_node( ValueNode const& node, ValueBox& value );
+    Opt<EngineError> handle_array_node( ArrayNode const& node, ValueBox& value );
+    Opt<EngineError> handle_struct_node( StructNode const& node, ValueBox& value );
+    Opt<EngineError> handle_cast_node( CastNode const& node, ValueBox& value );
     Opt<EngineError> handle_var_node( VariableNode const& node, Int& push_count );
-    Opt<EngineError> handle_id_node( IdentifierNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_func_node( FunctionNode const& node, Ref<Value>& retval );
-    Opt<EngineError> handle_return_node( ReturnNode const& node, Ref<Value>& retval, Bool& didret );
+    Opt<EngineError> handle_id_node( IdentifierNode const& node, ValueBox& value );
+    Opt<EngineError> handle_func_node( FunctionNode const& node, ValueBox& retval );
+    Opt<EngineError> handle_return_node( ReturnNode const& node, ValueBox& retval, Bool& didret );
     Opt<EngineError> handle_break_node( BreakNode const& node, Bool* didbrk );
     Opt<EngineError> handle_continue_node( ContinueNode const& node, Bool* didcon );
-    Opt<EngineError> handle_if_node( IfNode const& node, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon );
-    Opt<EngineError> handle_switch_node( SwitchNode const& node, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon );
-    Opt<EngineError> handle_loop_node( LoopNode const& node, Ref<Value>& retval, Bool& didret );
-    Opt<EngineError> handle_while_node( WhileNode const& node, Ref<Value>& retval, Bool& didret );
-    Opt<EngineError> handle_for_node( ForNode const& node, Ref<Value>& retval, Bool& didret );
-    Opt<EngineError> handle_un_node( UnaryNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_op_node( OperatorNode const& node, Ref<Value>& value );
-    Opt<EngineError> handle_ac_node( OperatorNodeAccess const& node, Ref<Value>& value );
-    Opt<EngineError> handle_as_node( AssignNode const& node, Ref<Value>& value );
+    Opt<EngineError> handle_if_node( IfNode const& node, ValueBox& retval, Bool& didret, Bool* didbrk, Bool* didcon );
+    Opt<EngineError> handle_switch_node( SwitchNode const& node, ValueBox& retval, Bool& didret, Bool* didbrk, Bool* didcon );
+    Opt<EngineError> handle_loop_node( LoopNode const& node, ValueBox& retval, Bool& didret );
+    Opt<EngineError> handle_while_node( WhileNode const& node, ValueBox& retval, Bool& didret );
+    Opt<EngineError> handle_for_node( ForNode const& node, ValueBox& retval, Bool& didret );
+    Opt<EngineError> handle_un_node( UnaryNode const& node, ValueBox& value );
+    Opt<EngineError> handle_op_node( OperatorNode const& node, ValueBox& value );
+    Opt<EngineError> handle_ac_node( OperatorNodeAccess const& node, ValueBox& value );
+    Opt<EngineError> handle_as_node( AssignNode const& node, ValueBox& value );
 };
 }

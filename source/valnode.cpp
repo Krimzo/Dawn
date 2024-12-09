@@ -2,37 +2,37 @@
 #include "values.h"
 
 
-dawn::Ref<dawn::Value> dawn::Value::operator-() const
+dawn::RawValue dawn::Value::operator-() const
 {
     PANIC( "unary - for [", type(), "] not supported" );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator+( Value const& other ) const
+dawn::RawValue dawn::Value::operator+( Value const& other ) const
 {
     PANIC( "[", type(), "] + [", other.type(), "] not supported" );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator-( Value const& other ) const
+dawn::RawValue dawn::Value::operator-( Value const& other ) const
 {
     PANIC( "[", type(), "] - [", other.type(), "] not supported" );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator*( Value const& other ) const
+dawn::RawValue dawn::Value::operator*( Value const& other ) const
 {
     PANIC( "[", type(), "] * [", other.type(), "] not supported" );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator/( Value const& other ) const
+dawn::RawValue dawn::Value::operator/( Value const& other ) const
 {
     PANIC( "[", type(), "] / [", other.type(), "] not supported" );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator^( Value const& other ) const
+dawn::RawValue dawn::Value::operator^( Value const& other ) const
 {
     PANIC( "[", type(), "] ^ [", other.type(), "] not supported" );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator%( Value const& other ) const
+dawn::RawValue dawn::Value::operator%( Value const& other ) const
 {
     PANIC( "[", type(), "] % [", other.type(), "] not supported" );
 }
@@ -42,75 +42,57 @@ dawn::Int dawn::Value::operator<=>( Value const& other ) const
     PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator==( Value const& other ) const
+dawn::RawValue dawn::Value::operator==( Value const& other ) const
 {
-    auto result = BoolValue::make();
-    result->value = ((*this <=> other) == 0);
-    return result;
+    return make_bool_value( (*this <=> other) == 0 );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator!=( Value const& other ) const
+dawn::RawValue dawn::Value::operator!=( Value const& other ) const
 {
-    auto result = BoolValue::make();
-    result->value = ((*this <=> other) != 0);
-    return result;
+    return make_bool_value( (*this <=> other) != 0 );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator<( Value const& other ) const
+dawn::RawValue dawn::Value::operator<( Value const& other ) const
 {
-    auto result = BoolValue::make();
-    result->value = ((*this <=> other) < 0);
-    return result;
+    return make_bool_value( (*this <=> other) < 0 );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator>( Value const& other ) const
+dawn::RawValue dawn::Value::operator>( Value const& other ) const
 {
-    auto result = BoolValue::make();
-    result->value = ((*this <=> other) > 0);
-    return result;
+    return make_bool_value( (*this <=> other) > 0 );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator<=( Value const& other ) const
+dawn::RawValue dawn::Value::operator<=( Value const& other ) const
 {
-    auto result = BoolValue::make();
-    result->value = ((*this <=> other) <= 0);
-    return result;
+    return make_bool_value( (*this <=> other) <= 0 );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator>=( Value const& other ) const
+dawn::RawValue dawn::Value::operator>=( Value const& other ) const
 {
-    auto result = BoolValue::make();
-    result->value = ((*this <=> other) >= 0);
-    return result;
+    return make_bool_value( (*this <=> other) >= 0 );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator!() const
+dawn::RawValue dawn::Value::operator!() const
 {
-    auto result = BoolValue::make();
-    result->value = !to_bool();
-    return result;
+    return make_bool_value( !to_bool() );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator&&( Value const& other ) const
+dawn::RawValue dawn::Value::operator&&( Value const& other ) const
 {
-    auto result = BoolValue::make();
-    result->value = to_bool() && other.to_bool();
-    return result;
+    return make_bool_value( to_bool() && other.to_bool() );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator||( Value const& other ) const
+dawn::RawValue dawn::Value::operator||( Value const& other ) const
 {
-    auto result = BoolValue::make();
-    result->value = to_bool() || other.to_bool();
-    return result;
+    return make_bool_value( to_bool() || other.to_bool() );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator>>( Value const& other ) const
+dawn::RawValue dawn::Value::operator>>( Value const& other ) const
 {
     PANIC( "operator ~ for [", type(), "] not supported" );
 }
 
-dawn::Ref<dawn::Value> dawn::Value::operator~() const
+dawn::RawValue dawn::Value::operator~() const
 {
     return IntValue{} >> *this;
 }
@@ -138,4 +120,35 @@ dawn::Char dawn::Value::to_char() const
 dawn::String dawn::Value::to_string() const
 {
     PANIC( "string conversion for [", type(), "] not supported" );
+}
+
+dawn::ValueBox::ValueBox()
+    : ValueBox( Type::VAR )
+{}
+
+dawn::ValueBox::ValueBox( Type type )
+    : m_type( type )
+{
+    m_value_ref = std::make_shared<RawValue>();
+    set_value( make_nothing_value() );
+}
+
+dawn::ValueBox::ValueBox( Type type, Ref<RawValue> const& value_ref )
+    : m_type( type ), m_value_ref( value_ref )
+{}
+
+dawn::RawValue const& dawn::ValueBox::get_value() const
+{
+    return *m_value_ref;
+}
+
+void dawn::ValueBox::set_value( RawValue const& value )
+{
+    if ( !value )
+        PANIC( "Cannot set null value" );
+
+    if ( m_type == Type::LET )
+        PANIC( "Cannot set value of a let variable" );
+
+    (*m_value_ref) = value;
 }

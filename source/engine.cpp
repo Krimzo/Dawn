@@ -7,78 +7,63 @@ std::wostream& dawn::operator<<( std::wostream& stream, EngineError const& error
     return stream;
 }
 
-dawn::EngineVariableLet::EngineVariableLet( Ref<Value> const& value )
+dawn::EngineVariableLet::EngineVariableLet( RawValue const& value )
+    : m_value( std::make_shared<RawValue>() )
 {
-    if ( auto ref_val = dynamic_cast<RefValue const*>(value.get()) )
-        m_value = ref_val->eng_var->get_value();
-    else
-        m_value = value;
+    *m_value = value;
 }
 
-dawn::Ref<dawn::Value> const& dawn::EngineVariableLet::get_value() const
+dawn::ValueBox dawn::EngineVariableLet::get_ref_value() const
 {
-    return m_value;
+    return ValueBox{ ValueBox::Type::LET, m_value };
 }
 
-dawn::Opt<dawn::EngineError> dawn::EngineVariableLet::set_value( Ref<Value> const& value )
+dawn::EngineVariableVar::EngineVariableVar( RawValue const& value )
+    : m_value( std::make_shared<RawValue>() )
 {
-    return EngineError{ "Cannot set value of a let variable" };
+    *m_value = value;
 }
 
-dawn::EngineVariableVar::EngineVariableVar( Ref<Value> const& value )
+dawn::ValueBox dawn::EngineVariableVar::get_ref_value() const
 {
-    set_value( value );
+    return ValueBox{ ValueBox::Type::VAR, m_value };
 }
 
-dawn::Ref<dawn::Value> const& dawn::EngineVariableVar::get_value() const
-{
-    return m_value;
-}
+dawn::EngineVariableRef::EngineVariableRef( ValueBox const& value_ref )
+    : m_value_ref( value_ref )
+{}
 
-dawn::Opt<dawn::EngineError> dawn::EngineVariableVar::set_value( Ref<Value> const& value )
+dawn::ValueBox dawn::EngineVariableRef::get_ref_value() const
 {
-    if ( auto ref_val = dynamic_cast<RefValue const*>(value.get()) )
-        m_value = ref_val->eng_var->get_value();
-    else
-        m_value = value;
-
-    return std::nullopt;
-}
-
-dawn::EngineVariableRef::EngineVariableRef( Ref<EngineVariable> const& ref_var )
-{
-    m_ref_var = ref_var;
-}
-
-dawn::Ref<dawn::Value> const& dawn::EngineVariableRef::get_value() const
-{
-    return m_ref_var->get_value();
-}
-
-dawn::Opt<dawn::EngineError> dawn::EngineVariableRef::set_value( Ref<Value> const& value )
-{
-    return m_ref_var->set_value( value );
+    return m_value_ref;
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::load_mod( Module const& module )
 {
-    auto helper_func = [this]( auto& out_coll, auto const& in_coll )
+    try
     {
-        for ( auto& entry : in_coll )
-            out_coll.push( entry.name, entry );
-    };
+        auto helper_func = [this]( auto& out_coll, auto const& in_coll )
+        {
+            for ( auto& entry : in_coll )
+                out_coll.push( entry.name, entry );
+        };
 
-    helper_func( enums, module.enums );
-    helper_func( structs, module.structs );
-    helper_func( functions, module.functions );
+        helper_func( enums, module.enums );
+        helper_func( structs, module.structs );
+        helper_func( functions, module.functions );
 
-    for ( auto& entry : module.variables )
-    {
-        if ( auto error = add_var( entry ) )
-            return error;
+        for ( auto& entry : module.variables )
+        {
+            if ( auto error = add_var( entry ) )
+                return error;
+        }
+
+        return std::nullopt;
     }
-
-    return std::nullopt;
+    catch ( String const& e )
+    {
+        return e;
+    }
 }
 
 void dawn::Engine::bind_func( String const& name, Function::CppFunc cpp_func )
@@ -89,19 +74,26 @@ void dawn::Engine::bind_func( String const& name, Function::CppFunc cpp_func )
     functions.push( name, func );
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::call_func( String const& name, Array<Ref<Node>> const& args, Ref<Value>& retval )
+dawn::Opt<dawn::EngineError> dawn::Engine::call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval )
 {
-    auto* func = functions.get( name );
-    if ( !func )
-        return EngineError{ L"function [", name, L"] doesn't exist" };
+    try
+    {
+        auto* func = functions.get( name );
+        if ( !func )
+            return EngineError{ L"function [", name, L"] doesn't exist" };
 
-    if ( auto error = handle_func( *func, args, retval ) )
-        return error;
+        if ( auto error = handle_func( *func, args, retval ) )
+            return error;
 
-    return std::nullopt;
+        return std::nullopt;
+    }
+    catch ( String const& e )
+    {
+        return e;
+    }
 }
 
-void dawn::Engine::add_var( String const& name, Bool is_var, Ref<Value> const& value )
+void dawn::Engine::add_var( String const& name, Bool is_var, RawValue const& value )
 {
     Ref<EngineVariable> eng_var;
     if ( !is_var )
@@ -117,31 +109,34 @@ void dawn::Engine::add_var( String const& name, Bool is_var, Ref<Value> const& v
 
 dawn::Opt<dawn::EngineError> dawn::Engine::add_var( Variable const& var )
 {
-    Ref<Value> value;
-    if ( auto error = handle_expr( var.expr, value ) )
-        return error;
-
-    Ref<EngineVariable> eng_var;
-    if ( var.kind == Variable::Kind::LET )
+    try
     {
-        eng_var = std::make_shared<EngineVariableLet>( value );
+        ValueBox value;
+        if ( auto error = handle_expr( var.expr, value ) )
+            return error;
+
+        Ref<EngineVariable> eng_var;
+        if ( var.kind == Variable::Kind::LET )
+        {
+            eng_var = std::make_shared<EngineVariableLet>( value.get_value() );
+        }
+        else if ( var.kind == Variable::Kind::VAR )
+        {
+            eng_var = std::make_shared<EngineVariableVar>( value.get_value() );
+        }
+        else
+        {
+            eng_var = std::make_shared<EngineVariableRef>( value );
+        }
+
+        variables.push( var.name, eng_var );
+
+        return std::nullopt;
     }
-    else if ( var.kind == Variable::Kind::VAR )
+    catch ( String const& e )
     {
-        eng_var = std::make_shared<EngineVariableVar>( value );
+        return e;
     }
-    else
-    {
-        auto ref_val = dynamic_cast<RefValue const*>(value.get());
-        if ( !ref_val )
-            return EngineError{ L"variable [", var.name, L"] can't reference [", value->type(), L"]" };
-
-        eng_var = std::make_shared<EngineVariableRef>( ref_val->eng_var );
-    }
-
-    variables.push( var.name, eng_var );
-
-    return std::nullopt;
 }
 
 dawn::EngineVariable* dawn::Engine::get_var( String const& name )
@@ -150,31 +145,22 @@ dawn::EngineVariable* dawn::Engine::get_var( String const& name )
     return ptr ? ptr->get() : nullptr;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Array<Ref<Node>> const& args, Ref<Value>& retval )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Array<Ref<Node>> const& args, ValueBox& retval )
 {
-    retval = NothingValue::make();
-
     if ( func.body.index() == 1 )
     {
-        Array<Ref<Value>> arg_values;
+        Array<ValueBox> arg_values;
         for ( auto& arg : args )
         {
-            Ref<Value> value;
+            ValueBox value;
             if ( auto error = handle_expr( arg, value ) )
                 return error;
             arg_values.push_back( std::move( value ) );
         }
 
-        try
-        {
-            retval = std::get<Function::CppFunc>( func.body )(arg_values);
-            if ( !retval )
-                retval = NothingValue::make();
-        }
-        catch ( String& msg )
-        {
-            return EngineError{ msg };
-        }
+        auto result = std::get<Function::CppFunc>( func.body )(arg_values);
+        if ( result )
+            retval.set_value( result );
 
         return std::nullopt;
     }
@@ -202,7 +188,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Ar
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_scope( Scope const& scope, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_scope( Scope const& scope, ValueBox& retval, Bool& didret, Bool* didbrk, Bool* didcon )
 {
     Int push_count = 0;
 
@@ -223,7 +209,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_scope( Scope const& scope, Ref
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_instr( Ref<Node> const& node, Ref<Value>& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_instr( Ref<Node> const& node, ValueBox& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon )
 {
     if ( auto scp = dynamic_cast<Scope*>(node.get()) )
         return handle_scope( *scp, retval, didret, didbrk, didcon );
@@ -261,11 +247,8 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_instr( Ref<Node> const& node, 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_expr( Ref<Node> const& node, Ref<Value>& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_expr( Ref<Node> const& node, ValueBox& value )
 {
-    if ( auto nd = dynamic_cast<NothingNode*>(node.get()) )
-        return handle_nothing_node( *nd, value );
-
     if ( auto nd = dynamic_cast<ValueNode*>(node.get()) )
         return handle_val_node( *nd, value );
 
@@ -293,66 +276,59 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_expr( Ref<Node> const& node, R
     return EngineError{ "Unknown expr node type: ", typeid(*node).name() };
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_nothing_node( NothingNode const& node, Ref<Value>& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_val_node( ValueNode const& node, ValueBox& value )
 {
-    value = NothingValue::make();
+    value.set_value( node.value );
 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_val_node( ValueNode const& node, Ref<Value>& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_array_node( ArrayNode const& node, ValueBox& value )
 {
-    value = node.value;
-
-    return std::nullopt;
-}
-
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_array_node( ArrayNode const& node, Ref<Value>& value )
-{
-    auto result = ArrayValue::make();
+    auto result = std::make_shared<ArrayValue>();
 
     if ( node.init_type == ArrayNode::InitType::SIZE )
     {
-        Ref<Value> size_val;
+        ValueBox size_val;
         if ( auto error = handle_expr( node.SIZE_size_expr, size_val ) )
             return error;
 
-        Int size = size_val->to_int();
+        Int size = size_val.get_value()->to_int();
         if ( size < 0 )
             return EngineError{ "Array size cannot be negative" };
 
-        Ref<Value> value_val;
+        ValueBox value_val;
         if ( auto error = handle_expr( node.SIZE_value_expr, value_val ) )
             return error;
 
         result->data.resize( size );
         for ( auto& val : result->data )
-            val = value_val->clone();
+            val.set_value( value_val.get_value()->clone() );
     }
     else
     {
         result->data.reserve( node.LIST_list.size() );
         for ( auto& expr : node.LIST_list )
         {
-            Ref<Value> val;
+            ValueBox val;
             if ( auto error = handle_expr( expr, val ) )
                 return error;
             result->data.push_back( std::move( val ) );
         }
     }
 
-    value = result;
+    value.set_value( result );
 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_struct_node( StructNode const& node, Ref<Value>& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_struct_node( StructNode const& node, ValueBox& value )
 {
     Struct* struc = structs.get( node.type );
     if ( !struc )
         return EngineError{ "struct [", node.type, L"] doesn't exist" };
 
-    auto result = StructValue::make();
+    auto result = std::make_shared<StructValue>();
     result->parent = struc;
 
     for ( auto& struc_field : struc->fields )
@@ -361,7 +337,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_struct_node( StructNode const&
         if ( node.args.contains( struc_field.name ) )
             continue;
 
-        Ref<Value> val;
+        ValueBox val;
         if ( auto error = handle_expr( struc_field.expr, val ) )
             return error;
 
@@ -370,7 +346,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_struct_node( StructNode const&
 
     for ( auto& [arg_name, arg_expr] : node.args )
     {
-        Ref<Value> expr_val;
+        ValueBox expr_val;
         if ( auto error = handle_expr( arg_expr, expr_val ) )
             return error;
 
@@ -380,46 +356,39 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_struct_node( StructNode const&
         result->members.at( arg_name ) = std::move( expr_val );
     }
 
-    value = result;
+    value.set_value( result );
 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_cast_node( CastNode const& node, Ref<Value>& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_cast_node( CastNode const& node, ValueBox& value )
 {
-    Ref<Value> expr;
+    ValueBox expr;
     if ( auto error = handle_expr( node.expr, expr ) )
         return error;
 
-    try
+    if ( node.type == tp_bool )
     {
-        if ( node.type == tp_bool )
-        {
-            value = make_bool_value( expr->to_bool() );
-        }
-        else if ( node.type == tp_int )
-        {
-            value = make_int_value( expr->to_int() );
-        }
-        else if ( node.type == tp_float )
-        {
-            value = make_float_value( expr->to_float() );
-        }
-        else if ( node.type == tp_char )
-        {
-            value = make_char_value( expr->to_char() );
-        }
-        else if ( node.type == tp_string )
-        {
-            value = make_string_value( expr->to_string() );
-        }
-        else
-            return EngineError{ "Unknown cast type: ", node.type };
+        value.set_value( make_bool_value( expr.get_value()->to_bool() ) );
     }
-    catch ( String& msg )
+    else if ( node.type == tp_int )
     {
-        return EngineError{ msg };
+        value.set_value( make_int_value( expr.get_value()->to_int() ) );
     }
+    else if ( node.type == tp_float )
+    {
+        value.set_value( make_float_value( expr.get_value()->to_float() ) );
+    }
+    else if ( node.type == tp_char )
+    {
+        value.set_value( make_char_value( expr.get_value()->to_char() ) );
+    }
+    else if ( node.type == tp_string )
+    {
+        value.set_value( make_string_value( expr.get_value()->to_string() ) );
+    }
+    else
+        return EngineError{ "Unknown cast type: ", node.type };
 
     return std::nullopt;
 }
@@ -434,21 +403,18 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_var_node( VariableNode const& 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_id_node( IdentifierNode const& node, Ref<Value>& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_id_node( IdentifierNode const& node, ValueBox& value )
 {
     auto* ptr = variables.get( node.name );
     if ( !ptr )
         return EngineError{ L"variable [", node.name, L"] doesn't exist" };
 
-    auto result = RefValue::make();
-    result->eng_var = *ptr;
-
-    value = result;
+    value = (*ptr)->get_ref_value();
 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_func_node( FunctionNode const& node, Ref<Value>& retval )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_func_node( FunctionNode const& node, ValueBox& retval )
 {
     auto* func = functions.get( node.name );
     if ( !func )
@@ -457,7 +423,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func_node( FunctionNode const&
     return handle_func( *func, node.args, retval );
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_return_node( ReturnNode const& node, Ref<Value>& retval, Bool& didret )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_return_node( ReturnNode const& node, ValueBox& retval, Bool& didret )
 {
     if ( auto error = handle_expr( node.expr, retval ) )
         return error;
@@ -487,19 +453,19 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_continue_node( ContinueNode co
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_if_node( IfNode const& node, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_if_node( IfNode const& node, ValueBox& retval, Bool& didret, Bool* didbrk, Bool* didcon )
 {
-    Ref<Value> check_expr;
+    ValueBox check_expr;
     if ( auto error = handle_expr( node.if_part.expr, check_expr ) )
         return error;
-    if ( check_expr->to_bool() )
+    if ( check_expr.get_value()->to_bool() )
         return handle_scope( node.if_part.scope, retval, didret, didbrk, didcon );
 
     for ( auto& elif_part : node.elif_parts )
     {
         if ( auto error = handle_expr( elif_part.expr, check_expr ) )
             return error;
-        if ( check_expr->to_bool() )
+        if ( check_expr.get_value()->to_bool() )
             return handle_scope( elif_part.scope, retval, didret, didbrk, didcon );
     }
 
@@ -509,9 +475,9 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_if_node( IfNode const& node, R
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_switch_node( SwitchNode const& node, Ref<Value>& retval, Bool& didret, Bool* didbrk, Bool* didcon )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_switch_node( SwitchNode const& node, ValueBox& retval, Bool& didret, Bool* didbrk, Bool* didcon )
 {
-    Ref<Value> check_expr;
+    ValueBox check_expr;
     if ( auto error = handle_expr( node.main_expr, check_expr ) )
         return error;
 
@@ -519,11 +485,11 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_switch_node( SwitchNode const&
     {
         for ( auto& expr : case_part.exprs )
         {
-            Ref<Value> val;
+            ValueBox val;
             if ( auto error = handle_expr( expr, val ) )
                 return error;
 
-            if ( (*check_expr == *val)->to_bool() )
+            if ( (*check_expr.get_value() == *val.get_value())->to_bool() )
             {
                 if ( auto error = handle_scope( case_part.scope, retval, didret, didbrk, didcon ) )
                     return error;
@@ -543,7 +509,7 @@ func_end:
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_loop_node( LoopNode const& node, Ref<Value>& retval, Bool& didret )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_loop_node( LoopNode const& node, ValueBox& retval, Bool& didret )
 {
     Bool didbrk = false, didcon = false;
     while ( true )
@@ -559,15 +525,15 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_loop_node( LoopNode const& nod
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_while_node( WhileNode const& node, Ref<Value>& retval, Bool& didret )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_while_node( WhileNode const& node, ValueBox& retval, Bool& didret )
 {
     Bool didbrk = false, didcon = false;
     while ( true )
     {
-        Ref<Value> check_expr;
+        ValueBox check_expr;
         if ( auto error = handle_expr( node.expr, check_expr ) )
             return error;
-        if ( !check_expr->to_bool() )
+        if ( !check_expr.get_value()->to_bool() )
             break;
 
         if ( didret || didbrk )
@@ -582,18 +548,15 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_while_node( WhileNode const& n
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node, Ref<Value>& retval, Bool& didret )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node, ValueBox& retval, Bool& didret )
 {
     ForNode node_cpy = node;
 
-    Ref<Value> loop_expr;
+    ValueBox loop_expr;
     if ( auto error = handle_expr( node_cpy.expr, loop_expr ) )
         return error;
 
-    if ( auto ref_val = dynamic_cast<RefValue const*>(loop_expr.get()) )
-        loop_expr = ref_val->eng_var->get_value();
-
-    if ( auto value_rng = dynamic_cast<RangeValue const*>(loop_expr.get()) )
+    if ( auto value_rng = dynamic_cast<RangeValue const*>(loop_expr.get_value().get()) )
     {
         Bool didbrk = false, didcon = false;
         for ( auto i = value_rng->start_incl; i < value_rng->end_excl; ++i )
@@ -603,7 +566,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node,
             if ( didcon )
                 didcon = false;
 
-            node_cpy.var.expr = make_int_literal( i );
+            node_cpy.var.expr = make_int_node( i );
             if ( auto error = add_var( node_cpy.var ) )
                 return error;
 
@@ -613,7 +576,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node,
             variables.pop();
         }
     }
-    else if ( auto value_str = dynamic_cast<StringValue const*>(loop_expr.get()) )
+    else if ( auto value_str = dynamic_cast<StringValue const*>(loop_expr.get_value().get()) )
     {
         Bool didbrk = false, didcon = false;
         for ( Char c : value_str->value )
@@ -623,7 +586,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node,
             if ( didcon )
                 didcon = false;
 
-            node_cpy.var.expr = make_char_literal( c );
+            node_cpy.var.expr = make_char_node( c );
             if ( auto error = add_var( node_cpy.var ) )
                 return error;
 
@@ -633,7 +596,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node,
             variables.pop();
         }
     }
-    else if ( auto value_arr = dynamic_cast<ArrayValue const*>(loop_expr.get()) )
+    else if ( auto value_arr = dynamic_cast<ArrayValue const*>(loop_expr.get_value().get()) )
     {
         Bool didbrk = false, didcon = false;
         for ( auto& value : value_arr->data )
@@ -643,9 +606,8 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node,
             if ( didcon )
                 didcon = false;
 
-            node_cpy.var.expr = make_value_literal( value );
-            if ( auto error = add_var( node_cpy.var ) )
-                return error;
+            auto eng_var = std::make_shared<EngineVariableRef>( value );
+            variables.push( node_cpy.var.name, eng_var );
 
             if ( auto error = handle_scope( node_cpy.scope, retval, didret, &didbrk, &didcon ) )
                 return error;
@@ -654,39 +616,32 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node,
         }
     }
     else
-        return EngineError{ "Can't for loop type: ", loop_expr->type() };
+        return EngineError{ "Can't for loop [", loop_expr.get_value()->type(), "]" };
 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_un_node( UnaryNode const& node, Ref<Value>& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_un_node( UnaryNode const& node, ValueBox& value )
 {
-    Ref<Value> right;
+    ValueBox right;
     if ( auto error = handle_expr( node.right, right ) )
         return error;
 
-    try
-    {
-        if ( typeid(node) == typeid(UnaryNodePlus) )
-            value = right->clone();
-        else if ( typeid(node) == typeid(UnaryNodeMinus) )
-            value = -(*right);
-        else if ( typeid(node) == typeid(UnaryNodeNot) )
-            value = !(*right);
-        else if ( typeid(node) == typeid(UnaryNodeRange) )
-            value = ~(*right);
-        else
-            return EngineError{ "Unknown unary node type: ", typeid(node).name() };
-    }
-    catch ( String& msg )
-    {
-        return EngineError{ msg };
-    }
+    if ( typeid(node) == typeid(UnaryNodePlus) )
+        value.set_value( right.get_value()->clone() );
+    else if ( typeid(node) == typeid(UnaryNodeMinus) )
+        value.set_value( -(*right.get_value()) );
+    else if ( typeid(node) == typeid(UnaryNodeNot) )
+        value.set_value( !(*right.get_value()) );
+    else if ( typeid(node) == typeid(UnaryNodeRange) )
+        value.set_value( ~(*right.get_value()) );
+    else
+        return EngineError{ "Unknown unary node type: ", typeid(node).name() };
 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& node, Ref<Value>& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& node, ValueBox& value )
 {
     if ( auto nd = dynamic_cast<OperatorNodeAccess const*>(&node) )
         return handle_ac_node( *nd, value );
@@ -694,69 +649,59 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& n
     if ( auto nd = dynamic_cast<AssignNode const*>(&node) )
         return handle_as_node( *nd, value );
 
-    Ref<Value> left;
+    ValueBox left;
     if ( auto error = handle_expr( node.left, left ) )
         return error;
 
-    Ref<Value> right;
+    ValueBox right;
     if ( auto error = handle_expr( node.right, right ) )
         return error;
 
-    try
-    {
-        if ( typeid(node) == typeid(OperatorNodeAdd) )
-            value = (*left) + (*right);
-        else if ( typeid(node) == typeid(OperatorNodeSub) )
-            value = (*left) - (*right);
-        else if ( typeid(node) == typeid(OperatorNodeMul) )
-            value = (*left) * (*right);
-        else if ( typeid(node) == typeid(OperatorNodeDiv) )
-            value = (*left) / (*right);
-        else if ( typeid(node) == typeid(OperatorNodePow) )
-            value = (*left) ^ (*right);
-        else if ( typeid(node) == typeid(OperatorNodeMod) )
-            value = (*left) % (*right);
-        else if ( typeid(node) == typeid(OperatorNodeAnd) )
-            value = (*left) && (*right);
-        else if ( typeid(node) == typeid(OperatorNodeOr) )
-            value = (*left) || (*right);
-        else if ( typeid(node) == typeid(OperatorNodeEq) )
-            value = (*left) == (*right);
-        else if ( typeid(node) == typeid(OperatorNodeNotEq) )
-            value = (*left) != (*right);
-        else if ( typeid(node) == typeid(OperatorNodeLess) )
-            value = (*left) < (*right);
-        else if ( typeid(node) == typeid(OperatorNodeGreat) )
-            value = (*left) > (*right);
-        else if ( typeid(node) == typeid(OperatorNodeLessEq) )
-            value = (*left) <= (*right);
-        else if ( typeid(node) == typeid(OperatorNodeGreatEq) )
-            value = (*left) >= (*right);
-        else if ( typeid(node) == typeid(OperatorNodeRange) )
-            value = (*left) >> (*right);
-        else
-            return EngineError{ "Unknown operator node type: ", typeid(node).name() };
-    }
-    catch ( String& msg )
-    {
-        return EngineError{ msg };
-    }
+    if ( typeid(node) == typeid(OperatorNodeAdd) )
+        value.set_value( (*left.get_value()) + (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodeSub) )
+        value.set_value( (*left.get_value()) - (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodeMul) )
+        value.set_value( (*left.get_value()) * (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodeDiv) )
+        value.set_value( (*left.get_value()) / (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodePow) )
+        value.set_value( (*left.get_value()) ^ (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodeMod) )
+        value.set_value( (*left.get_value()) % (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodeAnd) )
+        value.set_value( (*left.get_value()) && (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodeOr) )
+        value.set_value( (*left.get_value()) || (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodeEq) )
+        value.set_value( (*left.get_value()) == (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodeNotEq) )
+        value.set_value( (*left.get_value()) != (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodeLess) )
+        value.set_value( (*left.get_value()) < (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodeGreat) )
+        value.set_value( (*left.get_value()) > (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodeLessEq) )
+        value.set_value( (*left.get_value()) <= (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodeGreatEq) )
+        value.set_value( (*left.get_value()) >= (*right.get_value()) );
+    else if ( typeid(node) == typeid(OperatorNodeRange) )
+        value.set_value( (*left.get_value()) >> (*right.get_value()) );
+    else
+        return EngineError{ "Unknown operator node type: ", typeid(node).name() };
 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_node( OperatorNodeAccess const& node, Ref<Value>& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_node( OperatorNodeAccess const& node, ValueBox& value )
 {
-    Ref<Value> left;
+    ValueBox left;
     if ( auto error = handle_expr( node.left, left ) )
         return error;
 
-    if ( auto ref_val = dynamic_cast<RefValue const*>(left.get()) )
-        left = ref_val->eng_var->get_value();
-
-    auto struc_val = dynamic_cast<StructValue const*>(left.get());
+    auto struc_val = dynamic_cast<StructValue const*>(left.get_value().get());
     if ( !struc_val )
-        return EngineError{ "Can't access member of [", left->type(), "]" };
+        return EngineError{ "Can't access member of [", left.get_value()->type(), "]" };
 
     if ( auto id_node = dynamic_cast<IdentifierNode const*>(node.right.get()) )
     {
@@ -771,10 +716,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_node( OperatorNodeAccess co
         if ( !method_ptr )
             return EngineError{ "Method [", func_node->name, "] doesn't exist" };
 
-        auto self_val = std::make_shared<ValueNode>();
-        self_val->value = left;
-
-        Array<Ref<Node>> args = { self_val };
+        Array<Ref<Node>> args = { make_value_node( left.get_value() ) };
         args.insert( args.end(), func_node->args.begin(), func_node->args.end() );
 
         if ( auto error = handle_func( *method_ptr, args, value ) )
@@ -786,56 +728,43 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_node( OperatorNodeAccess co
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& node, Ref<Value>& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& node, ValueBox& value )
 {
-    Ref<Value> left;
+    ValueBox left;
     if ( auto error = handle_expr( node.left, left ) )
         return error;
 
-    auto left_ref = dynamic_cast<RefValue const*>(left.get());
-    if ( !left_ref )
-        return EngineError{ "Can't assign to [", left->type(), "]" };
-
-    Ref<Value> right;
+    ValueBox right;
     if ( auto error = handle_expr( node.right, right ) )
         return error;
 
-    auto& var = left_ref->eng_var;
-
     if ( typeid(node) == typeid(AssignNodeAdd) )
     {
-        if ( auto error = var->set_value( *var->get_value() + (*right) ) )
-            return error;
+        left.set_value( *left.get_value() + (*right.get_value()) );
     }
     else if ( typeid(node) == typeid(AssignNodeSub) )
     {
-        if ( auto error = var->set_value( *var->get_value() - (*right) ) )
-            return error;
+        left.set_value( *left.get_value() - (*right.get_value()) );
     }
     else if ( typeid(node) == typeid(AssignNodeMul) )
     {
-        if ( auto error = var->set_value( *var->get_value() * (*right) ) )
-            return error;
+        left.set_value( *left.get_value() * (*right.get_value()) );
     }
     else if ( typeid(node) == typeid(AssignNodeDiv) )
     {
-        if ( auto error = var->set_value( *var->get_value() / (*right) ) )
-            return error;
+        left.set_value( *left.get_value() / (*right.get_value()) );
     }
     else if ( typeid(node) == typeid(AssignNodePow) )
     {
-        if ( auto error = var->set_value( *var->get_value() ^ (*right) ) )
-            return error;
+        left.set_value( *left.get_value() ^ (*right.get_value()) );
     }
     else if ( typeid(node) == typeid(AssignNodeMod) )
     {
-        if ( auto error = var->set_value( *var->get_value() % (*right) ) )
-            return error;
+        left.set_value( *left.get_value() % (*right.get_value()) );
     }
     else
     {
-        if ( auto error = var->set_value( std::move( right ) ) )
-            return error;
+        left.set_value( right.get_value() );
     }
 
     value = left;

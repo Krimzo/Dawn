@@ -5,13 +5,9 @@
 
 namespace dawn
 {
-struct NothingNode : Node
-{
-};
-
 struct ValueNode : Node
 {
-    Ref<Value> value;
+    RawValue value;
 };
 
 struct CastNode : Node
@@ -232,17 +228,11 @@ struct AssignNodeMod : AssignNode
 {
 };
 
-Ref<Node> make_value_literal( Ref<Value> const& value );
-
-Ref<Node> make_bool_literal( Bool value );
-Ref<Node> make_int_literal( Int value );
-Ref<Node> make_float_literal( Float value );
-Ref<Node> make_char_literal( Char value );
-Ref<Node> make_string_literal( StringRef const& value );
-
-Ref<Value> make_bool_value( Bool value );
-Ref<Value> make_int_value( Int value );
-Ref<Value> make_float_value( Float value );
-Ref<Value> make_char_value( Char value );
-Ref<Value> make_string_value( StringRef const& value );
+Ref<Node> make_nothing_node();
+Ref<Node> make_bool_node( Bool value );
+Ref<Node> make_int_node( Int value );
+Ref<Node> make_float_node( Float value );
+Ref<Node> make_char_node( Char value );
+Ref<Node> make_string_node( StringRef const& value );
+Ref<Node> make_value_node( RawValue const& value );
 }

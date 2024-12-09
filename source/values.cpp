@@ -1,87 +1,5 @@
 #include "values.h"
-#include "engine.h"
 
-
-// ref
-dawn::StringRef const& dawn::RefValue::type() const
-{
-    return eng_var->get_value()->type();
-}
-
-dawn::Ref<dawn::Value> dawn::RefValue::clone() const
-{
-    return eng_var->get_value()->clone();
-}
-
-dawn::Ref<dawn::Value> dawn::RefValue::operator-() const
-{
-    return eng_var->get_value()->operator-();
-}
-
-dawn::Ref<dawn::Value> dawn::RefValue::operator+( Value const& other ) const
-{
-    return eng_var->get_value()->operator+( other );
-}
-
-dawn::Ref<dawn::Value> dawn::RefValue::operator-( Value const& other ) const
-{
-    return eng_var->get_value()->operator-( other );
-}
-
-dawn::Ref<dawn::Value> dawn::RefValue::operator*( Value const& other ) const
-{
-    return eng_var->get_value()->operator*( other );
-}
-
-dawn::Ref<dawn::Value> dawn::RefValue::operator/( Value const& other ) const
-{
-    return eng_var->get_value()->operator/( other );
-}
-
-dawn::Ref<dawn::Value> dawn::RefValue::operator^( Value const& other ) const
-{
-    return eng_var->get_value()->operator^( other );
-}
-
-dawn::Ref<dawn::Value> dawn::RefValue::operator%( Value const& other ) const
-{
-    return eng_var->get_value()->operator%( other );
-}
-
-dawn::Int dawn::RefValue::operator<=>( Value const& other ) const
-{
-    return eng_var->get_value()->operator<=>( other );
-}
-
-dawn::Ref<dawn::Value> dawn::RefValue::operator>>( Value const& other ) const
-{
-    return eng_var->get_value()->operator>>( other );
-}
-
-dawn::Bool dawn::RefValue::to_bool() const
-{
-    return eng_var->get_value()->to_bool();
-}
-
-dawn::Int dawn::RefValue::to_int() const
-{
-    return eng_var->get_value()->to_int();
-}
-
-dawn::Float dawn::RefValue::to_float() const
-{
-    return eng_var->get_value()->to_float();
-}
-
-dawn::Char dawn::RefValue::to_char() const
-{
-    return eng_var->get_value()->to_char();
-}
-
-dawn::String dawn::RefValue::to_string() const
-{
-    return eng_var->get_value()->to_string();
-}
 
 // nothing
 dawn::StringRef const& dawn::NothingValue::type() const
@@ -89,9 +7,9 @@ dawn::StringRef const& dawn::NothingValue::type() const
     return tp_nothing;
 }
 
-dawn::Ref<dawn::Value> dawn::NothingValue::clone() const
+dawn::RawValue dawn::NothingValue::clone() const
 {
-    return NothingValue::make();
+    return make_nothing_value();
 }
 
 dawn::Bool dawn::NothingValue::to_bool() const
@@ -125,11 +43,9 @@ dawn::StringRef const& dawn::BoolValue::type() const
     return tp_bool;
 }
 
-dawn::Ref<dawn::Value> dawn::BoolValue::clone() const
+dawn::RawValue dawn::BoolValue::clone() const
 {
-    auto result = BoolValue::make();
-    result->value = value;
-    return result;
+    return make_bool_value( value );
 }
 
 dawn::Int dawn::BoolValue::operator<=>( Value const& other ) const
@@ -178,130 +94,78 @@ dawn::StringRef const& dawn::IntValue::type() const
     return tp_int;
 }
 
-dawn::Ref<dawn::Value> dawn::IntValue::clone() const
+dawn::RawValue dawn::IntValue::clone() const
 {
-    auto result = IntValue::make();
-    result->value = value;
-    return result;
+    return make_int_value( value );
 }
 
-dawn::Ref<dawn::Value> dawn::IntValue::operator-() const
+dawn::RawValue dawn::IntValue::operator-() const
 {
-    auto result = IntValue::make();
-    result->value = -value;
-    return result;
+    return make_int_value( -value );
 }
 
-dawn::Ref<dawn::Value> dawn::IntValue::operator+( Value const& other ) const
+dawn::RawValue dawn::IntValue::operator+( Value const& other ) const
 {
     if ( other.type() == tp_int )
-    {
-        auto result = IntValue::make();
-        result->value = value + other.to_int();
-        return result;
-    }
+        return make_int_value( value + other.to_int() );
 
     if ( other.type() == tp_float )
-    {
-        auto result = FloatValue::make();
-        result->value = value + other.to_float();
-        return result;
-    }
+        return make_float_value( value + other.to_float() );
 
     return Value::operator+( other );
 }
 
-dawn::Ref<dawn::Value> dawn::IntValue::operator-( Value const& other ) const
+dawn::RawValue dawn::IntValue::operator-( Value const& other ) const
 {
     if ( other.type() == tp_int )
-    {
-        auto result = IntValue::make();
-        result->value = value - other.to_int();
-        return result;
-    }
+        return make_int_value( value - other.to_int() );
 
     if ( other.type() == tp_float )
-    {
-        auto result = FloatValue::make();
-        result->value = value - other.to_float();
-        return result;
-    }
+        return make_float_value( value - other.to_float() );
 
     return Value::operator-( other );
 }
 
-dawn::Ref<dawn::Value> dawn::IntValue::operator*( Value const& other ) const
+dawn::RawValue dawn::IntValue::operator*( Value const& other ) const
 {
     if ( other.type() == tp_int )
-    {
-        auto result = IntValue::make();
-        result->value = value * other.to_int();
-        return result;
-    }
+        return make_int_value( value * other.to_int() );
 
     if ( other.type() == tp_float )
-    {
-        auto result = FloatValue::make();
-        result->value = value * other.to_float();
-        return result;
-    }
+        return make_float_value( value * other.to_float() );
 
     return Value::operator*( other );
 }
 
-dawn::Ref<dawn::Value> dawn::IntValue::operator/( Value const& other ) const
+dawn::RawValue dawn::IntValue::operator/( Value const& other ) const
 {
     if ( other.type() == tp_int )
-    {
-        auto result = IntValue::make();
-        result->value = value / other.to_int();
-        return result;
-    }
+        return make_int_value( value / other.to_int() );
 
     if ( other.type() == tp_float )
-    {
-        auto result = FloatValue::make();
-        result->value = value / other.to_float();
-        return result;
-    }
+        return make_float_value( value / other.to_float() );
 
     return Value::operator/( other );
 }
 
-dawn::Ref<dawn::Value> dawn::IntValue::operator^( Value const& other ) const
+dawn::RawValue dawn::IntValue::operator^( Value const& other ) const
 {
     if ( other.type() == tp_int )
-    {
-        auto result = IntValue::make();
-        result->value = (Int) std::pow( value, other.to_int() );
-        return result;
-    }
+        return make_int_value( (Int) std::pow( value, other.to_int() ) );
 
     if ( other.type() == tp_float )
-    {
-        auto result = FloatValue::make();
-        result->value = (Float) std::pow( value, other.to_float() );
-        return result;
-    }
+        return make_float_value( (Float) std::pow( value, other.to_float() ) );
 
     return Value::operator^( other );
 }
 
-dawn::Ref<dawn::Value> dawn::IntValue::operator%( Value const& other ) const
+dawn::RawValue dawn::IntValue::operator%( Value const& other ) const
 {
     if ( other.type() == tp_int )
-    {
-        auto result = IntValue::make();
-        result->value = value % other.to_int();
-        return result;
-    }
+        return make_int_value( value % other.to_int() );
 
     if ( other.type() == tp_float )
-    {
-        auto result = FloatValue::make();
-        result->value = mymod( (Float) value, other.to_float() );
-        return result;
-    }
+        return make_float_value( mymod( (Float) value, other.to_float() ) );
 
     return Value::operator%( other );
 }
@@ -323,9 +187,9 @@ dawn::Int dawn::IntValue::operator<=>( Value const& other ) const
     return Value::operator<=>( other );
 }
 
-dawn::Ref<dawn::Value> dawn::IntValue::operator>>( Value const& other ) const
+dawn::RawValue dawn::IntValue::operator>>( Value const& other ) const
 {
-    auto result = RangeValue::make();
+    auto result = std::make_shared<RangeValue>();
     result->start_incl = value;
     result->end_excl = other.to_int();
     return result;
@@ -362,130 +226,78 @@ dawn::StringRef const& dawn::FloatValue::type() const
     return tp_float;
 }
 
-dawn::Ref<dawn::Value> dawn::FloatValue::clone() const
+dawn::RawValue dawn::FloatValue::clone() const
 {
-    auto result = FloatValue::make();
-    result->value = value;
-    return result;
+    return make_float_value( value );
 }
 
-dawn::Ref<dawn::Value> dawn::FloatValue::operator-() const
+dawn::RawValue dawn::FloatValue::operator-() const
 {
-    auto result = FloatValue::make();
-    result->value = -value;
-    return result;
+    return make_float_value( -value );
 }
 
-dawn::Ref<dawn::Value> dawn::FloatValue::operator+( Value const& other ) const
+dawn::RawValue dawn::FloatValue::operator+( Value const& other ) const
 {
     if ( other.type() == tp_int )
-    {
-        auto result = FloatValue::make();
-        result->value = value + other.to_int();
-        return result;
-    }
+        return make_float_value( value + other.to_int() );
 
     if ( other.type() == tp_float )
-    {
-        auto result = FloatValue::make();
-        result->value = value + other.to_float();
-        return result;
-    }
+        return make_float_value( value + other.to_float() );
 
     return Value::operator+( other );
 }
 
-dawn::Ref<dawn::Value> dawn::FloatValue::operator-( Value const& other ) const
+dawn::RawValue dawn::FloatValue::operator-( Value const& other ) const
 {
     if ( other.type() == tp_int )
-    {
-        auto result = FloatValue::make();
-        result->value = value - other.to_int();
-        return result;
-    }
+        return make_float_value( value - other.to_int() );
 
     if ( other.type() == tp_float )
-    {
-        auto result = FloatValue::make();
-        result->value = value - other.to_float();
-        return result;
-    }
+        return make_float_value( value - other.to_float() );
 
     return Value::operator-( other );
 }
 
-dawn::Ref<dawn::Value> dawn::FloatValue::operator*( Value const& other ) const
+dawn::RawValue dawn::FloatValue::operator*( Value const& other ) const
 {
     if ( other.type() == tp_int )
-    {
-        auto result = FloatValue::make();
-        result->value = value * other.to_int();
-        return result;
-    }
+        return make_float_value( value * other.to_int() );
 
     if ( other.type() == tp_float )
-    {
-        auto result = FloatValue::make();
-        result->value = value * other.to_float();
-        return result;
-    }
+        return make_float_value( value * other.to_float() );
 
     return Value::operator*( other );
 }
 
-dawn::Ref<dawn::Value> dawn::FloatValue::operator/( Value const& other ) const
+dawn::RawValue dawn::FloatValue::operator/( Value const& other ) const
 {
     if ( other.type() == tp_int )
-    {
-        auto result = FloatValue::make();
-        result->value = value / other.to_int();
-        return result;
-    }
+        return make_float_value( value / other.to_int() );
 
     if ( other.type() == tp_float )
-    {
-        auto result = FloatValue::make();
-        result->value = value / other.to_float();
-        return result;
-    }
+        return make_float_value( value / other.to_float() );
 
     return Value::operator/( other );
 }
 
-dawn::Ref<dawn::Value> dawn::FloatValue::operator^( Value const& other ) const
+dawn::RawValue dawn::FloatValue::operator^( Value const& other ) const
 {
     if ( other.type() == tp_int )
-    {
-        auto result = FloatValue::make();
-        result->value = std::pow( value, other.to_int() );
-        return result;
-    }
+        return make_float_value( std::pow( value, other.to_int() ) );
 
     if ( other.type() == tp_float )
-    {
-        auto result = FloatValue::make();
-        result->value = std::pow( value, other.to_float() );
-        return result;
-    }
+        return make_float_value( std::pow( value, other.to_float() ) );
 
     return Value::operator^( other );
 }
 
-dawn::Ref<dawn::Value> dawn::FloatValue::operator%( Value const& other ) const
+dawn::RawValue dawn::FloatValue::operator%( Value const& other ) const
 {
     if ( other.type() == tp_int )
-    {
-        auto result = FloatValue::make();
-        result->value = mymod( value, (Float) other.to_int() );
-        return result;
-    }
+        return make_float_value( mymod( value, (Float) other.to_int() ) );
 
     if ( other.type() == tp_float )
-    {
-        auto result = FloatValue::make();
-        result->value = mymod( value, other.to_float() );
-        return result;
-    }
+        return make_float_value( mymod( value, other.to_float() ) );
 
     return Value::operator%( other );
 }
@@ -541,11 +353,9 @@ dawn::StringRef const& dawn::CharValue::type() const
     return tp_char;
 }
 
-dawn::Ref<dawn::Value> dawn::CharValue::clone() const
+dawn::RawValue dawn::CharValue::clone() const
 {
-    auto result = CharValue::make();
-    result->value = value;
-    return result;
+    return make_char_value( value );
 }
 
 dawn::Int dawn::CharValue::operator<=>( Value const& other ) const
@@ -590,21 +400,15 @@ dawn::StringRef const& dawn::StringValue::type() const
     return tp_string;
 }
 
-dawn::Ref<dawn::Value> dawn::StringValue::clone() const
+dawn::RawValue dawn::StringValue::clone() const
 {
-    auto result = StringValue::make();
-    result->value = value;
-    return result;
+    return make_string_value( value );
 }
 
-dawn::Ref<dawn::Value> dawn::StringValue::operator+( Value const& other ) const
+dawn::RawValue dawn::StringValue::operator+( Value const& other ) const
 {
     if ( other.type() == tp_string )
-    {
-        auto result = StringValue::make();
-        result->value = value + other.to_string();
-        return result;
-    }
+        return make_string_value( value + other.to_string() );
 
     return Value::operator+( other );
 }
@@ -657,9 +461,9 @@ dawn::StringRef const& dawn::EnumValue::type() const
     return tp_enum;
 }
 
-dawn::Ref<dawn::Value> dawn::EnumValue::clone() const
+dawn::RawValue dawn::EnumValue::clone() const
 {
-    auto result = EnumValue::make();
+    auto result = std::make_shared<EnumValue>();
     result->parent = parent;
     result->key = key;
     return result;
@@ -676,12 +480,12 @@ dawn::StringRef const& dawn::StructValue::type() const
     return tp_struct;
 }
 
-dawn::Ref<dawn::Value> dawn::StructValue::clone() const
+dawn::RawValue dawn::StructValue::clone() const
 {
-    auto result = StructValue::make();
+    auto result = std::make_shared<StructValue>();
     result->parent = parent;
     for ( auto& [key, value] : members )
-        result->members[key] = value->clone();
+        result->members[key].set_value( value.get_value()->clone() );
     return result;
 }
 
@@ -695,8 +499,8 @@ dawn::String dawn::StructValue::to_string() const
     for ( auto it = members.begin(); it != members.end(); it++ )
     {
         auto& [key, value] = *it;
-        stream << key << L": " << value->to_string();
-        Map<String, Ref<Value>>::const_iterator next_it = it;
+        stream << key << L": " << value.get_value()->to_string();
+        Map<String, ValueBox>::const_iterator next_it = it;
         ++next_it;
         stream << (next_it == members.end() ? L" }" : L", ");
     }
@@ -709,25 +513,25 @@ dawn::StringRef const& dawn::ArrayValue::type() const
     return tp_array;
 }
 
-dawn::Ref<dawn::Value> dawn::ArrayValue::clone() const
+dawn::RawValue dawn::ArrayValue::clone() const
 {
-    auto result = ArrayValue::make();
+    auto result = std::make_shared<ArrayValue>();
     result->data.reserve( data.size() );
     for ( auto& value : data )
-        result->data.push_back( value->clone() );
+        result->data.emplace_back().set_value( value.get_value()->clone() );
     return result;
 }
 
-dawn::Ref<dawn::Value> dawn::ArrayValue::operator+( Value const& other ) const
+dawn::RawValue dawn::ArrayValue::operator+( Value const& other ) const
 {
     if ( auto other_arr = dynamic_cast<ArrayValue const*>(&other) )
     {
-        auto result = ArrayValue::make();
+        auto result = std::make_shared<ArrayValue>();
         result->data.reserve( data.size() + other_arr->data.size() );
         for ( auto& value : data )
-            result->data.push_back( value->clone() );
+            result->data.emplace_back().set_value( value.get_value()->clone() );
         for ( auto& value : other_arr->data )
-            result->data.push_back( value->clone() );
+            result->data.emplace_back().set_value( value.get_value()->clone() );
         return result;
     }
 
@@ -736,12 +540,6 @@ dawn::Ref<dawn::Value> dawn::ArrayValue::operator+( Value const& other ) const
 
 dawn::Int dawn::ArrayValue::operator<=>( Value const& other ) const
 {
-    if ( auto other_arr = dynamic_cast<ArrayValue const*>(&other) )
-    {
-        auto result = data <=> other_arr->data;
-        return result._Value;
-    }
-
     return Value::operator<=>( other );
 }
 
@@ -753,8 +551,8 @@ dawn::String dawn::ArrayValue::to_string() const
     StringStream stream;
     stream << L"[";
     for ( Int i = 0; i < (Int) data.size() - 1; i++ )
-        stream << data[i]->to_string() << L", ";
-    stream << data.back()->to_string() << L"]";
+        stream << data[i].get_value()->to_string() << L", ";
+    stream << data.back().get_value()->to_string() << L"]";
 
     return stream.str();
 }
@@ -764,9 +562,9 @@ dawn::StringRef const& dawn::RangeValue::type() const
     return tp_range;
 }
 
-dawn::Ref<dawn::Value> dawn::RangeValue::clone() const
+dawn::RawValue dawn::RangeValue::clone() const
 {
-    auto result = RangeValue::make();
+    auto result = std::make_shared<RangeValue>();
     result->start_incl = start_incl;
     result->end_excl = end_excl;
     return result;
@@ -775,4 +573,45 @@ dawn::Ref<dawn::Value> dawn::RangeValue::clone() const
 dawn::String dawn::RangeValue::to_string() const
 {
     return format( start_incl, L"~", end_excl );
+}
+
+// helpers
+dawn::RawValue dawn::make_nothing_value()
+{
+    return std::make_shared<NothingValue>();
+}
+
+dawn::RawValue dawn::make_bool_value( Bool value )
+{
+    auto result = std::make_shared<BoolValue>();
+    result->value = value;
+    return result;
+}
+
+dawn::RawValue dawn::make_int_value( Int value )
+{
+    auto result = std::make_shared<IntValue>();
+    result->value = value;
+    return result;
+}
+
+dawn::RawValue dawn::make_float_value( Float value )
+{
+    auto result = std::make_shared<FloatValue>();
+    result->value = value;
+    return result;
+}
+
+dawn::RawValue dawn::make_char_value( Char value )
+{
+    auto result = std::make_shared<CharValue>();
+    result->value = value;
+    return result;
+}
+
+dawn::RawValue dawn::make_string_value( StringRef const& value )
+{
+    auto result = std::make_shared<StringValue>();
+    result->value = value;
+    return result;
 }

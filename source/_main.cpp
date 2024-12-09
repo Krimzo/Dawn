@@ -12,7 +12,7 @@ int main( int argc, char** argv )
         return 1;
     }
 
-    Ref<Value> retval;
+    ValueBox retval;
     if ( auto error = dawn.call_func( L"main", {}, retval ) )
     {
         print( error.value() );

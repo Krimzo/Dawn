@@ -5,35 +5,44 @@
 
 namespace dawn
 {
+struct Node
+{
+    virtual ~Node() = default;
+};
+
+struct Value;
+
+using RawValue = Ref<Value>;
+
 struct Value
 {
     virtual ~Value() = default;
 
     virtual StringRef const& type() const = 0;
-    virtual Ref<Value> clone() const = 0;
+    virtual RawValue clone() const = 0;
 
-    virtual Ref<Value> operator-() const;
-    virtual Ref<Value> operator+( Value const& other ) const;
-    virtual Ref<Value> operator-( Value const& other ) const;
-    virtual Ref<Value> operator*( Value const& other ) const;
-    virtual Ref<Value> operator/( Value const& other ) const;
-    virtual Ref<Value> operator^( Value const& other ) const;
-    virtual Ref<Value> operator%( Value const& other ) const;
+    virtual RawValue operator-() const;
+    virtual RawValue operator+( Value const& other ) const;
+    virtual RawValue operator-( Value const& other ) const;
+    virtual RawValue operator*( Value const& other ) const;
+    virtual RawValue operator/( Value const& other ) const;
+    virtual RawValue operator^( Value const& other ) const;
+    virtual RawValue operator%( Value const& other ) const;
 
     virtual Int operator<=>( Value const& other ) const;
-    virtual Ref<Value> operator==( Value const& other ) const final;
-    virtual Ref<Value> operator!=( Value const& other ) const final;
-    virtual Ref<Value> operator<( Value const& other ) const final;
-    virtual Ref<Value> operator>( Value const& other ) const final;
-    virtual Ref<Value> operator<=( Value const& other ) const final;
-    virtual Ref<Value> operator>=( Value const& other ) const final;
+    virtual RawValue operator==( Value const& other ) const final;
+    virtual RawValue operator!=( Value const& other ) const final;
+    virtual RawValue operator<( Value const& other ) const final;
+    virtual RawValue operator>( Value const& other ) const final;
+    virtual RawValue operator<=( Value const& other ) const final;
+    virtual RawValue operator>=( Value const& other ) const final;
 
-    virtual Ref<Value> operator!() const final;
-    virtual Ref<Value> operator&&( Value const& other ) const final;
-    virtual Ref<Value> operator||( Value const& other ) const final;
+    virtual RawValue operator!() const final;
+    virtual RawValue operator&&( Value const& other ) const final;
+    virtual RawValue operator||( Value const& other ) const final;
 
-    virtual Ref<Value> operator>>( Value const& other ) const;
-    virtual Ref<Value> operator~() const final;
+    virtual RawValue operator>>( Value const& other ) const;
+    virtual RawValue operator~() const final;
 
     virtual Bool to_bool() const;
     virtual Int to_int() const;
@@ -42,8 +51,23 @@ struct Value
     virtual String to_string() const;
 };
 
-struct Node
+struct ValueBox
 {
-    virtual ~Node() = default;
+    enum struct Type
+    {
+        LET,
+        VAR,
+    };
+
+    ValueBox();
+    ValueBox( Type type );
+    ValueBox( Type type, Ref<RawValue> const& value_ref );
+
+    RawValue const& get_value() const;
+    void set_value( RawValue const& value );
+
+private:
+    Type m_type;
+    Ref<RawValue> m_value_ref;
 };
 }

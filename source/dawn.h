@@ -16,9 +16,9 @@ struct Dawn
     Opt<String> eval_file( StringRef const& path );
 
     void bind_func( String const& name, Function::CppFunc cpp_func );
-    Opt<EngineError> call_func( String const& name, Array<Ref<Node>> const& args, Ref<Value>& retval );
+    Opt<EngineError> call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval );
 
-    void add_var( String const& name, Bool is_var, Ref<Value> const& value );
+    void add_var( String const& name, Bool is_var, RawValue const& value );
     EngineVariable* get_var( String const& name );
 
 private:

@@ -5,26 +5,10 @@
 
 namespace dawn
 {
-struct EngineVariable;
-
-struct RefValue : Value, Makeable<RefValue>
+struct NothingValue : Value
 {
     StringRef const& type() const override;
-    Ref<Value> clone() const override;
-
-    Ref<EngineVariable> eng_var;
-
-    Ref<Value> operator-() const override;
-    Ref<Value> operator+( Value const& other ) const override;
-    Ref<Value> operator-( Value const& other ) const override;
-    Ref<Value> operator*( Value const& other ) const override;
-    Ref<Value> operator/( Value const& other ) const override;
-    Ref<Value> operator^( Value const& other ) const override;
-    Ref<Value> operator%( Value const& other ) const override;
-
-    Int operator<=>( Value const& other ) const override;
-
-    Ref<Value> operator>>( Value const& other ) const override;
+    RawValue clone() const override;
 
     Bool to_bool() const override;
     Int to_int() const override;
@@ -33,24 +17,12 @@ struct RefValue : Value, Makeable<RefValue>
     String to_string() const override;
 };
 
-struct NothingValue : Value, Makeable<NothingValue>
-{
-    StringRef const& type() const override;
-    Ref<Value> clone() const override;
-
-    Bool to_bool() const override;
-    Int to_int() const override;
-    Float to_float() const override;
-    Char to_char() const override;
-    String to_string() const override;
-};
-
-struct BoolValue : Value, Makeable<BoolValue>
+struct BoolValue : Value
 {
     Bool value = {};
 
     StringRef const& type() const override;
-    Ref<Value> clone() const override;
+    RawValue clone() const override;
 
     Int operator<=>( Value const& other ) const override;
 
@@ -61,23 +33,23 @@ struct BoolValue : Value, Makeable<BoolValue>
     String to_string() const override;
 };
 
-struct IntValue : Value, Makeable<IntValue>
+struct IntValue : Value
 {
     Int value = {};
 
     StringRef const& type() const override;
-    Ref<Value> clone() const override;
+    RawValue clone() const override;
 
-    Ref<Value> operator-() const override;
-    Ref<Value> operator+( Value const& other ) const override;
-    Ref<Value> operator-( Value const& other ) const override;
-    Ref<Value> operator*( Value const& other ) const override;
-    Ref<Value> operator/( Value const& other ) const override;
-    Ref<Value> operator^( Value const& other ) const override;
-    Ref<Value> operator%( Value const& other ) const override;
+    RawValue operator-() const override;
+    RawValue operator+( Value const& other ) const override;
+    RawValue operator-( Value const& other ) const override;
+    RawValue operator*( Value const& other ) const override;
+    RawValue operator/( Value const& other ) const override;
+    RawValue operator^( Value const& other ) const override;
+    RawValue operator%( Value const& other ) const override;
 
     Int operator<=>( Value const& other ) const override;
-    Ref<Value> operator>>( Value const& other ) const override;
+    RawValue operator>>( Value const& other ) const override;
 
     Bool to_bool() const override;
     Int to_int() const override;
@@ -86,20 +58,20 @@ struct IntValue : Value, Makeable<IntValue>
     String to_string() const override;
 };
 
-struct FloatValue : Value, Makeable<FloatValue>
+struct FloatValue : Value
 {
     Float value = {};
 
     StringRef const& type() const override;
-    Ref<Value> clone() const override;
+    RawValue clone() const override;
 
-    Ref<Value> operator-() const override;
-    Ref<Value> operator+( Value const& other ) const override;
-    Ref<Value> operator-( Value const& other ) const override;
-    Ref<Value> operator*( Value const& other ) const override;
-    Ref<Value> operator/( Value const& other ) const override;
-    Ref<Value> operator^( Value const& other ) const override;
-    Ref<Value> operator%( Value const& other ) const override;
+    RawValue operator-() const override;
+    RawValue operator+( Value const& other ) const override;
+    RawValue operator-( Value const& other ) const override;
+    RawValue operator*( Value const& other ) const override;
+    RawValue operator/( Value const& other ) const override;
+    RawValue operator^( Value const& other ) const override;
+    RawValue operator%( Value const& other ) const override;
 
     Int operator<=>( Value const& other ) const override;
 
@@ -110,12 +82,12 @@ struct FloatValue : Value, Makeable<FloatValue>
     String to_string() const override;
 };
 
-struct CharValue : Value, Makeable<CharValue>
+struct CharValue : Value
 {
     Char value = {};
 
     StringRef const& type() const override;
-    Ref<Value> clone() const override;
+    RawValue clone() const override;
 
     Int operator<=>( Value const& other ) const override;
 
@@ -126,14 +98,14 @@ struct CharValue : Value, Makeable<CharValue>
     String to_string() const override;
 };
 
-struct StringValue : Value, Makeable<StringValue>
+struct StringValue : Value
 {
     String value = {};
 
     StringRef const& type() const override;
-    Ref<Value> clone() const override;
+    RawValue clone() const override;
 
-    Ref<Value> operator+( Value const& other ) const override;
+    RawValue operator+( Value const& other ) const override;
 
     Int operator<=>( Value const& other ) const override;
 
@@ -144,50 +116,57 @@ struct StringValue : Value, Makeable<StringValue>
     String to_string() const override;
 };
 
-struct EnumValue : Value, Makeable<EnumValue>
+struct EnumValue : Value
 {
     Enum const* parent = nullptr;
     String key;
 
     StringRef const& type() const override;
-    Ref<Value> clone() const override;
+    RawValue clone() const override;
 
     String to_string() const override;
 };
 
-struct StructValue : Value, Makeable<StructValue>
+struct StructValue : Value
 {
     Struct const* parent = nullptr;
-    Map<String, Ref<Value>> members;
+    Map<String, ValueBox> members;
 
     StringRef const& type() const override;
-    Ref<Value> clone() const override;
+    RawValue clone() const override;
 
     String to_string() const override;
 };
 
-struct ArrayValue : Value, Makeable<ArrayValue>
+struct ArrayValue : Value
 {
-    Array<Ref<Value>> data = {};
+    Array<ValueBox> data = {};
 
     StringRef const& type() const override;
-    Ref<Value> clone() const override;
+    RawValue clone() const override;
 
-    Ref<Value> operator+( Value const& other ) const override;
+    RawValue operator+( Value const& other ) const override;
 
     Int operator<=>( Value const& other ) const override;
 
     String to_string() const override;
 };
 
-struct RangeValue : Value, Makeable<RangeValue>
+struct RangeValue : Value
 {
     Int start_incl = 0;
     Int end_excl = 0;
 
     StringRef const& type() const override;
-    Ref<Value> clone() const override;
+    RawValue clone() const override;
 
     String to_string() const override;
 };
+
+RawValue make_nothing_value();
+RawValue make_bool_value( Bool value );
+RawValue make_int_value( Int value );
+RawValue make_float_value( Float value );
+RawValue make_char_value( Char value );
+RawValue make_string_value( StringRef const& value );
 }

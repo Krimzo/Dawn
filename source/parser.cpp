@@ -183,7 +183,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_struct( Array<Token>::const_iter
                 if ( it->value != op_split )
                     return ParseError{ *it, L"expected split" };
                 ++it;
-                field.expr = std::make_shared<NothingNode>();
+                field.expr = make_nothing_node();
             }
         }
         else if ( it->value == kw_func )
@@ -194,7 +194,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_struct( Array<Token>::const_iter
 
             Variable self_var;
             self_var.kind = Variable::Kind::LET;
-            self_var.expr = std::make_shared<NothingNode>();
+            self_var.expr = make_nothing_node();
             self_var.name = kw_self;
 
             method.args.insert( method.args.begin(), self_var );
@@ -298,7 +298,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_variable( Array<Token>::const_it
             return error;
     }
     else
-        variable.expr = std::make_shared<NothingNode>();
+        variable.expr = make_nothing_node();
 
     return std::nullopt;
 }
@@ -307,7 +307,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_expression( Array<Token>::const_
 {
     if ( it == end )
     {
-        tree = std::make_shared<NothingNode>();
+        tree = make_nothing_node();
         return std::nullopt;
     }
 
@@ -455,7 +455,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_pure( Array<Token> const& t
 {
     if ( tokens.empty() )
     {
-        tree = std::make_shared<NothingNode>();
+        tree = make_nothing_node();
         return std::nullopt;
     }
 
@@ -533,35 +533,19 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_literal( Token const
 {
     if ( token.type == TokenType::INTEGER )
     {
-        auto value = IntValue::make();
-        value->value = std::stoll( token.lit_val );
-        auto node = std::make_shared<ValueNode>();
-        node->value = value;
-        tree = node;
+        tree = make_int_node( std::stoll( token.lit_val ) );
     }
     else if ( token.type == TokenType::FLOAT )
     {
-        auto value = FloatValue::make();
-        value->value = std::stod( token.lit_val );
-        auto node = std::make_shared<ValueNode>();
-        node->value = value;
-        tree = node;
+        tree = make_float_node( std::stod( token.lit_val ) );
     }
     else if ( token.type == TokenType::CHAR )
     {
-        auto value = CharValue::make();
-        value->value = token.lit_val[0];
-        auto node = std::make_shared<ValueNode>();
-        node->value = value;
-        tree = node;
+        tree = make_char_node( token.lit_val[0] );
     }
     else if ( token.type == TokenType::STRING )
     {
-        auto value = StringValue::make();
-        value->value = token.lit_val;
-        auto node = std::make_shared<ValueNode>();
-        node->value = value;
-        tree = node;
+        tree = make_string_node( token.lit_val );
     }
     else
         return ParseError{ token, L"expected literal" };
@@ -573,19 +557,11 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_keyword( Token const
 {
     if ( token.value == kw_true )
     {
-        auto value = BoolValue::make();
-        value->value = true;
-        auto node = std::make_shared<ValueNode>();
-        node->value = value;
-        tree = node;
+        tree = make_bool_node( true );
     }
     else if ( token.value == kw_false )
     {
-        auto value = BoolValue::make();
-        value->value = false;
-        auto node = std::make_shared<ValueNode>();
-        node->value = value;
-        tree = node;
+        tree = make_bool_node( false );
     }
     else if ( token.value == kw_self )
     {
@@ -893,7 +869,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_return( Array<Token>::const_iter
             return error;
     }
     else
-        node->expr = std::make_shared<NothingNode>();
+        node->expr = make_nothing_node();
 
     tree = node;
 
@@ -1223,22 +1199,22 @@ dawn::Opt<dawn::ParseError> dawn::create_operator_node( Token const& token, Ref<
 dawn::Ref<dawn::Node> dawn::make_def_type_expr( StringRef const& type )
 {
     if ( type == tp_bool )
-        return make_bool_literal( {} );
+        return make_bool_node( {} );
 
     if ( type == tp_int )
-        return make_int_literal( {} );
+        return make_int_node( {} );
 
     if ( type == tp_float )
-        return make_float_literal( {} );
+        return make_float_node( {} );
 
     if ( type == tp_char )
-        return make_char_literal( {} );
+        return make_char_node( {} );
 
     if ( type == tp_string )
-        return make_string_literal( {} );
+        return make_string_node( {} );
 
     if ( type == op_range )
-        return make_value_literal( RangeValue::make() );
+        return make_value_node( std::make_shared<RangeValue>() );
 
-    return make_value_literal( NothingValue::make() );
+    return make_nothing_node();
 }

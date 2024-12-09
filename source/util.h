@@ -29,15 +29,6 @@ struct ColoredText
 
 std::wostream& operator<<( std::wostream& stream, ColoredText const& colored_text );
 
-template<typename T>
-struct Makeable
-{
-    static Ref<T> make()
-    {
-        return std::make_shared<T>();
-    }
-};
-
 template<typename... Args>
 String format( Args const&... args )
 {

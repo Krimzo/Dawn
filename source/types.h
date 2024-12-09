@@ -26,7 +26,7 @@ struct Scope : Node
 
 struct Function
 {
-    using CppFunc = Func<Ref<Value>( Array<Ref<Value>> const& )>;
+    using CppFunc = Func<RawValue( Array<ValueBox> const& )>;
 
     String name;
     Array<Variable> args;
@@ -36,7 +36,7 @@ struct Function
 struct Enum
 {
     String name;
-    Array<Pair<String, Ref<Value>>> keys;
+    Array<Pair<String, RawValue>> keys;
 };
 
 struct Struct

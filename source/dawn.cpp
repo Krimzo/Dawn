@@ -35,12 +35,12 @@ void dawn::Dawn::bind_func( String const& name, Function::CppFunc cpp_func )
     m_engine.bind_func( name, cpp_func );
 }
 
-dawn::Opt<dawn::EngineError> dawn::Dawn::call_func( String const& name, Array<Ref<Node>> const& args, Ref<Value>& retval )
+dawn::Opt<dawn::EngineError> dawn::Dawn::call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval )
 {
     return m_engine.call_func( name, args, retval );
 }
 
-void dawn::Dawn::add_var( String const& name, Bool is_var, Ref<Value> const& value )
+void dawn::Dawn::add_var( String const& name, Bool is_var, RawValue const& value )
 {
     m_engine.add_var( name, is_var, value );
 }
