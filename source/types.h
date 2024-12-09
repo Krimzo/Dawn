@@ -33,32 +33,16 @@ struct Function
     Variant<Scope, CppFunc> body;
 };
 
-struct Operator : Function
-{
-};
-
-struct Method : Function
-{
-    Bool is_var = false;
-};
-
 struct Enum
 {
     String name;
     Array<Pair<String, Ref<Value>>> keys;
 };
 
-struct Layer
-{
-    String name;
-    Array<Method> methods;
-};
-
 struct Struct
 {
     String name;
-    Array<Ref<Layer>> layers;
     Array<Ref<Variable>> fields;
-    Array<Ref<Method>> methods;
+    Array<Ref<Function>> methods;
 };
 }

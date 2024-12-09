@@ -6,7 +6,6 @@
 namespace dawn
 {
 inline constexpr StringRef kw_func = L"func";
-inline constexpr StringRef kw_oper = L"oper";
 inline constexpr StringRef kw_return = L"return";
 inline constexpr StringRef kw_let = L"let";
 inline constexpr StringRef kw_var = L"var";
@@ -23,9 +22,7 @@ inline constexpr StringRef kw_loop = L"loop";
 inline constexpr StringRef kw_continue = L"continue";
 inline constexpr StringRef kw_break = L"break";
 inline constexpr StringRef kw_enum = L"enum";
-inline constexpr StringRef kw_layer = L"layer";
 inline constexpr StringRef kw_struct = L"struct";
-inline constexpr StringRef kw_impl = L"impl";
 inline constexpr StringRef kw_self = L"self";
 inline constexpr StringRef kw_true = L"true";
 inline constexpr StringRef kw_false = L"false";
@@ -37,7 +34,6 @@ inline constexpr StringRef tp_float = L"float";
 inline constexpr StringRef tp_char = L"char";
 inline constexpr StringRef tp_string = L"string";
 inline constexpr StringRef tp_enum = L"enum";
-inline constexpr StringRef tp_layer = L"layer";
 inline constexpr StringRef tp_struct = L"struct";
 inline constexpr StringRef tp_array = L"array";
 inline constexpr StringRef tp_range = L"range";

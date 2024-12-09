@@ -69,7 +69,6 @@ dawn::Opt<dawn::EngineError> dawn::Engine::load_mod( Module const& module )
     };
 
     helper_func( enums, module.enums );
-    helper_func( layers, module.layers );
     helper_func( structs, module.structs );
     helper_func( functions, module.functions );
 

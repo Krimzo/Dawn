@@ -39,7 +39,6 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
     LanguageDef result;
     result.keywords = {
         (String) kw_func,
-        (String) kw_oper,
         (String) kw_return,
         (String) kw_let,
         (String) kw_var,
@@ -56,9 +55,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) kw_continue,
         (String) kw_break,
         (String) kw_enum,
-        (String) kw_layer,
         (String) kw_struct,
-        (String) kw_impl,
         (String) kw_self,
         (String) kw_true,
         (String) kw_false,

@@ -33,16 +33,12 @@ func bracket_examp() {
 	//T(value)       // cast to T
 	//t()            // function call
 	//T[value]       // array init
+	//t[index]       // array access
 }
 
 // Function
 func func_examp(a) {
 	return a * a
-}
-
-// Operator
-oper *(left, right) {
-	return left->repeat(right)
 }
 
 // Logic
@@ -123,43 +119,26 @@ func enum_examp() {
 	let value = someone->val
 }
 
-// Layer
-layer Living {
-	let get_age()
-}
-
 // Struct
-struct Person: Living {
+struct Person {
 	name,
 	age,
 
-	impl get_age() {
+	func get_age() {
 		return self->age
 	}
 
-	var var_method() {
-		return self
-	}
-
-	let let_method() {
-		return self
-	}
-
-	let who() {
-		return self->name
+	func who() {
+		print(self->name)
 	}
 }
 
 func struct_examp() {
-	let person0 = Person{}
-	var person1 = Person{ name: "Krim", age: 23 }
-	
-	var living = Living[]
-	living->push(person0)
-	living->push(person1)
+	var people = []
+	people->push(Person{})
+	people->push(Person{ name: "Krim", age: 23 })
 
-	for alive: living {
-		let age = alive->get_age()
-		print(age)
+	for let person: people {
+		print(person->get_age())
 	}
 }

@@ -37,10 +37,8 @@ std::wostream& operator<<( std::wostream& stream, ParseError const& error );
 struct Module
 {
     Array<Variable> variables;
-    Array<Operator> operators;
     Array<Function> functions;
     Array<Enum> enums;
-    Array<Layer> layers;
     Array<Struct> structs;
 
     Bool contains_id( StringRef const& id ) const;
@@ -54,20 +52,15 @@ private:
     void prepare_tokens( Array<Token>& tokens );
 
     Opt<ParseError> parse_global_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
-    Opt<ParseError> parse_global_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     Opt<ParseError> parse_global_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     Opt<ParseError> parse_global_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
-    Opt<ParseError> parse_global_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     Opt<ParseError> parse_global_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
 
+    Opt<ParseError> parse_type( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, String& type );
     Opt<ParseError> parse_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Struct& struc );
-    Opt<ParseError> parse_layer( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Layer& layer );
     Opt<ParseError> parse_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Enum& enu );
     Opt<ParseError> parse_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Function& function );
-    Opt<ParseError> parse_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Operator& operato );
     Opt<ParseError> parse_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Variable& variable );
-
-    Opt<ParseError> type_basic( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, String& type );
 
     Opt<ParseError> parse_expression( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Ref<Node>& tree );
     Opt<ParseError> expression_extract( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Array<Token>& tokens );

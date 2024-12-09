@@ -104,10 +104,8 @@ private:
 struct Engine
 {
     Stack<Ref<EngineVariable>> variables;
-    Stack<Operator> operators;
     Stack<Function> functions;
     Stack<Enum> enums;
-    Stack<Layer> layers;
     Stack<Struct> structs;
 
     void load_default_mods();
