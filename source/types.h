@@ -36,7 +36,8 @@ struct Function
 struct Enum
 {
     String name;
-    Array<Pair<String, RawValue>> keys;
+    Map<String, Variable> keys_expr;
+    Map<String, ValueBox> keys_value;
 };
 
 struct Struct

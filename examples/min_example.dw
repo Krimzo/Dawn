@@ -1,21 +1,12 @@
 func main() {
-	var data = ""
-	for let i : ~26 {
-		data += string( char( int('a') + i ) )
+	let animals = [Animal{mouse}, Animal{cat}, Animal{dog}]
+	for ref animal : animals {
+		print(animal, " = ", animal->value)
 	}
-	print(data)
 }
 
-func main2() {
-	var data = [1, 2, 3]
-	for let i : ~10 {
-		data += [i]
-	}
-	for ref val : data {
-		val *= 2
-	}
-	for let i : 0 ~ data->length {
-		data->i = sqrt(data->i)
-	}
-	print(data)
+enum Animal {
+	mouse = "Mouse",
+	cat = 'C',
+	dog = "woof " + "woof",
 }

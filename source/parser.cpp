@@ -167,6 +167,10 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_struct( Array<Token>::const_iter
 
         if ( it->type == TokenType::NAME )
         {
+            auto find_it = std::find_if( struc.fields.begin(), struc.fields.end(), [&]( auto const& field ) { return field.name == it->value; } );
+            if ( find_it != struc.fields.end() )
+                return ParseError{ *it, L"field [" + it->value + L"] already defined" };
+
             auto& field = struc.fields.emplace_back();
             field.kind = VariableKind::VAR;
             field.name = it->value;
@@ -208,7 +212,55 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_struct( Array<Token>::const_iter
 
 dawn::Opt<dawn::ParseError> dawn::Parser::parse_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Enum& enu )
 {
-    assert( false && L"not impl" );
+    if ( it->value != kw_enum )
+        return ParseError{ *it, L"expected enum" };
+    ++it;
+
+    if ( !it->is_custom_type() )
+        return ParseError{ *it, L"expected enum name" };
+    enu.name = it->value;
+    ++it;
+
+    if ( it->value != op_scope_opn )
+        return ParseError{ *it, L"expected scope open" };
+    ++it;
+
+    while ( true )
+    {
+        if ( it->value == op_scope_cls )
+        {
+            ++it;
+            break;
+        }
+
+        if ( it->type == TokenType::NAME )
+        {
+            if ( enu.keys_expr.contains( it->value ) )
+                return ParseError{ *it, L"key [" + it->value + L"] already in use" };
+
+            auto& key = enu.keys_expr[it->value];
+            key.kind = VariableKind::LET;
+            key.name = it->value;
+            ++it;
+
+            if ( it->value == op_assign )
+            {
+                ++it;
+                if ( auto error = parse_expression( it, end, key.expr ) )
+                    return error;
+            }
+            else
+            {
+                if ( it->value != op_split )
+                    return ParseError{ *it, L"expected split" };
+                ++it;
+                key.expr = make_nothing_node();
+            }
+        }
+        else
+            return ParseError{ *it, L"expected key name" };
+    }
+
     return std::nullopt;
 }
 
@@ -570,7 +622,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_single_keyword( Token const
         tree = node;
     }
     else
-        return ParseError{ token, L"keyword is not an expression" };
+        return ParseError{ token, L"keyword [" + token.value + L"] is not an expression" };
 
     return std::nullopt;
 }
@@ -635,40 +687,63 @@ dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_cast( Array<Token> con
 dawn::Opt<dawn::ParseError> dawn::Parser::expression_type_make( Array<Token> const& tokens, Ref<Node>& tree )
 {
     Array<Token>::const_iterator it = tokens.begin();
-    Ref node = std::make_shared<StructNode>();
 
     if ( !it->is_custom_type() )
         return ParseError{ *it, L"expected custom type" };
-    node->type = it->value;
+    String type = it->value;
     ++it;
 
     if ( it->value != op_scope_opn )
         return ParseError{ *it, L"expected expression open" };
     ++it;
 
+    Map<String, Ref<Node>> args;
+    Opt<String> key;
     while ( true )
     {
         if ( it->value == op_scope_cls )
+        {
+            ++it;
             break;
+        }
 
         if ( it->type != TokenType::NAME )
             return ParseError{ *it, L"expected field name" };
 
         String name = it->value;
-        if ( node->args.contains( name ) )
+        if ( args.contains( name ) )
             return ParseError{ *it, L"argument [" + name + L"] already passed" };
         ++it;
+
+        if ( args.empty() && it->value == op_scope_cls )
+        {
+            key = name;
+            ++it;
+            break;
+        }
 
         if ( it->value != op_link )
             return ParseError{ *it, L"expected bind operator" };
         ++it;
 
-        if ( auto error = parse_expression( it, tokens.end(), node->args[name] ) )
+        if ( auto error = parse_expression( it, tokens.end(), args[name] ) )
             return error;
     }
-    ++it;
 
-    tree = node;
+    if ( key )
+    {
+        Ref node = std::make_shared<EnumNode>();
+        node->type = type;
+        node->key = *key;
+        tree = node;
+    }
+    else
+    {
+        Ref node = std::make_shared<StructNode>();
+        node->type = type;
+        node->args = args;
+        tree = node;
+    }
 
     return std::nullopt;
 }

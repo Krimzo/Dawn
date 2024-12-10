@@ -61,9 +61,9 @@ private:
 struct Engine
 {
     Stack<ValueBox> variables;
-    Stack<Function> functions;
-    Stack<Enum> enums;
-    Stack<Struct> structs;
+    Map<String, Function> functions;
+    Map<String, Enum> enums;
+    Map<String, Struct> structs;
 
     void load_default_mods();
     Opt<EngineError> load_mod( Module const& module );
@@ -82,8 +82,9 @@ private:
     Opt<EngineError> handle_expr( Ref<Node> const& node, ValueBox& value );
 
     Opt<EngineError> handle_val_node( ValueNode const& node, ValueBox& value );
-    Opt<EngineError> handle_array_node( ArrayNode const& node, ValueBox& value );
+    Opt<EngineError> handle_enum_node( EnumNode const& node, ValueBox& value );
     Opt<EngineError> handle_struct_node( StructNode const& node, ValueBox& value );
+    Opt<EngineError> handle_array_node( ArrayNode const& node, ValueBox& value );
     Opt<EngineError> handle_cast_node( CastNode const& node, ValueBox& value );
     Opt<EngineError> handle_var_node( VariableNode const& node, Int& push_count );
     Opt<EngineError> handle_id_node( IdentifierNode const& node, ValueBox& value );

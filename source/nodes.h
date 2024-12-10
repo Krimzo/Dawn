@@ -89,6 +89,12 @@ struct ForNode :Node
     Scope scope;
 };
 
+struct EnumNode : Node
+{
+    String type;
+    String key;
+};
+
 struct StructNode : Node
 {
     String type;

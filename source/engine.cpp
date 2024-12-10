@@ -11,15 +11,28 @@ dawn::Opt<dawn::EngineError> dawn::Engine::load_mod( Module const& module )
 {
     try
     {
-        auto helper_func = [this]( auto& out_coll, auto const& in_coll )
+        for ( auto& entry : module.enums )
         {
-            for ( auto& entry : in_coll )
-                out_coll.push( entry.name, entry );
-        };
+            auto& enu = (enums[entry.name] = entry);
+            for ( auto& [key, expr] : enu.keys_expr )
+            {
+                ValueBox key_val;
+                if ( auto error = handle_expr( expr.expr, key_val ) )
+                    return error;
 
-        helper_func( enums, module.enums );
-        helper_func( structs, module.structs );
-        helper_func( functions, module.functions );
+                enu.keys_value[key] = ValueBox{ ValueKind::LET, key_val.value() };
+            }
+        }
+
+        for ( auto& entry : module.structs )
+        {
+            structs[entry.name] = entry;
+        }
+
+        for ( auto& entry : module.functions )
+        {
+            functions[entry.name] = entry;
+        }
 
         for ( auto& entry : module.variables )
         {
@@ -40,21 +53,17 @@ void dawn::Engine::bind_func( String const& name, Function::CppFunc cpp_func )
     Function func;
     func.name = name;
     func.body.emplace<Function::CppFunc>( std::move( cpp_func ) );
-    functions.push( name, func );
+    functions[name] = func;
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval )
 {
     try
     {
-        auto* func = functions.get( name );
-        if ( !func )
-            return EngineError{ L"function [", name, L"] doesn't exist" };
-
-        if ( auto error = handle_func( *func, args, retval ) )
-            return error;
-
-        return std::nullopt;
+        FunctionNode node;
+        node.name = name;
+        node.args = args;
+        return handle_func_node( node, retval );
     }
     catch ( String const& msg )
     {
@@ -209,11 +218,14 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_expr( Ref<Node> const& node, V
     if ( auto nd = dynamic_cast<ValueNode*>(node.get()) )
         return handle_val_node( *nd, value );
 
-    if ( auto nd = dynamic_cast<ArrayNode*>(node.get()) )
-        return handle_array_node( *nd, value );
+    if ( auto nd = dynamic_cast<EnumNode*>(node.get()) )
+        return handle_enum_node( *nd, value );
 
     if ( auto nd = dynamic_cast<StructNode*>(node.get()) )
         return handle_struct_node( *nd, value );
+
+    if ( auto nd = dynamic_cast<ArrayNode*>(node.get()) )
+        return handle_array_node( *nd, value );
 
     if ( auto nd = dynamic_cast<CastNode*>(node.get()) )
         return handle_cast_node( *nd, value );
@@ -236,6 +248,60 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_expr( Ref<Node> const& node, V
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_val_node( ValueNode const& node, ValueBox& value )
 {
     value = ValueBox{ ValueKind::LET, node.value };
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_enum_node( EnumNode const& node, ValueBox& value )
+{
+    if ( !enums.contains( node.type ) )
+        return EngineError{ "enum [", node.type, L"] doesn't exist" };
+
+    auto result = std::make_shared<EnumValue>();
+    result->parent = &enums.at( node.type );
+    result->key = node.key;
+
+    value = ValueBox{ ValueKind::LET, result };
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_struct_node( StructNode const& node, ValueBox& value )
+{
+    if ( !structs.contains( node.type ) )
+        return EngineError{ "struct [", node.type, L"] doesn't exist" };
+
+    auto& struc = structs.at( node.type );
+
+    auto result = std::make_shared<StructValue>();
+    result->parent = &struc;
+
+    for ( auto& struc_field : struc.fields )
+    {
+        auto& field = result->members[struc_field.name];
+        if ( node.args.contains( struc_field.name ) )
+            continue;
+
+        ValueBox field_val;
+        if ( auto error = handle_expr( struc_field.expr, field_val ) )
+            return error;
+
+        field = ValueBox{ ValueKind::LET, field_val.value() };
+    }
+
+    for ( auto& [arg_name, arg_expr] : node.args )
+    {
+        ValueBox arg_val;
+        if ( auto error = handle_expr( arg_expr, arg_val ) )
+            return error;
+
+        if ( !result->members.contains( arg_name ) )
+            return EngineError{ "field [", arg_name, L"] doesn't exist in struct [", node.type, L"]" };
+
+        result->members.at( arg_name ) = ValueBox{ ValueKind::LET, arg_val.value() };
+    }
+
+    value = ValueBox{ ValueKind::LET, result };
 
     return std::nullopt;
 }
@@ -273,45 +339,6 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_array_node( ArrayNode const& n
 
             result->data.emplace_back( ValueKind::LET, entry_val.value() );
         }
-    }
-
-    value = ValueBox{ ValueKind::LET, result };
-
-    return std::nullopt;
-}
-
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_struct_node( StructNode const& node, ValueBox& value )
-{
-    Struct* struc = structs.get( node.type );
-    if ( !struc )
-        return EngineError{ "struct [", node.type, L"] doesn't exist" };
-
-    auto result = std::make_shared<StructValue>();
-    result->parent = struc;
-
-    for ( auto& struc_field : struc->fields )
-    {
-        auto& field = result->members[struc_field.name];
-        if ( node.args.contains( struc_field.name ) )
-            continue;
-
-        ValueBox field_val;
-        if ( auto error = handle_expr( struc_field.expr, field_val ) )
-            return error;
-
-        field = ValueBox{ ValueKind::LET, field_val.value() };
-    }
-
-    for ( auto& [arg_name, arg_expr] : node.args )
-    {
-        ValueBox arg_val;
-        if ( auto error = handle_expr( arg_expr, arg_val ) )
-            return error;
-
-        if ( !result->members.contains( arg_name ) )
-            return EngineError{ "field [", arg_name, L"] doesn't exist in struct [", node.type, L"]" };
-
-        result->members.at( arg_name ) = ValueBox{ ValueKind::LET, arg_val.value() };
     }
 
     value = ValueBox{ ValueKind::LET, result };
@@ -374,11 +401,11 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_id_node( IdentifierNode const&
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_func_node( FunctionNode const& node, ValueBox& retval )
 {
-    auto* func = functions.get( node.name );
-    if ( !func )
+    if ( !functions.contains( node.name ) )
         return EngineError{ L"function [", node.name, L"] doesn't exist" };
 
-    return handle_func( *func, node.args, retval );
+    auto& func = functions.at( node.name );
+    return handle_func( func, node.args, retval );
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_return_node( ReturnNode const& node, ValueBox& retval, Bool& didret )
@@ -755,6 +782,8 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_array_node( Ref<ArrayValue>
             value = ValueBox{ ValueKind::LET, make_int_value( (Int) left->data.size() ) };
             return std::nullopt;
         }
+
+        return EngineError{ "Array access [", id_node->name, "] doesn't exist" };
     }
 
     ValueBox right_val;
@@ -802,6 +831,16 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_struct_node( Ref<StructValu
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_enum_node( Ref<EnumValue> const& left, Ref<Node> const& right, ValueBox& value )
 {
-    assert( false && "not impl" );
-    return std::nullopt;
+    if ( auto id_node = dynamic_cast<IdentifierNode const*>(right.get()) )
+    {
+        if ( id_node->name == L"value" )
+        {
+            value = left->parent->keys_value.at( left->key );
+            return std::nullopt;
+        }
+
+        return EngineError{ "Enum access [", id_node->name, "] doesn't exist" };
+    }
+
+    return EngineError{ "Enum access must be an identifier" };
 }

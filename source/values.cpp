@@ -471,7 +471,7 @@ dawn::RawValue dawn::EnumValue::clone() const
 
 dawn::String dawn::EnumValue::to_string() const
 {
-    return parent->name + L":" + key;
+    return parent->name + L"{" + key + L"}";
 }
 
 // struct
