@@ -1,12 +1,11 @@
-func main() {
-	let animals = [Animal{mouse}, Animal{cat}, Animal{dog}]
-	for ref animal : animals {
-		print(animal, " = ", animal->value)
-	}
+func fib(ref n) {
+    if n <= 1 {
+        return n
+    }
+    return fib(n - 1) + fib(n - 2)
 }
 
-enum Animal {
-	mouse = "Mouse",
-	cat = 'C',
-	dog = "woof " + "woof",
+func main() {
+    var result = fib(30)
+    print(result)
 }
