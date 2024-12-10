@@ -7,7 +7,7 @@ namespace dawn
 {
 struct ValueNode : Node
 {
-    RawValue value;
+    Value value;
 };
 
 struct CastNode : Node
@@ -180,5 +180,5 @@ Ref<Node> make_int_node( Int value );
 Ref<Node> make_float_node( Float value );
 Ref<Node> make_char_node( Char value );
 Ref<Node> make_string_node( StringRef const& value );
-Ref<Node> make_value_node( RawValue const& value );
+Ref<Node> make_value_node( Value const& value );
 }

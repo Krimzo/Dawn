@@ -125,8 +125,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Ar
         }
 
         auto result = std::get<Function::CppFunc>( func.body )(arg_vals);
-        if ( result )
-            retval = ValueBox{ ValueKind::LET, result };
+        retval = ValueBox{ ValueKind::LET, result };
 
         return std::nullopt;
     }
@@ -260,9 +259,9 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_enum_node( EnumNode const& nod
     if ( !enums.contains( node.type ) )
         return EngineError{ "enum [", node.type, L"] doesn't exist" };
 
-    auto result = std::make_shared<EnumValue>();
-    result->parent = &enums.at( node.type );
-    result->key = node.key;
+    EnumVal result{};
+    result.parent = &enums.at( node.type );
+    result.key = node.key;
 
     value = ValueBox{ ValueKind::LET, result };
 
@@ -276,12 +275,12 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_struct_node( StructNode const&
 
     auto& struc = structs.at( node.type );
 
-    auto result = std::make_shared<StructValue>();
-    result->parent = &struc;
+    StructVal result{};
+    result.parent = &struc;
 
     for ( auto& struc_field : struc.fields )
     {
-        auto& field = result->members[struc_field.name];
+        auto& field = result.members[struc_field.name];
         if ( node.args.contains( struc_field.name ) )
             continue;
 
@@ -298,10 +297,10 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_struct_node( StructNode const&
         if ( auto error = handle_expr( arg_expr, arg_val ) )
             return error;
 
-        if ( !result->members.contains( arg_name ) )
+        if ( !result.members.contains( arg_name ) )
             return EngineError{ "field [", arg_name, L"] doesn't exist in struct [", node.type, L"]" };
 
-        result->members.at( arg_name ) = ValueBox{ ValueKind::LET, arg_val.value() };
+        result.members.at( arg_name ) = ValueBox{ ValueKind::LET, arg_val.value() };
     }
 
     value = ValueBox{ ValueKind::LET, result };
@@ -311,7 +310,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_struct_node( StructNode const&
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_array_node( ArrayNode const& node, ValueBox& value )
 {
-    auto result = std::make_shared<ArrayValue>();
+    ArrayVal result{};
 
     if ( node.init_type == ArrayNode::InitType::SIZE )
     {
@@ -319,7 +318,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_array_node( ArrayNode const& n
         if ( auto error = handle_expr( node.SIZE_size_expr, size_val ) )
             return error;
 
-        Int size = size_val.value()->to_int();
+        Int size = size_val.value().to_int();
         if ( size < 0 )
             return EngineError{ "Array size cannot be negative" };
 
@@ -327,20 +326,20 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_array_node( ArrayNode const& n
         if ( auto error = handle_expr( node.SIZE_value_expr, value_val ) )
             return error;
 
-        result->data.resize( size );
-        for ( auto& val : result->data )
+        result.data.resize( size );
+        for ( auto& val : result.data )
             val = ValueBox{ ValueKind::LET, value_val.value() };
     }
     else
     {
-        result->data.reserve( node.LIST_list.size() );
+        result.data.reserve( node.LIST_list.size() );
         for ( auto& expr : node.LIST_list )
         {
             ValueBox entry_val;
             if ( auto error = handle_expr( expr, entry_val ) )
                 return error;
 
-            result->data.emplace_back( ValueKind::LET, entry_val.value() );
+            result.data.emplace_back( ValueKind::LET, entry_val.value() );
         }
     }
 
@@ -357,23 +356,23 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_cast_node( CastNode const& nod
 
     if ( node.type == tp_bool )
     {
-        value = ValueBox{ ValueKind::LET, make_bool_value( cast_val.value()->to_bool() ) };
+        value = ValueBox{ ValueKind::LET, Value{ cast_val.value().to_bool() } };
     }
     else if ( node.type == tp_int )
     {
-        value = ValueBox{ ValueKind::LET, make_int_value( cast_val.value()->to_int() ) };
+        value = ValueBox{ ValueKind::LET, Value{ cast_val.value().to_int() } };
     }
     else if ( node.type == tp_float )
     {
-        value = ValueBox{ ValueKind::LET, make_float_value( cast_val.value()->to_float() ) };
+        value = ValueBox{ ValueKind::LET, Value{ cast_val.value().to_float() } };
     }
     else if ( node.type == tp_char )
     {
-        value = ValueBox{ ValueKind::LET, make_char_value( cast_val.value()->to_char() ) };
+        value = ValueBox{ ValueKind::LET, Value{ cast_val.value().to_char() } };
     }
     else if ( node.type == tp_string )
     {
-        value = ValueBox{ ValueKind::LET, make_string_value( cast_val.value()->to_string() ) };
+        value = ValueBox{ ValueKind::LET, Value{ cast_val.value().to_string() } };
     }
     else
         return EngineError{ "Unknown cast type: ", node.type };
@@ -447,14 +446,14 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_if_node( IfNode const& node, V
     if ( auto error = handle_expr( node.if_part.expr, check_val ) )
         return error;
 
-    if ( check_val.value()->to_bool() )
+    if ( check_val.value().to_bool() )
         return handle_scope( node.if_part.scope, retval, didret, didbrk, didcon );
 
     for ( auto& elif_part : node.elif_parts )
     {
         if ( auto error = handle_expr( elif_part.expr, check_val ) )
             return error;
-        if ( check_val.value()->to_bool() )
+        if ( check_val.value().to_bool() )
             return handle_scope( elif_part.scope, retval, didret, didbrk, didcon );
     }
 
@@ -478,7 +477,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_switch_node( SwitchNode const&
             if ( auto error = handle_expr( expr, case_val ) )
                 return error;
 
-            if ( (*check_val.value() == *case_val.value())->to_bool() )
+            if ( (check_val.value() == case_val.value()).to_bool() )
             {
                 if ( auto error = handle_scope( case_part.scope, retval, didret, didbrk, didcon ) )
                     return error;
@@ -525,7 +524,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_while_node( WhileNode const& n
         if ( auto error = handle_expr( node.expr, check_val ) )
             return error;
 
-        if ( !check_val.value()->to_bool() )
+        if ( !check_val.value().to_bool() )
             break;
 
         if ( didret || didbrk )
@@ -547,33 +546,12 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node,
     if ( auto error = handle_expr( node.expr, loop_val ) )
         return error;
 
-    if ( auto value_rng = dynamic_cast<RangeValue const*>(loop_val.value().get()) )
+    if ( loop_val.value().type() == ValueType::STRING )
     {
+        auto& value_str = loop_val.value().as<String>();
+
         Bool didbrk = false, didcon = false;
-        for ( auto i = value_rng->start_incl; i < value_rng->end_excl; ++i )
-        {
-            if ( didret || didbrk )
-                break;
-
-            if ( didcon )
-                didcon = false;
-
-            Variable arg = node.var;
-            arg.expr = make_int_node( i );
-
-            if ( auto error = add_var( arg ) )
-                return error;
-
-            if ( auto error = handle_scope( node.scope, retval, didret, &didbrk, &didcon ) )
-                return error;
-
-            variables.pop();
-        }
-    }
-    else if ( auto value_str = dynamic_cast<StringValue const*>(loop_val.value().get()) )
-    {
-        Bool didbrk = false, didcon = false;
-        for ( Char c : value_str->value )
+        for ( Char c : value_str )
         {
             if ( didret || didbrk )
                 break;
@@ -593,10 +571,12 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node,
             variables.pop();
         }
     }
-    else if ( auto value_arr = dynamic_cast<ArrayValue const*>(loop_val.value().get()) )
+    else if ( loop_val.value().type() == ValueType::ARRAY )
     {
+        auto& value_arr = loop_val.value().as<ArrayVal>();
+
         Bool didbrk = false, didcon = false;
-        for ( auto& value : value_arr->data )
+        for ( auto& value : value_arr.data )
         {
             if ( didret || didbrk )
                 break;
@@ -612,8 +592,33 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_for_node( ForNode const& node,
             variables.pop();
         }
     }
+    else if ( loop_val.value().type() == ValueType::RANGE )
+    {
+        auto& value_rng = loop_val.value().as<RangeVal>();
+
+        Bool didbrk = false, didcon = false;
+        for ( auto i = value_rng.start_incl; i < value_rng.end_excl; ++i )
+        {
+            if ( didret || didbrk )
+                break;
+
+            if ( didcon )
+                didcon = false;
+
+            Variable arg = node.var;
+            arg.expr = make_int_node( i );
+
+            if ( auto error = add_var( arg ) )
+                return error;
+
+            if ( auto error = handle_scope( node.scope, retval, didret, &didbrk, &didcon ) )
+                return error;
+
+            variables.pop();
+        }
+    }
     else
-        return EngineError{ "Can't for loop [", loop_val.value()->type(), "]" };
+        return EngineError{ "Can't for loop [", loop_val.value().type(), "]" };
 
     return std::nullopt;
 }
@@ -627,19 +632,19 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_un_node( UnaryNode const& node
     switch ( node.type )
     {
     case UnaryType::PLUS:
-        value = ValueBox{ ValueKind::LET, right_val.value() };
+        value = ValueBox{ ValueKind::LET, +right_val.value() };
         break;
 
     case UnaryType::MINUS:
-        value = ValueBox{ ValueKind::LET, -(*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, -right_val.value() };
         break;
 
     case UnaryType::NOT:
-        value = ValueBox{ ValueKind::LET, !(*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, !right_val.value() };
         break;
 
     case UnaryType::RANGE:
-        value = ValueBox{ ValueKind::LET, ~(*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, ~right_val.value() };
         break;
 
     default:
@@ -665,63 +670,63 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& n
     switch ( node.type )
     {
     case OperatorType::ADD:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) + (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() + right_val.value() };
         break;
 
     case OperatorType::SUB:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) - (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() - right_val.value() };
         break;
 
     case OperatorType::MUL:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) * (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() * right_val.value() };
         break;
 
     case OperatorType::DIV:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) / (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() / right_val.value() };
         break;
 
     case OperatorType::POW:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) ^ (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() ^ right_val.value() };
         break;
 
     case OperatorType::MOD:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) % (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() % right_val.value() };
         break;
 
     case OperatorType::AND:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) && (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() && right_val.value() };
         break;
 
     case OperatorType::OR:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) || (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() || right_val.value() };
         break;
 
     case OperatorType::EQ:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) == (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() == right_val.value() };
         break;
 
     case OperatorType::NOT_EQ:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) != (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() != right_val.value() };
         break;
 
     case OperatorType::LESS:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) < (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() < right_val.value() };
         break;
 
     case OperatorType::GREAT:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) > (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() > right_val.value() };
         break;
 
     case OperatorType::LESS_EQ:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) <= (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() <= right_val.value() };
         break;
 
     case OperatorType::GREAT_EQ:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) >= (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() >= right_val.value() };
         break;
 
     case OperatorType::RANGE:
-        value = ValueBox{ ValueKind::LET, (*left_val.value()) >> (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, left_val.value() >> right_val.value() };
         break;
 
     default:
@@ -737,16 +742,16 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_node( OperatorNode const& n
     if ( auto error = handle_expr( node.left, left_val ) )
         return error;
 
-    if ( auto array_val = std::dynamic_pointer_cast<ArrayValue>(left_val.value()) )
-        return handle_ac_array_node( array_val, node.right, value );
+    if ( left_val.value().type() == ValueType::ENUM )
+        return handle_ac_enum_node( left_val.value().as<EnumVal>(), node.right, value );
 
-    if ( auto struct_val = std::dynamic_pointer_cast<StructValue>(left_val.value()) )
-        return handle_ac_struct_node( struct_val, node.right, value );
+    if ( left_val.value().type() == ValueType::STRUCT )
+        return handle_ac_struct_node( left_val.value().as<StructVal>(), node.right, value );
 
-    if ( auto enum_val = std::dynamic_pointer_cast<EnumValue>(left_val.value()) )
-        return handle_ac_enum_node( enum_val, node.right, value );
+    if ( left_val.value().type() == ValueType::ARRAY )
+        return handle_ac_array_node( left_val.value().as<ArrayVal>(), node.right, value );
 
-    return EngineError{ "Can't access member of [", left_val.value()->type(), "]" };
+    return EngineError{ "Can't access member of [", left_val.value().type(), "]" };
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& node, ValueBox& value )
@@ -766,27 +771,27 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& nod
         break;
 
     case AssignType::ADD:
-        left_val.set_value( *left_val.value() + (*right_val.value()) );
+        left_val.set_value( left_val.value() + right_val.value() );
         break;
 
     case AssignType::SUB:
-        left_val.set_value( *left_val.value() - (*right_val.value()) );
+        left_val.set_value( left_val.value() - right_val.value() );
         break;
 
     case AssignType::MUL:
-        left_val.set_value( *left_val.value() * (*right_val.value()) );
+        left_val.set_value( left_val.value() * right_val.value() );
         break;
 
     case AssignType::DIV:
-        left_val.set_value( *left_val.value() / (*right_val.value()) );
+        left_val.set_value( left_val.value() / right_val.value() );
         break;
 
     case AssignType::POW:
-        left_val.set_value( *left_val.value() ^ (*right_val.value()) );
+        left_val.set_value( left_val.value() ^ right_val.value() );
         break;
 
     case AssignType::MOD:
-        left_val.set_value( *left_val.value() % (*right_val.value()) );
+        left_val.set_value( left_val.value() % right_val.value() );
         break;
 
     default:
@@ -798,13 +803,13 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& nod
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_string_node( Ref<StringValue> const& left, Ref<Node> const& right, ValueBox& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_string_node( String const& left, Ref<Node> const& right, ValueBox& value )
 {
     if ( auto id_node = dynamic_cast<IdentifierNode const*>(right.get()) )
     {
         if ( id_node->name == L"length" )
         {
-            value = ValueBox{ ValueKind::LET, make_int_value( (Int) left->value.size() ) };
+            value = ValueBox{ ValueKind::LET, Value{ (Int) left.size() } };
             return std::nullopt;
         }
     }
@@ -813,56 +818,46 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_string_node( Ref<StringValu
     if ( auto error = handle_expr( right, right_val ) )
         return error;
 
-    Int index = right_val.value()->to_int();
-    if ( index < 0 || index >= (Int) left->value.size() )
+    Int index = right_val.value().to_int();
+    if ( index < 0 || index >= (Int) left.size() )
         return EngineError{ "String access [", index, "] out of bounds" };
 
-    value = ValueBox{ ValueKind::LET, make_char_value( left->value[index] ) };
+    value = ValueBox{ ValueKind::LET, Value{ left[index] } };
 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_array_node( Ref<ArrayValue> const& left, Ref<Node> const& right, ValueBox& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_enum_node( EnumVal const& left, Ref<Node> const& right, ValueBox& value )
 {
     if ( auto id_node = dynamic_cast<IdentifierNode const*>(right.get()) )
     {
-        if ( id_node->name == L"length" )
+        if ( id_node->name == L"value" )
         {
-            value = ValueBox{ ValueKind::LET, make_int_value( (Int) left->data.size() ) };
+            value = left.parent->keys_value.at( left.key );
             return std::nullopt;
         }
 
-        return EngineError{ "Array access [", id_node->name, "] doesn't exist" };
+        return EngineError{ "Enum access [", id_node->name, "] doesn't exist" };
     }
 
-    ValueBox right_val;
-    if ( auto error = handle_expr( right, right_val ) )
-        return error;
-
-    Int index = right_val.value()->to_int();
-    if ( index < 0 || index >= (Int) left->data.size() )
-        return EngineError{ "Array access [", index, "] out of bounds" };
-
-    value = left->data[index];
-
-    return std::nullopt;
+    return EngineError{ "Enum access must be an identifier" };
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_struct_node( Ref<StructValue> const& left, Ref<Node> const& right, ValueBox& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_struct_node( StructVal const& left, Ref<Node> const& right, ValueBox& value )
 {
     if ( auto id_node = dynamic_cast<IdentifierNode const*>(right.get()) )
     {
-        if ( !left->members.contains( id_node->name ) )
+        if ( !left.members.contains( id_node->name ) )
             return EngineError{ "Member [", id_node->name, "] doesn't exist" };
 
-        value = left->members.at( id_node->name );
+        value = left.members.at( id_node->name );
 
         return std::nullopt;
     }
 
     if ( auto func_node = dynamic_cast<FunctionNode const*>(right.get()) )
     {
-        auto method_ptr = left->parent->get_method( func_node->name );
+        auto method_ptr = left.parent->get_method( func_node->name );
         if ( !method_ptr )
             return EngineError{ "Method [", func_node->name, "] doesn't exist" };
 
@@ -878,18 +873,28 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_struct_node( Ref<StructValu
     return EngineError{ "Struct access must be an identifier or function call" };
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_enum_node( Ref<EnumValue> const& left, Ref<Node> const& right, ValueBox& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_array_node( ArrayVal const& left, Ref<Node> const& right, ValueBox& value )
 {
     if ( auto id_node = dynamic_cast<IdentifierNode const*>(right.get()) )
     {
-        if ( id_node->name == L"value" )
+        if ( id_node->name == L"length" )
         {
-            value = left->parent->keys_value.at( left->key );
+            value = ValueBox{ ValueKind::LET, Value{ (Int) left.data.size() } };
             return std::nullopt;
         }
 
-        return EngineError{ "Enum access [", id_node->name, "] doesn't exist" };
+        return EngineError{ "Array access [", id_node->name, "] doesn't exist" };
     }
 
-    return EngineError{ "Enum access must be an identifier" };
+    ValueBox right_val;
+    if ( auto error = handle_expr( right, right_val ) )
+        return error;
+
+    Int index = right_val.value().to_int();
+    if ( index < 0 || index >= (Int) left.data.size() )
+        return EngineError{ "Array access [", index, "] out of bounds" };
+
+    value = left.data[index];
+
+    return std::nullopt;
 }

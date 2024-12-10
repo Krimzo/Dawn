@@ -5,168 +5,137 @@
 
 namespace dawn
 {
-struct NothingValue : Value
-{
-    StringRef const& type() const override;
-    RawValue clone() const override;
-
-    Bool to_bool() const override;
-    Int to_int() const override;
-    Float to_float() const override;
-    Char to_char() const override;
-    String to_string() const override;
-};
-
-struct BoolValue : Value
-{
-    Bool value = {};
-
-    StringRef const& type() const override;
-    RawValue clone() const override;
-
-    Int operator<=>( Value const& other ) const override;
-
-    Bool to_bool() const override;
-    Int to_int() const override;
-    Float to_float() const override;
-    Char to_char() const override;
-    String to_string() const override;
-};
-
-struct IntValue : Value
-{
-    Int value = {};
-
-    StringRef const& type() const override;
-    RawValue clone() const override;
-
-    RawValue operator-() const override;
-    RawValue operator+( Value const& other ) const override;
-    RawValue operator-( Value const& other ) const override;
-    RawValue operator*( Value const& other ) const override;
-    RawValue operator/( Value const& other ) const override;
-    RawValue operator^( Value const& other ) const override;
-    RawValue operator%( Value const& other ) const override;
-
-    Int operator<=>( Value const& other ) const override;
-    RawValue operator>>( Value const& other ) const override;
-
-    Bool to_bool() const override;
-    Int to_int() const override;
-    Float to_float() const override;
-    Char to_char() const override;
-    String to_string() const override;
-};
-
-struct FloatValue : Value
-{
-    Float value = {};
-
-    StringRef const& type() const override;
-    RawValue clone() const override;
-
-    RawValue operator-() const override;
-    RawValue operator+( Value const& other ) const override;
-    RawValue operator-( Value const& other ) const override;
-    RawValue operator*( Value const& other ) const override;
-    RawValue operator/( Value const& other ) const override;
-    RawValue operator^( Value const& other ) const override;
-    RawValue operator%( Value const& other ) const override;
-
-    Int operator<=>( Value const& other ) const override;
-
-    Bool to_bool() const override;
-    Int to_int() const override;
-    Float to_float() const override;
-    Char to_char() const override;
-    String to_string() const override;
-};
-
-struct CharValue : Value
-{
-    Char value = {};
-
-    StringRef const& type() const override;
-    RawValue clone() const override;
-
-    Int operator<=>( Value const& other ) const override;
-
-    Bool to_bool() const override;
-    Int to_int() const override;
-    Float to_float() const override;
-    Char to_char() const override;
-    String to_string() const override;
-};
-
-struct StringValue : Value
-{
-    String value = {};
-
-    StringRef const& type() const override;
-    RawValue clone() const override;
-
-    RawValue operator+( Value const& other ) const override;
-
-    Int operator<=>( Value const& other ) const override;
-
-    Bool to_bool() const override;
-    Int to_int() const override;
-    Float to_float() const override;
-    Char to_char() const override;
-    String to_string() const override;
-};
-
-struct EnumValue : Value
+struct EnumVal
 {
     Enum const* parent = nullptr;
     String key;
-
-    StringRef const& type() const override;
-    RawValue clone() const override;
-
-    String to_string() const override;
 };
 
-struct StructValue : Value
+struct StructVal
 {
     Struct const* parent = nullptr;
     Map<String, ValueBox> members;
-
-    StringRef const& type() const override;
-    RawValue clone() const override;
-
-    String to_string() const override;
 };
 
-struct ArrayValue : Value
+struct ArrayVal
 {
-    Array<ValueBox> data = {};
-
-    StringRef const& type() const override;
-    RawValue clone() const override;
-
-    RawValue operator+( Value const& other ) const override;
-
-    Int operator<=>( Value const& other ) const override;
-
-    String to_string() const override;
+    Array<ValueBox> data;
 };
 
-struct RangeValue : Value
+struct RangeVal
 {
     Int start_incl = 0;
     Int end_excl = 0;
-
-    StringRef const& type() const override;
-    RawValue clone() const override;
-
-    String to_string() const override;
 };
 
-RawValue make_nothing_value();
-RawValue make_bool_value( Bool value );
-RawValue make_int_value( Int value );
-RawValue make_float_value( Float value );
-RawValue make_char_value( Char value );
-RawValue make_string_value( StringRef const& value );
+enum struct ValueType
+{
+    NOTHING,
+    BOOL,
+    INT,
+    FLOAT,
+    CHAR,
+    STRING,
+    ENUM,
+    STRUCT,
+    ARRAY,
+    RANGE,
+};
+
+std::wostream& operator<<( std::wostream& stream, ValueType type );
+
+struct Value
+{
+    Value();
+    Value( Bool value );
+    Value( Int value );
+    Value( Float value );
+    Value( Char value );
+    Value( StringRef const& value );
+    Value( EnumVal const& value );
+    Value( StructVal const& value );
+    Value( ArrayVal const& value );
+    Value( RangeVal const& value );
+
+    constexpr ValueType type() const
+    {
+        return static_cast<ValueType>(m_value.index());
+    }
+
+    template<typename T>
+    constexpr T& as()
+    {
+        return std::get<T>( m_value );
+    }
+
+    template<typename T>
+    constexpr T const& as() const
+    {
+        return std::get<T>( m_value );
+    }
+
+    Value operator+() const;
+    Value operator-() const;
+    Value operator+( Value const& other ) const;
+    Value operator-( Value const& other ) const;
+    Value operator*( Value const& other ) const;
+    Value operator/( Value const& other ) const;
+    Value operator^( Value const& other ) const;
+    Value operator%( Value const& other ) const;
+
+    Value operator==( Value const& other ) const;
+    Value operator!=( Value const& other ) const;
+    Value operator<( Value const& other ) const;
+    Value operator>( Value const& other ) const;
+    Value operator<=( Value const& other ) const;
+    Value operator>=( Value const& other ) const;
+
+    Value operator!() const;
+    Value operator&&( Value const& other ) const;
+    Value operator||( Value const& other ) const;
+
+    Value operator~() const;
+    Value operator>>( Value const& other ) const;
+
+    Bool to_bool() const;
+    Int to_int() const;
+    Float to_float() const;
+    Char to_char() const;
+    String to_string() const;
+
+private:
+    Variant<
+        nullptr_t,
+        Bool,
+        Int,
+        Float,
+        Char,
+        String,
+        EnumVal,
+        StructVal,
+        ArrayVal,
+        RangeVal
+    > m_value;
+};
+
+enum struct ValueKind
+{
+    LET = 0,
+    VAR,
+};
+
+struct ValueBox
+{
+    ValueBox();
+    ValueBox( ValueKind kind, Value const& value );
+
+    Value const& value() const;
+    void set_value( Value const& value );
+
+private:
+    ValueKind m_kind;
+    Ref<Value> m_value_ref;
+
+    void reapply_kind();
+};
 }

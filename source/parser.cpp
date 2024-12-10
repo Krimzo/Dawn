@@ -1311,7 +1311,7 @@ dawn::Ref<dawn::Node> dawn::make_def_type_expr( StringRef const& type )
         return make_string_node( {} );
 
     if ( type == op_range )
-        return make_value_node( std::make_shared<RangeValue>() );
+        return make_value_node( Value{ RangeVal{} } );
 
     return make_nothing_node();
 }

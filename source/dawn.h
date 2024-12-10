@@ -10,17 +10,17 @@ namespace dawn
 {
 struct Dawn
 {
-    Dawn();
+    Dawn() noexcept;
 
-    Opt<String> eval( StringRef const& source );
-    Opt<String> eval_file( StringRef const& path );
+    Opt<String> eval( StringRef const& source ) noexcept;
+    Opt<String> eval_file( StringRef const& path ) noexcept;
 
-    void bind_func( String const& name, Function::CppFunc cpp_func );
-    Opt<EngineError> call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval );
+    void bind_func( String const& name, Function::CppFunc cpp_func ) noexcept;
+    Opt<EngineError> call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval ) noexcept;
 
-    Opt<EngineError> add_var( Variable const& var );
-    void add_var( Variable const& var, ValueBox const& value );
-    ValueBox* get_var( String const& name );
+    Opt<EngineError> add_var( Variable const& var ) noexcept;
+    void add_var( Variable const& var, ValueBox const& value ) noexcept;
+    ValueBox* get_var( String const& name ) noexcept;
 
 private:
     Lexer m_lexer;

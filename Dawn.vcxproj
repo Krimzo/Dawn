@@ -19,7 +19,6 @@
     <ClCompile Include="source\types.cpp" />
     <ClCompile Include="source\util.cpp" />
     <ClCompile Include="source\dawn.cpp" />
-    <ClCompile Include="source\valnode.cpp" />
     <ClCompile Include="source\values.cpp" />
     <ClCompile Include="source\_main.cpp" />
   </ItemGroup>
@@ -33,7 +32,6 @@
     <ClInclude Include="source\t.h" />
     <ClInclude Include="source\types.h" />
     <ClInclude Include="source\util.h" />
-    <ClInclude Include="source\valnode.h" />
     <ClInclude Include="source\values.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

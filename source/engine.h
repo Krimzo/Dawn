@@ -102,9 +102,9 @@ private:
     Opt<EngineError> handle_ac_node( OperatorNode const& node, ValueBox& value );
     Opt<EngineError> handle_as_node( AssignNode const& node, ValueBox& value );
 
-    Opt<EngineError> handle_ac_string_node( Ref<StringValue> const& left, Ref<Node> const& right, ValueBox& value );
-    Opt<EngineError> handle_ac_array_node( Ref<ArrayValue> const& left, Ref<Node> const& right, ValueBox& value );
-    Opt<EngineError> handle_ac_struct_node( Ref<StructValue> const& left, Ref<Node> const& right, ValueBox& value );
-    Opt<EngineError> handle_ac_enum_node( Ref<EnumValue> const& left, Ref<Node> const& right, ValueBox& value );
+    Opt<EngineError> handle_ac_string_node( String const& left, Ref<Node> const& right, ValueBox& value );
+    Opt<EngineError> handle_ac_enum_node( EnumVal const& left, Ref<Node> const& right, ValueBox& value );
+    Opt<EngineError> handle_ac_struct_node( StructVal const& left, Ref<Node> const& right, ValueBox& value );
+    Opt<EngineError> handle_ac_array_node( ArrayVal const& left, Ref<Node> const& right, ValueBox& value );
 };
 }

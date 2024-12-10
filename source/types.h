@@ -1,10 +1,18 @@
 #pragma once
 
-#include "valnode.h"
+#include "syntax.h"
 
 
 namespace dawn
 {
+struct Value;
+struct ValueBox;
+
+struct Node
+{
+    virtual ~Node() = default;
+};
+
 enum struct VariableKind
 {
     LET = 0,
@@ -26,7 +34,7 @@ struct Scope : Node
 
 struct Function
 {
-    using CppFunc = Func<RawValue( Array<ValueBox> const& )>;
+    using CppFunc = Func<Value( Array<ValueBox> const& )>;
 
     String name;
     Array<Variable> args;

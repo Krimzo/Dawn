@@ -1,617 +1,786 @@
 #include "values.h"
 
 
-// nothing
-dawn::StringRef const& dawn::NothingValue::type() const
+std::wostream& dawn::operator<<( std::wostream& stream, ValueType type )
 {
-    return tp_nothing;
-}
-
-dawn::RawValue dawn::NothingValue::clone() const
-{
-    return make_nothing_value();
-}
-
-dawn::Bool dawn::NothingValue::to_bool() const
-{
-    return {};
-}
-
-dawn::Int dawn::NothingValue::to_int() const
-{
-    return {};
-}
-
-dawn::Float dawn::NothingValue::to_float() const
-{
-    return {};
-}
-
-dawn::Char dawn::NothingValue::to_char() const
-{
-    return {};
-}
-
-dawn::String dawn::NothingValue::to_string() const
-{
-    return {};
-}
-
-// bool
-dawn::StringRef const& dawn::BoolValue::type() const
-{
-    return tp_bool;
-}
-
-dawn::RawValue dawn::BoolValue::clone() const
-{
-    return make_bool_value( value );
-}
-
-dawn::Int dawn::BoolValue::operator<=>( Value const& other ) const
-{
-    if ( other.type() == tp_bool )
+    switch ( type )
     {
-        auto result = value <=> other.to_bool();
-        return result._Value;
+    case ValueType::NOTHING: stream << tp_nothing; break;
+    case ValueType::BOOL: stream << tp_bool; break;
+    case ValueType::INT: stream << tp_int; break;
+    case ValueType::FLOAT: stream << tp_float; break;
+    case ValueType::CHAR: stream << tp_char; break;
+    case ValueType::STRING: stream << tp_string; break;
+    case ValueType::ENUM: stream << tp_enum; break;
+    case ValueType::STRUCT: stream << tp_struct; break;
+    case ValueType::ARRAY: stream << tp_array; break;
+    case ValueType::RANGE: stream << tp_range; break;
+    }
+    return stream;
+}
+
+dawn::Value::Value()
+{}
+
+dawn::Value::Value( Bool value )
+{
+    m_value.emplace<Bool>( value );
+}
+
+dawn::Value::Value( Int value )
+{
+    m_value.emplace<Int>( value );
+}
+
+dawn::Value::Value( Float value )
+{
+    m_value.emplace<Float>( value );
+}
+
+dawn::Value::Value( Char value )
+{
+    m_value.emplace<Char>( value );
+}
+
+dawn::Value::Value( StringRef const& value )
+{
+    m_value.emplace<String>( value );
+}
+
+dawn::Value::Value( EnumVal const& value )
+{
+    m_value.emplace<EnumVal>( value );
+}
+
+dawn::Value::Value( StructVal const& value )
+{
+    m_value.emplace<StructVal>( value );
+}
+
+dawn::Value::Value( ArrayVal const& value )
+{
+    m_value.emplace<ArrayVal>( value );
+}
+
+dawn::Value::Value( RangeVal const& value )
+{
+    m_value.emplace<RangeVal>( value );
+}
+
+dawn::Value dawn::Value::operator+() const
+{
+    switch ( type() )
+    {
+    case ValueType::INT:
+        return Value{ +std::get<Int>( m_value ) };
+
+    case ValueType::FLOAT:
+        return Value{ +std::get<Float>( m_value ) };
+
+    default:
+        PANIC( "+ [", type(), "] not supported" );
+    }
+}
+
+dawn::Value dawn::Value::operator-() const
+{
+    switch ( type() )
+    {
+    case ValueType::INT:
+        return Value{ -std::get<Int>( m_value ) };
+
+    case ValueType::FLOAT:
+        return Value{ -std::get<Float>( m_value ) };
+
+    default:
+        PANIC( "- [", type(), "] not supported" );
+    }
+}
+
+dawn::Value dawn::Value::operator+( Value const& other ) const
+{
+    switch ( type() )
+    {
+    case ValueType::INT:
+    {
+        switch ( other.type() )
+        {
+        case ValueType::INT:
+            return Value{ std::get<Int>( m_value ) + std::get<Int>( other.m_value ) };
+
+        case ValueType::FLOAT:
+            return Value{ std::get<Int>( m_value ) + std::get<Float>( other.m_value ) };
+
+        default:
+            PANIC( "[", type(), "] + [", other.type(), "] not supported" );
+        }
     }
 
-    return Value::operator<=>( other );
-}
-
-dawn::Bool dawn::BoolValue::to_bool() const
-{
-    return value;
-}
-
-dawn::Int dawn::BoolValue::to_int() const
-{
-    return (Int) value;
-}
-
-dawn::Float dawn::BoolValue::to_float() const
-{
-    return (Float) value;
-}
-
-dawn::Char dawn::BoolValue::to_char() const
-{
-    if ( value )
-        return L't';
-    return L'f';
-}
-
-dawn::String dawn::BoolValue::to_string() const
-{
-    if ( value )
-        return L"true";
-    return L"false";
-}
-
-// int
-dawn::StringRef const& dawn::IntValue::type() const
-{
-    return tp_int;
-}
-
-dawn::RawValue dawn::IntValue::clone() const
-{
-    return make_int_value( value );
-}
-
-dawn::RawValue dawn::IntValue::operator-() const
-{
-    return make_int_value( -value );
-}
-
-dawn::RawValue dawn::IntValue::operator+( Value const& other ) const
-{
-    if ( other.type() == tp_int )
-        return make_int_value( value + other.to_int() );
-
-    if ( other.type() == tp_float )
-        return make_float_value( value + other.to_float() );
-
-    return Value::operator+( other );
-}
-
-dawn::RawValue dawn::IntValue::operator-( Value const& other ) const
-{
-    if ( other.type() == tp_int )
-        return make_int_value( value - other.to_int() );
-
-    if ( other.type() == tp_float )
-        return make_float_value( value - other.to_float() );
-
-    return Value::operator-( other );
-}
-
-dawn::RawValue dawn::IntValue::operator*( Value const& other ) const
-{
-    if ( other.type() == tp_int )
-        return make_int_value( value * other.to_int() );
-
-    if ( other.type() == tp_float )
-        return make_float_value( value * other.to_float() );
-
-    return Value::operator*( other );
-}
-
-dawn::RawValue dawn::IntValue::operator/( Value const& other ) const
-{
-    if ( other.type() == tp_int )
-        return make_int_value( value / other.to_int() );
-
-    if ( other.type() == tp_float )
-        return make_float_value( value / other.to_float() );
-
-    return Value::operator/( other );
-}
-
-dawn::RawValue dawn::IntValue::operator^( Value const& other ) const
-{
-    if ( other.type() == tp_int )
-        return make_int_value( (Int) std::pow( value, other.to_int() ) );
-
-    if ( other.type() == tp_float )
-        return make_float_value( (Float) std::pow( value, other.to_float() ) );
-
-    return Value::operator^( other );
-}
-
-dawn::RawValue dawn::IntValue::operator%( Value const& other ) const
-{
-    if ( other.type() == tp_int )
-        return make_int_value( value % other.to_int() );
-
-    if ( other.type() == tp_float )
-        return make_float_value( mymod( (Float) value, other.to_float() ) );
-
-    return Value::operator%( other );
-}
-
-dawn::Int dawn::IntValue::operator<=>( Value const& other ) const
-{
-    if ( other.type() == tp_int )
+    case ValueType::FLOAT:
     {
-        auto result = value <=> other.to_int();
-        return result._Value;
+        switch ( other.type() )
+        {
+        case ValueType::INT:
+            return Value{ std::get<Float>( m_value ) + std::get<Int>( other.m_value ) };
+
+        case ValueType::FLOAT:
+            return Value{ std::get<Float>( m_value ) + std::get<Float>( other.m_value ) };
+
+        default:
+            PANIC( "[", type(), "] + [", other.type(), "] not supported" );
+        }
     }
 
-    if ( other.type() == tp_float )
+    case ValueType::STRING:
     {
-        auto result = to_float() <=> other.to_float();
-        return result._Value;
+        switch ( other.type() )
+        {
+        case ValueType::STRING:
+            return Value{ std::get<String>( m_value ) + std::get<String>( other.m_value ) };
+
+        default:
+            PANIC( "[", type(), "] + [", other.type(), "] not supported" );
+        }
     }
 
-    return Value::operator<=>( other );
-}
-
-dawn::RawValue dawn::IntValue::operator>>( Value const& other ) const
-{
-    auto result = std::make_shared<RangeValue>();
-    result->start_incl = value;
-    result->end_excl = other.to_int();
-    return result;
-}
-
-dawn::Bool dawn::IntValue::to_bool() const
-{
-    return (Bool) value;
-}
-
-dawn::Int dawn::IntValue::to_int() const
-{
-    return value;
-}
-
-dawn::Float dawn::IntValue::to_float() const
-{
-    return (Float) value;
-}
-
-dawn::Char dawn::IntValue::to_char() const
-{
-    return (Char) value;
-}
-
-dawn::String dawn::IntValue::to_string() const
-{
-    return std::to_wstring( value );
-}
-
-// float
-dawn::StringRef const& dawn::FloatValue::type() const
-{
-    return tp_float;
-}
-
-dawn::RawValue dawn::FloatValue::clone() const
-{
-    return make_float_value( value );
-}
-
-dawn::RawValue dawn::FloatValue::operator-() const
-{
-    return make_float_value( -value );
-}
-
-dawn::RawValue dawn::FloatValue::operator+( Value const& other ) const
-{
-    if ( other.type() == tp_int )
-        return make_float_value( value + other.to_int() );
-
-    if ( other.type() == tp_float )
-        return make_float_value( value + other.to_float() );
-
-    return Value::operator+( other );
-}
-
-dawn::RawValue dawn::FloatValue::operator-( Value const& other ) const
-{
-    if ( other.type() == tp_int )
-        return make_float_value( value - other.to_int() );
-
-    if ( other.type() == tp_float )
-        return make_float_value( value - other.to_float() );
-
-    return Value::operator-( other );
-}
-
-dawn::RawValue dawn::FloatValue::operator*( Value const& other ) const
-{
-    if ( other.type() == tp_int )
-        return make_float_value( value * other.to_int() );
-
-    if ( other.type() == tp_float )
-        return make_float_value( value * other.to_float() );
-
-    return Value::operator*( other );
-}
-
-dawn::RawValue dawn::FloatValue::operator/( Value const& other ) const
-{
-    if ( other.type() == tp_int )
-        return make_float_value( value / other.to_int() );
-
-    if ( other.type() == tp_float )
-        return make_float_value( value / other.to_float() );
-
-    return Value::operator/( other );
-}
-
-dawn::RawValue dawn::FloatValue::operator^( Value const& other ) const
-{
-    if ( other.type() == tp_int )
-        return make_float_value( std::pow( value, other.to_int() ) );
-
-    if ( other.type() == tp_float )
-        return make_float_value( std::pow( value, other.to_float() ) );
-
-    return Value::operator^( other );
-}
-
-dawn::RawValue dawn::FloatValue::operator%( Value const& other ) const
-{
-    if ( other.type() == tp_int )
-        return make_float_value( mymod( value, (Float) other.to_int() ) );
-
-    if ( other.type() == tp_float )
-        return make_float_value( mymod( value, other.to_float() ) );
-
-    return Value::operator%( other );
-}
-
-dawn::Int dawn::FloatValue::operator<=>( Value const& other ) const
-{
-    if ( other.type() == tp_float )
+    case ValueType::ARRAY:
     {
-        auto result = value <=> other.to_float();
-        return result._Value;
+        switch ( other.type() )
+        {
+        case ValueType::ARRAY:
+        {
+            ArrayVal result;
+            result.data.insert( result.data.end(), std::get<ArrayVal>( m_value ).data.begin(), std::get<ArrayVal>( m_value ).data.end() );
+            result.data.insert( result.data.end(), std::get<ArrayVal>( other.m_value ).data.begin(), std::get<ArrayVal>( other.m_value ).data.end() );
+            return Value{ result };
+        }
+
+        default:
+            PANIC( "[", type(), "] + [", other.type(), "] not supported" );
+        }
     }
 
-    if ( other.type() == tp_int )
+    default:
+        PANIC( "[", type(), "] + [", other.type(), "] not supported" );
+    }
+}
+
+dawn::Value dawn::Value::operator-( Value const& other ) const
+{
+    switch ( type() )
     {
-        auto result = value <=> other.to_float();
-        return result._Value;
+    case ValueType::INT:
+    {
+        switch ( other.type() )
+        {
+        case ValueType::INT:
+            return Value{ std::get<Int>( m_value ) - std::get<Int>( other.m_value ) };
+
+        case ValueType::FLOAT:
+            return Value{ std::get<Int>( m_value ) - std::get<Float>( other.m_value ) };
+
+        default:
+            PANIC( "[", type(), "] - [", other.type(), "] not supported" );
+        }
     }
 
-    return Value::operator<=>( other );
-}
-
-dawn::Bool dawn::FloatValue::to_bool() const
-{
-    return (Bool) value;
-}
-
-dawn::Int dawn::FloatValue::to_int() const
-{
-    return (Int) value;
-}
-
-dawn::Float dawn::FloatValue::to_float() const
-{
-    return value;
-}
-
-dawn::Char dawn::FloatValue::to_char() const
-{
-    return (Char) value;
-}
-
-dawn::String dawn::FloatValue::to_string() const
-{
-    String result = format( value );
-    if ( std::to_wstring( Int( value ) ) == result )
-        result += L".0";
-    return result;
-}
-
-// char
-dawn::StringRef const& dawn::CharValue::type() const
-{
-    return tp_char;
-}
-
-dawn::RawValue dawn::CharValue::clone() const
-{
-    return make_char_value( value );
-}
-
-dawn::Int dawn::CharValue::operator<=>( Value const& other ) const
-{
-    if ( other.type() == tp_char )
+    case ValueType::FLOAT:
     {
-        auto result = value <=> other.to_char();
-        return result._Value;
+        switch ( other.type() )
+        {
+        case ValueType::INT:
+            return Value{ std::get<Float>( m_value ) - std::get<Int>( other.m_value ) };
+
+        case ValueType::FLOAT:
+            return Value{ std::get<Float>( m_value ) - std::get<Float>( other.m_value ) };
+
+        default:
+            PANIC( "[", type(), "] - [", other.type(), "] not supported" );
+        }
     }
 
-    return Value::operator<=>( other );
+    default:
+        PANIC( "[", type(), "] - [", other.type(), "] not supported" );
+    }
 }
 
-dawn::Bool dawn::CharValue::to_bool() const
+dawn::Value dawn::Value::operator*( Value const& other ) const
 {
-    return value == L't';
-}
-
-dawn::Int dawn::CharValue::to_int() const
-{
-    return (Int) value;
-}
-
-dawn::Float dawn::CharValue::to_float() const
-{
-    return (Float) value;
-}
-
-dawn::Char dawn::CharValue::to_char() const
-{
-    return value;
-}
-
-dawn::String dawn::CharValue::to_string() const
-{
-    return String( 1, value );
-}
-
-// string
-dawn::StringRef const& dawn::StringValue::type() const
-{
-    return tp_string;
-}
-
-dawn::RawValue dawn::StringValue::clone() const
-{
-    return make_string_value( value );
-}
-
-dawn::RawValue dawn::StringValue::operator+( Value const& other ) const
-{
-    if ( other.type() == tp_string )
-        return make_string_value( value + other.to_string() );
-
-    return Value::operator+( other );
-}
-
-dawn::Int dawn::StringValue::operator<=>( Value const& other ) const
-{
-    if ( other.type() == tp_string )
+    switch ( type() )
     {
-        auto result = value <=> other.to_string();
-        return result._Value;
+    case ValueType::INT:
+    {
+        switch ( other.type() )
+        {
+        case ValueType::INT:
+            return Value{ std::get<Int>( m_value ) * std::get<Int>( other.m_value ) };
+
+        case ValueType::FLOAT:
+            return Value{ std::get<Int>( m_value ) * std::get<Float>( other.m_value ) };
+
+        default:
+            PANIC( "[", type(), "] * [", other.type(), "] not supported" );
+        }
     }
 
-    return Value::operator<=>( other );
-}
-
-dawn::Bool dawn::StringValue::to_bool() const
-{
-    return value == kw_true;
-}
-
-dawn::Int dawn::StringValue::to_int() const
-{
-    auto optres = parse_int( value );
-    if ( !optres )
-        PANIC( "string \"", value, "\" to int failed" );
-    return *optres;
-}
-
-dawn::Float dawn::StringValue::to_float() const
-{
-    auto optres = parse_float( value );
-    if ( !optres )
-        PANIC( "string \"", value, "\" to float failed" );
-    return *optres;
-}
-
-dawn::Char dawn::StringValue::to_char() const
-{
-    return value.front();
-}
-
-dawn::String dawn::StringValue::to_string() const
-{
-    return value;
-}
-
-// enum
-dawn::StringRef const& dawn::EnumValue::type() const
-{
-    return tp_enum;
-}
-
-dawn::RawValue dawn::EnumValue::clone() const
-{
-    auto result = std::make_shared<EnumValue>();
-    result->parent = parent;
-    result->key = key;
-    return result;
-}
-
-dawn::String dawn::EnumValue::to_string() const
-{
-    return parent->name + L"{" + key + L"}";
-}
-
-// struct
-dawn::StringRef const& dawn::StructValue::type() const
-{
-    return tp_struct;
-}
-
-dawn::RawValue dawn::StructValue::clone() const
-{
-    auto result = std::make_shared<StructValue>();
-    result->parent = parent;
-    for ( auto& [key, value] : members )
-        result->members[key] = ValueBox{ ValueKind::LET, value.value() };
-    return result;
-}
-
-dawn::String dawn::StructValue::to_string() const
-{
-    if ( members.empty() )
-        return parent->name + L"{}";
-
-    StringStream stream;
-    stream << parent->name << L"{ ";
-    for ( auto it = members.begin(); it != members.end(); it++ )
+    case ValueType::FLOAT:
     {
-        auto& [key, value] = *it;
-        stream << key << L": " << value.value()->to_string();
-        Map<String, ValueBox>::const_iterator next_it = it;
-        ++next_it;
-        stream << (next_it == members.end() ? L" }" : L", ");
+        switch ( other.type() )
+        {
+        case ValueType::INT:
+            return Value{ std::get<Float>( m_value ) * std::get<Int>( other.m_value ) };
+
+        case ValueType::FLOAT:
+            return Value{ std::get<Float>( m_value ) * std::get<Float>( other.m_value ) };
+
+        default:
+            PANIC( "[", type(), "] * [", other.type(), "] not supported" );
+        }
     }
-    return stream.str();
+
+    default:
+        PANIC( "[", type(), "] * [", other.type(), "] not supported" );
+    }
 }
 
-// array
-dawn::StringRef const& dawn::ArrayValue::type() const
+dawn::Value dawn::Value::operator/( Value const& other ) const
 {
-    return tp_array;
-}
-
-dawn::RawValue dawn::ArrayValue::clone() const
-{
-    auto result = std::make_shared<ArrayValue>();
-    result->data.reserve( data.size() );
-    for ( auto& value : data )
-        result->data.emplace_back( ValueKind::LET, value.value() );
-    return result;
-}
-
-dawn::RawValue dawn::ArrayValue::operator+( Value const& other ) const
-{
-    if ( auto other_arr = dynamic_cast<ArrayValue const*>(&other) )
+    switch ( type() )
     {
-        auto result = std::make_shared<ArrayValue>();
-        result->data.reserve( data.size() + other_arr->data.size() );
-        for ( auto& value : data )
-            result->data.emplace_back( ValueKind::LET, value.value() );
-        for ( auto& value : other_arr->data )
-            result->data.emplace_back( ValueKind::LET, value.value() );
+    case ValueType::INT:
+    {
+        switch ( other.type() )
+        {
+        case ValueType::INT:
+            return Value{ std::get<Int>( m_value ) / std::get<Int>( other.m_value ) };
+
+        case ValueType::FLOAT:
+            return Value{ std::get<Int>( m_value ) / std::get<Float>( other.m_value ) };
+
+        default:
+            PANIC( "[", type(), "] / [", other.type(), "] not supported" );
+        }
+    }
+
+    case ValueType::FLOAT:
+    {
+        switch ( other.type() )
+        {
+        case ValueType::INT:
+            return Value{ std::get<Float>( m_value ) / std::get<Int>( other.m_value ) };
+
+        case ValueType::FLOAT:
+            return Value{ std::get<Float>( m_value ) / std::get<Float>( other.m_value ) };
+
+        default:
+            PANIC( "[", type(), "] / [", other.type(), "] not supported" );
+        }
+    }
+
+    default:
+        PANIC( "[", type(), "] / [", other.type(), "] not supported" );
+    }
+}
+
+dawn::Value dawn::Value::operator^( Value const& other ) const
+{
+    switch ( type() )
+    {
+    case ValueType::INT:
+    {
+        switch ( other.type() )
+        {
+        case ValueType::INT:
+            return Value{ (Int) std::pow( std::get<Int>( m_value ), std::get<Int>( other.m_value ) ) };
+
+        case ValueType::FLOAT:
+            return Value{ std::pow( std::get<Int>( m_value ), std::get<Float>( other.m_value ) ) };
+
+        default:
+            PANIC( "[", type(), "] ^ [", other.type(), "] not supported" );
+        }
+    }
+
+    case ValueType::FLOAT:
+    {
+        switch ( other.type() )
+        {
+        case ValueType::INT:
+            return Value{ std::pow( std::get<Float>( m_value ), std::get<Int>( other.m_value ) ) };
+
+        case ValueType::FLOAT:
+            return Value{ std::pow( std::get<Float>( m_value ), std::get<Float>( other.m_value ) ) };
+
+        default:
+            PANIC( "[", type(), "] ^ [", other.type(), "] not supported" );
+        }
+    }
+
+    default:
+        PANIC( "[", type(), "] ^ [", other.type(), "] not supported" );
+    }
+}
+
+dawn::Value dawn::Value::operator%( Value const& other ) const
+{
+    switch ( type() )
+    {
+    case ValueType::INT:
+    {
+        switch ( other.type() )
+        {
+        case ValueType::INT:
+            return Value{ std::get<Int>( m_value ) % std::get<Int>( other.m_value ) };
+
+        case ValueType::FLOAT:
+            return Value{ mymod( (Float) std::get<Int>( m_value ), std::get<Float>( other.m_value ) ) };
+
+        default:
+            PANIC( "[", type(), "] % [", other.type(), "] not supported" );
+        }
+    }
+
+    case ValueType::FLOAT:
+    {
+        switch ( other.type() )
+        {
+        case ValueType::INT:
+            return Value{ mymod( std::get<Float>( m_value ), (Float) std::get<Int>( other.m_value ) ) };
+
+        case ValueType::FLOAT:
+            return Value{ mymod( std::get<Float>( m_value ), std::get<Float>( other.m_value ) ) };
+
+        default:
+            PANIC( "[", type(), "] % [", other.type(), "] not supported" );
+        }
+    }
+
+    default:
+        PANIC( "[", type(), "] % [", other.type(), "] not supported" );
+    }
+}
+
+dawn::Value dawn::Value::operator==( Value const& other ) const
+{
+    switch ( type() )
+    {
+    case ValueType::BOOL:
+        return to_bool() == other.to_bool();
+
+    case ValueType::INT:
+        return to_int() == other.to_int();
+
+    case ValueType::FLOAT:
+        return to_float() == other.to_float();
+
+    case ValueType::CHAR:
+        return to_char() == other.to_char();
+
+    case ValueType::STRING:
+        return to_string() == other.to_string();
+
+    default:
+        PANIC( "[", type(), "] == [", other.type(), "] not supported" );
+    }
+}
+
+dawn::Value dawn::Value::operator!=( Value const& other ) const
+{
+    switch ( type() )
+    {
+    case ValueType::BOOL:
+        return to_bool() != other.to_bool();
+
+    case ValueType::INT:
+        return to_int() != other.to_int();
+
+    case ValueType::FLOAT:
+        return to_float() != other.to_float();
+
+    case ValueType::CHAR:
+        return to_char() != other.to_char();
+
+    case ValueType::STRING:
+        return to_string() != other.to_string();
+
+    default:
+        PANIC( "[", type(), "] != [", other.type(), "] not supported" );
+    }
+}
+
+dawn::Value dawn::Value::operator<( Value const& other ) const
+{
+    switch ( type() )
+    {
+    case ValueType::BOOL:
+        return to_bool() < other.to_bool();
+
+    case ValueType::INT:
+        return to_int() < other.to_int();
+
+    case ValueType::FLOAT:
+        return to_float() < other.to_float();
+
+    case ValueType::CHAR:
+        return to_char() < other.to_char();
+
+    case ValueType::STRING:
+        return to_string() < other.to_string();
+
+    default:
+        PANIC( "[", type(), "] < [", other.type(), "] not supported" );
+    }
+}
+
+dawn::Value dawn::Value::operator>( Value const& other ) const
+{
+    switch ( type() )
+    {
+    case ValueType::BOOL:
+        return to_bool() > other.to_bool();
+
+    case ValueType::INT:
+        return to_int() > other.to_int();
+
+    case ValueType::FLOAT:
+        return to_float() > other.to_float();
+
+    case ValueType::CHAR:
+        return to_char() > other.to_char();
+
+    case ValueType::STRING:
+        return to_string() > other.to_string();
+
+    default:
+        PANIC( "[", type(), "] > [", other.type(), "] not supported" );
+    }
+}
+
+dawn::Value dawn::Value::operator<=( Value const& other ) const
+{
+    switch ( type() )
+    {
+    case ValueType::BOOL:
+        return to_bool() <= other.to_bool();
+
+    case ValueType::INT:
+        return to_int() <= other.to_int();
+
+    case ValueType::FLOAT:
+        return to_float() <= other.to_float();
+
+    case ValueType::CHAR:
+        return to_char() <= other.to_char();
+
+    case ValueType::STRING:
+        return to_string() <= other.to_string();
+
+    default:
+        PANIC( "[", type(), "] <= [", other.type(), "] not supported" );
+    }
+}
+
+dawn::Value dawn::Value::operator>=( Value const& other ) const
+{
+    switch ( type() )
+    {
+    case ValueType::BOOL:
+        return to_bool() >= other.to_bool();
+
+    case ValueType::INT:
+        return to_int() >= other.to_int();
+
+    case ValueType::FLOAT:
+        return to_float() >= other.to_float();
+
+    case ValueType::CHAR:
+        return to_char() >= other.to_char();
+
+    case ValueType::STRING:
+        return to_string() >= other.to_string();
+
+    default:
+        PANIC( "[", type(), "] >= [", other.type(), "] not supported" );
+    }
+}
+
+dawn::Value dawn::Value::operator!() const
+{
+    return !to_bool();
+}
+
+dawn::Value dawn::Value::operator&&( Value const& other ) const
+{
+    return to_bool() && other.to_bool();
+}
+
+dawn::Value dawn::Value::operator||( Value const& other ) const
+{
+    return to_bool() || other.to_bool();
+}
+
+dawn::Value dawn::Value::operator~() const
+{
+    return Value{ 0ll } >> *this;
+}
+
+dawn::Value dawn::Value::operator>>( Value const& other ) const
+{
+    RangeVal result;
+    result.start_incl = to_int();
+    result.end_excl = other.to_int();
+    return Value{ result };
+}
+
+dawn::Bool dawn::Value::to_bool() const
+{
+    switch ( type() )
+    {
+    case ValueType::NOTHING:
+        return Bool{};
+
+    case ValueType::BOOL:
+        return std::get<Bool>( m_value );
+
+    case ValueType::INT:
+        return (Bool) std::get<Int>( m_value );
+
+    case ValueType::FLOAT:
+        return (Bool) std::get<Float>( m_value );
+
+    case ValueType::CHAR:
+        return (Bool) std::get<Char>( m_value );
+
+    case ValueType::STRING:
+        return std::get<String>( m_value ) == kw_true;
+
+    default:
+        PANIC( "Cannot convert ", type(), " to bool" );
+    }
+}
+
+dawn::Int dawn::Value::to_int() const
+{
+    switch ( type() )
+    {
+    case ValueType::NOTHING:
+        return Int{};
+
+    case ValueType::BOOL:
+        return (Int) std::get<Bool>( m_value );
+
+    case ValueType::INT:
+        return std::get<Int>( m_value );
+
+    case ValueType::FLOAT:
+        return (Int) std::get<Float>( m_value );
+
+    case ValueType::CHAR:
+        return (Int) std::get<Char>( m_value );
+
+    case ValueType::STRING:
+    {
+        auto optres = parse_int( std::get<String>( m_value ) );
+        if ( !optres )
+            PANIC( "string \"", std::get<String>( m_value ), "\" to int failed" );
+        return *optres;
+    }
+
+    default:
+        PANIC( "Cannot convert ", type(), " to int" );
+    }
+}
+
+dawn::Float dawn::Value::to_float() const
+{
+    switch ( type() )
+    {
+    case ValueType::NOTHING:
+        return Float{};
+
+    case ValueType::BOOL:
+        return (Float) std::get<Bool>( m_value );
+
+    case ValueType::INT:
+        return (Float) std::get<Int>( m_value );
+
+    case ValueType::FLOAT:
+        return std::get<Float>( m_value );
+
+    case ValueType::CHAR:
+        return (Float) std::get<Char>( m_value );
+
+    case ValueType::STRING:
+    {
+        auto optres = parse_float( std::get<String>( m_value ) );
+        if ( !optres )
+            PANIC( "string \"", std::get<String>( m_value ), "\" to float failed" );
+        return *optres;
+    }
+
+    default:
+        PANIC( "Cannot convert ", type(), " to float" );
+    }
+}
+
+dawn::Char dawn::Value::to_char() const
+{
+    switch ( type() )
+    {
+    case ValueType::NOTHING:
+        return Char{};
+
+    case ValueType::BOOL:
+        return std::get<Bool>( m_value ) ? kw_true[0] : kw_false[0];
+
+    case ValueType::INT:
+        return (Char) std::get<Int>( m_value );
+
+    case ValueType::FLOAT:
+        return (Char) std::get<Float>( m_value );
+
+    case ValueType::CHAR:
+        return std::get<Char>( m_value );
+
+    case ValueType::STRING:
+        return std::get<String>( m_value )[0];
+
+    default:
+        PANIC( "Cannot convert ", type(), " to char" );
+    }
+}
+
+dawn::String dawn::Value::to_string() const
+{
+    switch ( type() )
+    {
+    case ValueType::NOTHING:
+        return String{};
+
+    case ValueType::BOOL:
+        return String{ std::get<Bool>( m_value ) ? kw_true : kw_false };
+
+    case ValueType::INT:
+        return std::to_wstring( std::get<Int>( m_value ) );
+
+    case ValueType::FLOAT:
+    {
+        String result = format( std::get<Float>( m_value ) );
+        if ( std::to_wstring( (Int) std::get<Float>( m_value ) ) == result )
+            result += L".0";
         return result;
     }
 
-    return Value::operator+( other );
+    case ValueType::CHAR:
+        return String( 1, std::get<Char>( m_value ) );
+
+    case ValueType::STRING:
+        return std::get<String>( m_value );
+
+    case ValueType::ENUM:
+    {
+        auto& val = std::get<EnumVal>( m_value );
+        return val.parent->name + L"{" + val.key + L"}";
+    }
+
+    case ValueType::STRUCT:
+    {
+        auto& val = std::get<StructVal>( m_value );
+        if ( val.members.empty() )
+            return val.parent->name + L"{}";
+
+        StringStream stream;
+        stream << val.parent->name << L"{ ";
+        for ( auto it = val.members.begin(); it != val.members.end(); it++ )
+        {
+            auto& [key, value] = *it;
+            stream << key << L": " << value.value().to_string();
+            Map<String, ValueBox>::const_iterator next_it = it;
+            ++next_it;
+            stream << (next_it == val.members.end() ? L" }" : L", ");
+        }
+        return stream.str();
+    }
+
+    case ValueType::ARRAY:
+    {
+        auto& val = std::get<ArrayVal>( m_value );
+        if ( val.data.empty() )
+            return L"[]";
+
+        StringStream stream;
+        stream << L"[";
+        for ( Int i = 0; i < (Int) val.data.size() - 1; i++ )
+            stream << val.data[i].value().to_string() << L", ";
+        stream << val.data.back().value().to_string() << L"]";
+
+        return stream.str();
+    }
+
+    case ValueType::RANGE:
+    {
+        auto& val = std::get<RangeVal>( m_value );
+        return format( val.start_incl, op_range, val.end_excl );
+    }
+
+    default:
+        PANIC( "Cannot convert ", type(), " to string" );
+    }
 }
 
-dawn::Int dawn::ArrayValue::operator<=>( Value const& other ) const
+dawn::ValueBox::ValueBox()
+    : ValueBox( ValueKind::LET, Value{} )
+{}
+
+dawn::ValueBox::ValueBox( ValueKind kind, Value const& value )
 {
-    return Value::operator<=>( other );
+    m_value_ref = std::make_shared<Value>( value );
+
+    m_kind = ValueKind::VAR;
+    set_value( value );
+
+    m_kind = kind;
+    reapply_kind();
 }
 
-dawn::String dawn::ArrayValue::to_string() const
+dawn::Value const& dawn::ValueBox::value() const
 {
-    if ( data.empty() )
-        return L"[]";
-
-    StringStream stream;
-    stream << L"[";
-    for ( Int i = 0; i < (Int) data.size() - 1; i++ )
-        stream << data[i].value()->to_string() << L", ";
-    stream << data.back().value()->to_string() << L"]";
-
-    return stream.str();
+    return *m_value_ref;
 }
 
-dawn::StringRef const& dawn::RangeValue::type() const
+void dawn::ValueBox::set_value( Value const& value )
 {
-    return tp_range;
+    if ( m_kind == ValueKind::LET )
+        PANIC( "Cannot set value of a let variable" );
+
+    (*m_value_ref) = value;
+    reapply_kind();
 }
 
-dawn::RawValue dawn::RangeValue::clone() const
+void dawn::ValueBox::reapply_kind()
 {
-    auto result = std::make_shared<RangeValue>();
-    result->start_incl = start_incl;
-    result->end_excl = end_excl;
-    return result;
-}
+    switch ( value().type() )
+    {
+    case ValueType::STRUCT:
+    {
+        auto& val = (*m_value_ref).as<StructVal>();
+        for ( auto& [_, member] : val.members )
+        {
+            member.m_kind = this->m_kind;
+            member.reapply_kind();
+        }
+        break;
+    }
 
-dawn::String dawn::RangeValue::to_string() const
-{
-    return format( start_incl, L"~", end_excl );
-}
-
-// helpers
-dawn::RawValue dawn::make_nothing_value()
-{
-    return std::make_shared<NothingValue>();
-}
-
-dawn::RawValue dawn::make_bool_value( Bool value )
-{
-    auto result = std::make_shared<BoolValue>();
-    result->value = value;
-    return result;
-}
-
-dawn::RawValue dawn::make_int_value( Int value )
-{
-    auto result = std::make_shared<IntValue>();
-    result->value = value;
-    return result;
-}
-
-dawn::RawValue dawn::make_float_value( Float value )
-{
-    auto result = std::make_shared<FloatValue>();
-    result->value = value;
-    return result;
-}
-
-dawn::RawValue dawn::make_char_value( Char value )
-{
-    auto result = std::make_shared<CharValue>();
-    result->value = value;
-    return result;
-}
-
-dawn::RawValue dawn::make_string_value( StringRef const& value )
-{
-    auto result = std::make_shared<StringValue>();
-    result->value = value;
-    return result;
+    case ValueType::ARRAY:
+    {
+        auto& val = (*m_value_ref).as<ArrayVal>();
+        for ( auto& value : val.data )
+        {
+            value.m_kind = this->m_kind;
+            value.reapply_kind();
+        }
+        break;
+    }
+    }
 }
