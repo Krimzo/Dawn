@@ -168,7 +168,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_struct( Array<Token>::const_iter
         if ( it->type == TokenType::NAME )
         {
             auto& field = struc.fields.emplace_back();
-            field.kind = Variable::Kind::VAR;
+            field.kind = VariableKind::VAR;
             field.name = it->value;
             ++it;
 
@@ -193,7 +193,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_struct( Array<Token>::const_iter
                 return error;
 
             Variable self_var;
-            self_var.kind = Variable::Kind::LET;
+            self_var.kind = VariableKind::LET;
             self_var.expr = make_nothing_node();
             self_var.name = kw_self;
 
@@ -242,11 +242,11 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_function( Array<Token>::const_it
         if ( it->value != kw_let && it->value != kw_var && it->value != kw_ref )
             return ParseError{ *it, L"expected let, var or ref keywords" };
         if ( it->value == kw_let )
-            arg.kind = Variable::Kind::LET;
+            arg.kind = VariableKind::LET;
         else if ( it->value == kw_var )
-            arg.kind = Variable::Kind::VAR;
+            arg.kind = VariableKind::VAR;
         else
-            arg.kind = Variable::Kind::REF;
+            arg.kind = VariableKind::REF;
         ++it;
 
         if ( it->type != TokenType::NAME )
@@ -275,11 +275,11 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_variable( Array<Token>::const_it
     if ( it->value != kw_let && it->value != kw_var && it->value != kw_ref )
         return ParseError{ *it, L"expected let, var or ref keywords" };
     if ( it->value == kw_let )
-        variable.kind = Variable::Kind::LET;
+        variable.kind = VariableKind::LET;
     else if ( it->value == kw_var )
-        variable.kind = Variable::Kind::VAR;
+        variable.kind = VariableKind::VAR;
     else
-        variable.kind = Variable::Kind::REF;
+        variable.kind = VariableKind::REF;
     ++it;
 
     if ( it->type != TokenType::NAME )
@@ -1045,11 +1045,11 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_for( Array<Token>::const_iterato
     if ( it->value != kw_let && it->value != kw_var && it->value != kw_ref )
         return ParseError{ *it, L"expected let, var or ref keywords" };
     if ( it->value == kw_let )
-        node->var.kind = Variable::Kind::LET;
+        node->var.kind = VariableKind::LET;
     else if ( it->value == kw_var )
-        node->var.kind = Variable::Kind::VAR;
+        node->var.kind = VariableKind::VAR;
     else
-        node->var.kind = Variable::Kind::REF;
+        node->var.kind = VariableKind::REF;
     ++it;
 
     if ( it->type != TokenType::NAME )

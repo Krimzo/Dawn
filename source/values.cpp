@@ -485,7 +485,7 @@ dawn::RawValue dawn::StructValue::clone() const
     auto result = std::make_shared<StructValue>();
     result->parent = parent;
     for ( auto& [key, value] : members )
-        result->members[key].set_value( value.value()->clone() );
+        result->members[key] = ValueBox{ ValueKind::LET, value.value() };
     return result;
 }
 
@@ -518,7 +518,7 @@ dawn::RawValue dawn::ArrayValue::clone() const
     auto result = std::make_shared<ArrayValue>();
     result->data.reserve( data.size() );
     for ( auto& value : data )
-        result->data.emplace_back().set_value( value.value()->clone() );
+        result->data.emplace_back( ValueKind::LET, value.value() );
     return result;
 }
 
@@ -529,9 +529,9 @@ dawn::RawValue dawn::ArrayValue::operator+( Value const& other ) const
         auto result = std::make_shared<ArrayValue>();
         result->data.reserve( data.size() + other_arr->data.size() );
         for ( auto& value : data )
-            result->data.emplace_back().set_value( value.value()->clone() );
+            result->data.emplace_back( ValueKind::LET, value.value() );
         for ( auto& value : other_arr->data )
-            result->data.emplace_back().set_value( value.value()->clone() );
+            result->data.emplace_back( ValueKind::LET, value.value() );
         return result;
     }
 

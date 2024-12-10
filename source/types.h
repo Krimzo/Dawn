@@ -5,17 +5,17 @@
 
 namespace dawn
 {
+enum struct VariableKind
+{
+    LET = 0,
+    VAR,
+    REF,
+};
+
 struct Variable
 {
-    enum struct Kind
-    {
-        LET = 0,
-        VAR,
-        REF,
-    };
-
     String name;
-    Kind kind = Kind::LET;
+    VariableKind kind = VariableKind::LET;
     Ref<Node> expr;
 };
 

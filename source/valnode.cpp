@@ -123,15 +123,16 @@ dawn::String dawn::Value::to_string() const
 }
 
 dawn::ValueBox::ValueBox()
-    : ValueBox( Type::LET, make_nothing_value() )
+    : ValueBox( ValueKind::LET, make_nothing_value() )
 {}
 
-dawn::ValueBox::ValueBox( Type type, RawValue const& value )
+dawn::ValueBox::ValueBox( ValueKind kind, RawValue const& value )
 {
     m_value_ref = std::make_shared<RawValue>( value );
-    m_type = Type::VAR;
+    m_kind = ValueKind::VAR;
     set_value( value );
-    m_type = type;
+    m_kind = kind;
+    reapply_kind();
 }
 
 dawn::RawValue const& dawn::ValueBox::value() const
@@ -144,8 +145,28 @@ void dawn::ValueBox::set_value( RawValue const& value )
     if ( !value )
         PANIC( "Cannot set null value" );
 
-    if ( m_type == Type::LET )
+    if ( m_kind == ValueKind::LET )
         PANIC( "Cannot set value of a let variable" );
 
-    (*m_value_ref) = value;
+    (*m_value_ref) = value->clone();
+}
+
+void dawn::ValueBox::reapply_kind()
+{
+    if ( auto array_value = dynamic_cast<ArrayValue*>(m_value_ref->get()) )
+    {
+        for ( auto& value : array_value->data )
+        {
+            value.m_kind = this->m_kind;
+            value.reapply_kind();
+        }
+    }
+    else if ( auto struct_value = dynamic_cast<StructValue*>(m_value_ref->get()) )
+    {
+        for ( auto& [_, member] : struct_value->members )
+        {
+            member.m_kind = this->m_kind;
+            member.reapply_kind();
+        }
+    }
 }

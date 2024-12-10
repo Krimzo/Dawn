@@ -1,13 +1,16 @@
 func main() {
-	let a = [1, 2, 3]
-	for ref i : a {
+	var data = [1, 2, 3]
+	for ref i : data {
 		i *= 2
 	}
-	print(a)
-	
-	let person = Person{ name: "Krim", age: 23 }
-	alter(person->age)
-	person->who()
+	print(data)
+
+	var p = Person{ name: "Krim", age: 23 }
+	ref pp = p
+	ref ppp = pp
+	ref pppp = ppp
+	alter(pppp->age)
+	print(p)
 }
 
 func alter(ref val) {

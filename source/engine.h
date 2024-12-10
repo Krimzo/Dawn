@@ -71,9 +71,8 @@ struct Engine
     void bind_func( String const& name, Function::CppFunc cpp_func );
     Opt<EngineError> call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval );
 
-    void add_var( String const& name, Bool is_var, RawValue const& value );
-    void add_var( Variable const& var, ValueBox const& value );
     Opt<EngineError> add_var( Variable const& var );
+    void add_var( Variable const& var, ValueBox const& value );
     ValueBox* get_var( String const& name );
 
 private:

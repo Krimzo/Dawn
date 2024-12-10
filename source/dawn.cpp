@@ -40,9 +40,14 @@ dawn::Opt<dawn::EngineError> dawn::Dawn::call_func( String const& name, Array<Re
     return m_engine.call_func( name, args, retval );
 }
 
-void dawn::Dawn::add_var( String const& name, Bool is_var, RawValue const& value )
+dawn::Opt<dawn::EngineError> dawn::Dawn::add_var( Variable const& var )
 {
-    m_engine.add_var( name, is_var, value );
+    return m_engine.add_var( var );
+}
+
+void dawn::Dawn::add_var( Variable const& var, ValueBox const& value )
+{
+    m_engine.add_var( var, value );
 }
 
 dawn::ValueBox* dawn::Dawn::get_var( String const& name )

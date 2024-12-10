@@ -51,22 +51,24 @@ struct Value
     virtual String to_string() const;
 };
 
+enum struct ValueKind
+{
+    LET = 0,
+    VAR,
+};
+
 struct ValueBox
 {
-    enum struct Type
-    {
-        LET = 0,
-        VAR,
-    };
-
     ValueBox();
-    ValueBox( Type type, RawValue const& value );
+    ValueBox( ValueKind kind, RawValue const& value );
 
     RawValue const& value() const;
     void set_value( RawValue const& value );
 
 private:
-    Type m_type;
+    ValueKind m_kind;
     Ref<RawValue> m_value_ref;
+
+    void reapply_kind();
 };
 }

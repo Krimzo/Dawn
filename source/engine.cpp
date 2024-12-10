@@ -62,28 +62,6 @@ dawn::Opt<dawn::EngineError> dawn::Engine::call_func( String const& name, Array<
     }
 }
 
-void dawn::Engine::add_var( String const& name, Bool is_var, RawValue const& value )
-{
-    ValueBox var_val = { is_var ? ValueBox::Type::VAR : ValueBox::Type::LET, value };
-    variables.push( name, var_val );
-}
-
-void dawn::Engine::add_var( Variable const& var, ValueBox const& value )
-{
-    if ( var.kind == Variable::Kind::LET )
-    {
-        variables.push( var.name, ValueBox{ ValueBox::Type::LET, value.value() } );
-    }
-    else if ( var.kind == Variable::Kind::VAR )
-    {
-        variables.push( var.name, ValueBox{ ValueBox::Type::VAR, value.value() } );
-    }
-    else
-    {
-        variables.push( var.name, value );
-    }
-}
-
 dawn::Opt<dawn::EngineError> dawn::Engine::add_var( Variable const& var )
 {
     try
@@ -99,6 +77,22 @@ dawn::Opt<dawn::EngineError> dawn::Engine::add_var( Variable const& var )
     catch ( String const& msg )
     {
         return msg;
+    }
+}
+
+void dawn::Engine::add_var( Variable const& var, ValueBox const& value )
+{
+    if ( var.kind == VariableKind::LET )
+    {
+        variables.push( var.name, ValueBox{ ValueKind::LET, value.value() } );
+    }
+    else if ( var.kind == VariableKind::VAR )
+    {
+        variables.push( var.name, ValueBox{ ValueKind::VAR, value.value() } );
+    }
+    else
+    {
+        variables.push( var.name, value );
     }
 }
 
@@ -123,7 +117,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Ar
 
         auto result = std::get<Function::CppFunc>( func.body )(arg_vals);
         if ( result )
-            retval = ValueBox{ ValueBox::Type::LET, result };
+            retval = ValueBox{ ValueKind::LET, result };
 
         return std::nullopt;
     }
@@ -241,7 +235,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_expr( Ref<Node> const& node, V
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_val_node( ValueNode const& node, ValueBox& value )
 {
-    value = ValueBox{ ValueBox::Type::LET, node.value };
+    value = ValueBox{ ValueKind::LET, node.value };
 
     return std::nullopt;
 }
@@ -266,7 +260,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_array_node( ArrayNode const& n
 
         result->data.resize( size );
         for ( auto& val : result->data )
-            val = ValueBox{ ValueBox::Type::VAR, value_val.value()->clone() };
+            val = ValueBox{ ValueKind::LET, value_val.value() };
     }
     else
     {
@@ -277,11 +271,11 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_array_node( ArrayNode const& n
             if ( auto error = handle_expr( expr, entry_val ) )
                 return error;
 
-            result->data.emplace_back( ValueBox::Type::VAR, entry_val.value() );
+            result->data.emplace_back( ValueKind::LET, entry_val.value() );
         }
     }
 
-    value = ValueBox{ ValueBox::Type::LET, result };
+    value = ValueBox{ ValueKind::LET, result };
 
     return std::nullopt;
 }
@@ -305,7 +299,7 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_struct_node( StructNode const&
         if ( auto error = handle_expr( struc_field.expr, field_val ) )
             return error;
 
-        field = ValueBox{ ValueBox::Type::VAR, field_val.value() };
+        field = ValueBox{ ValueKind::LET, field_val.value() };
     }
 
     for ( auto& [arg_name, arg_expr] : node.args )
@@ -317,10 +311,10 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_struct_node( StructNode const&
         if ( !result->members.contains( arg_name ) )
             return EngineError{ "field [", arg_name, L"] doesn't exist in struct [", node.type, L"]" };
 
-        result->members.at( arg_name ) = ValueBox{ ValueBox::Type::VAR, arg_val.value() };
+        result->members.at( arg_name ) = ValueBox{ ValueKind::LET, arg_val.value() };
     }
 
-    value = ValueBox{ ValueBox::Type::LET, result };
+    value = ValueBox{ ValueKind::LET, result };
 
     return std::nullopt;
 }
@@ -333,23 +327,23 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_cast_node( CastNode const& nod
 
     if ( node.type == tp_bool )
     {
-        value = ValueBox{ ValueBox::Type::LET, make_bool_value( cast_val.value()->to_bool() ) };
+        value = ValueBox{ ValueKind::LET, make_bool_value( cast_val.value()->to_bool() ) };
     }
     else if ( node.type == tp_int )
     {
-        value = ValueBox{ ValueBox::Type::LET, make_int_value( cast_val.value()->to_int() ) };
+        value = ValueBox{ ValueKind::LET, make_int_value( cast_val.value()->to_int() ) };
     }
     else if ( node.type == tp_float )
     {
-        value = ValueBox{ ValueBox::Type::LET, make_float_value( cast_val.value()->to_float() ) };
+        value = ValueBox{ ValueKind::LET, make_float_value( cast_val.value()->to_float() ) };
     }
     else if ( node.type == tp_char )
     {
-        value = ValueBox{ ValueBox::Type::LET, make_char_value( cast_val.value()->to_char() ) };
+        value = ValueBox{ ValueKind::LET, make_char_value( cast_val.value()->to_char() ) };
     }
     else if ( node.type == tp_string )
     {
-        value = ValueBox{ ValueBox::Type::LET, make_string_value( cast_val.value()->to_string() ) };
+        value = ValueBox{ ValueKind::LET, make_string_value( cast_val.value()->to_string() ) };
     }
     else
         return EngineError{ "Unknown cast type: ", node.type };
@@ -601,13 +595,13 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_un_node( UnaryNode const& node
         return error;
 
     if ( typeid(node) == typeid(UnaryNodePlus) )
-        value = ValueBox{ ValueBox::Type::LET, right_val.value()->clone() };
+        value = ValueBox{ ValueKind::LET, right_val.value() };
     else if ( typeid(node) == typeid(UnaryNodeMinus) )
-        value = ValueBox{ ValueBox::Type::LET, -(*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, -(*right_val.value()) };
     else if ( typeid(node) == typeid(UnaryNodeNot) )
-        value = ValueBox{ ValueBox::Type::LET, !(*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, !(*right_val.value()) };
     else if ( typeid(node) == typeid(UnaryNodeRange) )
-        value = ValueBox{ ValueBox::Type::LET, ~(*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, ~(*right_val.value()) };
     else
         return EngineError{ "Unknown unary node type: ", typeid(node).name() };
 
@@ -631,35 +625,35 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& n
         return error;
 
     if ( typeid(node) == typeid(OperatorNodeAdd) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) + (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) + (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodeSub) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) - (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) - (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodeMul) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) * (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) * (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodeDiv) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) / (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) / (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodePow) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) ^ (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) ^ (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodeMod) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) % (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) % (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodeAnd) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) && (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) && (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodeOr) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) || (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) || (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodeEq) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) == (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) == (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodeNotEq) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) != (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) != (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodeLess) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) < (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) < (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodeGreat) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) > (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) > (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodeLessEq) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) <= (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) <= (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodeGreatEq) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) >= (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) >= (*right_val.value()) };
     else if ( typeid(node) == typeid(OperatorNodeRange) )
-        value = ValueBox{ ValueBox::Type::LET, (*left_val.value()) >> (*right_val.value()) };
+        value = ValueBox{ ValueKind::LET, (*left_val.value()) >> (*right_val.value()) };
     else
         return EngineError{ "Unknown operator node type: ", typeid(node).name() };
 
