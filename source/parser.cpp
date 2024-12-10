@@ -391,19 +391,27 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_expression( Array<Token>::const_
         if ( (Int) expr_tokens.size() < least_prec_op + 2 )
             return ParseError{ *it, L"unary expected expression" };
 
-        Ref<OperatorNode> node;
-        if ( auto error = create_operator_node( expr_tokens[least_prec_op], node ) )
-            return error;
+        Ref<OperatorNode> op_node;
+        Ref<AssignNode> as_node;
+        if ( auto error = create_operator_node( expr_tokens[least_prec_op], op_node ) )
+        {
+            op_node.reset();
+            if ( auto error = create_assign_node( expr_tokens[least_prec_op], as_node ) )
+                return error;
+        }
 
         auto it = expr_tokens.begin();
-        if ( auto error = parse_expression( it, expr_tokens.begin() + least_prec_op, node->left ) )
+        if ( auto error = parse_expression( it, expr_tokens.begin() + least_prec_op, op_node ? op_node->left : as_node->left ) )
             return error;
 
         it = expr_tokens.begin() + (least_prec_op + 1);
-        if ( auto error = parse_expression( it, expr_tokens.end(), node->right ) )
+        if ( auto error = parse_expression( it, expr_tokens.end(), op_node ? op_node->right : as_node->right ) )
             return error;
 
-        tree = node;
+        if ( op_node )
+            tree = op_node;
+        else
+            tree = as_node;
     }
     else
     {
@@ -1149,121 +1157,135 @@ dawn::Opt<dawn::ParseError> dawn::Parser::scope_for( Array<Token>::const_iterato
 
 dawn::Opt<dawn::ParseError> dawn::create_unary_node( Token const& token, Ref<UnaryNode>& node )
 {
+    node = std::make_shared<UnaryNode>();
+
     if ( token.value == op_add )
     {
-        node = std::make_shared<UnaryNodePlus>();
+        node->type = UnaryType::PLUS;
     }
     else if ( token.value == op_sub )
     {
-        node = std::make_shared<UnaryNodeMinus>();
+        node->type = UnaryType::MINUS;
     }
     else if ( token.value == op_not )
     {
-        node = std::make_shared<UnaryNodeNot>();
+        node->type = UnaryType::NOT;
     }
     else if ( token.value == op_range )
     {
-        node = std::make_shared<UnaryNodeRange>();
+        node->type = UnaryType::RANGE;
     }
     else
-        return ParseError{ token, L"unknown unary operator" };
+        return ParseError{ token, L"unknown operator" };
 
     return std::nullopt;
 }
 
 dawn::Opt<dawn::ParseError> dawn::create_operator_node( Token const& token, Ref<OperatorNode>& node )
 {
+    node = std::make_shared<OperatorNode>();
+
     if ( token.value == op_access )
     {
-        node = std::make_shared<OperatorNodeAccess>();
+        node->type = OperatorType::ACCESS;
     }
     else if ( token.value == op_range )
     {
-        node = std::make_shared<OperatorNodeRange>();
+        node->type = OperatorType::RANGE;
     }
     else if ( token.value == op_pow )
     {
-        node = std::make_shared<OperatorNodePow>();
+        node->type = OperatorType::POW;
     }
     else if ( token.value == op_mod )
     {
-        node = std::make_shared<OperatorNodeMod>();
+        node->type = OperatorType::MOD;
     }
     else if ( token.value == op_mul )
     {
-        node = std::make_shared<OperatorNodeMul>();
+        node->type = OperatorType::MUL;
     }
     else if ( token.value == op_div )
     {
-        node = std::make_shared<OperatorNodeDiv>();
+        node->type = OperatorType::DIV;
     }
     else if ( token.value == op_add )
     {
-        node = std::make_shared<OperatorNodeAdd>();
+        node->type = OperatorType::ADD;
     }
     else if ( token.value == op_sub )
     {
-        node = std::make_shared<OperatorNodeSub>();
+        node->type = OperatorType::SUB;
     }
     else if ( token.value == op_less )
     {
-        node = std::make_shared<OperatorNodeLess>();
+        node->type = OperatorType::LESS;
     }
     else if ( token.value == op_great )
     {
-        node = std::make_shared<OperatorNodeGreat>();
+        node->type = OperatorType::GREAT;
     }
     else if ( token.value == op_lesseq )
     {
-        node = std::make_shared<OperatorNodeLessEq>();
+        node->type = OperatorType::LESS_EQ;
     }
     else if ( token.value == op_greateq )
     {
-        node = std::make_shared<OperatorNodeGreatEq>();
+        node->type = OperatorType::GREAT_EQ;
     }
     else if ( token.value == op_eq )
     {
-        node = std::make_shared<OperatorNodeEq>();
+        node->type = OperatorType::EQ;
     }
     else if ( token.value == op_neq )
     {
-        node = std::make_shared<OperatorNodeNotEq>();
+        node->type = OperatorType::NOT_EQ;
     }
     else if ( token.value == op_and )
     {
-        node = std::make_shared<OperatorNodeAnd>();
+        node->type = OperatorType::AND;
     }
     else if ( token.value == op_or )
     {
-        node = std::make_shared<OperatorNodeOr>();
+        node->type = OperatorType::OR;
     }
-    else if ( token.value == op_assign )
+    else
+        return ParseError{ token, L"unknown operator" };
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::ParseError> dawn::create_assign_node( Token const& token, Ref<AssignNode>& node )
+{
+    node = std::make_shared<AssignNode>();
+
+    if ( token.value == op_assign )
     {
-        node = std::make_shared<AssignNode>();
+        node->type = AssignType::ASSIGN;
     }
     else if ( token.value == op_addas )
     {
-        node = std::make_shared<AssignNodeAdd>();
+        node->type = AssignType::ADD;
     }
     else if ( token.value == op_subas )
     {
-        node = std::make_shared<AssignNodeSub>();
+        node->type = AssignType::SUB;
     }
     else if ( token.value == op_mulas )
     {
-        node = std::make_shared<AssignNodeMul>();
+        node->type = AssignType::MUL;
     }
     else if ( token.value == op_divas )
     {
-        node = std::make_shared<AssignNodeDiv>();
+        node->type = AssignType::DIV;
     }
     else if ( token.value == op_powas )
     {
-        node = std::make_shared<AssignNodePow>();
+        node->type = AssignType::POW;
     }
     else if ( token.value == op_modas )
     {
-        node = std::make_shared<AssignNodeMod>();
+        node->type = AssignType::MOD;
     }
     else
         return ParseError{ token, L"unknown operator" };

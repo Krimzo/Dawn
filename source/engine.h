@@ -99,7 +99,7 @@ private:
     Opt<EngineError> handle_for_node( ForNode const& node, ValueBox& retval, Bool& didret );
     Opt<EngineError> handle_un_node( UnaryNode const& node, ValueBox& value );
     Opt<EngineError> handle_op_node( OperatorNode const& node, ValueBox& value );
-    Opt<EngineError> handle_ac_node( OperatorNodeAccess const& node, ValueBox& value );
+    Opt<EngineError> handle_ac_node( OperatorNode const& node, ValueBox& value );
     Opt<EngineError> handle_as_node( AssignNode const& node, ValueBox& value );
 
     Opt<EngineError> handle_ac_string_node( Ref<StringValue> const& left, Ref<Node> const& right, ValueBox& value );

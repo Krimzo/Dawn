@@ -242,6 +242,9 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_expr( Ref<Node> const& node, V
     if ( auto nd = dynamic_cast<OperatorNode*>(node.get()) )
         return handle_op_node( *nd, value );
 
+    if ( auto nd = dynamic_cast<AssignNode*>(node.get()) )
+        return handle_as_node( *nd, value );
+
     return EngineError{ "Unknown expr node type: ", typeid(*node).name() };
 }
 
@@ -621,27 +624,35 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_un_node( UnaryNode const& node
     if ( auto error = handle_expr( node.right, right_val ) )
         return error;
 
-    if ( typeid(node) == typeid(UnaryNodePlus) )
+    switch ( node.type )
+    {
+    case UnaryType::PLUS:
         value = ValueBox{ ValueKind::LET, right_val.value() };
-    else if ( typeid(node) == typeid(UnaryNodeMinus) )
+        break;
+
+    case UnaryType::MINUS:
         value = ValueBox{ ValueKind::LET, -(*right_val.value()) };
-    else if ( typeid(node) == typeid(UnaryNodeNot) )
+        break;
+
+    case UnaryType::NOT:
         value = ValueBox{ ValueKind::LET, !(*right_val.value()) };
-    else if ( typeid(node) == typeid(UnaryNodeRange) )
+        break;
+
+    case UnaryType::RANGE:
         value = ValueBox{ ValueKind::LET, ~(*right_val.value()) };
-    else
+        break;
+
+    default:
         return EngineError{ "Unknown unary node type: ", typeid(node).name() };
+    }
 
     return std::nullopt;
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& node, ValueBox& value )
 {
-    if ( auto nd = dynamic_cast<OperatorNodeAccess const*>(&node) )
-        return handle_ac_node( *nd, value );
-
-    if ( auto nd = dynamic_cast<AssignNode const*>(&node) )
-        return handle_as_node( *nd, value );
+    if ( OperatorType::ACCESS == node.type )
+        return handle_ac_node( node, value );
 
     ValueBox left_val;
     if ( auto error = handle_expr( node.left, left_val ) )
@@ -651,43 +662,76 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_op_node( OperatorNode const& n
     if ( auto error = handle_expr( node.right, right_val ) )
         return error;
 
-    if ( typeid(node) == typeid(OperatorNodeAdd) )
+    switch ( node.type )
+    {
+    case OperatorType::ADD:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) + (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodeSub) )
+        break;
+
+    case OperatorType::SUB:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) - (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodeMul) )
+        break;
+
+    case OperatorType::MUL:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) * (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodeDiv) )
+        break;
+
+    case OperatorType::DIV:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) / (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodePow) )
+        break;
+
+    case OperatorType::POW:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) ^ (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodeMod) )
+        break;
+
+    case OperatorType::MOD:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) % (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodeAnd) )
+        break;
+
+    case OperatorType::AND:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) && (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodeOr) )
+        break;
+
+    case OperatorType::OR:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) || (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodeEq) )
+        break;
+
+    case OperatorType::EQ:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) == (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodeNotEq) )
+        break;
+
+    case OperatorType::NOT_EQ:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) != (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodeLess) )
+        break;
+
+    case OperatorType::LESS:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) < (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodeGreat) )
+        break;
+
+    case OperatorType::GREAT:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) > (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodeLessEq) )
+        break;
+
+    case OperatorType::LESS_EQ:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) <= (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodeGreatEq) )
+        break;
+
+    case OperatorType::GREAT_EQ:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) >= (*right_val.value()) };
-    else if ( typeid(node) == typeid(OperatorNodeRange) )
+        break;
+
+    case OperatorType::RANGE:
         value = ValueBox{ ValueKind::LET, (*left_val.value()) >> (*right_val.value()) };
-    else
+        break;
+
+    default:
         return EngineError{ "Unknown operator node type: ", typeid(node).name() };
+    }
 
     return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_node( OperatorNodeAccess const& node, ValueBox& value )
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_node( OperatorNode const& node, ValueBox& value )
 {
     ValueBox left_val;
     if ( auto error = handle_expr( node.left, left_val ) )
@@ -715,33 +759,38 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& nod
     if ( auto error = handle_expr( node.right, right_val ) )
         return error;
 
-    if ( typeid(node) == typeid(AssignNodeAdd) )
+    switch ( node.type )
     {
-        left_val.set_value( *left_val.value() + (*right_val.value()) );
-    }
-    else if ( typeid(node) == typeid(AssignNodeSub) )
-    {
-        left_val.set_value( *left_val.value() - (*right_val.value()) );
-    }
-    else if ( typeid(node) == typeid(AssignNodeMul) )
-    {
-        left_val.set_value( *left_val.value() * (*right_val.value()) );
-    }
-    else if ( typeid(node) == typeid(AssignNodeDiv) )
-    {
-        left_val.set_value( *left_val.value() / (*right_val.value()) );
-    }
-    else if ( typeid(node) == typeid(AssignNodePow) )
-    {
-        left_val.set_value( *left_val.value() ^ (*right_val.value()) );
-    }
-    else if ( typeid(node) == typeid(AssignNodeMod) )
-    {
-        left_val.set_value( *left_val.value() % (*right_val.value()) );
-    }
-    else
-    {
+    case AssignType::ASSIGN:
         left_val.set_value( right_val.value() );
+        break;
+
+    case AssignType::ADD:
+        left_val.set_value( *left_val.value() + (*right_val.value()) );
+        break;
+
+    case AssignType::SUB:
+        left_val.set_value( *left_val.value() - (*right_val.value()) );
+        break;
+
+    case AssignType::MUL:
+        left_val.set_value( *left_val.value() * (*right_val.value()) );
+        break;
+
+    case AssignType::DIV:
+        left_val.set_value( *left_val.value() / (*right_val.value()) );
+        break;
+
+    case AssignType::POW:
+        left_val.set_value( *left_val.value() ^ (*right_val.value()) );
+        break;
+
+    case AssignType::MOD:
+        left_val.set_value( *left_val.value() % (*right_val.value()) );
+        break;
+
+    default:
+        return EngineError{ "Unknown assign node type: ", typeid(node).name() };
     }
 
     value = left_val;

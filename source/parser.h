@@ -89,6 +89,7 @@ private:
 
 Opt<ParseError> create_unary_node( Token const& token, Ref<UnaryNode>& node );
 Opt<ParseError> create_operator_node( Token const& token, Ref<OperatorNode>& node );
+Opt<ParseError> create_assign_node( Token const& token, Ref<AssignNode>& node );
 
 Ref<Node> make_def_type_expr( StringRef const& type );
 }

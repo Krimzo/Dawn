@@ -115,123 +115,63 @@ struct ArrayNode : Node
     Array<Ref<Node>> LIST_list;
 };
 
+enum struct UnaryType
+{
+    PLUS,
+    MINUS,
+    NOT,
+    RANGE,
+};
+
 struct UnaryNode : Node
 {
+    UnaryType type;
     Ref<Node> right;
 };
 
-struct UnaryNodePlus : UnaryNode
+enum struct OperatorType
 {
-};
-
-struct UnaryNodeMinus : UnaryNode
-{
-};
-
-struct UnaryNodeNot : UnaryNode
-{
-};
-
-struct UnaryNodeRange : UnaryNode
-{
+    ACCESS,
+    RANGE,
+    POW,
+    MOD,
+    MUL,
+    DIV,
+    ADD,
+    SUB,
+    LESS,
+    GREAT,
+    LESS_EQ,
+    GREAT_EQ,
+    EQ,
+    NOT_EQ,
+    AND,
+    OR,
 };
 
 struct OperatorNode : Node
 {
+    OperatorType type;
     Ref<Node> left;
     Ref<Node> right;
 };
 
-struct OperatorNodeAccess : OperatorNode
+enum struct AssignType
 {
+    ASSIGN,
+    ADD,
+    SUB,
+    MUL,
+    DIV,
+    POW,
+    MOD,
 };
 
-struct OperatorNodeRange : OperatorNode
+struct AssignNode :Node
 {
-};
-
-struct OperatorNodePow : OperatorNode
-{
-};
-
-struct OperatorNodeMod : OperatorNode
-{
-};
-
-struct OperatorNodeMul : OperatorNode
-{
-};
-
-struct OperatorNodeDiv : OperatorNode
-{
-};
-
-struct OperatorNodeAdd : OperatorNode
-{
-};
-
-struct OperatorNodeSub : OperatorNode
-{
-};
-
-struct OperatorNodeLess : OperatorNode
-{
-};
-
-struct OperatorNodeGreat : OperatorNode
-{
-};
-
-struct OperatorNodeLessEq : OperatorNode
-{
-};
-
-struct OperatorNodeGreatEq : OperatorNode
-{
-};
-
-struct OperatorNodeEq : OperatorNode
-{
-};
-
-struct OperatorNodeNotEq : OperatorNode
-{
-};
-
-struct OperatorNodeAnd : OperatorNode
-{
-};
-
-struct OperatorNodeOr : OperatorNode
-{
-};
-
-struct AssignNode : OperatorNode
-{
-};
-
-struct AssignNodeAdd : AssignNode
-{
-};
-
-struct AssignNodeSub : AssignNode
-{
-};
-
-struct AssignNodeMul : AssignNode
-{
-};
-
-struct AssignNodeDiv : AssignNode
-{
-};
-
-struct AssignNodePow : AssignNode
-{
-};
-
-struct AssignNodeMod : AssignNode
-{
+    AssignType type;
+    Ref<Node> left;
+    Ref<Node> right;
 };
 
 Ref<Node> make_nothing_node();
