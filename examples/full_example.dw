@@ -37,7 +37,7 @@ func bracket_examp() {
 }
 
 // Function
-func func_examp(a) {
+func func_examp(let a) {
 	return a * a
 }
 
@@ -73,16 +73,16 @@ func switch_examp() {
 
 // For
 func for_examp() {
-	for i: ~10 {
+	for let i: ~10 {
 		print(i)
 	}
-	for i: 3~6 {
+	for let i: 3~6 {
 		print(i)
 	}
-	for c: "some text" {
+	for let c: "some text" {
 		print(c)
 	}
-	for value: int[5] {
+	for ref value: int[5] {
 		print(value)
 	}
 }
@@ -108,37 +108,37 @@ func loop_examp() {
 
 // Enum
 enum ExampleEnum {
-	me(0.0),
-	you("1.1"),
-	them(2.2),
+	me = 0.0,
+	you = "1.1",
+	them = 2.2,
 }
 
 func enum_examp() {
-	let someone = ExampleEnum->me
-	let someone_else = ExampleEnum->you
-	let value = someone->val
+	let someone = ExampleEnum{me}
+	let someone_else = ExampleEnum{you}
+	let value = someone->value
 }
 
 // Struct
 struct Person {
-	name,
-	age,
+	name = "unknown",
+	age = 0,
 
 	func get_age() {
 		return self->age
 	}
 
 	func who() {
-		print(self->name)
+		print("Person ", self->name, " is ", self->age, " years old")
 	}
 }
 
 func struct_examp() {
 	var people = []
-	people->push(Person{})
-	people->push(Person{ name: "Krim", age: 23 })
+	people += [Person{}]
+	people += [Person{ name: "Krim", age: 23 }]
 
-	for let person: people {
-		print(person->get_age())
+	for ref person: people {
+		person->who()
 	}
 }
