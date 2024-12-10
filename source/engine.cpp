@@ -666,33 +666,16 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_node( OperatorNodeAccess co
     if ( auto error = handle_expr( node.left, left_val ) )
         return error;
 
-    auto struc_val = dynamic_cast<StructValue const*>(left_val.value().get());
-    if ( !struc_val )
-        return EngineError{ "Can't access member of [", left_val.value()->type(), "]" };
+    if ( auto array_val = std::dynamic_pointer_cast<ArrayValue>(left_val.value()) )
+        return handle_ac_array_node( array_val, node.right, value );
 
-    if ( auto id_node = dynamic_cast<IdentifierNode const*>(node.right.get()) )
-    {
-        if ( !struc_val->members.contains( id_node->name ) )
-            return EngineError{ "Member [", id_node->name, "] doesn't exist" };
+    if ( auto struct_val = std::dynamic_pointer_cast<StructValue>(left_val.value()) )
+        return handle_ac_struct_node( struct_val, node.right, value );
 
-        value = struc_val->members.at( id_node->name );
-    }
-    else if ( auto func_node = dynamic_cast<FunctionNode const*>(node.right.get()) )
-    {
-        auto method_ptr = struc_val->parent->get_method( func_node->name );
-        if ( !method_ptr )
-            return EngineError{ "Method [", func_node->name, "] doesn't exist" };
+    if ( auto enum_val = std::dynamic_pointer_cast<EnumValue>(left_val.value()) )
+        return handle_ac_enum_node( enum_val, node.right, value );
 
-        Array<Ref<Node>> args = { make_value_node( left_val.value() ) };
-        args.insert( args.end(), func_node->args.begin(), func_node->args.end() );
-
-        if ( auto error = handle_func( *method_ptr, args, value ) )
-            return error;
-    }
-    else
-        return EngineError{ "Struct access must be an identifier or function call" };
-
-    return std::nullopt;
+    return EngineError{ "Can't access member of [", left_val.value()->type(), "]" };
 }
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& node, ValueBox& value )
@@ -736,5 +719,89 @@ dawn::Opt<dawn::EngineError> dawn::Engine::handle_as_node( AssignNode const& nod
 
     value = left_val;
 
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_string_node( Ref<StringValue> const& left, Ref<Node> const& right, ValueBox& value )
+{
+    if ( auto id_node = dynamic_cast<IdentifierNode const*>(right.get()) )
+    {
+        if ( id_node->name == L"length" )
+        {
+            value = ValueBox{ ValueKind::LET, make_int_value( (Int) left->value.size() ) };
+            return std::nullopt;
+        }
+    }
+
+    ValueBox right_val;
+    if ( auto error = handle_expr( right, right_val ) )
+        return error;
+
+    Int index = right_val.value()->to_int();
+    if ( index < 0 || index >= (Int) left->value.size() )
+        return EngineError{ "String access [", index, "] out of bounds" };
+
+    value = ValueBox{ ValueKind::LET, make_char_value( left->value[index] ) };
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_array_node( Ref<ArrayValue> const& left, Ref<Node> const& right, ValueBox& value )
+{
+    if ( auto id_node = dynamic_cast<IdentifierNode const*>(right.get()) )
+    {
+        if ( id_node->name == L"length" )
+        {
+            value = ValueBox{ ValueKind::LET, make_int_value( (Int) left->data.size() ) };
+            return std::nullopt;
+        }
+    }
+
+    ValueBox right_val;
+    if ( auto error = handle_expr( right, right_val ) )
+        return error;
+
+    Int index = right_val.value()->to_int();
+    if ( index < 0 || index >= (Int) left->data.size() )
+        return EngineError{ "Array access [", index, "] out of bounds" };
+
+    value = left->data[index];
+
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_struct_node( Ref<StructValue> const& left, Ref<Node> const& right, ValueBox& value )
+{
+    if ( auto id_node = dynamic_cast<IdentifierNode const*>(right.get()) )
+    {
+        if ( !left->members.contains( id_node->name ) )
+            return EngineError{ "Member [", id_node->name, "] doesn't exist" };
+
+        value = left->members.at( id_node->name );
+
+        return std::nullopt;
+    }
+
+    if ( auto func_node = dynamic_cast<FunctionNode const*>(right.get()) )
+    {
+        auto method_ptr = left->parent->get_method( func_node->name );
+        if ( !method_ptr )
+            return EngineError{ "Method [", func_node->name, "] doesn't exist" };
+
+        Array<Ref<Node>> args = { make_value_node( left ) };
+        args.insert( args.end(), func_node->args.begin(), func_node->args.end() );
+
+        if ( auto error = handle_func( *method_ptr, args, value ) )
+            return error;
+
+        return std::nullopt;
+    }
+
+    return EngineError{ "Struct access must be an identifier or function call" };
+}
+
+dawn::Opt<dawn::EngineError> dawn::Engine::handle_ac_enum_node( Ref<EnumValue> const& left, Ref<Node> const& right, ValueBox& value )
+{
+    assert( false && "not impl" );
     return std::nullopt;
 }

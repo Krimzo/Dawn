@@ -1,27 +1,21 @@
 func main() {
-	var data = [1, 2, 3]
-	for ref i : data {
-		i *= 2
+	var data = ""
+	for let i : ~26 {
+		data += string( char( int('a') + i ) )
 	}
 	print(data)
-
-	var p = Person{ name: "Krim", age: 23 }
-	ref pp = p
-	ref ppp = pp
-	ref pppp = ppp
-	alter(pppp->age)
-	print(p)
 }
 
-func alter(ref val) {
-	val *= 5
-}
-
-struct Person {
-	name = "wasd",
-	age = 2 * 2,
-	
-	func who() {
-		print(self->name, " is ", self->age, " years old")
+func main2() {
+	var data = [1, 2, 3]
+	for let i : ~10 {
+		data += [i]
 	}
+	for ref val : data {
+		val *= 2
+	}
+	for let i : 0 ~ data->length {
+		data->i = sqrt(data->i)
+	}
+	print(data)
 }

@@ -129,8 +129,10 @@ dawn::ValueBox::ValueBox()
 dawn::ValueBox::ValueBox( ValueKind kind, RawValue const& value )
 {
     m_value_ref = std::make_shared<RawValue>( value );
+
     m_kind = ValueKind::VAR;
     set_value( value );
+
     m_kind = kind;
     reapply_kind();
 }
@@ -149,6 +151,7 @@ void dawn::ValueBox::set_value( RawValue const& value )
         PANIC( "Cannot set value of a let variable" );
 
     (*m_value_ref) = value->clone();
+    reapply_kind();
 }
 
 void dawn::ValueBox::reapply_kind()

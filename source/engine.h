@@ -100,5 +100,10 @@ private:
     Opt<EngineError> handle_op_node( OperatorNode const& node, ValueBox& value );
     Opt<EngineError> handle_ac_node( OperatorNodeAccess const& node, ValueBox& value );
     Opt<EngineError> handle_as_node( AssignNode const& node, ValueBox& value );
+
+    Opt<EngineError> handle_ac_string_node( Ref<StringValue> const& left, Ref<Node> const& right, ValueBox& value );
+    Opt<EngineError> handle_ac_array_node( Ref<ArrayValue> const& left, Ref<Node> const& right, ValueBox& value );
+    Opt<EngineError> handle_ac_struct_node( Ref<StructValue> const& left, Ref<Node> const& right, ValueBox& value );
+    Opt<EngineError> handle_ac_enum_node( Ref<EnumValue> const& left, Ref<Node> const& right, ValueBox& value );
 };
 }
