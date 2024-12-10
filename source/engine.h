@@ -55,7 +55,7 @@ struct Stack
     }
 
 private:
-    List<Pair<String, T>> m_data;
+    Array<Pair<String, T>> m_data;
 };
 
 struct Engine

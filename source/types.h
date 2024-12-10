@@ -43,7 +43,7 @@ struct Enum
 struct Struct
 {
     String name;
-    List<Variable> fields;
+    Array<Variable> fields;
     Array<Function> methods;
 
     Function const* get_method( StringRef const& name ) const;
