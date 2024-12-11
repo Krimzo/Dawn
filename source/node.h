@@ -5,6 +5,28 @@
 
 namespace dawn
 {
+struct ValueNod;
+struct BoxNod;
+struct CastNod;
+struct VariableNod;
+struct IdentifierNod;
+struct FunctionNod;
+struct ReturnNod;
+struct BreakNod;
+struct ContinueNod;
+struct IfNod;
+struct SwitchNod;
+struct LoopNod;
+struct WhileNod;
+struct ForNod;
+struct EnumNod;
+struct StructNod;
+struct ArrayNod;
+struct UnaryNod;
+struct OperatorNod;
+struct AssignNod;
+struct Scope;
+
 enum struct NodeType
 {
     EMPTY,
@@ -31,14 +53,87 @@ enum struct NodeType
     SCOPE,
 };
 
+template<typename T>
+consteval NodeType node_type()
+{
+    if constexpr ( std::is_same_v<T, ValueNod> )
+        return NodeType::VALUE;
+
+    else if constexpr ( std::is_same_v<T, BoxNod> )
+        return NodeType::BOX;
+
+    else if constexpr ( std::is_same_v<T, CastNod> )
+        return NodeType::CAST;
+
+    else if constexpr ( std::is_same_v<T, VariableNod> )
+        return NodeType::VARIABLE;
+
+    else if constexpr ( std::is_same_v<T, IdentifierNod> )
+        return NodeType::IDENTIFIER;
+
+    else if constexpr ( std::is_same_v<T, FunctionNod> )
+        return NodeType::FUNCTION;
+
+    else if constexpr ( std::is_same_v<T, ReturnNod> )
+        return NodeType::RETURN;
+
+    else if constexpr ( std::is_same_v<T, BreakNod> )
+        return NodeType::BREAK;
+
+    else if constexpr ( std::is_same_v<T, ContinueNod> )
+        return NodeType::CONTINUE;
+
+    else if constexpr ( std::is_same_v<T, IfNod> )
+        return NodeType::IF;
+
+    else if constexpr ( std::is_same_v<T, SwitchNod> )
+        return NodeType::SWITCH;
+
+    else if constexpr ( std::is_same_v<T, LoopNod> )
+        return NodeType::LOOP;
+
+    else if constexpr ( std::is_same_v<T, WhileNod> )
+        return NodeType::WHILE;
+
+    else if constexpr ( std::is_same_v<T, ForNod> )
+        return NodeType::FOR;
+
+    else if constexpr ( std::is_same_v<T, EnumNod> )
+        return NodeType::ENUM;
+
+    else if constexpr ( std::is_same_v<T, StructNod> )
+        return NodeType::STRUCT;
+
+    else if constexpr ( std::is_same_v<T, ArrayNod> )
+        return NodeType::ARRAY;
+
+    else if constexpr ( std::is_same_v<T, UnaryNod> )
+        return NodeType::UNARY;
+
+    else if constexpr ( std::is_same_v<T, OperatorNod> )
+        return NodeType::OPERATOR;
+
+    else if constexpr ( std::is_same_v<T, AssignNod> )
+        return NodeType::ASSIGN;
+
+    else if constexpr ( std::is_same_v<T, Scope> )
+        return NodeType::SCOPE;
+
+    else
+        static_assert(false, "Invalid node type");
+}
+
 struct Node : private std::any
 {
-    NodeType type() const;
+    constexpr NodeType type() const
+    {
+        return m_type;
+    }
 
     template<typename T>
-    constexpr T& store()
+    constexpr T const& as() const
     {
-        return emplace<T>();
+        return *_Cast<T>();
     }
 
     template<typename T>
@@ -48,9 +143,13 @@ struct Node : private std::any
     }
 
     template<typename T>
-    constexpr T const& as() const
+    constexpr T& store()
     {
-        return *_Cast<T>();
+        m_type = node_type<T>();
+        return emplace<T>();
     }
+
+private:
+    NodeType m_type;
 };
 }
