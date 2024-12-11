@@ -112,43 +112,42 @@ dawn::ValueBox* dawn::Engine::get_var( String const& name )
 
 dawn::Opt<dawn::EngineError> dawn::Engine::handle_func( Function const& func, Array<Ref<Node>> const& args, ValueBox& retval )
 {
-    if ( func.body.index() == 1 )
+    if ( func.body.index() == 0 )
+    {
+        if ( func.args.size() != args.size() )
+            return EngineError{ "invalid argument count for function [", func.name, L"]" };
+
+        for ( Int i = 0; i < (Int) args.size(); i++ )
+        {
+            Variable arg;
+            arg.name = func.args[i].name;
+            arg.kind = func.args[i].kind;
+            arg.expr = args[i];
+
+            if ( auto error = add_var( arg ) )
+                return error;
+        }
+
+        Bool didret = false;
+        if ( auto error = handle_scope( std::get<Scope>( func.body ), retval, didret, nullptr, nullptr ) )
+            return error;
+
+        variables.pop( (Int) args.size() );
+    }
+    else
     {
         Array<ValueBox> arg_vals;
+        arg_vals.reserve( args.size() );
+
         for ( auto& arg : args )
         {
-            ValueBox arg_val;
-            if ( auto error = handle_expr( arg, arg_val ) )
+            if ( auto error = handle_expr( arg, arg_vals.emplace_back() ) )
                 return error;
-
-            arg_vals.push_back( arg_val );
         }
 
         auto result = std::get<Function::CppFunc>( func.body )(arg_vals);
         retval = ValueBox{ result };
-
-        return std::nullopt;
     }
-
-    if ( func.args.size() != args.size() )
-        return EngineError{ "invalid argument count for function [", func.name, L"]" };
-
-    for ( Int i = 0; i < (Int) args.size(); i++ )
-    {
-        Variable arg;
-        arg.name = func.args[i].name;
-        arg.kind = func.args[i].kind;
-        arg.expr = args[i];
-
-        if ( auto error = add_var( arg ) )
-            return error;
-    }
-
-    Bool didret = false;
-    if ( auto error = handle_scope( std::get<Scope>( func.body ), retval, didret, nullptr, nullptr ) )
-        return error;
-
-    variables.pop( (Int) args.size() );
 
     return std::nullopt;
 }
