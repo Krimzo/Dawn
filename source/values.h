@@ -1,7 +1,8 @@
 #pragma once
 
-#include "types.h"
 #include "err.h"
+#include "types.h"
+#include "memory.h"
 
 
 namespace dawn
@@ -132,8 +133,8 @@ struct ValueBox
     void set_value( Value const& value );
 
 private:
+    RegisterRef<Value> m_register;
     ValueKind m_kind;
-    std::shared_ptr<Value> m_value_ref;
 
     void reapply_kind();
 };

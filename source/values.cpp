@@ -361,6 +361,19 @@ dawn::Value dawn::Value::operator==( Value const& other ) const
     case ValueType::STRING:
         return to_string() == other.to_string();
 
+    case ValueType::ENUM:
+    {
+        if ( other.type() != ValueType::ENUM )
+            PANIC( "[", type(), "] == [", other.type(), "] not supported" );
+
+        auto& left = as<EnumVal>();
+        auto& right = other.as<EnumVal>();
+        if ( left.parent != right.parent )
+            PANIC( "enum [", left.parent->name, "] == enum [", right.parent->name, "] not supported" );
+
+        return left.key == right.key;
+    }
+
     default:
         PANIC( "[", type(), "] == [", other.type(), "] not supported" );
     }
@@ -384,6 +397,19 @@ dawn::Value dawn::Value::operator!=( Value const& other ) const
 
     case ValueType::STRING:
         return to_string() != other.to_string();
+
+    case ValueType::ENUM:
+    {
+        if ( other.type() != ValueType::ENUM )
+            PANIC( "[", type(), "] != [", other.type(), "] not supported" );
+
+        auto& left = as<EnumVal>();
+        auto& right = other.as<EnumVal>();
+        if ( left.parent != right.parent )
+            PANIC( "enum [", left.parent->name, "] != enum [", right.parent->name, "] not supported" );
+
+        return left.key != right.key;
+    }
 
     default:
         PANIC( "[", type(), "] != [", other.type(), "] not supported" );
@@ -710,14 +736,15 @@ dawn::String dawn::Value::to_string() const
     }
 }
 
+static dawn::Memory<dawn::Value> _MEMORY{ 1024 };
+
 dawn::ValueBox::ValueBox()
     : ValueBox( Value{} )
 {}
 
 dawn::ValueBox::ValueBox( Value const& value, ValueKind kind )
+    : m_register( _MEMORY.new_register() )
 {
-    m_value_ref = std::make_shared<Value>( value );
-
     m_kind = ValueKind::VAR;
     set_value( value );
 
@@ -727,7 +754,7 @@ dawn::ValueBox::ValueBox( Value const& value, ValueKind kind )
 
 dawn::Value const& dawn::ValueBox::value() const
 {
-    return *m_value_ref;
+    return m_register.value();
 }
 
 void dawn::ValueBox::set_value( Value const& value )
@@ -735,7 +762,7 @@ void dawn::ValueBox::set_value( Value const& value )
     if ( m_kind == ValueKind::LET )
         PANIC( "Cannot set value of a let variable" );
 
-    (*m_value_ref) = value;
+    m_register.value() = value;
     reapply_kind();
 }
 
@@ -745,7 +772,7 @@ void dawn::ValueBox::reapply_kind()
     {
     case ValueType::STRUCT:
     {
-        auto& val = (*m_value_ref).as<StructVal>();
+        auto& val = m_register.value().as<StructVal>();
         for ( auto& [_, member] : val.members )
         {
             member.m_kind = this->m_kind;
@@ -756,7 +783,7 @@ void dawn::ValueBox::reapply_kind()
 
     case ValueType::ARRAY:
     {
-        auto& val = (*m_value_ref).as<ArrayVal>();
+        auto& val = m_register.value().as<ArrayVal>();
         for ( auto& value : val.data )
         {
             value.m_kind = this->m_kind;
