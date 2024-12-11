@@ -16,7 +16,7 @@ struct Dawn
     Opt<String> eval_file( StringRef const& path ) noexcept;
 
     void bind_func( String const& name, Function::CppFunc cpp_func ) noexcept;
-    Opt<String> call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval ) noexcept;
+    Opt<String> call_func( String const& name, Array<Node> const& args, ValueBox& retval ) noexcept;
 
     Opt<String> add_var( Variable const& var ) noexcept;
     void add_var( Variable const& var, ValueBox const& value ) noexcept;

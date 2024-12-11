@@ -39,7 +39,6 @@ using Any = std::any;
 template<typename T> using Opt = std::optional<T>;
 template<typename... Args> using Variant = std::variant<Args...>;
 template<typename T1, typename T2> using Pair = std::pair<T1, T2>;
-template<typename T> using Ref = std::shared_ptr<T>;
 
 template<typename T> using Array = std::vector<T>;
 template<typename K> using Set = std::unordered_set<K>;

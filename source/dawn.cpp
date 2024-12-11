@@ -36,7 +36,7 @@ void dawn::Dawn::bind_func( String const& name, Function::CppFunc cpp_func ) noe
     m_engine.bind_func( name, cpp_func );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<Node> const& args, ValueBox& retval ) noexcept
 {
     try
     {

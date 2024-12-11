@@ -1,17 +1,12 @@
 #pragma once
 
-#include "syntax.h"
+#include "node.h"
 
 
 namespace dawn
 {
 struct Value;
 struct ValueBox;
-
-struct Node
-{
-    virtual ~Node() = default;
-};
 
 enum struct VariableKind
 {
@@ -24,12 +19,12 @@ struct Variable
 {
     VariableKind kind;
     String name;
-    Ref<Node> expr;
+    Node expr;
 };
 
-struct Scope : Node
+struct Scope
 {
-    Array<Ref<Node>> instr;
+    Array<Node> instr;
 };
 
 struct Function

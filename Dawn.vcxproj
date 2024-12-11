@@ -15,6 +15,7 @@
     <ClCompile Include="source\engine_defaults.cpp" />
     <ClCompile Include="source\err.cpp" />
     <ClCompile Include="source\lexer.cpp" />
+    <ClCompile Include="source\node.cpp" />
     <ClCompile Include="source\nodes.cpp" />
     <ClCompile Include="source\parser.cpp" />
     <ClCompile Include="source\token.cpp" />
@@ -29,6 +30,7 @@
     <ClInclude Include="source\engine.h" />
     <ClInclude Include="source\err.h" />
     <ClInclude Include="source\lexer.h" />
+    <ClInclude Include="source\node.h" />
     <ClInclude Include="source\nodes.h" />
     <ClInclude Include="source\parser.h" />
     <ClInclude Include="source\syntax.h" />

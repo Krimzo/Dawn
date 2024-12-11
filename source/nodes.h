@@ -5,56 +5,56 @@
 
 namespace dawn
 {
-struct ValueNode : Node
+struct ValueNod
 {
     Value value;
 };
 
-struct BoxNode : Node
+struct BoxNod
 {
     ValueBox box;
 };
 
-struct CastNode : Node
+struct CastNod
 {
     String type;
-    Ref<Node> expr;
+    Node expr;
 };
 
-struct VariableNode : Node
+struct VariableNod
 {
     Variable var;
 };
 
-struct IdentifierNode : Node
+struct IdentifierNod
 {
     String name;
 };
 
-struct FunctionNode : Node
+struct FunctionNod
 {
     String name;
-    Array<Ref<Node>> args;
+    Array<Node> args;
 };
 
-struct ReturnNode : Node
+struct ReturnNod
 {
-    Ref<Node> expr;
+    Node expr;
 };
 
-struct BreakNode : Node
-{
-};
-
-struct ContinueNode : Node
+struct BreakNod
 {
 };
 
-struct IfNode : Node
+struct ContinueNod
+{
+};
+
+struct IfNod
 {
     struct Part
     {
-        Ref<Node> expr;
+        Node expr;
         Scope scope;
     };
 
@@ -63,50 +63,50 @@ struct IfNode : Node
     Opt<Part> else_part;
 };
 
-struct SwitchNode : Node
+struct SwitchNod
 {
     struct Part
     {
-        Array<Ref<Node>> exprs;
+        Array<Node> exprs;
         Scope scope;
     };
 
-    Ref<Node> main_expr;
+    Node main_expr;
     Array<Part> cases;
     Opt<Scope> def_scope;
 };
 
-struct LoopNode : Node
+struct LoopNod
 {
     Scope scope;
 };
 
-struct WhileNode : Node
+struct WhileNod
 {
-    Ref<Node> expr;
+    Node expr;
     Scope scope;
 };
 
-struct ForNode :Node
+struct ForNod
 {
     Variable var;
-    Ref<Node> expr;
+    Node expr;
     Scope scope;
 };
 
-struct EnumNode : Node
+struct EnumNod
 {
     String type;
     String key;
 };
 
-struct StructNode : Node
+struct StructNod
 {
     String type;
-    Map<String, Ref<Node>> args;
+    Map<String, Node> args;
 };
 
-struct ArrayNode : Node
+struct ArrayNod
 {
     enum struct InitType
     {
@@ -115,9 +115,9 @@ struct ArrayNode : Node
     };
 
     InitType init_type;
-    Ref<Node> SIZE_value_expr;
-    Ref<Node> SIZE_size_expr;
-    Array<Ref<Node>> LIST_list;
+    Node SIZE_value_expr;
+    Node SIZE_size_expr;
+    Array<Node> LIST_list;
 };
 
 enum struct UnaryType
@@ -128,10 +128,10 @@ enum struct UnaryType
     RANGE,
 };
 
-struct UnaryNode : Node
+struct UnaryNod
 {
     UnaryType type;
-    Ref<Node> right;
+    Node right;
 };
 
 enum struct OperatorType
@@ -154,11 +154,11 @@ enum struct OperatorType
     OR,
 };
 
-struct OperatorNode : Node
+struct OperatorNod
 {
     OperatorType type;
-    Ref<Node> left;
-    Ref<Node> right;
+    Node left;
+    Node right;
 };
 
 enum struct AssignType
@@ -172,18 +172,18 @@ enum struct AssignType
     MOD,
 };
 
-struct AssignNode :Node
+struct AssignNod
 {
     AssignType type;
-    Ref<Node> left;
-    Ref<Node> right;
+    Node left;
+    Node right;
 };
 
-Ref<Node> make_nothing_node();
-Ref<Node> make_bool_node( Bool value );
-Ref<Node> make_int_node( Int value );
-Ref<Node> make_float_node( Float value );
-Ref<Node> make_char_node( Char value );
-Ref<Node> make_string_node( StringRef const& value );
-Ref<Node> make_value_node( Value const& value );
+Node make_nothing_node();
+Node make_bool_node( Bool value );
+Node make_int_node( Int value );
+Node make_float_node( Float value );
+Node make_char_node( Char value );
+Node make_string_node( StringRef const& value );
+Node make_value_node( Value const& value );
 }

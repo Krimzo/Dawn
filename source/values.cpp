@@ -1,24 +1,6 @@
 #include "values.h"
 
 
-std::wostream& dawn::operator<<( std::wostream& stream, ValueType type )
-{
-    switch ( type )
-    {
-    case ValueType::NOTHING: stream << tp_nothing; break;
-    case ValueType::BOOL: stream << tp_bool; break;
-    case ValueType::INT: stream << tp_int; break;
-    case ValueType::FLOAT: stream << tp_float; break;
-    case ValueType::CHAR: stream << tp_char; break;
-    case ValueType::STRING: stream << tp_string; break;
-    case ValueType::ENUM: stream << tp_enum; break;
-    case ValueType::STRUCT: stream << tp_struct; break;
-    case ValueType::ARRAY: stream << tp_array; break;
-    case ValueType::RANGE: stream << tp_range; break;
-    }
-    return stream;
-}
-
 dawn::Value::Value()
 {}
 
@@ -783,4 +765,22 @@ void dawn::ValueBox::reapply_kind()
         break;
     }
     }
+}
+
+std::wostream& dawn::operator<<( std::wostream& stream, ValueType type )
+{
+    switch ( type )
+    {
+    case ValueType::NOTHING: stream << tp_nothing; break;
+    case ValueType::BOOL: stream << tp_bool; break;
+    case ValueType::INT: stream << tp_int; break;
+    case ValueType::FLOAT: stream << tp_float; break;
+    case ValueType::CHAR: stream << tp_char; break;
+    case ValueType::STRING: stream << tp_string; break;
+    case ValueType::ENUM: stream << tp_enum; break;
+    case ValueType::STRUCT: stream << tp_struct; break;
+    case ValueType::ARRAY: stream << tp_array; break;
+    case ValueType::RANGE: stream << tp_range; break;
+    }
+    return stream;
 }

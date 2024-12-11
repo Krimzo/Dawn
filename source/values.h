@@ -43,8 +43,6 @@ enum struct ValueType
     RANGE,
 };
 
-std::wostream& operator<<( std::wostream& stream, ValueType type );
-
 struct Value
 {
     Value();
@@ -135,8 +133,10 @@ struct ValueBox
 
 private:
     ValueKind m_kind;
-    Ref<Value> m_value_ref;
+    std::shared_ptr<Value> m_value_ref;
 
     void reapply_kind();
 };
+
+std::wostream& operator<<( std::wostream& stream, ValueType type );
 }
