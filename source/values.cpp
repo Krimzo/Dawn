@@ -1,6 +1,44 @@
 #include "values.h"
 
 
+dawn::StructVal::StructVal( StructVal const& other )
+{
+    parent = other.parent;
+    for ( auto& [key, val] : other.members )
+        members[key] = ValueRef{ val.value(), val.kind() };
+}
+
+dawn::StructVal& dawn::StructVal::operator=( StructVal const& other )
+{
+    if ( this != &other )
+    {
+        parent = other.parent;
+        members.clear();
+        for ( auto& [key, val] : other.members )
+            members[key] = ValueRef{ val.value(), val.kind() };
+    }
+    return *this;
+}
+
+dawn::ArrayVal::ArrayVal( ArrayVal const& other )
+{
+    data.reserve( other.data.size() );
+    for ( auto& val : other.data )
+        data.emplace_back( val.value(), val.kind() );
+}
+
+dawn::ArrayVal& dawn::ArrayVal::operator=( ArrayVal const& other )
+{
+    if ( this != &other )
+    {
+        data.clear();
+        data.reserve( other.data.size() );
+        for ( auto& val : other.data )
+            data.emplace_back( val.value(), val.kind() );
+    }
+    return *this;
+}
+
 dawn::Value::Value()
 {}
 
@@ -703,7 +741,7 @@ dawn::String dawn::Value::to_string() const
         {
             auto& [key, value] = *it;
             stream << key << L": " << value.value().to_string();
-            Map<String, ValueBox>::const_iterator next_it = it;
+            Map<String, ValueRef>::const_iterator next_it = it;
             ++next_it;
             stream << (next_it == val.members.end() ? L" }" : L", ");
         }
@@ -738,11 +776,11 @@ dawn::String dawn::Value::to_string() const
 
 static dawn::Memory<dawn::Value> _MEMORY{ 1024 };
 
-dawn::ValueBox::ValueBox()
-    : ValueBox( Value{} )
+dawn::ValueRef::ValueRef()
+    : ValueRef( Value{} )
 {}
 
-dawn::ValueBox::ValueBox( Value const& value, ValueKind kind )
+dawn::ValueRef::ValueRef( Value const& value, ValueKind kind )
     : m_register( _MEMORY.new_register() )
 {
     m_kind = ValueKind::VAR;
@@ -752,12 +790,17 @@ dawn::ValueBox::ValueBox( Value const& value, ValueKind kind )
     reapply_kind();
 }
 
-dawn::Value const& dawn::ValueBox::value() const
+dawn::ValueKind dawn::ValueRef::kind() const
+{
+    return m_kind;
+}
+
+dawn::Value const& dawn::ValueRef::value() const
 {
     return m_register.value();
 }
 
-void dawn::ValueBox::set_value( Value const& value )
+void dawn::ValueRef::set_value( Value const& value )
 {
     if ( m_kind == ValueKind::LET )
         PANIC( "Cannot set value of a let variable" );
@@ -766,7 +809,7 @@ void dawn::ValueBox::set_value( Value const& value )
     reapply_kind();
 }
 
-void dawn::ValueBox::reapply_kind()
+void dawn::ValueRef::reapply_kind()
 {
     switch ( value().type() )
     {

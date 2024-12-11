@@ -16,12 +16,22 @@ struct EnumVal
 struct StructVal
 {
     Struct const* parent = nullptr;
-    Map<String, ValueBox> members;
+    Map<String, ValueRef> members;
+
+    StructVal() = default;
+
+    StructVal( StructVal const& other );
+    StructVal& operator=( StructVal const& other );
 };
 
 struct ArrayVal
 {
-    Array<ValueBox> data;
+    Array<ValueRef> data;
+
+    ArrayVal() = default;
+
+    ArrayVal( ArrayVal const& other );
+    ArrayVal& operator=( ArrayVal const& other );
 };
 
 struct RangeVal
@@ -124,10 +134,12 @@ enum struct ValueKind
     VAR,
 };
 
-struct ValueBox
+struct ValueRef
 {
-    ValueBox();
-    ValueBox( Value const& value, ValueKind kind = ValueKind::LET );
+    ValueRef();
+    ValueRef( Value const& value, ValueKind kind = ValueKind::LET );
+
+    ValueKind kind() const;
 
     Value const& value() const;
     void set_value( Value const& value );

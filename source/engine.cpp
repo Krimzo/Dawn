@@ -11,9 +11,9 @@ void dawn::Engine::load_mod( Module const& module )
         auto& enu = (enums[entry.name] = entry);
         for ( auto& [key, expr] : enu.keys_expr )
         {
-            ValueBox key_val;
+            ValueRef key_val;
             handle_expr( expr.expr, key_val );
-            enu.keys_value[key] = ValueBox{ key_val.value() };
+            enu.keys_value[key] = ValueRef{ key_val.value() };
         }
     }
 
@@ -32,7 +32,7 @@ void dawn::Engine::bind_func( String const& name, Function::CppFunc cpp_func )
     functions[name] = func;
 }
 
-void dawn::Engine::call_func( String const& name, Array<Node> const& args, ValueBox& retval )
+void dawn::Engine::call_func( String const& name, Array<Node> const& args, ValueRef& retval )
 {
     FunctionNod node;
     node.name = name;
@@ -42,20 +42,20 @@ void dawn::Engine::call_func( String const& name, Array<Node> const& args, Value
 
 void dawn::Engine::add_var( Variable const& var )
 {
-    ValueBox var_val;
+    ValueRef var_val;
     handle_expr( var.expr, var_val );
     add_var( var, var_val );
 }
 
-void dawn::Engine::add_var( Variable const& var, ValueBox const& value )
+void dawn::Engine::add_var( Variable const& var, ValueRef const& value )
 {
     if ( var.kind == VariableKind::LET )
     {
-        variables.push( var.name, ValueBox{ value.value() } );
+        variables.push( var.name, ValueRef{ value.value() } );
     }
     else if ( var.kind == VariableKind::VAR )
     {
-        variables.push( var.name, ValueBox{ value.value(), ValueKind::VAR } );
+        variables.push( var.name, ValueRef{ value.value(), ValueKind::VAR } );
     }
     else
     {
@@ -63,12 +63,12 @@ void dawn::Engine::add_var( Variable const& var, ValueBox const& value )
     }
 }
 
-dawn::ValueBox* dawn::Engine::get_var( String const& name )
+dawn::ValueRef* dawn::Engine::get_var( String const& name )
 {
     return variables.get( name );
 }
 
-void dawn::Engine::handle_func( Function const& func, Array<Node> const& args, ValueBox& retval )
+void dawn::Engine::handle_func( Function const& func, Array<Node> const& args, ValueRef& retval )
 {
     if ( func.body.index() == 0 )
     {
@@ -91,18 +91,18 @@ void dawn::Engine::handle_func( Function const& func, Array<Node> const& args, V
     }
     else
     {
-        Array<ValueBox> arg_vals;
+        Array<ValueRef> arg_vals;
         arg_vals.reserve( args.size() );
 
         for ( auto& arg : args )
             handle_expr( arg, arg_vals.emplace_back() );
 
         auto result = std::get<Function::CppFunc>( func.body )(arg_vals);
-        retval = ValueBox{ result };
+        retval = ValueRef{ result };
     }
 }
 
-void dawn::Engine::handle_scope( Scope const& scope, ValueBox& retval, Bool& didret, Bool* didbrk, Bool* didcon )
+void dawn::Engine::handle_scope( Scope const& scope, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon )
 {
     Int push_count = 0;
 
@@ -117,7 +117,7 @@ void dawn::Engine::handle_scope( Scope const& scope, ValueBox& retval, Bool& did
     variables.pop( push_count );
 }
 
-void dawn::Engine::handle_instr( Node const& node, ValueBox& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon )
+void dawn::Engine::handle_instr( Node const& node, ValueRef& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon )
 {
     switch ( node.type() )
     {
@@ -166,7 +166,7 @@ void dawn::Engine::handle_instr( Node const& node, ValueBox& retval, Int& push_c
     }
 }
 
-void dawn::Engine::handle_expr( Node const& node, ValueBox& value )
+void dawn::Engine::handle_expr( Node const& node, ValueRef& value )
 {
     switch ( node.type() )
     {
@@ -219,40 +219,40 @@ void dawn::Engine::handle_expr( Node const& node, ValueBox& value )
     }
 }
 
-void dawn::Engine::handle_val_node( ValueNod const& node, ValueBox& value )
+void dawn::Engine::handle_val_node( ValueNod const& node, ValueRef& value )
 {
-    value = ValueBox{ node.value };
+    value = ValueRef{ node.value };
 }
 
-void dawn::Engine::handle_box_node( BoxNod const& node, ValueBox& value )
+void dawn::Engine::handle_box_node( BoxNod const& node, ValueRef& value )
 {
     value = node.box;
 }
 
-void dawn::Engine::handle_cast_node( CastNod const& node, ValueBox& value )
+void dawn::Engine::handle_cast_node( CastNod const& node, ValueRef& value )
 {
-    ValueBox cast_val;
+    ValueRef cast_val;
     handle_expr( node.expr, cast_val );
 
     if ( node.type == tp_bool )
     {
-        value = ValueBox{ Value{ cast_val.value().to_bool() } };
+        value = ValueRef{ Value{ cast_val.value().to_bool() } };
     }
     else if ( node.type == tp_int )
     {
-        value = ValueBox{ Value{ cast_val.value().to_int() } };
+        value = ValueRef{ Value{ cast_val.value().to_int() } };
     }
     else if ( node.type == tp_float )
     {
-        value = ValueBox{ Value{ cast_val.value().to_float() } };
+        value = ValueRef{ Value{ cast_val.value().to_float() } };
     }
     else if ( node.type == tp_char )
     {
-        value = ValueBox{ Value{ cast_val.value().to_char() } };
+        value = ValueRef{ Value{ cast_val.value().to_char() } };
     }
     else if ( node.type == tp_string )
     {
-        value = ValueBox{ Value{ cast_val.value().to_string() } };
+        value = ValueRef{ Value{ cast_val.value().to_string() } };
     }
     else
         ENGINE_PANIC( "Unknown cast type: ", node.type );
@@ -264,7 +264,7 @@ void dawn::Engine::handle_var_node( VariableNod const& node, Int& push_count )
     ++push_count;
 }
 
-void dawn::Engine::handle_id_node( IdentifierNod const& node, ValueBox& value )
+void dawn::Engine::handle_id_node( IdentifierNod const& node, ValueRef& value )
 {
     auto* ptr = variables.get( node.name );
     if ( !ptr )
@@ -272,7 +272,7 @@ void dawn::Engine::handle_id_node( IdentifierNod const& node, ValueBox& value )
     value = *ptr;
 }
 
-void dawn::Engine::handle_func_node( FunctionNod const& node, ValueBox& retval )
+void dawn::Engine::handle_func_node( FunctionNod const& node, ValueRef& retval )
 {
     if ( !functions.contains( node.name ) )
         ENGINE_PANIC( L"function [", node.name, L"] doesn't exist" );
@@ -281,7 +281,7 @@ void dawn::Engine::handle_func_node( FunctionNod const& node, ValueBox& retval )
     handle_func( func, node.args, retval );
 }
 
-void dawn::Engine::handle_return_node( ReturnNod const& node, ValueBox& retval, Bool& didret )
+void dawn::Engine::handle_return_node( ReturnNod const& node, ValueRef& retval, Bool& didret )
 {
     handle_expr( node.expr, retval );
     didret = true;
@@ -301,9 +301,9 @@ void dawn::Engine::handle_continue_node( ContinueNod const& node, Bool* didcon )
     *didcon = true;
 }
 
-void dawn::Engine::handle_if_node( IfNod const& node, ValueBox& retval, Bool& didret, Bool* didbrk, Bool* didcon )
+void dawn::Engine::handle_if_node( IfNod const& node, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon )
 {
-    ValueBox check_val;
+    ValueRef check_val;
     handle_expr( node.if_part.expr, check_val );
 
     if ( check_val.value().to_bool() )
@@ -326,16 +326,16 @@ void dawn::Engine::handle_if_node( IfNod const& node, ValueBox& retval, Bool& di
         handle_scope( node.else_part->scope, retval, didret, didbrk, didcon );
 }
 
-void dawn::Engine::handle_switch_node( SwitchNod const& node, ValueBox& retval, Bool& didret, Bool* didbrk, Bool* didcon )
+void dawn::Engine::handle_switch_node( SwitchNod const& node, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon )
 {
-    ValueBox check_val;
+    ValueRef check_val;
     handle_expr( node.main_expr, check_val );
 
     for ( auto& case_part : node.cases )
     {
         for ( auto& expr : case_part.exprs )
         {
-            ValueBox case_val;
+            ValueRef case_val;
             handle_expr( expr, case_val );
 
             if ( (check_val.value() == case_val.value()).to_bool() )
@@ -350,7 +350,7 @@ void dawn::Engine::handle_switch_node( SwitchNod const& node, ValueBox& retval, 
         handle_scope( *node.def_scope, retval, didret, didbrk, didcon );
 }
 
-void dawn::Engine::handle_loop_node( LoopNod const& node, ValueBox& retval, Bool& didret )
+void dawn::Engine::handle_loop_node( LoopNod const& node, ValueRef& retval, Bool& didret )
 {
     Bool didbrk = false, didcon = false;
     while ( true )
@@ -365,12 +365,12 @@ void dawn::Engine::handle_loop_node( LoopNod const& node, ValueBox& retval, Bool
     }
 }
 
-void dawn::Engine::handle_while_node( WhileNod const& node, ValueBox& retval, Bool& didret )
+void dawn::Engine::handle_while_node( WhileNod const& node, ValueRef& retval, Bool& didret )
 {
     Bool didbrk = false, didcon = false;
     while ( true )
     {
-        ValueBox check_val;
+        ValueRef check_val;
         handle_expr( node.expr, check_val );
 
         if ( !check_val.value().to_bool() )
@@ -386,9 +386,9 @@ void dawn::Engine::handle_while_node( WhileNod const& node, ValueBox& retval, Bo
     }
 }
 
-void dawn::Engine::handle_for_node( ForNod const& node, ValueBox& retval, Bool& didret )
+void dawn::Engine::handle_for_node( ForNod const& node, ValueRef& retval, Bool& didret )
 {
-    ValueBox loop_val;
+    ValueRef loop_val;
     handle_expr( node.expr, loop_val );
 
     if ( loop_val.value().type() == ValueType::STRING )
@@ -461,7 +461,7 @@ void dawn::Engine::handle_for_node( ForNod const& node, ValueBox& retval, Bool& 
         ENGINE_PANIC( "Can't for loop [", loop_val.value().type(), "]" );
 }
 
-void dawn::Engine::handle_enum_node( EnumNod const& node, ValueBox& value )
+void dawn::Engine::handle_enum_node( EnumNod const& node, ValueRef& value )
 {
     if ( !enums.contains( node.type ) )
         ENGINE_PANIC( "enum [", node.type, L"] doesn't exist" );
@@ -470,10 +470,10 @@ void dawn::Engine::handle_enum_node( EnumNod const& node, ValueBox& value )
     result.parent = &enums.at( node.type );
     result.key = node.key;
 
-    value = ValueBox{ result };
+    value = ValueRef{ result };
 }
 
-void dawn::Engine::handle_struct_node( StructNod const& node, ValueBox& value )
+void dawn::Engine::handle_struct_node( StructNod const& node, ValueRef& value )
 {
     if ( !structs.contains( node.type ) )
         ENGINE_PANIC( "struct [", node.type, L"] doesn't exist" );
@@ -489,80 +489,80 @@ void dawn::Engine::handle_struct_node( StructNod const& node, ValueBox& value )
         if ( node.args.contains( struc_field.name ) )
             continue;
 
-        ValueBox field_val;
+        ValueRef field_val;
         handle_expr( struc_field.expr, field_val );
-        field = ValueBox{ field_val.value() };
+        field = ValueRef{ field_val.value() };
     }
 
     for ( auto& [arg_name, arg_expr] : node.args )
     {
-        ValueBox arg_val;
+        ValueRef arg_val;
         handle_expr( arg_expr, arg_val );
 
         if ( !result.members.contains( arg_name ) )
             ENGINE_PANIC( "field [", arg_name, L"] doesn't exist in struct [", node.type, L"]" );
 
-        result.members.at( arg_name ) = ValueBox{ arg_val.value() };
+        result.members.at( arg_name ) = ValueRef{ arg_val.value() };
     }
 
-    value = ValueBox{ result };
+    value = ValueRef{ result };
 }
 
-void dawn::Engine::handle_array_node( ArrayNod const& node, ValueBox& value )
+void dawn::Engine::handle_array_node( ArrayNod const& node, ValueRef& value )
 {
     ArrayVal result{};
 
     if ( node.init_type == ArrayNod::InitType::SIZE )
     {
-        ValueBox size_val;
+        ValueRef size_val;
         handle_expr( node.SIZE_size_expr, size_val );
 
         Int size = size_val.value().to_int();
         if ( size < 0 )
             ENGINE_PANIC( "Array size cannot be negative" );
 
-        ValueBox value_val;
+        ValueRef value_val;
         handle_expr( node.SIZE_value_expr, value_val );
 
         result.data.resize( size );
         for ( auto& val : result.data )
-            val = ValueBox{ value_val.value() };
+            val = ValueRef{ value_val.value() };
     }
     else
     {
         result.data.reserve( node.LIST_list.size() );
         for ( auto& expr : node.LIST_list )
         {
-            ValueBox entry_val;
+            ValueRef entry_val;
             handle_expr( expr, entry_val );
             result.data.emplace_back( entry_val.value() );
         }
     }
 
-    value = ValueBox{ result };
+    value = ValueRef{ result };
 }
 
-void dawn::Engine::handle_un_node( UnaryNod const& node, ValueBox& value )
+void dawn::Engine::handle_un_node( UnaryNod const& node, ValueRef& value )
 {
-    ValueBox right_val;
+    ValueRef right_val;
     handle_expr( node.right, right_val );
 
     switch ( node.type )
     {
     case UnaryType::PLUS:
-        value = ValueBox{ +right_val.value() };
+        value = ValueRef{ +right_val.value() };
         break;
 
     case UnaryType::MINUS:
-        value = ValueBox{ -right_val.value() };
+        value = ValueRef{ -right_val.value() };
         break;
 
     case UnaryType::NOT:
-        value = ValueBox{ !right_val.value() };
+        value = ValueRef{ !right_val.value() };
         break;
 
     case UnaryType::RANGE:
-        value = ValueBox{ ~right_val.value() };
+        value = ValueRef{ ~right_val.value() };
         break;
 
     default:
@@ -570,77 +570,77 @@ void dawn::Engine::handle_un_node( UnaryNod const& node, ValueBox& value )
     }
 }
 
-void dawn::Engine::handle_op_node( OperatorNod const& node, ValueBox& value )
+void dawn::Engine::handle_op_node( OperatorNod const& node, ValueRef& value )
 {
     if ( OperatorType::ACCESS == node.type )
         return handle_ac_node( node, value );
 
-    ValueBox left_val;
+    ValueRef left_val;
     handle_expr( node.left, left_val );
 
-    ValueBox right_val;
+    ValueRef right_val;
     handle_expr( node.right, right_val );
 
     switch ( node.type )
     {
     case OperatorType::ADD:
-        value = ValueBox{ left_val.value() + right_val.value() };
+        value = ValueRef{ left_val.value() + right_val.value() };
         break;
 
     case OperatorType::SUB:
-        value = ValueBox{ left_val.value() - right_val.value() };
+        value = ValueRef{ left_val.value() - right_val.value() };
         break;
 
     case OperatorType::MUL:
-        value = ValueBox{ left_val.value() * right_val.value() };
+        value = ValueRef{ left_val.value() * right_val.value() };
         break;
 
     case OperatorType::DIV:
-        value = ValueBox{ left_val.value() / right_val.value() };
+        value = ValueRef{ left_val.value() / right_val.value() };
         break;
 
     case OperatorType::POW:
-        value = ValueBox{ left_val.value() ^ right_val.value() };
+        value = ValueRef{ left_val.value() ^ right_val.value() };
         break;
 
     case OperatorType::MOD:
-        value = ValueBox{ left_val.value() % right_val.value() };
+        value = ValueRef{ left_val.value() % right_val.value() };
         break;
 
     case OperatorType::AND:
-        value = ValueBox{ left_val.value() && right_val.value() };
+        value = ValueRef{ left_val.value() && right_val.value() };
         break;
 
     case OperatorType::OR:
-        value = ValueBox{ left_val.value() || right_val.value() };
+        value = ValueRef{ left_val.value() || right_val.value() };
         break;
 
     case OperatorType::EQ:
-        value = ValueBox{ left_val.value() == right_val.value() };
+        value = ValueRef{ left_val.value() == right_val.value() };
         break;
 
     case OperatorType::NOT_EQ:
-        value = ValueBox{ left_val.value() != right_val.value() };
+        value = ValueRef{ left_val.value() != right_val.value() };
         break;
 
     case OperatorType::LESS:
-        value = ValueBox{ left_val.value() < right_val.value() };
+        value = ValueRef{ left_val.value() < right_val.value() };
         break;
 
     case OperatorType::GREAT:
-        value = ValueBox{ left_val.value() > right_val.value() };
+        value = ValueRef{ left_val.value() > right_val.value() };
         break;
 
     case OperatorType::LESS_EQ:
-        value = ValueBox{ left_val.value() <= right_val.value() };
+        value = ValueRef{ left_val.value() <= right_val.value() };
         break;
 
     case OperatorType::GREAT_EQ:
-        value = ValueBox{ left_val.value() >= right_val.value() };
+        value = ValueRef{ left_val.value() >= right_val.value() };
         break;
 
     case OperatorType::RANGE:
-        value = ValueBox{ left_val.value() >> right_val.value() };
+        value = ValueRef{ left_val.value() >> right_val.value() };
         break;
 
     default:
@@ -648,9 +648,9 @@ void dawn::Engine::handle_op_node( OperatorNod const& node, ValueBox& value )
     }
 }
 
-void dawn::Engine::handle_ac_node( OperatorNod const& node, ValueBox& value )
+void dawn::Engine::handle_ac_node( OperatorNod const& node, ValueRef& value )
 {
-    ValueBox left_val;
+    ValueRef left_val;
     handle_expr( node.left, left_val );
 
     if ( left_val.value().type() == ValueType::STRING )
@@ -668,12 +668,12 @@ void dawn::Engine::handle_ac_node( OperatorNod const& node, ValueBox& value )
     ENGINE_PANIC( "Can't access member of [", left_val.value().type(), "]" );
 }
 
-void dawn::Engine::handle_as_node( AssignNod const& node, ValueBox& value )
+void dawn::Engine::handle_as_node( AssignNod const& node, ValueRef& value )
 {
-    ValueBox left_val;
+    ValueRef left_val;
     handle_expr( node.left, left_val );
 
-    ValueBox right_val;
+    ValueRef right_val;
     handle_expr( node.right, right_val );
 
     switch ( node.type )
@@ -713,7 +713,7 @@ void dawn::Engine::handle_as_node( AssignNod const& node, ValueBox& value )
     value = left_val;
 }
 
-void dawn::Engine::handle_ac_string_node( ValueBox const& left, Node const& right, ValueBox& value )
+void dawn::Engine::handle_ac_string_node( ValueRef const& left, Node const& right, ValueRef& value )
 {
     auto& left_val = left.value().as<String>();
 
@@ -723,22 +723,22 @@ void dawn::Engine::handle_ac_string_node( ValueBox const& left, Node const& righ
 
         if ( id_node.name == L"length" )
         {
-            value = ValueBox{ Value{ (Int) left_val.size() } };
+            value = ValueRef{ Value{ (Int) left_val.size() } };
             return;
         }
     }
 
-    ValueBox right_val;
+    ValueRef right_val;
     handle_expr( right, right_val );
 
     Int index = right_val.value().to_int();
     if ( index < 0 || index >= (Int) left_val.size() )
         ENGINE_PANIC( "String access [", index, "] out of bounds" );
 
-    value = ValueBox{ Value{ left_val[index] } };
+    value = ValueRef{ Value{ left_val[index] } };
 }
 
-void dawn::Engine::handle_ac_enum_node( ValueBox const& left, Node const& right, ValueBox& value )
+void dawn::Engine::handle_ac_enum_node( ValueRef const& left, Node const& right, ValueRef& value )
 {
     auto& left_val = left.value().as<EnumVal>();
 
@@ -758,7 +758,7 @@ void dawn::Engine::handle_ac_enum_node( ValueBox const& left, Node const& right,
         ENGINE_PANIC( "Enum access must be an identifier" );
 }
 
-void dawn::Engine::handle_ac_struct_node( ValueBox const& left, Node const& right, ValueBox& value )
+void dawn::Engine::handle_ac_struct_node( ValueRef const& left, Node const& right, ValueRef& value )
 {
     auto& left_val = left.value().as<StructVal>();
 
@@ -791,7 +791,7 @@ void dawn::Engine::handle_ac_struct_node( ValueBox const& left, Node const& righ
         ENGINE_PANIC( "Struct access must be an identifier or function call" );
 }
 
-void dawn::Engine::handle_ac_array_node( ValueBox const& left, Node const& right, ValueBox& value )
+void dawn::Engine::handle_ac_array_node( ValueRef const& left, Node const& right, ValueRef& value )
 {
     auto& left_val = left.value().as<ArrayVal>();
 
@@ -801,14 +801,14 @@ void dawn::Engine::handle_ac_array_node( ValueBox const& left, Node const& right
 
         if ( id_node.name == L"length" )
         {
-            value = ValueBox{ Value{ (Int) left_val.data.size() } };
+            value = ValueRef{ Value{ (Int) left_val.data.size() } };
             return;
         }
 
         ENGINE_PANIC( "Array access [", id_node.name, "] doesn't exist" );
     }
 
-    ValueBox right_val;
+    ValueRef right_val;
     handle_expr( right, right_val );
 
     Int index = right_val.value().to_int();

@@ -36,7 +36,7 @@ void dawn::Dawn::bind_func( String const& name, Function::CppFunc cpp_func ) noe
     m_engine.bind_func( name, cpp_func );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<Node> const& args, ValueBox& retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<Node> const& args, ValueRef& retval ) noexcept
 {
     try
     {
@@ -62,12 +62,12 @@ dawn::Opt<dawn::String> dawn::Dawn::add_var( Variable const& var ) noexcept
     return std::nullopt;
 }
 
-void dawn::Dawn::add_var( Variable const& var, ValueBox const& value ) noexcept
+void dawn::Dawn::add_var( Variable const& var, ValueRef const& value ) noexcept
 {
     m_engine.add_var( var, value );
 }
 
-dawn::ValueBox* dawn::Dawn::get_var( String const& name ) noexcept
+dawn::ValueRef* dawn::Dawn::get_var( String const& name ) noexcept
 {
     return m_engine.get_var( name );
 }

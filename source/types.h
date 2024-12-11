@@ -6,7 +6,7 @@
 namespace dawn
 {
 struct Value;
-struct ValueBox;
+struct ValueRef;
 
 enum struct VariableKind
 {
@@ -29,7 +29,7 @@ struct Scope
 
 struct Function
 {
-    using CppFunc = Func<Value( Array<ValueBox> const& )>;
+    using CppFunc = Func<Value( Array<ValueRef> const& )>;
 
     String name;
     Array<Variable> args;
@@ -40,7 +40,7 @@ struct Enum
 {
     String name;
     Map<String, Variable> keys_expr;
-    Map<String, ValueBox> keys_value;
+    Map<String, ValueRef> keys_value;
 };
 
 struct Struct

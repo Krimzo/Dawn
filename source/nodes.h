@@ -12,7 +12,7 @@ struct ValueNod
 
 struct BoxNod
 {
-    ValueBox box;
+    ValueRef box;
 };
 
 struct CastNod
