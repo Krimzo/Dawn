@@ -22,8 +22,8 @@ enum struct VariableKind
 
 struct Variable
 {
+    VariableKind kind;
     String name;
-    VariableKind kind = VariableKind::LET;
     Ref<Node> expr;
 };
 

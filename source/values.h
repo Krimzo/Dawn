@@ -127,7 +127,7 @@ enum struct ValueKind
 struct ValueBox
 {
     ValueBox();
-    ValueBox( ValueKind kind, Value const& value );
+    ValueBox( Value const& value, ValueKind kind = ValueKind::LET );
 
     Value const& value() const;
     void set_value( Value const& value );

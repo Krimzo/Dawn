@@ -172,7 +172,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_struct( Array<Token>::const_iter
                 return ParseError{ *it, L"field [" + it->value + L"] already defined" };
 
             auto& field = struc.fields.emplace_back();
-            field.kind = VariableKind::VAR;
             field.name = it->value;
             ++it;
 
@@ -197,7 +196,7 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_struct( Array<Token>::const_iter
                 return error;
 
             Variable self_var;
-            self_var.kind = VariableKind::LET;
+            self_var.kind = VariableKind::REF;
             self_var.expr = make_nothing_node();
             self_var.name = kw_self;
 
@@ -239,7 +238,6 @@ dawn::Opt<dawn::ParseError> dawn::Parser::parse_enum( Array<Token>::const_iterat
                 return ParseError{ *it, L"key [" + it->value + L"] already in use" };
 
             auto& key = enu.keys_expr[it->value];
-            key.kind = VariableKind::LET;
             key.name = it->value;
             ++it;
 

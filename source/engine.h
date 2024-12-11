@@ -82,9 +82,7 @@ private:
     Opt<EngineError> handle_expr( Ref<Node> const& node, ValueBox& value );
 
     Opt<EngineError> handle_val_node( ValueNode const& node, ValueBox& value );
-    Opt<EngineError> handle_enum_node( EnumNode const& node, ValueBox& value );
-    Opt<EngineError> handle_struct_node( StructNode const& node, ValueBox& value );
-    Opt<EngineError> handle_array_node( ArrayNode const& node, ValueBox& value );
+    Opt<EngineError> handle_box_node( BoxNode const& node, ValueBox& value );
     Opt<EngineError> handle_cast_node( CastNode const& node, ValueBox& value );
     Opt<EngineError> handle_var_node( VariableNode const& node, Int& push_count );
     Opt<EngineError> handle_id_node( IdentifierNode const& node, ValueBox& value );
@@ -97,14 +95,17 @@ private:
     Opt<EngineError> handle_loop_node( LoopNode const& node, ValueBox& retval, Bool& didret );
     Opt<EngineError> handle_while_node( WhileNode const& node, ValueBox& retval, Bool& didret );
     Opt<EngineError> handle_for_node( ForNode const& node, ValueBox& retval, Bool& didret );
+    Opt<EngineError> handle_enum_node( EnumNode const& node, ValueBox& value );
+    Opt<EngineError> handle_struct_node( StructNode const& node, ValueBox& value );
+    Opt<EngineError> handle_array_node( ArrayNode const& node, ValueBox& value );
     Opt<EngineError> handle_un_node( UnaryNode const& node, ValueBox& value );
     Opt<EngineError> handle_op_node( OperatorNode const& node, ValueBox& value );
     Opt<EngineError> handle_ac_node( OperatorNode const& node, ValueBox& value );
     Opt<EngineError> handle_as_node( AssignNode const& node, ValueBox& value );
 
-    Opt<EngineError> handle_ac_string_node( String const& left, Ref<Node> const& right, ValueBox& value );
-    Opt<EngineError> handle_ac_enum_node( EnumVal const& left, Ref<Node> const& right, ValueBox& value );
-    Opt<EngineError> handle_ac_struct_node( StructVal const& left, Ref<Node> const& right, ValueBox& value );
-    Opt<EngineError> handle_ac_array_node( ArrayVal const& left, Ref<Node> const& right, ValueBox& value );
+    Opt<EngineError> handle_ac_string_node( ValueBox const& left, Ref<Node> const& right, ValueBox& value );
+    Opt<EngineError> handle_ac_enum_node( ValueBox const& left, Ref<Node> const& right, ValueBox& value );
+    Opt<EngineError> handle_ac_struct_node( ValueBox const& left, Ref<Node> const& right, ValueBox& value );
+    Opt<EngineError> handle_ac_array_node( ValueBox const& left, Ref<Node> const& right, ValueBox& value );
 };
 }

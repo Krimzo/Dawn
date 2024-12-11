@@ -729,10 +729,10 @@ dawn::String dawn::Value::to_string() const
 }
 
 dawn::ValueBox::ValueBox()
-    : ValueBox( ValueKind::LET, Value{} )
+    : ValueBox( Value{} )
 {}
 
-dawn::ValueBox::ValueBox( ValueKind kind, Value const& value )
+dawn::ValueBox::ValueBox( Value const& value, ValueKind kind )
 {
     m_value_ref = std::make_shared<Value>( value );
 

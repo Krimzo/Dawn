@@ -10,6 +10,11 @@ struct ValueNode : Node
     Value value;
 };
 
+struct BoxNode : Node
+{
+    ValueBox box;
+};
+
 struct CastNode : Node
 {
     String type;
