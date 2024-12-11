@@ -13,19 +13,6 @@ static HANDLE _console_init = []
 }();
 #endif
 
-std::wostream& dawn::operator<<( std::wostream& stream, Color const& color )
-{
-    stream << L"\033[38;2;" << Int( color.r ) << L";" << Int( color.g ) << L";" << Int( color.b ) << L"m";
-    return stream;
-}
-
-std::wostream& dawn::operator<<( std::wostream& stream, ColoredText const& colored_text )
-{
-    static constexpr Color DEFAULT_COLOR = { 204, 204, 204 };
-    stream << colored_text.color << colored_text.text << DEFAULT_COLOR;
-    return stream;
-}
-
 dawn::Char dawn::to_escaping( Char c )
 {
     switch ( c )
@@ -90,4 +77,17 @@ dawn::Float dawn::mymod( Float left, Float right )
 {
     if ( left < 0.0 ) return (right < 0.0) ? std::fmod( left, right ) : std::remainder( left, right );
     else              return (right < 0.0) ? std::remainder( left, right ) : std::fmod( left, right );
+}
+
+std::wostream& dawn::operator<<( std::wostream& stream, Color const& color )
+{
+    stream << L"\033[38;2;" << Int( color.r ) << L";" << Int( color.g ) << L";" << Int( color.b ) << L"m";
+    return stream;
+}
+
+std::wostream& dawn::operator<<( std::wostream& stream, ColoredText const& colored_text )
+{
+    static constexpr Color DEFAULT_COLOR = { 204, 204, 204 };
+    stream << colored_text.color << colored_text.text << DEFAULT_COLOR;
+    return stream;
 }

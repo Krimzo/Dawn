@@ -13,9 +13,11 @@
   <ItemGroup>
     <ClCompile Include="source\engine.cpp" />
     <ClCompile Include="source\engine_defaults.cpp" />
+    <ClCompile Include="source\err.cpp" />
     <ClCompile Include="source\lexer.cpp" />
     <ClCompile Include="source\nodes.cpp" />
     <ClCompile Include="source\parser.cpp" />
+    <ClCompile Include="source\token.cpp" />
     <ClCompile Include="source\types.cpp" />
     <ClCompile Include="source\util.cpp" />
     <ClCompile Include="source\dawn.cpp" />
@@ -25,11 +27,13 @@
   <ItemGroup>
     <ClInclude Include="source\dawn.h" />
     <ClInclude Include="source\engine.h" />
+    <ClInclude Include="source\err.h" />
     <ClInclude Include="source\lexer.h" />
     <ClInclude Include="source\nodes.h" />
     <ClInclude Include="source\parser.h" />
     <ClInclude Include="source\syntax.h" />
     <ClInclude Include="source\t.h" />
+    <ClInclude Include="source\token.h" />
     <ClInclude Include="source\types.h" />
     <ClInclude Include="source\util.h" />
     <ClInclude Include="source\values.h" />

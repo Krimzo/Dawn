@@ -1,46 +1,6 @@
 #include "lexer.h"
 
 
-std::wostream& dawn::operator<<( std::wostream& stream, LexError const& error )
-{
-    stream << error.msg;
-    return stream;
-}
-
-std::wostream& dawn::operator<<( std::wostream& stream, TokenType type )
-{
-    switch ( type )
-    {
-    case TokenType::INTEGER: stream << L"Integer"; break;
-    case TokenType::FLOAT: stream << L"Float"; break;
-    case TokenType::CHAR: stream << L"Char"; break;
-    case TokenType::STRING: stream << L"String"; break;
-    case TokenType::KEYWORD: stream << L"Keyword"; break;
-    case TokenType::TYPE: stream << L"Type"; break;
-    case TokenType::FUNCTION: stream << L"Function"; break;
-    case TokenType::NAME: stream << L"Name"; break;
-    case TokenType::OPERATOR: stream << L"Operator"; break;
-    }
-    return stream;
-}
-
-dawn::Bool dawn::Token::is_custom_type() const
-{
-    if ( value.empty() )
-        return false;
-    return iswupper( value.front() );
-}
-
-std::wostream& dawn::operator<<( std::wostream& stream, Token const& token )
-{
-    Color color = to_color( token.type );
-    stream << L"[(" << ColoredText{ color, token.type } <<
-        L") {" << ColoredText{ color, token.value } <<
-        L"} {" << ColoredText{ color, token.lit_val } <<
-        L"} <" << ColoredText{ color, token.line_number } << L">]";
-    return stream;
-}
-
 dawn::LanguageDef dawn::LanguageDef::dawn()
 {
     LanguageDef result;
@@ -117,58 +77,48 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
     return result;
 }
 
-dawn::Opt<dawn::LexError> dawn::Lexer::tokenize( StringRef const& source, Array<Token>& tokens )
+void dawn::Lexer::tokenize( StringRef const& source, Array<Token>& tokens )
 {
     Int line = 1;
     for ( Int i = 0; i < (Int) source.size(); i++ )
     {
         if ( is_space( source, i ) )
         {
-            if ( auto error = extract_space( source, tokens, line, i ) )
-                return error;
+            extract_space( source, tokens, line, i );
         }
         else if ( is_comment( source, i ) )
         {
-            if ( auto error = extract_comment( source, tokens, line, i ) )
-                return error;
+            extract_comment( source, tokens, line, i );
         }
         else if ( is_mlcomment( source, i ) )
         {
-            if ( auto error = extract_mlcomment( source, tokens, line, i ) )
-                return error;
+            extract_mlcomment( source, tokens, line, i );
         }
         else if ( is_word( source, i ) )
         {
-            if ( auto error = extract_word( source, tokens, line, i ) )
-                return error;
+            extract_word( source, tokens, line, i );
         }
         else if ( is_number( source, i ) )
         {
-            if ( auto error = extract_number( source, tokens, line, i ) )
-                return error;
+            extract_number( source, tokens, line, i );
         }
         else if ( is_char( source, i ) )
         {
-            if ( auto error = extract_char( source, tokens, line, i ) )
-                return error;;
+            extract_char( source, tokens, line, i );
         }
         else if ( is_string( source, i ) )
         {
-            if ( auto error = extract_string( source, tokens, line, i ) )
-                return error;;
+            extract_string( source, tokens, line, i );
         }
         else if ( is_operator( source, i ) )
         {
-            if ( auto error = extract_operator( source, tokens, line, i ) )
-                return error;
+            extract_operator( source, tokens, line, i );
         }
         else
         {
-            return LexError{ line, source[i], L"unexpected character" };
+            LEXER_PANIC( line, source[i], L"unexpected character" );
         }
     }
-
-    return std::nullopt;
 }
 
 dawn::Bool dawn::Lexer::is_space( StringRef const& source, Int i )
@@ -176,7 +126,7 @@ dawn::Bool dawn::Lexer::is_space( StringRef const& source, Int i )
     return iswspace( source[i] );
 }
 
-dawn::Opt<dawn::LexError> dawn::Lexer::extract_space( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_space( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
 {
     for ( ; i < (Int) source.size(); i++ )
     {
@@ -189,8 +139,6 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_space( StringRef const& source, A
             break;
         }
     }
-
-    return std::nullopt;
 }
 
 dawn::Bool dawn::Lexer::is_comment( StringRef const& source, Int i )
@@ -198,7 +146,7 @@ dawn::Bool dawn::Lexer::is_comment( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.comment_line );
 }
 
-dawn::Opt<dawn::LexError> dawn::Lexer::extract_comment( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_comment( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
 {
     for ( ; i < (Int) source.size(); i++ )
     {
@@ -208,8 +156,6 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_comment( StringRef const& source,
             break;
         }
     }
-
-    return std::nullopt;
 }
 
 dawn::Bool dawn::Lexer::is_mlcomment( StringRef const& source, Int i )
@@ -217,7 +163,7 @@ dawn::Bool dawn::Lexer::is_mlcomment( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.comment_multiline.first );
 }
 
-dawn::Opt<dawn::LexError> dawn::Lexer::extract_mlcomment( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_mlcomment( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
 {
     for ( ; i < (Int) source.size(); i++ )
     {
@@ -230,8 +176,6 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_mlcomment( StringRef const& sourc
             break;
         }
     }
-
-    return std::nullopt;
 }
 
 dawn::Bool dawn::Lexer::is_word( StringRef const& source, Int i )
@@ -239,7 +183,7 @@ dawn::Bool dawn::Lexer::is_word( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.separator_identifier ) || iswalpha( source[i] );
 }
 
-dawn::Opt<dawn::LexError> dawn::Lexer::extract_word( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_word( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
 {
     String buffer;
     for ( ; i < (Int) source.size(); i++ )
@@ -266,12 +210,10 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_word( StringRef const& source, Ar
         type = TokenType::NAME;
     }
 
-    Token& token = tokens.emplace_back();
+    auto& token = tokens.emplace_back();
     token.type = type;
     token.value = buffer;
     token.line_number = line;
-
-    return std::nullopt;
 }
 
 dawn::Bool dawn::Lexer::is_number( StringRef const& source, Int i )
@@ -279,7 +221,7 @@ dawn::Bool dawn::Lexer::is_number( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.separator_number ) || iswdigit( source[i] );
 }
 
-dawn::Opt<dawn::LexError> dawn::Lexer::extract_number( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_number( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
 {
     String buffer;
     Bool is_float = false;
@@ -288,7 +230,7 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_number( StringRef const& source, 
         if ( source.substr( i ).starts_with( lang_def.separator_number ) )
         {
             if ( is_float )
-                return LexError{ line, source[i], L"invalid float number" };
+                LEXER_PANIC( line, source[i], L"invalid float number" );
 
             is_float = true;
         }
@@ -301,14 +243,12 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_number( StringRef const& source, 
     }
 
     if ( buffer == lang_def.separator_number )
-        return LexError{ line, source[i], L"invalid number" };
+        LEXER_PANIC( line, source[i], L"invalid number" );
 
-    Token& token = tokens.emplace_back();
+    auto& token = tokens.emplace_back();
     token.type = is_float ? TokenType::FLOAT : TokenType::INTEGER;
     token.lit_val = buffer;
     token.line_number = line;
-
-    return std::nullopt;
 }
 
 dawn::Bool dawn::Lexer::is_char( StringRef const& source, Int i )
@@ -316,19 +256,19 @@ dawn::Bool dawn::Lexer::is_char( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.literal_char );
 }
 
-dawn::Opt<dawn::LexError> dawn::Lexer::extract_char( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_char( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
 {
     if ( source.substr( i ).size() < 3 )
-        return LexError{ line, source[i], L"char literal too short" };
+        LEXER_PANIC( line, source[i], L"char literal too short" );
 
     String buffer;
     if ( source[i + 1] == L'\\' )
     {
         if ( source.substr( i ).size() < 4 )
-            return LexError{ line, source[i], L"escaping char too short" };
+            LEXER_PANIC( line, source[i], L"escaping char too short" );
 
         if ( !is_char( source, i + 3 ) )
-            return LexError{ line, source[i], L"invalid escaping char literal" };
+            LEXER_PANIC( line, source[i], L"invalid escaping char literal" );
 
         Char c = to_escaping( source[i + 2] );
         buffer = String( 1, c );
@@ -337,19 +277,17 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_char( StringRef const& source, Ar
     else
     {
         if ( !is_char( source, i + 2 ) )
-            return LexError{ line, source[i], L"invalid char literal" };
+            LEXER_PANIC( line, source[i], L"invalid char literal" );
 
         Char c = source[i + 1];
         buffer = String( 1, c );
         i += 2;
     }
 
-    Token& token = tokens.emplace_back();
+    auto& token = tokens.emplace_back();
     token.type = TokenType::CHAR;
     token.lit_val = buffer;
     token.line_number = line;
-
-    return std::nullopt;
 }
 
 dawn::Bool dawn::Lexer::is_string( StringRef const& source, Int i )
@@ -357,7 +295,7 @@ dawn::Bool dawn::Lexer::is_string( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.literal_string );
 }
 
-dawn::Opt<dawn::LexError> dawn::Lexer::extract_string( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_string( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
 {
     String buffer;
     i += lang_def.literal_string.size();
@@ -376,7 +314,7 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_string( StringRef const& source, 
         {
             auto view = source.substr( i );
             if ( view.size() < 2 )
-                return LexError{ line, source[i], L"string escaping char too short" };
+                LEXER_PANIC( line, source[i], L"string escaping char too short" );
 
             Char c = to_escaping( view[1] );
             buffer.push_back( c );
@@ -388,12 +326,10 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_string( StringRef const& source, 
         }
     }
 
-    Token& token = tokens.emplace_back();
+    auto& token = tokens.emplace_back();
     token.type = TokenType::STRING;
     token.lit_val = buffer;
     token.line_number = line;
-
-    return std::nullopt;
 }
 
 dawn::Bool dawn::Lexer::is_operator( StringRef const& source, Int i )
@@ -406,7 +342,7 @@ dawn::Bool dawn::Lexer::is_operator( StringRef const& source, Int i )
     return false;
 }
 
-dawn::Opt<dawn::LexError> dawn::Lexer::extract_operator( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_operator( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
 {
     Int op_size = 0;
     Opt<String> closest_op;
@@ -421,12 +357,10 @@ dawn::Opt<dawn::LexError> dawn::Lexer::extract_operator( StringRef const& source
     i += op_size - 1;
 
     if ( !closest_op )
-        return LexError{ line, source[i], L"unknown operator" };
+        LEXER_PANIC( line, source[i], L"unknown operator" );
 
-    Token& token = tokens.emplace_back();
+    auto& token = tokens.emplace_back();
     token.type = TokenType::OPERATOR;
     token.value = closest_op.value();
     token.line_number = line;
-
-    return std::nullopt;
 }

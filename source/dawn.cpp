@@ -8,17 +8,18 @@ dawn::Dawn::Dawn() noexcept
 
 dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source ) noexcept
 {
-    Array<Token> tokens;
-    if ( auto error = m_lexer.tokenize( source, tokens ) )
-        return error->msg;
-
-    Module module;
-    if ( auto error = m_parser.parse( tokens, module ) )
-        return error->msg;
-
-    if ( auto error = m_engine.load_mod( module ) )
-        return error->msg;
-
+    try
+    {
+        Array<Token> tokens;
+        Module module;
+        m_lexer.tokenize( source, tokens );
+        m_parser.parse( tokens, module );
+        m_engine.load_mod( module );
+    }
+    catch ( String const& msg )
+    {
+        return msg;
+    }
     return std::nullopt;
 }
 
@@ -35,14 +36,30 @@ void dawn::Dawn::bind_func( String const& name, Function::CppFunc cpp_func ) noe
     m_engine.bind_func( name, cpp_func );
 }
 
-dawn::Opt<dawn::EngineError> dawn::Dawn::call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<Ref<Node>> const& args, ValueBox& retval ) noexcept
 {
-    return m_engine.call_func( name, args, retval );
+    try
+    {
+        m_engine.call_func( name, args, retval );
+    }
+    catch ( String const& msg )
+    {
+        return msg;
+    }
+    return std::nullopt;
 }
 
-dawn::Opt<dawn::EngineError> dawn::Dawn::add_var( Variable const& var ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::add_var( Variable const& var ) noexcept
 {
-    return m_engine.add_var( var );
+    try
+    {
+        m_engine.add_var( var );
+    }
+    catch ( String const& msg )
+    {
+        return msg;
+    }
+    return std::nullopt;
 }
 
 void dawn::Dawn::add_var( Variable const& var, ValueBox const& value ) noexcept

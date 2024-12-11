@@ -10,8 +10,6 @@ struct Color
     uint8_t r, g, b;
 };
 
-std::wostream& operator<<( std::wostream& stream, Color const& color );
-
 struct ColoredText
 {
     Color color;
@@ -27,8 +25,6 @@ struct ColoredText
     }
 };
 
-std::wostream& operator<<( std::wostream& stream, ColoredText const& colored_text );
-
 template<typename... Args>
 String format( Args const&... args )
 {
@@ -43,8 +39,6 @@ void print( Args const&... args )
     (std::wcout << ... << args) << '\n';
 }
 
-#define PANIC(...) throw format( __VA_ARGS__ );
-
 Char to_escaping( Char c );
 String from_escaping( Char c );
 Opt<String> read_file( StringRef const& path );
@@ -53,4 +47,7 @@ Opt<Int> parse_int( StringRef const& data );
 Opt<Float> parse_float( StringRef const& data );
 
 Float mymod( Float left, Float right );
+
+std::wostream& operator<<( std::wostream& stream, Color const& color );
+std::wostream& operator<<( std::wostream& stream, ColoredText const& colored_text );
 }
