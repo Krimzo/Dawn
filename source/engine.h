@@ -8,6 +8,11 @@ namespace dawn
 template<typename T>
 struct Stack
 {
+    Stack( Int reserve = 512 )
+    {
+        m_data.reserve( reserve );
+    }
+
     void push( StringRef const& name, T const& val )
     {
         m_data.emplace_back( name, val );

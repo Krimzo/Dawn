@@ -29,7 +29,7 @@ struct Scope;
 
 enum struct NodeType
 {
-    EMPTY,
+    EMPTY = 0,
     VALUE,
     BOX,
     CAST,

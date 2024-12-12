@@ -43,7 +43,7 @@ struct RangeVal
 
 enum struct ValueType
 {
-    NOTHING,
+    NOTHING = 0,
     BOOL,
     INT,
     FLOAT,
