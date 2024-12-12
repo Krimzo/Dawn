@@ -272,11 +272,10 @@ void dawn::Engine::handle_id_node( IdentifierNod const& node, ValueRef& value )
 
 void dawn::Engine::handle_func_node( FunctionNod const& node, ValueRef& retval )
 {
-    if ( !functions.contains( node.name ) )
+    auto it = functions.find( node.name );
+    if ( it == functions.end() )
         ENGINE_PANIC( L"function [", node.name, L"] doesn't exist" );
-
-    auto& func = functions.at( node.name );
-    handle_func( func, node.args, retval );
+    handle_func( it->second, node.args, retval );
 }
 
 void dawn::Engine::handle_return_node( ReturnNod const& node, ValueRef& retval, Bool& didret )
