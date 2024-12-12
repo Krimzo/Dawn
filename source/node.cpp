@@ -5,12 +5,8 @@ void dawn::NodeHandler::copy( NodeType type, void*& to, void const* from )
 {
     switch ( type )
     {
-    case NodeType::VALUE:
-        to = new ValueNod( *static_cast<ValueNod const*>(from) );
-        break;
-
-    case NodeType::BOX:
-        to = new BoxNod( *static_cast<BoxNod const*>(from) );
+    case NodeType::REF:
+        to = new RefNod( *static_cast<RefNod const*>(from) );
         break;
 
     case NodeType::CAST:
@@ -95,12 +91,8 @@ void dawn::NodeHandler::destruct( NodeType type, void* ptr )
 {
     switch ( type )
     {
-    case NodeType::VALUE:
-        delete static_cast<ValueNod*>(ptr);
-        break;
-
-    case NodeType::BOX:
-        delete static_cast<BoxNod*>(ptr);
+    case NodeType::REF:
+        delete static_cast<RefNod*>(ptr);
         break;
 
     case NodeType::CAST:

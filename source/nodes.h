@@ -5,14 +5,9 @@
 
 namespace dawn
 {
-struct ValueNod
+struct RefNod
 {
-    Value value;
-};
-
-struct BoxNod
-{
-    ValueRef box;
+    ValueRef value_ref;
 };
 
 struct CastNod

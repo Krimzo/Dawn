@@ -6,8 +6,7 @@
 
 namespace dawn
 {
-struct ValueNod;
-struct BoxNod;
+struct RefNod;
 struct CastNod;
 struct VariableNod;
 struct IdentifierNod;
@@ -31,8 +30,7 @@ struct Scope;
 enum struct NodeType
 {
     EMPTY = 0,
-    VALUE,
-    BOX,
+    REF,
     CAST,
     VARIABLE,
     IDENTIFIER,
@@ -59,11 +57,8 @@ struct NodeHandler
     template<typename T>
     static consteval NodeType type()
     {
-        if constexpr ( std::is_same_v<T, ValueNod> )
-            return NodeType::VALUE;
-
-        else if constexpr ( std::is_same_v<T, BoxNod> )
-            return NodeType::BOX;
+        if constexpr ( std::is_same_v<T, RefNod> )
+            return NodeType::REF;
 
         else if constexpr ( std::is_same_v<T, CastNod> )
             return NodeType::CAST;

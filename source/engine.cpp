@@ -168,12 +168,8 @@ void dawn::Engine::handle_expr( Node const& node, ValueRef& value )
 {
     switch ( node.type() )
     {
-    case NodeType::VALUE:
-        handle_val_node( node.as<ValueNod>(), value );
-        break;
-
-    case NodeType::BOX:
-        handle_box_node( node.as<BoxNod>(), value );
+    case NodeType::REF:
+        handle_ref_node( node.as<RefNod>(), value );
         break;
 
     case NodeType::CAST:
@@ -217,14 +213,9 @@ void dawn::Engine::handle_expr( Node const& node, ValueRef& value )
     }
 }
 
-void dawn::Engine::handle_val_node( ValueNod const& node, ValueRef& value )
+void dawn::Engine::handle_ref_node( RefNod const& node, ValueRef& value )
 {
-    value = ValueRef{ node.value };
-}
-
-void dawn::Engine::handle_box_node( BoxNod const& node, ValueRef& value )
-{
-    value = node.box;
+    value = node.value_ref;
 }
 
 void dawn::Engine::handle_cast_node( CastNod const& node, ValueRef& value )
@@ -778,7 +769,7 @@ void dawn::Engine::handle_ac_struct_node( ValueRef const& left, Node const& righ
             ENGINE_PANIC( "Method [", func_node.name, "] doesn't exist" );
 
         Array<Node> args( 1 );
-        args.front().store<BoxNod>().box = left;
+        args.front().store<RefNod>().value_ref = left;
         args.insert( args.end(), func_node.args.begin(), func_node.args.end() );
 
         handle_func( *method_ptr, args, value );

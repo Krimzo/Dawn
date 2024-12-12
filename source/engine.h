@@ -65,8 +65,7 @@ private:
     void handle_instr( Node const& node, ValueRef& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon );
     void handle_expr( Node const& node, ValueRef& value );
 
-    void handle_val_node( ValueNod const& node, ValueRef& value );
-    void handle_box_node( BoxNod const& node, ValueRef& value );
+    void handle_ref_node( RefNod const& node, ValueRef& value );
     void handle_cast_node( CastNod const& node, ValueRef& value );
     void handle_var_node( VariableNod const& node, Int& push_count );
     void handle_id_node( IdentifierNod const& node, ValueRef& value );
