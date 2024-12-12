@@ -54,9 +54,43 @@ enum struct ValueType
     RANGE,
 };
 
-struct Value
+template<typename T>
+consteval ValueType value_type()
 {
-    Value();
+    if constexpr ( std::is_same_v<T, Bool> )
+        return ValueType::BOOL;
+
+    else if constexpr ( std::is_same_v<T, Int> )
+        return ValueType::INT;
+
+    else if constexpr ( std::is_same_v<T, Float> )
+        return ValueType::FLOAT;
+
+    else if constexpr ( std::is_same_v<T, Char> )
+        return ValueType::CHAR;
+
+    else if constexpr ( std::is_same_v<T, String> )
+        return ValueType::STRING;
+
+    else if constexpr ( std::is_same_v<T, EnumVal> )
+        return ValueType::ENUM;
+
+    else if constexpr ( std::is_same_v<T, StructVal> )
+        return ValueType::STRUCT;
+
+    else if constexpr ( std::is_same_v<T, ArrayVal> )
+        return ValueType::ARRAY;
+
+    else if constexpr ( std::is_same_v<T, RangeVal> )
+        return ValueType::RANGE;
+
+    else
+        static_assert(false, "Invalid value type");
+}
+
+struct Value : private Any
+{
+    Value() = default;
     Value( Bool value );
     Value( Int value );
     Value( Float value );
@@ -69,19 +103,26 @@ struct Value
 
     constexpr ValueType type() const
     {
-        return static_cast<ValueType>(m_value.index());
-    }
-
-    template<typename T>
-    constexpr T& as()
-    {
-        return std::get<T>( m_value );
+        return m_type;
     }
 
     template<typename T>
     constexpr T const& as() const
     {
-        return std::get<T>( m_value );
+        return *_Cast<T>();
+    }
+
+    template<typename T>
+    constexpr T& as()
+    {
+        return *_Cast<T>();
+    }
+
+    template<typename T, typename... Args>
+    constexpr T& store( Args const&... args )
+    {
+        m_type = value_type<T>();
+        return emplace<T>( args... );
     }
 
     Value operator+() const;
@@ -114,18 +155,7 @@ struct Value
     String to_string() const;
 
 private:
-    Variant<
-        nullptr_t,
-        Bool,
-        Int,
-        Float,
-        Char,
-        String,
-        EnumVal,
-        StructVal,
-        ArrayVal,
-        RangeVal
-    > m_value;
+    ValueType m_type = ValueType::NOTHING;
 };
 
 enum struct ValueKind

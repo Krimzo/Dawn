@@ -123,7 +123,7 @@ consteval NodeType node_type()
         static_assert(false, "Invalid node type");
 }
 
-struct Node : private std::any
+struct Node : private Any
 {
     constexpr NodeType type() const
     {
@@ -150,6 +150,6 @@ struct Node : private std::any
     }
 
 private:
-    NodeType m_type;
+    NodeType m_type = NodeType::EMPTY;
 };
 }

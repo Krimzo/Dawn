@@ -39,52 +39,49 @@ dawn::ArrayVal& dawn::ArrayVal::operator=( ArrayVal const& other )
     return *this;
 }
 
-dawn::Value::Value()
-{}
-
 dawn::Value::Value( Bool value )
 {
-    m_value.emplace<Bool>( value );
+    store<Bool>( value );
 }
 
 dawn::Value::Value( Int value )
 {
-    m_value.emplace<Int>( value );
+    store<Int>( value );
 }
 
 dawn::Value::Value( Float value )
 {
-    m_value.emplace<Float>( value );
+    store<Float>( value );
 }
 
 dawn::Value::Value( Char value )
 {
-    m_value.emplace<Char>( value );
+    store<Char>( value );
 }
 
 dawn::Value::Value( StringRef const& value )
 {
-    m_value.emplace<String>( value );
+    store<String>( value );
 }
 
 dawn::Value::Value( EnumVal const& value )
 {
-    m_value.emplace<EnumVal>( value );
+    store<EnumVal>( value );
 }
 
 dawn::Value::Value( StructVal const& value )
 {
-    m_value.emplace<StructVal>( value );
+    store<StructVal>( value );
 }
 
 dawn::Value::Value( ArrayVal const& value )
 {
-    m_value.emplace<ArrayVal>( value );
+    store<ArrayVal>( value );
 }
 
 dawn::Value::Value( RangeVal const& value )
 {
-    m_value.emplace<RangeVal>( value );
+    store<RangeVal>( value );
 }
 
 dawn::Value dawn::Value::operator+() const
@@ -92,10 +89,10 @@ dawn::Value dawn::Value::operator+() const
     switch ( type() )
     {
     case ValueType::INT:
-        return Value{ +std::get<Int>( m_value ) };
+        return Value{ +as<Int>() };
 
     case ValueType::FLOAT:
-        return Value{ +std::get<Float>( m_value ) };
+        return Value{ +as<Float>() };
 
     default:
         PANIC( "+ [", type(), "] not supported" );
@@ -107,10 +104,10 @@ dawn::Value dawn::Value::operator-() const
     switch ( type() )
     {
     case ValueType::INT:
-        return Value{ -std::get<Int>( m_value ) };
+        return Value{ -as<Int>() };
 
     case ValueType::FLOAT:
-        return Value{ -std::get<Float>( m_value ) };
+        return Value{ -as<Float>() };
 
     default:
         PANIC( "- [", type(), "] not supported" );
@@ -126,10 +123,10 @@ dawn::Value dawn::Value::operator+( Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ std::get<Int>( m_value ) + std::get<Int>( other.m_value ) };
+            return Value{ as<Int>() + other.as<Int>() };
 
         case ValueType::FLOAT:
-            return Value{ std::get<Int>( m_value ) + std::get<Float>( other.m_value ) };
+            return Value{ as<Int>() + other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] + [", other.type(), "] not supported" );
@@ -141,10 +138,10 @@ dawn::Value dawn::Value::operator+( Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ std::get<Float>( m_value ) + std::get<Int>( other.m_value ) };
+            return Value{ as<Float>() + other.as<Int>() };
 
         case ValueType::FLOAT:
-            return Value{ std::get<Float>( m_value ) + std::get<Float>( other.m_value ) };
+            return Value{ as<Float>() + other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] + [", other.type(), "] not supported" );
@@ -156,7 +153,7 @@ dawn::Value dawn::Value::operator+( Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::STRING:
-            return Value{ std::get<String>( m_value ) + std::get<String>( other.m_value ) };
+            return Value{ as<String>() + other.as<String>() };
 
         default:
             PANIC( "[", type(), "] + [", other.type(), "] not supported" );
@@ -170,8 +167,8 @@ dawn::Value dawn::Value::operator+( Value const& other ) const
         case ValueType::ARRAY:
         {
             ArrayVal result;
-            result.data.insert( result.data.end(), std::get<ArrayVal>( m_value ).data.begin(), std::get<ArrayVal>( m_value ).data.end() );
-            result.data.insert( result.data.end(), std::get<ArrayVal>( other.m_value ).data.begin(), std::get<ArrayVal>( other.m_value ).data.end() );
+            result.data.insert( result.data.end(), as<ArrayVal>().data.begin(), as<ArrayVal>().data.end() );
+            result.data.insert( result.data.end(), other.as<ArrayVal>().data.begin(), other.as<ArrayVal>().data.end() );
             return Value{ result };
         }
 
@@ -194,10 +191,10 @@ dawn::Value dawn::Value::operator-( Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ std::get<Int>( m_value ) - std::get<Int>( other.m_value ) };
+            return Value{ as<Int>() - other.as<Int>() };
 
         case ValueType::FLOAT:
-            return Value{ std::get<Int>( m_value ) - std::get<Float>( other.m_value ) };
+            return Value{ as<Int>() - other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] - [", other.type(), "] not supported" );
@@ -209,10 +206,10 @@ dawn::Value dawn::Value::operator-( Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ std::get<Float>( m_value ) - std::get<Int>( other.m_value ) };
+            return Value{ as<Float>() - other.as<Int>() };
 
         case ValueType::FLOAT:
-            return Value{ std::get<Float>( m_value ) - std::get<Float>( other.m_value ) };
+            return Value{ as<Float>() - other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] - [", other.type(), "] not supported" );
@@ -233,10 +230,10 @@ dawn::Value dawn::Value::operator*( Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ std::get<Int>( m_value ) * std::get<Int>( other.m_value ) };
+            return Value{ as<Int>() * other.as<Int>() };
 
         case ValueType::FLOAT:
-            return Value{ std::get<Int>( m_value ) * std::get<Float>( other.m_value ) };
+            return Value{ as<Int>() * other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] * [", other.type(), "] not supported" );
@@ -248,10 +245,10 @@ dawn::Value dawn::Value::operator*( Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ std::get<Float>( m_value ) * std::get<Int>( other.m_value ) };
+            return Value{ as<Float>() * other.as<Int>() };
 
         case ValueType::FLOAT:
-            return Value{ std::get<Float>( m_value ) * std::get<Float>( other.m_value ) };
+            return Value{ as<Float>() * other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] * [", other.type(), "] not supported" );
@@ -272,10 +269,10 @@ dawn::Value dawn::Value::operator/( Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ std::get<Int>( m_value ) / std::get<Int>( other.m_value ) };
+            return Value{ as<Int>() / other.as<Int>() };
 
         case ValueType::FLOAT:
-            return Value{ std::get<Int>( m_value ) / std::get<Float>( other.m_value ) };
+            return Value{ as<Int>() / other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] / [", other.type(), "] not supported" );
@@ -287,10 +284,10 @@ dawn::Value dawn::Value::operator/( Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ std::get<Float>( m_value ) / std::get<Int>( other.m_value ) };
+            return Value{ as<Float>() / other.as<Int>() };
 
         case ValueType::FLOAT:
-            return Value{ std::get<Float>( m_value ) / std::get<Float>( other.m_value ) };
+            return Value{ as<Float>() / other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] / [", other.type(), "] not supported" );
@@ -311,10 +308,10 @@ dawn::Value dawn::Value::operator^( Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ (Int) std::pow( std::get<Int>( m_value ), std::get<Int>( other.m_value ) ) };
+            return Value{ (Int) std::pow( as<Int>(), other.as<Int>() ) };
 
         case ValueType::FLOAT:
-            return Value{ std::pow( std::get<Int>( m_value ), std::get<Float>( other.m_value ) ) };
+            return Value{ std::pow( as<Int>(), other.as<Float>() ) };
 
         default:
             PANIC( "[", type(), "] ^ [", other.type(), "] not supported" );
@@ -326,10 +323,10 @@ dawn::Value dawn::Value::operator^( Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ std::pow( std::get<Float>( m_value ), std::get<Int>( other.m_value ) ) };
+            return Value{ std::pow( as<Float>(), other.as<Int>() ) };
 
         case ValueType::FLOAT:
-            return Value{ std::pow( std::get<Float>( m_value ), std::get<Float>( other.m_value ) ) };
+            return Value{ std::pow( as<Float>(), other.as<Float>() ) };
 
         default:
             PANIC( "[", type(), "] ^ [", other.type(), "] not supported" );
@@ -350,10 +347,10 @@ dawn::Value dawn::Value::operator%( Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ std::get<Int>( m_value ) % std::get<Int>( other.m_value ) };
+            return Value{ as<Int>() % other.as<Int>() };
 
         case ValueType::FLOAT:
-            return Value{ mymod( (Float) std::get<Int>( m_value ), std::get<Float>( other.m_value ) ) };
+            return Value{ mymod( (Float) as<Int>(), other.as<Float>() ) };
 
         default:
             PANIC( "[", type(), "] % [", other.type(), "] not supported" );
@@ -365,10 +362,10 @@ dawn::Value dawn::Value::operator%( Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ mymod( std::get<Float>( m_value ), (Float) std::get<Int>( other.m_value ) ) };
+            return Value{ mymod( as<Float>(), (Float) other.as<Int>() ) };
 
         case ValueType::FLOAT:
-            return Value{ mymod( std::get<Float>( m_value ), std::get<Float>( other.m_value ) ) };
+            return Value{ mymod( as<Float>(), other.as<Float>() ) };
 
         default:
             PANIC( "[", type(), "] % [", other.type(), "] not supported" );
@@ -586,19 +583,19 @@ dawn::Bool dawn::Value::to_bool() const
         return Bool{};
 
     case ValueType::BOOL:
-        return std::get<Bool>( m_value );
+        return as<Bool>();
 
     case ValueType::INT:
-        return (Bool) std::get<Int>( m_value );
+        return (Bool) as<Int>();
 
     case ValueType::FLOAT:
-        return (Bool) std::get<Float>( m_value );
+        return (Bool) as<Float>();
 
     case ValueType::CHAR:
-        return (Bool) std::get<Char>( m_value );
+        return (Bool) as<Char>();
 
     case ValueType::STRING:
-        return std::get<String>( m_value ) == kw_true;
+        return as<String>() == kw_true;
 
     default:
         PANIC( "Cannot convert ", type(), " to bool" );
@@ -613,22 +610,22 @@ dawn::Int dawn::Value::to_int() const
         return Int{};
 
     case ValueType::BOOL:
-        return (Int) std::get<Bool>( m_value );
+        return (Int) as<Bool>();
 
     case ValueType::INT:
-        return std::get<Int>( m_value );
+        return as<Int>();
 
     case ValueType::FLOAT:
-        return (Int) std::get<Float>( m_value );
+        return (Int) as<Float>();
 
     case ValueType::CHAR:
-        return (Int) std::get<Char>( m_value );
+        return (Int) as<Char>();
 
     case ValueType::STRING:
     {
-        auto optres = parse_int( std::get<String>( m_value ) );
+        auto optres = parse_int( as<String>() );
         if ( !optres )
-            PANIC( "string \"", std::get<String>( m_value ), "\" to int failed" );
+            PANIC( "string \"", as<String>(), "\" to int failed" );
         return *optres;
     }
 
@@ -645,22 +642,22 @@ dawn::Float dawn::Value::to_float() const
         return Float{};
 
     case ValueType::BOOL:
-        return (Float) std::get<Bool>( m_value );
+        return (Float) as<Bool>();
 
     case ValueType::INT:
-        return (Float) std::get<Int>( m_value );
+        return (Float) as<Int>();
 
     case ValueType::FLOAT:
-        return std::get<Float>( m_value );
+        return as<Float>();
 
     case ValueType::CHAR:
-        return (Float) std::get<Char>( m_value );
+        return (Float) as<Char>();
 
     case ValueType::STRING:
     {
-        auto optres = parse_float( std::get<String>( m_value ) );
+        auto optres = parse_float( as<String>() );
         if ( !optres )
-            PANIC( "string \"", std::get<String>( m_value ), "\" to float failed" );
+            PANIC( "string \"", as<String>(), "\" to float failed" );
         return *optres;
     }
 
@@ -677,19 +674,19 @@ dawn::Char dawn::Value::to_char() const
         return Char{};
 
     case ValueType::BOOL:
-        return std::get<Bool>( m_value ) ? kw_true[0] : kw_false[0];
+        return as<Bool>() ? kw_true[0] : kw_false[0];
 
     case ValueType::INT:
-        return (Char) std::get<Int>( m_value );
+        return (Char) as<Int>();
 
     case ValueType::FLOAT:
-        return (Char) std::get<Float>( m_value );
+        return (Char) as<Float>();
 
     case ValueType::CHAR:
-        return std::get<Char>( m_value );
+        return as<Char>();
 
     case ValueType::STRING:
-        return std::get<String>( m_value )[0];
+        return as<String>()[0];
 
     default:
         PANIC( "Cannot convert ", type(), " to char" );
@@ -704,34 +701,34 @@ dawn::String dawn::Value::to_string() const
         return String{};
 
     case ValueType::BOOL:
-        return String{ std::get<Bool>( m_value ) ? kw_true : kw_false };
+        return String{ as<Bool>() ? kw_true : kw_false };
 
     case ValueType::INT:
-        return std::to_wstring( std::get<Int>( m_value ) );
+        return std::to_wstring( as<Int>() );
 
     case ValueType::FLOAT:
     {
-        String result = format( std::get<Float>( m_value ) );
-        if ( std::to_wstring( (Int) std::get<Float>( m_value ) ) == result )
+        String result = format( as<Float>() );
+        if ( std::to_wstring( (Int) as<Float>() ) == result )
             result += L".0";
         return result;
     }
 
     case ValueType::CHAR:
-        return String( 1, std::get<Char>( m_value ) );
+        return String( 1, as<Char>() );
 
     case ValueType::STRING:
-        return std::get<String>( m_value );
+        return as<String>();
 
     case ValueType::ENUM:
     {
-        auto& val = std::get<EnumVal>( m_value );
+        auto& val = as<EnumVal>();
         return val.parent->name + L"{" + val.key + L"}";
     }
 
     case ValueType::STRUCT:
     {
-        auto& val = std::get<StructVal>( m_value );
+        auto& val = as<StructVal>();
         if ( val.members.empty() )
             return val.parent->name + L"{}";
 
@@ -750,7 +747,7 @@ dawn::String dawn::Value::to_string() const
 
     case ValueType::ARRAY:
     {
-        auto& val = std::get<ArrayVal>( m_value );
+        auto& val = as<ArrayVal>();
         if ( val.data.empty() )
             return L"[]";
 
@@ -765,7 +762,7 @@ dawn::String dawn::Value::to_string() const
 
     case ValueType::RANGE:
     {
-        auto& val = std::get<RangeVal>( m_value );
+        auto& val = as<RangeVal>();
         return format( val.start_incl, op_range, val.end_excl );
     }
 
