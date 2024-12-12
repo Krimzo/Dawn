@@ -56,7 +56,7 @@ struct Engine
     void call_func( String const& name, Array<Node> const& args, ValueRef& retval );
 
     void add_var( Variable const& var );
-    void add_var( Variable const& var, ValueRef const& value );
+    void add_var( VariableKind kind, StringRef const& name, ValueRef const& value );
     ValueRef* get_var( String const& name );
 
 private:

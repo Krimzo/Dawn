@@ -19,7 +19,7 @@ struct Dawn
     Opt<String> call_func( String const& name, Array<Node> const& args, ValueRef& retval ) noexcept;
 
     Opt<String> add_var( Variable const& var ) noexcept;
-    void add_var( Variable const& var, ValueRef const& value ) noexcept;
+    void add_var( VariableKind kind, StringRef const& name, ValueRef const& value ) noexcept;
     ValueRef* get_var( String const& name ) noexcept;
 
 private:

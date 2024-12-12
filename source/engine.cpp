@@ -44,22 +44,22 @@ void dawn::Engine::add_var( Variable const& var )
 {
     ValueRef var_val;
     handle_expr( var.expr, var_val );
-    add_var( var, var_val );
+    add_var( var.kind, var.name, var_val );
 }
 
-void dawn::Engine::add_var( Variable const& var, ValueRef const& value )
+void dawn::Engine::add_var( VariableKind kind, StringRef const& name, ValueRef const& value )
 {
-    if ( var.kind == VariableKind::LET )
+    if ( kind == VariableKind::LET )
     {
-        variables.push( var.name, ValueRef{ value.value() } );
+        variables.push( name, ValueRef{ value.value() } );
     }
-    else if ( var.kind == VariableKind::VAR )
+    else if ( kind == VariableKind::VAR )
     {
-        variables.push( var.name, ValueRef{ value.value(), ValueKind::VAR } );
+        variables.push( name, ValueRef{ value.value(), ValueKind::VAR } );
     }
     else
     {
-        variables.push( var.name, value );
+        variables.push( name, value );
     }
 }
 
@@ -77,11 +77,9 @@ void dawn::Engine::handle_func( Function const& func, Array<Node> const& args, V
 
         for ( Int i = 0; i < (Int) args.size(); i++ )
         {
-            Variable arg;
-            arg.name = func.args[i].name;
-            arg.kind = func.args[i].kind;
-            arg.expr = args[i];
-            add_var( arg );
+            ValueRef arg_val;
+            handle_expr( args[i], arg_val );
+            add_var( func.args[i].kind, func.args[i].name, arg_val );
         }
 
         Bool didret = false;
@@ -427,7 +425,7 @@ void dawn::Engine::handle_for_node( ForNod const& node, ValueRef& retval, Bool& 
             if ( didcon )
                 didcon = false;
 
-            add_var( node.var, value );
+            add_var( node.var.kind, node.var.name, value );
 
             handle_scope( node.scope, retval, didret, &didbrk, &didcon );
 
