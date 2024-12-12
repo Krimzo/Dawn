@@ -41,6 +41,34 @@ struct RangeVal
     Int end_excl = 0;
 };
 
+consteval size_t max_val_size()
+{
+    return std::max( {
+        sizeof( Bool ),
+        sizeof( Int ),
+        sizeof( Float ),
+        sizeof( Char ),
+        sizeof( String ),
+        sizeof( EnumVal ),
+        sizeof( StructVal ),
+        sizeof( ArrayVal ),
+        sizeof( RangeVal ) } );
+}
+
+consteval size_t max_val_align()
+{
+    return std::max( {
+        alignof(Bool),
+        alignof(Int),
+        alignof(Float),
+        alignof(Char),
+        alignof(String),
+        alignof(EnumVal),
+        alignof(StructVal),
+        alignof(ArrayVal),
+        alignof(RangeVal) } );
+}
+
 enum struct ValueType
 {
     NOTHING = 0,
@@ -175,34 +203,6 @@ struct ValueHandler
         }
     }
 };
-
-consteval size_t max_val_size()
-{
-    return std::max( {
-        sizeof( Bool ),
-        sizeof( Int ),
-        sizeof( Float ),
-        sizeof( Char ),
-        sizeof( String ),
-        sizeof( EnumVal ),
-        sizeof( StructVal ),
-        sizeof( ArrayVal ),
-        sizeof( RangeVal ) } );
-}
-
-consteval size_t max_val_align()
-{
-    return std::max( {
-        alignof(Bool),
-        alignof(Int),
-        alignof(Float),
-        alignof(Char),
-        alignof(String),
-        alignof(EnumVal),
-        alignof(StructVal),
-        alignof(ArrayVal),
-        alignof(RangeVal) } );
-}
 
 struct Value : private Storage<max_val_size(), max_val_align(), ValueType, ValueHandler>
 {

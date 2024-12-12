@@ -15,6 +15,7 @@
     <ClCompile Include="source\engine_defaults.cpp" />
     <ClCompile Include="source\err.cpp" />
     <ClCompile Include="source\lexer.cpp" />
+    <ClCompile Include="source\node.cpp" />
     <ClCompile Include="source\nodes.cpp" />
     <ClCompile Include="source\parser.cpp" />
     <ClCompile Include="source\token.cpp" />
