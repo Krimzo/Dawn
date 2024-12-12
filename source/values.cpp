@@ -774,16 +774,13 @@ dawn::String dawn::Value::to_string() const
 static dawn::Memory<dawn::Value> _MEMORY{ 1024 };
 
 dawn::ValueRef::ValueRef()
-    : ValueRef( Value{} )
+    : m_register( _MEMORY.new_register() ), m_kind( ValueKind::LET )
 {}
 
 dawn::ValueRef::ValueRef( Value const& value, ValueKind kind )
-    : m_register( _MEMORY.new_register() )
+    : m_register( _MEMORY.new_register() ), m_kind( kind )
 {
-    m_kind = ValueKind::VAR;
-    set_value( value );
-
-    m_kind = kind;
+    m_register.value() = value;
     reapply_kind();
 }
 
@@ -808,12 +805,12 @@ void dawn::ValueRef::set_value( Value const& value )
 
 void dawn::ValueRef::reapply_kind()
 {
-    switch ( value().type() )
+    auto& val = m_register.value();
+    switch ( val.type() )
     {
     case ValueType::STRUCT:
     {
-        auto& val = m_register.value().as<StructVal>();
-        for ( auto& [_, member] : val.members )
+        for ( auto& [_, member] : val.as<StructVal>().members )
         {
             member.m_kind = this->m_kind;
             member.reapply_kind();
@@ -823,11 +820,10 @@ void dawn::ValueRef::reapply_kind()
 
     case ValueType::ARRAY:
     {
-        auto& val = m_register.value().as<ArrayVal>();
-        for ( auto& value : val.data )
+        for ( auto& element : val.as<ArrayVal>().data )
         {
-            value.m_kind = this->m_kind;
-            value.reapply_kind();
+            element.m_kind = this->m_kind;
+            element.reapply_kind();
         }
         break;
     }
