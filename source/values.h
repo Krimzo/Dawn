@@ -278,7 +278,7 @@ enum struct ValueKind
 
 struct ValueRef
 {
-    ValueRef();
+    ValueRef() = default;
     ValueRef( Value const& value, ValueKind kind = ValueKind::LET );
 
     ValueKind kind() const;
@@ -287,8 +287,8 @@ struct ValueRef
     void set_value( Value const& value );
 
 private:
-    RegisterRef<Value> m_register;
-    ValueKind m_kind;
+    RegisterRef<Value> m_regref;
+    ValueKind m_kind = ValueKind::LET;
 
     void reapply_kind();
 };

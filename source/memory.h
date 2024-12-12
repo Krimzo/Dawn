@@ -28,31 +28,40 @@ struct Register
 template<typename T>
 struct RegisterRef
 {
+    RegisterRef() noexcept = default;
+
     RegisterRef( Memory<T>* memory, Int index ) noexcept
         : m_memory( memory ), m_index( index )
     {
-        regist().incr();
+        if ( valid() )
+            regist().incr();
     }
 
     ~RegisterRef() noexcept
     {
-        regist().decr();
+        if ( valid() )
+            regist().decr();
     }
 
     RegisterRef( RegisterRef const& other ) noexcept
         : m_memory( other.m_memory ), m_index( other.m_index )
     {
-        regist().incr();
+        if ( valid() )
+            regist().incr();
     }
 
     RegisterRef& operator=( RegisterRef const& other ) noexcept
     {
         if ( this != &other )
         {
-            regist().decr();
+            if ( valid() )
+                regist().decr();
+
             m_memory = other.m_memory;
             m_index = other.m_index;
-            regist().incr();
+
+            if ( valid() )
+                regist().incr();
         }
         return *this;
     }
@@ -66,14 +75,19 @@ struct RegisterRef
         return (*this = other);
     }
 
+    constexpr Bool valid() const
+    {
+        return m_memory;
+    }
+
     T& value() const noexcept
     {
         return regist().value;
     }
 
 private:
-    Memory<T>* m_memory;
-    Int m_index;
+    Memory<T>* m_memory = nullptr;
+    Int m_index = -1;
 
     Register<T>& regist() const noexcept
     {

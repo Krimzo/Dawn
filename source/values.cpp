@@ -771,16 +771,12 @@ dawn::String dawn::Value::to_string() const
     }
 }
 
-static dawn::Memory<dawn::Value> _MEMORY{ 1024 };
-
-dawn::ValueRef::ValueRef()
-    : m_register( _MEMORY.new_register() ), m_kind( ValueKind::LET )
-{}
+static dawn::Memory<dawn::Value> _MEMORY{ 2048 };
 
 dawn::ValueRef::ValueRef( Value const& value, ValueKind kind )
-    : m_register( _MEMORY.new_register() ), m_kind( kind )
+    : m_regref( _MEMORY.new_register() ), m_kind( kind )
 {
-    m_register.value() = value;
+    m_regref.value() = value;
     reapply_kind();
 }
 
@@ -791,7 +787,7 @@ dawn::ValueKind dawn::ValueRef::kind() const
 
 dawn::Value const& dawn::ValueRef::value() const
 {
-    return m_register.value();
+    return m_regref.value();
 }
 
 void dawn::ValueRef::set_value( Value const& value )
@@ -799,13 +795,13 @@ void dawn::ValueRef::set_value( Value const& value )
     if ( m_kind == ValueKind::LET )
         PANIC( "Cannot set value of a let variable" );
 
-    m_register.value() = value;
+    m_regref.value() = value;
     reapply_kind();
 }
 
 void dawn::ValueRef::reapply_kind()
 {
-    auto& val = m_register.value();
+    auto& val = m_regref.value();
     switch ( val.type() )
     {
     case ValueType::STRUCT:
