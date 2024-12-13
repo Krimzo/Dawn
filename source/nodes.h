@@ -12,7 +12,7 @@ struct RefNod
 
 struct CastNod
 {
-    String type;
+    ID type;
     Node expr;
 };
 
@@ -23,12 +23,12 @@ struct VariableNod
 
 struct IdentifierNod
 {
-    String name;
+    ID name;
 };
 
 struct FunctionNod
 {
-    String name;
+    ID name;
     Array<Node> args;
 };
 
@@ -91,13 +91,13 @@ struct ForNod
 
 struct EnumNod
 {
-    String type;
-    String key;
+    ID type;
+    ID key;
 };
 
 struct StructNod
 {
-    String type;
+    ID type;
     Map<String, Node> args;
 };
 

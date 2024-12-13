@@ -10,14 +10,14 @@ namespace dawn
 {
 struct EnumVal
 {
-    Enum const* parent = nullptr;
-    String key;
+    Enum* parent = nullptr;
+    ID key;
 };
 
 struct StructVal
 {
-    Struct const* parent = nullptr;
-    Map<String, ValueRef> members;
+    Struct* parent = nullptr;
+    Map<Int, ValueRef> members;
 
     StructVal() = default;
 

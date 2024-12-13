@@ -3,16 +3,16 @@
 
 dawn::Bool dawn::Module::contains_id( StringRef const& id ) const
 {
-    if ( std::find_if( variables.begin(), variables.end(), [&]( Variable const& var ) { return var.name == id; } ) != variables.end() )
+    if ( std::find_if( variables.begin(), variables.end(), [&]( Variable const& var ) { return var.name.str_id == id; } ) != variables.end() )
         return true;
 
-    if ( std::find_if( functions.begin(), functions.end(), [&]( Function const& func ) { return func.name == id; } ) != functions.end() )
+    if ( std::find_if( functions.begin(), functions.end(), [&]( Function const& func ) { return func.name.str_id == id; } ) != functions.end() )
         return true;
 
-    if ( std::find_if( enums.begin(), enums.end(), [&]( Enum const& enu ) { return enu.name == id; } ) != enums.end() )
+    if ( std::find_if( enums.begin(), enums.end(), [&]( Enum const& enu ) { return enu.name.str_id == id; } ) != enums.end() )
         return true;
 
-    if ( std::find_if( structs.begin(), structs.end(), [&]( Struct const& struc ) { return struc.name == id; } ) != structs.end() )
+    if ( std::find_if( structs.begin(), structs.end(), [&]( Struct const& struc ) { return struc.name.str_id == id; } ) != structs.end() )
         return true;
 
     return false;
@@ -62,8 +62,8 @@ void dawn::Parser::parse_global_struct( Array<Token>::const_iterator& it, Array<
     Struct struc;
     parse_struct( it, end, struc );
 
-    if ( module.contains_id( struc.name ) )
-        PARSER_PANIC( {}, L"name [" + struc.name + L"] already in use" );
+    if ( module.contains_id( struc.name.str_id ) )
+        PARSER_PANIC( {}, L"name [", struc.name, L"] already in use" );
 
     module.structs.push_back( struc );
 }
@@ -73,8 +73,8 @@ void dawn::Parser::parse_global_enum( Array<Token>::const_iterator& it, Array<To
     Enum enu;
     parse_enum( it, end, enu );
 
-    if ( module.contains_id( enu.name ) )
-        PARSER_PANIC( {}, L"name [" + enu.name + L"] already in use" );
+    if ( module.contains_id( enu.name.str_id ) )
+        PARSER_PANIC( {}, L"name [", enu.name, L"] already in use" );
 
     module.enums.push_back( enu );
 }
@@ -84,8 +84,8 @@ void dawn::Parser::parse_global_function( Array<Token>::const_iterator& it, Arra
     Function function;
     parse_function( it, end, function );
 
-    if ( module.contains_id( function.name ) )
-        PARSER_PANIC( {}, L"name [" + function.name + L"] already in use" );
+    if ( module.contains_id( function.name.str_id ) )
+        PARSER_PANIC( {}, L"name [", function.name, L"] already in use" );
 
     module.functions.push_back( function );
 }
@@ -95,8 +95,8 @@ void dawn::Parser::parse_global_variable( Array<Token>::const_iterator& it, Arra
     Variable variable;
     parse_variable( it, end, variable );
 
-    if ( module.contains_id( variable.name ) )
-        PARSER_PANIC( {}, L"name [" + variable.name + L"] already in use" );
+    if ( module.contains_id( variable.name.str_id ) )
+        PARSER_PANIC( {}, L"name [", variable.name, L"] already in use" );
 
     module.variables.push_back( variable );
 }
@@ -141,9 +141,9 @@ void dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>:
 
         if ( it->type == TokenType::NAME )
         {
-            auto find_it = std::find_if( struc.fields.begin(), struc.fields.end(), [&]( auto const& field ) { return field.name == it->value; } );
+            auto find_it = std::find_if( struc.fields.begin(), struc.fields.end(), [&]( auto const& field ) { return field.name.str_id == it->value; } );
             if ( find_it != struc.fields.end() )
-                PARSER_PANIC( *it, L"field [" + it->value + L"] already defined" );
+                PARSER_PANIC( *it, L"field [", it->value, L"] already defined" );
 
             auto& field = struc.fields.emplace_back();
             field.name = it->value;
@@ -170,7 +170,7 @@ void dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>:
             auto& self_var = *method.args.emplace( method.args.begin() );
             self_var.kind = VariableKind::REF;
             self_var.expr = make_nothing_node();
-            self_var.name = kw_self;
+            self_var.name.str_id = kw_self;
         }
         else
             PARSER_PANIC( *it, L"expected field name or function" );
@@ -203,7 +203,7 @@ void dawn::Parser::parse_enum( Array<Token>::const_iterator& it, Array<Token>::c
         if ( it->type == TokenType::NAME )
         {
             if ( enu.keys_expr.contains( it->value ) )
-                PARSER_PANIC( *it, L"key [" + it->value + L"] already in use" );
+                PARSER_PANIC( *it, L"key [", it->value, L"] already in use" );
 
             auto& key = enu.keys_expr[it->value];
             key.name = it->value;
@@ -269,9 +269,9 @@ void dawn::Parser::parse_function( Array<Token>::const_iterator& it, Array<Token
         arg.name = it->value;
         ++it;
 
-        if ( args.contains( arg.name ) )
+        if ( args.contains( arg.name.str_id ) )
             PARSER_PANIC( *it, L"argument [", arg.name, L"] already defined" );
-        args.insert( arg.name );
+        args.insert( arg.name.str_id );
 
         if ( it->value == op_split )
             ++it;
@@ -555,10 +555,10 @@ void dawn::Parser::expression_single_keyword( Token const& token, Node& tree )
     }
     else if ( token.value == kw_self )
     {
-        tree.store<IdentifierNod>().name = kw_self;
+        tree.store<IdentifierNod>().name.str_id = kw_self;
     }
     else
-        PARSER_PANIC( token, L"keyword [" + token.value + L"] is not an expression" );
+        PARSER_PANIC( token, L"keyword [", token.value, L"] is not an expression" );
 }
 
 void dawn::Parser::expression_single_identifier( Token const& token, Node& tree )
@@ -590,7 +590,7 @@ void dawn::Parser::expression_type_cast( Array<Token> const& tokens, Node& tree 
     Array<Token>::const_iterator it = tokens.begin();
     auto& node = tree.store<CastNod>();
 
-    parse_type( it, tokens.end(), node.type );
+    parse_type( it, tokens.end(), node.type.str_id );
 
     if ( it->value != op_expr_opn )
         PARSER_PANIC( *it, L"expected expression open" );
@@ -749,9 +749,9 @@ void dawn::Parser::parse_scope( Array<Token>::const_iterator& it, Array<Token>::
             auto& node = scope.instr.emplace_back().store<VariableNod>();
             parse_variable( it, end, node.var );
 
-            if ( vars.contains( node.var.name ) )
+            if ( vars.contains( node.var.name.str_id ) )
                 PARSER_PANIC( *it, L"variable [", node.var.name, L"] already defined" );
-            vars.insert( node.var.name );
+            vars.insert( node.var.name.str_id );
         }
         else if ( it->value == kw_if )
         {

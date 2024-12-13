@@ -1,6 +1,7 @@
 #pragma once
 
 #include "node.h"
+#include "id.h"
 
 
 namespace dawn
@@ -18,7 +19,7 @@ enum struct VariableKind
 struct Variable
 {
     VariableKind kind;
-    String name;
+    ID name;
     Node expr;
 };
 
@@ -31,24 +32,25 @@ struct Function
 {
     using CppFunc = Func<Value( Array<ValueRef> const& )>;
 
-    String name;
+    ID name;
     Array<Variable> args;
     Variant<Scope, CppFunc> body;
 };
 
 struct Enum
 {
-    String name;
+    ID name;
     Map<String, Variable> keys_expr;
-    Map<String, ValueRef> keys_value;
+    Map<Int, ValueRef> keys_value;
 };
 
 struct Struct
 {
-    String name;
+    ID name;
     Array<Variable> fields;
     Array<Function> methods;
 
-    Function const* get_method( StringRef const& name ) const;
+    Variable* get_field( IDSystem& system, Int id );
+    Function* get_method( IDSystem& system, Int id );
 };
 }

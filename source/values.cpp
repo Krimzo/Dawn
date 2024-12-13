@@ -406,7 +406,7 @@ dawn::Value dawn::Value::operator==( Value const& other ) const
         if ( left.parent != right.parent )
             PANIC( "enum [", left.parent->name, "] == enum [", right.parent->name, "] not supported" );
 
-        return left.key == right.key;
+        return left.key.str_id == right.key.str_id;
     }
 
     default:
@@ -443,7 +443,7 @@ dawn::Value dawn::Value::operator!=( Value const& other ) const
         if ( left.parent != right.parent )
             PANIC( "enum [", left.parent->name, "] != enum [", right.parent->name, "] not supported" );
 
-        return left.key != right.key;
+        return left.key.str_id != right.key.str_id;
     }
 
     default:
@@ -723,26 +723,13 @@ dawn::String dawn::Value::to_string() const
     case ValueType::ENUM:
     {
         auto& val = as<EnumVal>();
-        return val.parent->name + L"{" + val.key + L"}";
+        return val.parent->name.str_id + L"{" + val.key.str_id + L"}";
     }
 
     case ValueType::STRUCT:
     {
         auto& val = as<StructVal>();
-        if ( val.members.empty() )
-            return val.parent->name + L"{}";
-
-        StringStream stream;
-        stream << val.parent->name << L"{ ";
-        for ( auto it = val.members.begin(); it != val.members.end(); it++ )
-        {
-            auto& [key, value] = *it;
-            stream << key << L": " << value.value().to_string();
-            Map<String, ValueRef>::const_iterator next_it = it;
-            ++next_it;
-            stream << (next_it == val.members.end() ? L" }" : L", ");
-        }
-        return stream.str();
+        return val.parent->name.str_id + L"{}";
     }
 
     case ValueType::ARRAY:
@@ -756,7 +743,6 @@ dawn::String dawn::Value::to_string() const
         for ( Int i = 0; i < (Int) val.data.size() - 1; i++ )
             stream << val.data[i].value().to_string() << L", ";
         stream << val.data.back().value().to_string() << L"]";
-
         return stream.str();
     }
 

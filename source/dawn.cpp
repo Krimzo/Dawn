@@ -31,16 +31,35 @@ dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path ) noexcept
     return eval( *source );
 }
 
-void dawn::Dawn::bind_func( String const& name, Function::CppFunc cpp_func ) noexcept
+void dawn::Dawn::bind_func( StringRef const& name, Function::CppFunc cpp_func ) noexcept
 {
     m_engine.bind_func( name, cpp_func );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<Node> const& args, ValueRef& retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name ) noexcept
+{
+    Array<Node> args;
+    ValueRef retval;
+    return call_func( name, args, retval );
+}
+
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, ValueRef& retval ) noexcept
+{
+    Array<Node> args;
+    return call_func( name, args, retval );
+}
+
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<Node>& args ) noexcept
+{
+    ValueRef retval;
+    return call_func( name, args, retval );
+}
+
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<Node>& args, ValueRef& retval ) noexcept
 {
     try
     {
-        m_engine.call_func( name, args, retval );
+        m_engine.call_func( m_engine.id_system.get( name ), args, retval );
     }
     catch ( String const& msg )
     {
@@ -49,7 +68,7 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<Node> c
     return std::nullopt;
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::add_var( Variable const& var ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::add_var( Variable& var ) noexcept
 {
     try
     {
@@ -62,12 +81,12 @@ dawn::Opt<dawn::String> dawn::Dawn::add_var( Variable const& var ) noexcept
     return std::nullopt;
 }
 
-void dawn::Dawn::add_var( VariableKind kind, StringRef const& name, ValueRef const& value ) noexcept
+void dawn::Dawn::add_var( VariableKind kind, String const& name, ValueRef const& value ) noexcept
 {
-    m_engine.add_var( kind, name, value );
+    m_engine.add_var( kind, m_engine.id_system.get( name ), value );
 }
 
 dawn::ValueRef* dawn::Dawn::get_var( String const& name ) noexcept
 {
-    return m_engine.get_var( name );
+    return m_engine.get_var( m_engine.id_system.get( name ) );
 }

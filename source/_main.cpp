@@ -14,8 +14,7 @@ int main( int argc, char** argv )
 
     auto start_time = std::chrono::high_resolution_clock::now();
 
-    ValueRef retval;
-    if ( auto error = dawn.call_func( L"main", {}, retval ) )
+    if ( auto error = dawn.call_func( L"main" ) )
     {
         print( error.value() );
         return 2;
