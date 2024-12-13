@@ -400,7 +400,25 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
     ValueRef loop_val;
     handle_expr( node.expr, loop_val );
 
-    if ( loop_val.value().type() == ValueType::STRING )
+    if ( loop_val.value().type() == ValueType::RANGE )
+    {
+        auto& value_rng = loop_val.value().as<RangeVal>();
+
+        Bool didbrk = false, didcon = false;
+        for ( Int i = value_rng.start_incl; i < value_rng.end_excl; ++i )
+        {
+            if ( didret || didbrk )
+                break;
+
+            if ( didcon )
+                didcon = false;
+
+            add_var( node.var.kind, node.var.name.get( id_system ), Value{ i } );
+            handle_scope( node.scope, retval, didret, &didbrk, &didcon );
+            variables.pop();
+        }
+    }
+    else if ( loop_val.value().type() == ValueType::STRING )
     {
         auto& value_str = loop_val.value().as<String>();
 
@@ -413,13 +431,8 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
             if ( didcon )
                 didcon = false;
 
-            Variable arg = node.var;
-            arg.expr = make_char_node( c );
-
-            add_var( arg );
-
+            add_var( node.var.kind, node.var.name.get( id_system ), Value{ c } );
             handle_scope( node.scope, retval, didret, &didbrk, &didcon );
-
             variables.pop();
         }
     }
@@ -437,32 +450,7 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
                 didcon = false;
 
             add_var( node.var.kind, node.var.name.get( id_system ), value );
-
             handle_scope( node.scope, retval, didret, &didbrk, &didcon );
-
-            variables.pop();
-        }
-    }
-    else if ( loop_val.value().type() == ValueType::RANGE )
-    {
-        auto& value_rng = loop_val.value().as<RangeVal>();
-
-        Bool didbrk = false, didcon = false;
-        for ( auto i = value_rng.start_incl; i < value_rng.end_excl; ++i )
-        {
-            if ( didret || didbrk )
-                break;
-
-            if ( didcon )
-                didcon = false;
-
-            Variable arg = node.var;
-            arg.expr = make_int_node( i );
-
-            add_var( arg );
-
-            handle_scope( node.scope, retval, didret, &didbrk, &didcon );
-
             variables.pop();
         }
     }
