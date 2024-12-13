@@ -54,7 +54,11 @@ void dawn::Engine::call_func( Int id, Array<Node>& args, ValueRef& retval )
 {
     auto it = functions.find( id );
     if ( it == functions.end() )
-        ENGINE_PANIC( L"function [", id_system.get( id ), L"] doesn't exist" );
+    {
+        String const* ptr = id_system.get( id );
+        String name = ptr ? *ptr : String();
+        ENGINE_PANIC( L"function [", name, L"] doesn't exist" );
+    }
     handle_func( it->second, args, retval );
 }
 
@@ -468,12 +472,15 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
 
 void dawn::Engine::handle_enum_node( EnumNod& node, ValueRef& value )
 {
-    auto it = enums.find( node.type.get( id_system ) );
-    if ( it == enums.end() )
+    auto enum_it = enums.find( node.type.get( id_system ) );
+    if ( enum_it == enums.end() )
         ENGINE_PANIC( "enum [", node.type, L"] doesn't exist" );
 
+    if ( !enum_it->second.keys_value.contains( node.key.get( id_system ) ) )
+        ENGINE_PANIC( "enum [", node.type, L"] doesn't have key [", node.key, L"]" );
+
     EnumVal result{};
-    result.parent = &it->second;
+    result.parent = &enum_it->second;
     result.key = node.key;
 
     value = ValueRef{ result };
@@ -481,29 +488,33 @@ void dawn::Engine::handle_enum_node( EnumNod& node, ValueRef& value )
 
 void dawn::Engine::handle_struct_node( StructNod& node, ValueRef& value )
 {
-    auto it = structs.find( node.type.get( id_system ) );
-    if ( it == structs.end() )
+    auto struct_it = structs.find( node.type.get( id_system ) );
+    if ( struct_it == structs.end() )
         ENGINE_PANIC( "struct [", node.type, L"] doesn't exist" );
 
     StructVal result{};
-    result.parent = &it->second;
+    result.parent = &struct_it->second;
 
-    for ( auto& struc_field : it->second.fields )
+    for ( auto& field : struct_it->second.fields )
     {
-        auto& field = result.members[struc_field.name.get( id_system )];
-        auto it = std::find_if( node.args.begin(), node.args.end(), [&]( auto const& entry ) { return entry.first.str_id == struc_field.name.str_id; } );
-        if ( it != node.args.end() )
-        {
-            ValueRef arg_val;
-            handle_expr( it->second, arg_val );
-            field = ValueRef{ arg_val.value() };
-        }
-        else
-        {
-            ValueRef field_val;
-            handle_expr( struc_field.expr, field_val );
-            field = ValueRef{ field_val.value() };
-        }
+        auto arg_it = std::find_if( node.args.begin(), node.args.end(), [&]( auto& arg ) { return arg.first.get( id_system ) == field.name.get( id_system ); } );
+        if ( arg_it != node.args.end() )
+            continue;
+
+        ValueRef field_val;
+        handle_expr( field.expr, field_val );
+        result.members[field.name.get( id_system )] = ValueRef{ field_val.value() };
+    }
+
+    for ( auto& [id, arg] : node.args )
+    {
+        auto field_it = std::find_if( struct_it->second.fields.begin(), struct_it->second.fields.end(), [&]( auto& field ) { return field.name.get( id_system ) == id.get( id_system ); } );
+        if ( field_it == struct_it->second.fields.end() )
+            ENGINE_PANIC( "struct [", node.type, L"] doesn't contain member [", id, L"]" );
+
+        ValueRef arg_val;
+        handle_expr( arg, arg_val );
+        result.members[id.get( id_system )] = ValueRef{ arg_val.value() };
     }
 
     value = ValueRef{ result };

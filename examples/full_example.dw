@@ -108,9 +108,9 @@ func loop_examp() {
 
 // Enum
 enum ExampleEnum {
-	me = 0.0,
-	you = "1.1",
-	them = 2.2,
+	me = 0.0
+	you = "1.1"
+	them = 2.2
 }
 
 func enum_examp() {
@@ -121,8 +121,8 @@ func enum_examp() {
 
 // Struct
 struct Person {
-	name = "unknown",
-	age = 0,
+	name = "unknown"
+	age = 0
 
 	func get_age() {
 		return self->age

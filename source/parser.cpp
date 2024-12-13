@@ -156,9 +156,6 @@ void dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>:
             }
             else
             {
-                if ( it->value != op_split )
-                    PARSER_PANIC( *it, L"expected split" );
-                ++it;
                 field.expr = make_nothing_node();
             }
         }
@@ -216,9 +213,6 @@ void dawn::Parser::parse_enum( Array<Token>::const_iterator& it, Array<Token>::c
             }
             else
             {
-                if ( it->value != op_split )
-                    PARSER_PANIC( *it, L"expected split" );
-                ++it;
                 key.expr = make_nothing_node();
             }
         }
