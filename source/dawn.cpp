@@ -3,7 +3,7 @@
 
 dawn::Dawn::Dawn() noexcept
 {
-    m_engine.load_default_mods();
+    m_engine.load_standard();
 }
 
 dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source ) noexcept

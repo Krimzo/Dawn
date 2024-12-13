@@ -16,6 +16,32 @@ void dawn::Engine::load_mod( Module& module )
         load_variable( entry );
 }
 
+void dawn::Engine::load_function( Function& entry )
+{
+    functions[entry.name.get( id_system )] = entry;
+}
+
+void dawn::Engine::load_enum( Enum& entry )
+{
+    auto& enu = (enums[entry.name.get( id_system )] = entry);
+    for ( auto& [key, expr] : enu.keys_expr )
+    {
+        ValueRef key_val;
+        handle_expr( expr.expr, key_val );
+        enu.keys_value[id_system.get( key )] = ValueRef{ key_val.value() };
+    }
+}
+
+void dawn::Engine::load_struct( Struct& entry )
+{
+    structs[entry.name.get( id_system )] = entry;
+}
+
+void dawn::Engine::load_variable( Variable& entry )
+{
+    add_var( entry );
+}
+
 void dawn::Engine::bind_func( StringRef const& name, Function::CppFunc cpp_func )
 {
     Function func;
@@ -58,32 +84,6 @@ void dawn::Engine::add_var( VariableKind kind, Int id, ValueRef const& value )
 dawn::ValueRef* dawn::Engine::get_var( Int id )
 {
     return variables.get( id );
-}
-
-void dawn::Engine::load_function( Function& entry )
-{
-    functions[entry.name.get( id_system )] = entry;
-}
-
-void dawn::Engine::load_enum( Enum& entry )
-{
-    auto& enu = (enums[entry.name.get( id_system )] = entry);
-    for ( auto& [key, expr] : enu.keys_expr )
-    {
-        ValueRef key_val;
-        handle_expr( expr.expr, key_val );
-        enu.keys_value[id_system.get( key )] = ValueRef{ key_val.value() };
-    }
-}
-
-void dawn::Engine::load_struct( Struct& entry )
-{
-    structs[entry.name.get( id_system )] = entry;
-}
-
-void dawn::Engine::load_variable( Variable& entry )
-{
-    add_var( entry );
 }
 
 void dawn::Engine::handle_func( Function& func, Array<Node>& args, ValueRef& retval )
@@ -492,7 +492,7 @@ void dawn::Engine::handle_struct_node( StructNod& node, ValueRef& value )
     for ( auto& struc_field : it->second.fields )
     {
         auto& field = result.members[struc_field.name.get( id_system )];
-        auto it = node.args.find( struc_field.name.str_id );
+        auto it = std::find_if( node.args.begin(), node.args.end(), [&]( auto const& entry ) { return entry.first.str_id == struc_field.name.str_id; } );
         if ( it != node.args.end() )
         {
             ValueRef arg_val;

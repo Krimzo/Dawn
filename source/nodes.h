@@ -98,7 +98,7 @@ struct EnumNod
 struct StructNod
 {
     ID type;
-    Map<String, Node> args;
+    Array<Pair<ID, Node>> args;
 };
 
 struct ArrayNod

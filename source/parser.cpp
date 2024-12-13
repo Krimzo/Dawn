@@ -616,7 +616,7 @@ void dawn::Parser::expression_type_make( Array<Token> const& tokens, Node& tree 
         PARSER_PANIC( *it, L"expected expression open" );
     ++it;
 
-    Map<String, Node> args;
+    Array<Pair<ID, Node>> args;
     Opt<String> key;
     while ( true )
     {
@@ -630,7 +630,7 @@ void dawn::Parser::expression_type_make( Array<Token> const& tokens, Node& tree 
             PARSER_PANIC( *it, L"expected field name" );
 
         String name = it->value;
-        if ( args.contains( name ) )
+        if ( std::find_if( args.begin(), args.end(), [&]( auto const& entry ) { return entry.first.str_id == name; } ) != args.end() )
             PARSER_PANIC( *it, L"argument [" + name + L"] already passed" );
         ++it;
 
@@ -645,7 +645,8 @@ void dawn::Parser::expression_type_make( Array<Token> const& tokens, Node& tree 
             PARSER_PANIC( *it, L"expected bind operator" );
         ++it;
 
-        parse_expression( it, tokens.end(), args[name] );
+        auto& arg = args.emplace_back( name, Node{} );
+        parse_expression( it, tokens.end(), arg.second );
     }
 
     if ( key )

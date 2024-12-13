@@ -8,7 +8,7 @@ static thread_local std::mt19937_64 RAND_ENGINE = []
     return std::mt19937_64{ device() };
 }();
 
-void dawn::Engine::load_default_mods()
+void dawn::Engine::load_standard()
 {
     /* UTIL */
     bind_func( L"format", []( Array<ValueRef> const& args ) -> Value

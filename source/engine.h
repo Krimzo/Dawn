@@ -28,8 +28,12 @@ struct Engine
     Map<Int, Enum> enums;
     Map<Int, Struct> structs;
 
-    void load_default_mods();
+    void load_standard();
     void load_mod( Module& module );
+    void load_function( Function& entry );
+    void load_enum( Enum& entry );
+    void load_struct( Struct& entry );
+    void load_variable( Variable& entry );
 
     void bind_func( StringRef const& name, Function::CppFunc cpp_func );
     void call_func( Int id, Array<Node>& args, ValueRef& retval );
@@ -39,11 +43,6 @@ struct Engine
     ValueRef* get_var( Int id );
 
 private:
-    void load_function( Function& entry );
-    void load_enum( Enum& entry );
-    void load_struct( Struct& entry );
-    void load_variable( Variable& entry );
-
     void handle_func( Function& func, Array<Node>& args, ValueRef& retval );
     void handle_scope( Scope& scope, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
     void handle_instr( Node& node, ValueRef& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon );

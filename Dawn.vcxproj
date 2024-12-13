@@ -12,7 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\engine.cpp" />
-    <ClCompile Include="source\engine_defaults.cpp" />
+    <ClCompile Include="source\standard.cpp" />
     <ClCompile Include="source\err.cpp" />
     <ClCompile Include="source\id.cpp" />
     <ClCompile Include="source\lexer.cpp" />
