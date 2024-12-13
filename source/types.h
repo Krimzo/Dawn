@@ -30,7 +30,7 @@ struct Scope
 
 struct Function
 {
-    using CppFunc = Func<Value( Array<ValueRef> const& )>;
+    using CppFunc = Func<ValueRef( Array<ValueRef> const& )>;
 
     ID name;
     Array<Variable> args;

@@ -113,8 +113,7 @@ void dawn::Engine::handle_func( Function& func, Array<Node>& args, ValueRef& ret
         for ( auto& arg : args )
             handle_expr( arg, arg_vals.emplace_back() );
 
-        auto result = std::get<Function::CppFunc>( func.body )(arg_vals);
-        retval = ValueRef{ result };
+        retval = std::get<Function::CppFunc>( func.body )(arg_vals);
     }
 }
 
