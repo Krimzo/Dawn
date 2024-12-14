@@ -704,13 +704,13 @@ dawn::String dawn::Value::to_string() const
         return String{ as<Bool>() ? kw_true : kw_false };
 
     case ValueType::INT:
-        return std::to_wstring( as<Int>() );
+        return std::to_string( as<Int>() );
 
     case ValueType::FLOAT:
     {
         String result = format( as<Float>() );
-        if ( std::to_wstring( (Int) as<Float>() ) == result )
-            result += L".0";
+        if ( std::to_string( (Int) as<Float>() ) == result )
+            result += ".0";
         return result;
     }
 
@@ -723,26 +723,26 @@ dawn::String dawn::Value::to_string() const
     case ValueType::ENUM:
     {
         auto& val = as<EnumVal>();
-        return val.parent->name.str_id + L"{" + val.key.str_id + L"}";
+        return val.parent->name.str_id + "{" + val.key.str_id + "}";
     }
 
     case ValueType::STRUCT:
     {
         auto& val = as<StructVal>();
-        return val.parent->name.str_id + L"{}";
+        return val.parent->name.str_id + "{}";
     }
 
     case ValueType::ARRAY:
     {
         auto& val = as<ArrayVal>();
         if ( val.data.empty() )
-            return L"[]";
+            return "[]";
 
         StringStream stream;
-        stream << L"[";
+        stream << "[";
         for ( Int i = 0; i < (Int) val.data.size() - 1; i++ )
-            stream << val.data[i].value().to_string() << L", ";
-        stream << val.data.back().value().to_string() << L"]";
+            stream << val.data[i].value().to_string() << ", ";
+        stream << val.data.back().value().to_string() << "]";
         return stream.str();
     }
 
@@ -812,7 +812,7 @@ void dawn::ValueRef::reapply_kind()
     }
 }
 
-std::wostream& dawn::operator<<( std::wostream& stream, ValueType type )
+std::ostream& dawn::operator<<( std::ostream& stream, ValueType type )
 {
     switch ( type )
     {

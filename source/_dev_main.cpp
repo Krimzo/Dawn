@@ -7,16 +7,16 @@ int dawn::_dev_main( int argc, char** argv )
 
     Dawn dawn;
 
-    if ( auto error = dawn.eval_file( L"examples/min_example.dw" ) )
+    if ( auto error = dawn.eval_file( "examples/min_example.dw" ) )
     {
         print( error.value() );
-        return 1;
+        return -1;
     }
 
-    if ( auto error = dawn.call_func( L"main" ) )
+    if ( auto error = dawn.call_func( "main" ) )
     {
         print( error.value() );
-        return 2;
+        return -2;
     }
 
     auto end_time = std::chrono::high_resolution_clock::now();

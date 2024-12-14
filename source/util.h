@@ -36,7 +36,7 @@ String format( Args const&... args )
 template<typename... Args>
 void print( Args const&... args )
 {
-    (std::wcout << ... << args) << '\n';
+    (std::cout << ... << args) << '\n';
 }
 
 Char to_escaping( Char c );
@@ -48,6 +48,6 @@ Opt<Float> parse_float( StringRef const& data );
 
 Float mymod( Float left, Float right );
 
-std::wostream& operator<<( std::wostream& stream, Color const& color );
-std::wostream& operator<<( std::wostream& stream, ColoredText const& colored_text );
+std::ostream& operator<<( std::ostream& stream, Color const& color );
+std::ostream& operator<<( std::ostream& stream, ColoredText const& colored_text );
 }

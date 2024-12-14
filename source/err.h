@@ -13,8 +13,8 @@ struct LexerError
     LexerError( Int line_number, Char c, Args const&... args )
     {
         StringStream stream;
-        stream << L"Lexer error at line [" << line_number
-            << L"] and char [" << from_escaping( c ) << L"]: ";
+        stream << "Lexer error at line [" << line_number
+            << "] and char [" << from_escaping( c ) << "]: ";
         (stream << ... << args);
         msg = stream.str();
     }
@@ -30,11 +30,11 @@ struct ParserError
         StringStream stream;
         if ( token )
         {
-            stream << L"Parser error at token " << *token << L": ";
+            stream << "Parser error at token " << *token << ": ";
         }
         else
         {
-            stream << L"Parser error: ";
+            stream << "Parser error: ";
         }
         (stream << ... << args);
         msg = stream.str();
@@ -55,9 +55,9 @@ struct EngineError
     }
 };
 
-std::wostream& operator<<( std::wostream& stream, LexerError const& error );
-std::wostream& operator<<( std::wostream& stream, ParserError const& error );
-std::wostream& operator<<( std::wostream& stream, EngineError const& error );
+std::ostream& operator<<( std::ostream& stream, LexerError const& error );
+std::ostream& operator<<( std::ostream& stream, ParserError const& error );
+std::ostream& operator<<( std::ostream& stream, EngineError const& error );
 
 #define PANIC(...) throw format( "Error: ", __VA_ARGS__ );
 #define LEXER_PANIC(...) throw format( LexerError{ __VA_ARGS__ } );

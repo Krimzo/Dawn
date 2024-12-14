@@ -29,5 +29,5 @@ private:
     Int int_id = 0;
 };
 
-std::wostream& operator<<( std::wostream& stream, ID const& id );
+std::ostream& operator<<( std::ostream& stream, ID const& id );
 }

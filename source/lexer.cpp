@@ -115,22 +115,20 @@ void dawn::Lexer::tokenize( StringRef const& source, Array<Token>& tokens )
             extract_operator( source, tokens, line, i );
         }
         else
-        {
-            LEXER_PANIC( line, source[i], L"unexpected character" );
-        }
+            LEXER_PANIC( line, source[i], "unexpected character" );
     }
 }
 
 dawn::Bool dawn::Lexer::is_space( StringRef const& source, Int i )
 {
-    return iswspace( source[i] );
+    return isspace( source[i] );
 }
 
 void dawn::Lexer::extract_space( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
 {
     for ( ; i < (Int) source.size(); i++ )
     {
-        if ( source[i] == L'\n' )
+        if ( source[i] == '\n' )
             ++line;
 
         if ( !is_space( source, i ) )
@@ -150,7 +148,7 @@ void dawn::Lexer::extract_comment( StringRef const& source, Array<Token>& tokens
 {
     for ( ; i < (Int) source.size(); i++ )
     {
-        if ( source[i] == L'\n' )
+        if ( source[i] == '\n' )
         {
             ++line;
             break;
@@ -167,7 +165,7 @@ void dawn::Lexer::extract_mlcomment( StringRef const& source, Array<Token>& toke
 {
     for ( ; i < (Int) source.size(); i++ )
     {
-        if ( source[i] == L'\n' )
+        if ( source[i] == '\n' )
             ++line;
 
         if ( source.substr( i ).starts_with( lang_def.comment_multiline.second ) )
@@ -180,7 +178,7 @@ void dawn::Lexer::extract_mlcomment( StringRef const& source, Array<Token>& toke
 
 dawn::Bool dawn::Lexer::is_word( StringRef const& source, Int i )
 {
-    return source.substr( i ).starts_with( lang_def.separator_identifier ) || iswalpha( source[i] );
+    return source.substr( i ).starts_with( lang_def.separator_identifier ) || isalpha( source[i] );
 }
 
 void dawn::Lexer::extract_word( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
@@ -188,7 +186,7 @@ void dawn::Lexer::extract_word( StringRef const& source, Array<Token>& tokens, I
     String buffer;
     for ( ; i < (Int) source.size(); i++ )
     {
-        if ( !iswdigit( source[i] ) && !is_word( source, i ) )
+        if ( !isdigit( source[i] ) && !is_word( source, i ) )
         {
             --i;
             break;
@@ -201,7 +199,7 @@ void dawn::Lexer::extract_word( StringRef const& source, Array<Token>& tokens, I
     {
         type = TokenType::KEYWORD;
     }
-    else if ( iswupper( buffer.front() ) || lang_def.types.contains( buffer ) )
+    else if ( isupper( buffer.front() ) || lang_def.types.contains( buffer ) )
     {
         type = TokenType::TYPE;
     }
@@ -218,7 +216,7 @@ void dawn::Lexer::extract_word( StringRef const& source, Array<Token>& tokens, I
 
 dawn::Bool dawn::Lexer::is_number( StringRef const& source, Int i )
 {
-    return source.substr( i ).starts_with( lang_def.separator_number ) || iswdigit( source[i] );
+    return source.substr( i ).starts_with( lang_def.separator_number ) || isdigit( source[i] );
 }
 
 void dawn::Lexer::extract_number( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
@@ -230,7 +228,7 @@ void dawn::Lexer::extract_number( StringRef const& source, Array<Token>& tokens,
         if ( source.substr( i ).starts_with( lang_def.separator_number ) )
         {
             if ( is_float )
-                LEXER_PANIC( line, source[i], L"invalid float number" );
+                LEXER_PANIC( line, source[i], "invalid float number" );
 
             is_float = true;
         }
@@ -243,7 +241,7 @@ void dawn::Lexer::extract_number( StringRef const& source, Array<Token>& tokens,
     }
 
     if ( buffer == lang_def.separator_number )
-        LEXER_PANIC( line, source[i], L"invalid number" );
+        LEXER_PANIC( line, source[i], "invalid number" );
 
     auto& token = tokens.emplace_back();
     token.type = is_float ? TokenType::FLOAT : TokenType::INTEGER;
@@ -259,16 +257,16 @@ dawn::Bool dawn::Lexer::is_char( StringRef const& source, Int i )
 void dawn::Lexer::extract_char( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
 {
     if ( source.substr( i ).size() < 3 )
-        LEXER_PANIC( line, source[i], L"char literal too short" );
+        LEXER_PANIC( line, source[i], "char literal too short" );
 
     String buffer;
-    if ( source[i + 1] == L'\\' )
+    if ( source[i + 1] == '\\' )
     {
         if ( source.substr( i ).size() < 4 )
-            LEXER_PANIC( line, source[i], L"escaping char too short" );
+            LEXER_PANIC( line, source[i], "escaping char too short" );
 
         if ( !is_char( source, i + 3 ) )
-            LEXER_PANIC( line, source[i], L"invalid escaping char literal" );
+            LEXER_PANIC( line, source[i], "invalid escaping char literal" );
 
         Char c = to_escaping( source[i + 2] );
         buffer = String( 1, c );
@@ -277,7 +275,7 @@ void dawn::Lexer::extract_char( StringRef const& source, Array<Token>& tokens, I
     else
     {
         if ( !is_char( source, i + 2 ) )
-            LEXER_PANIC( line, source[i], L"invalid char literal" );
+            LEXER_PANIC( line, source[i], "invalid char literal" );
 
         Char c = source[i + 1];
         buffer = String( 1, c );
@@ -301,7 +299,7 @@ void dawn::Lexer::extract_string( StringRef const& source, Array<Token>& tokens,
     i += lang_def.literal_string.size();
     for ( ; i < (Int) source.size(); i++ )
     {
-        if ( source[i] == L'\n' )
+        if ( source[i] == '\n' )
             ++line;
 
         if ( source.substr( i ).starts_with( lang_def.literal_string ) )
@@ -310,11 +308,11 @@ void dawn::Lexer::extract_string( StringRef const& source, Array<Token>& tokens,
             break;
         }
 
-        if ( source[i] == L'\\' )
+        if ( source[i] == '\\' )
         {
             auto view = source.substr( i );
             if ( view.size() < 2 )
-                LEXER_PANIC( line, source[i], L"string escaping char too short" );
+                LEXER_PANIC( line, source[i], "string escaping char too short" );
 
             Char c = to_escaping( view[1] );
             buffer.push_back( c );
@@ -357,7 +355,7 @@ void dawn::Lexer::extract_operator( StringRef const& source, Array<Token>& token
     i += op_size - 1;
 
     if ( !closest_op )
-        LEXER_PANIC( line, source[i], L"unknown operator" );
+        LEXER_PANIC( line, source[i], "unknown operator" );
 
     auto& token = tokens.emplace_back();
     token.type = TokenType::OPERATOR;

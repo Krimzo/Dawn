@@ -17,11 +17,11 @@ dawn::Char dawn::to_escaping( Char c )
 {
     switch ( c )
     {
-    case L'b': return L'\b';
-    case L'f': return L'\f';
-    case L'n': return L'\n';
-    case L'r': return L'\r';
-    case L't': return L'\t';
+    case 'b': return '\b';
+    case 'f': return '\f';
+    case 'n': return '\n';
+    case 'r': return '\r';
+    case 't': return '\t';
     }
     return c;
 }
@@ -30,11 +30,11 @@ dawn::String dawn::from_escaping( Char c )
 {
     switch ( c )
     {
-    case L'\b': return L"\\b";
-    case L'\f': return L"\\f";
-    case L'\n': return L"\\n";
-    case L'\r': return L"\\r";
-    case L'\t': return L"\\t";
+    case '\b': return "\\b";
+    case '\f': return "\\f";
+    case '\n': return "\\n";
+    case '\r': return "\\r";
+    case '\t': return "\\t";
     }
     return String( 1, c );
 }
@@ -53,7 +53,7 @@ dawn::Opt<dawn::Int> dawn::parse_int( StringRef const& data )
         return std::nullopt;
 
     Char* last_char = nullptr;
-    Int result = std::wcstoll( data.data(), &last_char, 10 );
+    Int result = std::strtoll( data.data(), &last_char, 10 );
     if ( last_char != data.data() + data.size() )
         return std::nullopt;
 
@@ -66,7 +66,7 @@ dawn::Opt<dawn::Float> dawn::parse_float( StringRef const& data )
         return std::nullopt;
 
     Char* last_char = nullptr;
-    Float result = std::wcstod( data.data(), &last_char );
+    Float result = std::strtod( data.data(), &last_char );
     if ( last_char != data.data() + data.size() )
         return std::nullopt;
 
@@ -79,13 +79,13 @@ dawn::Float dawn::mymod( Float left, Float right )
     else              return (right < 0.0) ? std::remainder( left, right ) : std::fmod( left, right );
 }
 
-std::wostream& dawn::operator<<( std::wostream& stream, Color const& color )
+std::ostream& dawn::operator<<( std::ostream& stream, Color const& color )
 {
-    stream << L"\033[38;2;" << Int( color.r ) << L";" << Int( color.g ) << L";" << Int( color.b ) << L"m";
+    stream << "\033[38;2;" << Int( color.r ) << ";" << Int( color.g ) << ";" << Int( color.b ) << "m";
     return stream;
 }
 
-std::wostream& dawn::operator<<( std::wostream& stream, ColoredText const& colored_text )
+std::ostream& dawn::operator<<( std::ostream& stream, ColoredText const& colored_text )
 {
     static constexpr Color DEFAULT_COLOR = { 204, 204, 204 };
     stream << colored_text.color << colored_text.text << DEFAULT_COLOR;

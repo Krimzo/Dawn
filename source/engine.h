@@ -6,7 +6,7 @@
 
 namespace dawn
 {
-#define NAME_GEN(NAME) ID _##NAME = String( L#NAME );
+#define NAME_GEN(NAME) ID _##NAME = String( #NAME );
 
 struct PredefinedNames
 {

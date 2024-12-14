@@ -57,7 +57,7 @@ void dawn::Engine::call_func( Int id, Array<Node>& args, ValueRef& retval )
     {
         String const* ptr = id_system.get( id );
         String name = ptr ? *ptr : String();
-        ENGINE_PANIC( L"function [", name, L"] doesn't exist" );
+        ENGINE_PANIC( "function [", name, "] doesn't exist" );
     }
     handle_func( it->second, args, retval );
 }
@@ -95,7 +95,7 @@ void dawn::Engine::handle_func( Function& func, Array<Node>& args, ValueRef& ret
     if ( func.body.index() == 0 )
     {
         if ( func.args.size() != args.size() )
-            ENGINE_PANIC( "invalid argument count for function [", func.name, L"]" );
+            ENGINE_PANIC( "invalid argument count for function [", func.name, "]" );
 
         for ( Int i = 0; i < (Int) args.size(); i++ )
         {
@@ -278,7 +278,7 @@ void dawn::Engine::handle_id_node( IdentifierNod& node, ValueRef& value )
 {
     auto* ptr = variables.get( node.name.get( id_system ) );
     if ( !ptr )
-        ENGINE_PANIC( L"variable [", node.name, L"] doesn't exist" );
+        ENGINE_PANIC( "variable [", node.name, "] doesn't exist" );
     value = *ptr;
 }
 
@@ -286,7 +286,7 @@ void dawn::Engine::handle_func_node( FunctionNod& node, ValueRef& retval )
 {
     auto it = functions.find( node.name.get( id_system ) );
     if ( it == functions.end() )
-        ENGINE_PANIC( L"function [", node.name, L"] doesn't exist" );
+        ENGINE_PANIC( "function [", node.name, "] doesn't exist" );
     handle_func( it->second, node.args, retval );
 }
 
@@ -462,10 +462,10 @@ void dawn::Engine::handle_enum_node( EnumNod& node, ValueRef& value )
 {
     auto enum_it = enums.find( node.type.get( id_system ) );
     if ( enum_it == enums.end() )
-        ENGINE_PANIC( "enum [", node.type, L"] doesn't exist" );
+        ENGINE_PANIC( "enum [", node.type, "] doesn't exist" );
 
     if ( !enum_it->second.keys_value.contains( node.key.get( id_system ) ) )
-        ENGINE_PANIC( "enum [", node.type, L"] doesn't have key [", node.key, L"]" );
+        ENGINE_PANIC( "enum [", node.type, "] doesn't have key [", node.key, "]" );
 
     EnumVal result{};
     result.parent = &enum_it->second;
@@ -478,7 +478,7 @@ void dawn::Engine::handle_struct_node( StructNod& node, ValueRef& value )
 {
     auto struct_it = structs.find( node.type.get( id_system ) );
     if ( struct_it == structs.end() )
-        ENGINE_PANIC( "struct [", node.type, L"] doesn't exist" );
+        ENGINE_PANIC( "struct [", node.type, "] doesn't exist" );
 
     StructVal result{};
     result.parent = &struct_it->second;
@@ -498,7 +498,7 @@ void dawn::Engine::handle_struct_node( StructNod& node, ValueRef& value )
     {
         auto field_it = std::find_if( struct_it->second.fields.begin(), struct_it->second.fields.end(), [&]( auto& field ) { return field.name.get( id_system ) == id.get( id_system ); } );
         if ( field_it == struct_it->second.fields.end() )
-            ENGINE_PANIC( "struct [", node.type, L"] doesn't contain member [", id, L"]" );
+            ENGINE_PANIC( "struct [", node.type, "] doesn't contain member [", id, "]" );
 
         ValueRef arg_val;
         handle_expr( arg, arg_val );

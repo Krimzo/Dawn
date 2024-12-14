@@ -26,14 +26,14 @@ namespace dawn
 using Bool = bool;
 using Int = int64_t;
 using Float = double;
-using Char = wchar_t;
-using String = std::wstring;
+using Char = char;
+using String = std::string;
 
-using StringRef = std::wstring_view;
-using StringStream = std::wstringstream;
+using StringRef = std::string_view;
+using StringStream = std::stringstream;
 
-using IFileStream = std::wifstream;
-using OFileStream = std::wofstream;
+using IFileStream = std::ifstream;
+using OFileStream = std::ofstream;
 
 using Any = std::any;
 template<typename T> using Opt = std::optional<T>;

@@ -293,5 +293,5 @@ private:
     void reapply_kind();
 };
 
-std::wostream& operator<<( std::wostream& stream, ValueType type );
+std::ostream& operator<<( std::ostream& stream, ValueType type );
 }

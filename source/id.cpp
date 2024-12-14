@@ -31,7 +31,7 @@ dawn::Int dawn::ID::get( IDSystem& system )
     return int_id;
 }
 
-std::wostream& dawn::operator<<( std::wostream& stream, ID const& id )
+std::ostream& dawn::operator<<( std::ostream& stream, ID const& id )
 {
     stream << id.str_id;
     return stream;

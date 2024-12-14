@@ -45,6 +45,6 @@ constexpr Color to_color( TokenType type )
     return { 204, 204, 204 };
 }
 
-std::wostream& operator<<( std::wostream& stream, TokenType type );
-std::wostream& operator<<( std::wostream& stream, Token const& token );
+std::ostream& operator<<( std::ostream& stream, TokenType type );
+std::ostream& operator<<( std::ostream& stream, Token const& token );
 }
