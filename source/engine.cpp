@@ -561,10 +561,6 @@ void dawn::Engine::handle_un_node( UnaryNod& node, ValueRef& value )
         value = ValueRef{ !right_val.value() };
         break;
 
-    case UnaryType::RANGE:
-        value = ValueRef{ ~right_val.value() };
-        break;
-
     default:
         ENGINE_PANIC( "Unknown unary node type: ", typeid(node).name() );
     }

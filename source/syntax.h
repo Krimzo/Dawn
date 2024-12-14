@@ -63,7 +63,7 @@ inline constexpr StringRef op_assign = "=";
 inline constexpr StringRef op_split = ",";
 inline constexpr StringRef op_access = "->";
 inline constexpr StringRef op_link = ":";
-inline constexpr StringRef op_range = "~";
+inline constexpr StringRef op_range = ">>";
 inline constexpr StringRef op_expr_opn = "(";
 inline constexpr StringRef op_expr_cls = ")";
 inline constexpr StringRef op_scope_opn = "{";

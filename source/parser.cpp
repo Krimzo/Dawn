@@ -985,11 +985,8 @@ void dawn::create_unary_node( Token const& token, Node& node )
     else if ( token.value == op_not )
         un_nod.type = UnaryType::NOT;
 
-    else if ( token.value == op_range )
-        un_nod.type = UnaryType::RANGE;
-
     else
-        PARSER_PANIC( token, "unknown operator" );
+        PARSER_PANIC( token, "unknown unary operator" );
 }
 
 void dawn::create_operator_node( Token const& token, Node& node )
@@ -1045,7 +1042,7 @@ void dawn::create_operator_node( Token const& token, Node& node )
         op_nod.type = OperatorType::OR;
 
     else
-        PARSER_PANIC( token, "unknown operator" );
+        PARSER_PANIC( token, "unknown binary operator" );
 }
 
 void dawn::create_assign_node( Token const& token, Node& node )
@@ -1073,7 +1070,7 @@ void dawn::create_assign_node( Token const& token, Node& node )
         as_nod.type = AssignType::MOD;
 
     else
-        PARSER_PANIC( token, "unknown operator" );
+        PARSER_PANIC( token, "unknown assign operator" );
 }
 
 dawn::Node dawn::make_def_type_expr( StringRef const& type )

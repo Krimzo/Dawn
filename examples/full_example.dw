@@ -73,13 +73,10 @@ func switch_examp() {
 
 // For
 func for_examp() {
-	for let i: ~10 {
+	for ref i: 0>>10 {
 		print(i)
 	}
-	for let i: 3~6 {
-		print(i)
-	}
-	for let c: "some text" {
+	for ref c: "some text" {
 		print(c)
 	}
 	for ref value: int[5] {

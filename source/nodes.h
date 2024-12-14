@@ -105,7 +105,7 @@ struct ArrayNod
 {
     enum struct InitType
     {
-        SIZE,
+        SIZE = 0,
         LIST,
     };
 
@@ -117,10 +117,9 @@ struct ArrayNod
 
 enum struct UnaryType
 {
-    PLUS,
+    PLUS = 0,
     MINUS,
     NOT,
-    RANGE,
 };
 
 struct UnaryNod
@@ -131,7 +130,7 @@ struct UnaryNod
 
 enum struct OperatorType
 {
-    ACCESS,
+    ACCESS = 0,
     RANGE,
     POW,
     MOD,
@@ -158,7 +157,7 @@ struct OperatorNod
 
 enum struct AssignType
 {
-    ASSIGN,
+    ASSIGN = 0,
     ADD,
     SUB,
     MUL,

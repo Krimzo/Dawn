@@ -562,11 +562,6 @@ dawn::Value dawn::Value::operator||( Value const& other ) const
     return to_bool() || other.to_bool();
 }
 
-dawn::Value dawn::Value::operator~() const
-{
-    return Value{ 0ll } >> *this;
-}
-
 dawn::Value dawn::Value::operator>>( Value const& other ) const
 {
     RangeVal result;
@@ -749,7 +744,7 @@ dawn::String dawn::Value::to_string() const
     case ValueType::RANGE:
     {
         auto& val = as<RangeVal>();
-        return format( val.start_incl, op_range, val.end_excl );
+        return format( '[', val.start_incl, op_range, val.end_excl, ')' );
     }
 
     default:

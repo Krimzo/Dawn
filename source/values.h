@@ -260,7 +260,6 @@ struct Value : private Storage<max_val_size(), max_val_align(), ValueType, Value
     Value operator&&( Value const& other ) const;
     Value operator||( Value const& other ) const;
 
-    Value operator~() const;
     Value operator>>( Value const& other ) const;
 
     Bool to_bool() const;
