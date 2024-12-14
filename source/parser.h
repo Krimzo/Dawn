@@ -64,5 +64,5 @@ void create_unary_node( Token const& token, Node& node );
 void create_operator_node( Token const& token, Node& node );
 void create_assign_node( Token const& token, Node& node );
 
-Node make_def_type_expr( StringRef const& type );
+Node make_def_expr( StringRef const& type );
 }

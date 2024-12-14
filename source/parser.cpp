@@ -127,7 +127,7 @@ void dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>:
         PARSER_PANIC( *it, "expected struct" );
     ++it;
 
-    if ( !it->is_custom_type() )
+    if ( !is_custom_type( it->value ) )
         PARSER_PANIC( *it, "expected struct name" );
     struc.name = it->value;
     ++it;
@@ -185,7 +185,7 @@ void dawn::Parser::parse_enum( Array<Token>::const_iterator& it, Array<Token>::c
         PARSER_PANIC( *it, "expected enum" );
     ++it;
 
-    if ( !it->is_custom_type() )
+    if ( !is_custom_type( it->value ) )
         PARSER_PANIC( *it, "expected enum name" );
     enu.name = it->value;
     ++it;
@@ -613,7 +613,7 @@ void dawn::Parser::expression_type_make( Array<Token> const& tokens, Node& tree 
 {
     Array<Token>::const_iterator it = tokens.begin();
 
-    if ( !it->is_custom_type() )
+    if ( !is_custom_type( it->value ) )
         PARSER_PANIC( *it, "expected custom type" );
     String type = it->value;
     ++it;
@@ -677,30 +677,25 @@ void dawn::Parser::expression_type_array( Array<Token> const& tokens, Node& tree
     if ( it->value == op_array_opn )
     {
         ++it;
-
         while ( true )
         {
             if ( it->value == op_array_cls )
                 break;
-
             parse_expression( it, tokens.end(), node.LIST_list.emplace_back() );
         }
-
         node.init_type = ArrayNod::InitType::LIST;
     }
     else
     {
         String val_type;
         parse_type( it, tokens.end(), val_type );
-
-        node.SIZE_value_expr = make_def_type_expr( val_type );
+        node.SIZE_value_expr = make_def_expr( val_type );
 
         if ( it->value != op_array_opn )
             PARSER_PANIC( *it, "expected array size expression" );
         ++it;
 
         parse_expression( it, tokens.end(), node.SIZE_size_expr );
-
         node.init_type = ArrayNod::InitType::SIZE;
     }
 
@@ -1106,7 +1101,7 @@ void dawn::create_assign_node( Token const& token, Node& node )
         PARSER_PANIC( token, "unknown assign operator" );
 }
 
-dawn::Node dawn::make_def_type_expr( StringRef const& type )
+dawn::Node dawn::make_def_expr( StringRef const& type )
 {
     if ( type == tp_bool )
         return make_bool_node( {} );
@@ -1126,6 +1121,13 @@ dawn::Node dawn::make_def_type_expr( StringRef const& type )
     else if ( type == op_range )
         return make_value_node( Value{ RangeVal{} } );
 
+    else if ( is_custom_type( type ) )
+    {
+        Node result;
+        result.store<StructNod>().type.str_id = type;
+        return result;
+    }
+
     else
-        return make_nothing_node();
+        PARSER_PANIC( {}, "[", type, "] doesn't have a default value" );
 }

@@ -25,8 +25,6 @@ struct Token
     String value;
     String lit_val;
     Int line_number = 0;
-
-    Bool is_custom_type() const;
 };
 
 constexpr Color to_color( TokenType type )
@@ -46,6 +44,8 @@ constexpr Color to_color( TokenType type )
     }
     return { 204, 204, 204 };
 }
+
+Bool is_custom_type( StringRef const& value );
 
 std::ostream& operator<<( std::ostream& stream, TokenType type );
 std::ostream& operator<<( std::ostream& stream, Token const& token );

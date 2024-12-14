@@ -1,7 +1,7 @@
 #include "token.h"
 
 
-dawn::Bool dawn::Token::is_custom_type() const
+dawn::Bool dawn::is_custom_type( StringRef const& value )
 {
     if ( value.empty() )
         return false;
