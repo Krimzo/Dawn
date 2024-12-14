@@ -13,8 +13,9 @@ enum struct TokenType
     STRING,
     KEYWORD,
     TYPE,
-    FUNCTION,
     NAME,
+    CALL,
+    INDEX,
     OPERATOR,
 };
 
@@ -38,8 +39,9 @@ constexpr Color to_color( TokenType type )
     case TokenType::STRING:   return { 173, 216, 230 };
     case TokenType::KEYWORD:  return { 144, 238, 144 };
     case TokenType::TYPE:     return { 255, 222, 173 };
-    case TokenType::FUNCTION: return { 175, 238, 238 };
     case TokenType::NAME:     return { 238, 221, 130 };
+    case TokenType::CALL:     return { 175, 238, 238 };
+    case TokenType::INDEX:    return { 175, 238, 238 };
     case TokenType::OPERATOR: return { 211, 211, 211 };
     }
     return { 204, 204, 204 };

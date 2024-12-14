@@ -46,7 +46,8 @@ private:
     void expression_type_cast( Array<Token> const& tokens, Node& tree );
     void expression_type_make( Array<Token> const& tokens, Node& tree );
     void expression_type_array( Array<Token> const& tokens, Node& tree );
-    void expression_function( Array<Token> const& tokens, Node& tree );
+    void expression_call( Array<Token> const& tokens, Node& tree );
+    void expression_index( Array<Token> const& tokens, Node& tree );
 
     void parse_scope( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Scope& scope );
     void scope_return( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree );

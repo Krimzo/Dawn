@@ -10,7 +10,8 @@ struct RefNod;
 struct CastNod;
 struct VariableNod;
 struct IdentifierNod;
-struct FunctionNod;
+struct CallNod;
+struct IndexNod;
 struct ReturnNod;
 struct BreakNod;
 struct ContinueNod;
@@ -34,7 +35,8 @@ enum struct NodeType
     CAST,
     VARIABLE,
     IDENTIFIER,
-    FUNCTION,
+    CALL,
+    INDEX,
     RETURN,
     BREAK,
     CONTINUE,
@@ -69,8 +71,11 @@ struct NodeHandler
         else if constexpr ( std::is_same_v<T, IdentifierNod> )
             return NodeType::IDENTIFIER;
 
-        else if constexpr ( std::is_same_v<T, FunctionNod> )
-            return NodeType::FUNCTION;
+        else if constexpr ( std::is_same_v<T, CallNod> )
+            return NodeType::CALL;
+
+        else if constexpr ( std::is_same_v<T, IndexNod> )
+            return NodeType::INDEX;
 
         else if constexpr ( std::is_same_v<T, ReturnNod> )
             return NodeType::RETURN;

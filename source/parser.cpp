@@ -52,8 +52,13 @@ void dawn::Parser::prepare_tokens( Array<Token>& tokens )
 {
     for ( Int i = 0; i < (Int) tokens.size() - 1; i++ )
     {
-        if ( tokens[i].type == TokenType::NAME && tokens[i + 1].value == op_expr_opn )
-            tokens[i].type = TokenType::FUNCTION;
+        if ( tokens[i].type == TokenType::NAME )
+        {
+            if ( tokens[i + 1].value == op_expr_opn )
+                tokens[i].type = TokenType::CALL;
+            else if ( tokens[i + 1].value == op_array_opn )
+                tokens[i].type = TokenType::INDEX;
+        }
     }
 }
 
@@ -227,7 +232,7 @@ void dawn::Parser::parse_function( Array<Token>::const_iterator& it, Array<Token
         PARSER_PANIC( *it, "expected function" );
     ++it;
 
-    if ( it->type != TokenType::FUNCTION )
+    if ( it->type != TokenType::CALL )
         PARSER_PANIC( *it, "expected function name" );
     function.name = it->value;
     ++it;
@@ -464,9 +469,13 @@ void dawn::Parser::expression_pure( Array<Token> const& tokens, Node& tree )
     {
         expression_type( tokens, tree );
     }
-    else if ( tokens.front().type == TokenType::FUNCTION )
+    else if ( tokens.front().type == TokenType::CALL )
     {
-        expression_function( tokens, tree );
+        expression_call( tokens, tree );
+    }
+    else if ( tokens.front().type == TokenType::INDEX )
+    {
+        expression_index( tokens, tree );
     }
     else if ( tokens.front().value == op_expr_opn )
     {
@@ -501,17 +510,20 @@ void dawn::Parser::expression_single( Token const& token, Node& tree )
         break;
 
     case TokenType::TYPE:
-        PARSER_PANIC( token, "type is not an expression" );
-
-    case TokenType::FUNCTION:
-        PARSER_PANIC( token, "function is not an expression" );
+        PARSER_PANIC( token, "single type is not an expression" );
 
     case TokenType::NAME:
         expression_single_identifier( token, tree );
         break;
 
+    case TokenType::CALL:
+        PARSER_PANIC( token, "single call is not an expression" );
+
+    case TokenType::INDEX:
+        PARSER_PANIC( token, "single index is not an expression" );
+
     case TokenType::OPERATOR:
-        PARSER_PANIC( token, "operator is not an expression" );
+        PARSER_PANIC( token, "single operator is not an expression" );
     }
 }
 
@@ -696,12 +708,12 @@ void dawn::Parser::expression_type_array( Array<Token> const& tokens, Node& tree
         PARSER_PANIC( *it, "expected array end" );
 }
 
-void dawn::Parser::expression_function( Array<Token> const& tokens, Node& tree )
+void dawn::Parser::expression_call( Array<Token> const& tokens, Node& tree )
 {
     Array<Token>::const_iterator it = tokens.begin();
-    auto& node = tree.store<FunctionNod>();
+    auto& node = tree.store<CallNod>();
 
-    if ( it->type != TokenType::FUNCTION )
+    if ( it->type != TokenType::CALL )
         PARSER_PANIC( *it, "expected function name" );
     node.name = it->value;
     ++it;
@@ -720,6 +732,27 @@ void dawn::Parser::expression_function( Array<Token> const& tokens, Node& tree )
 
     if ( it->value != op_expr_cls )
         PARSER_PANIC( *it, "expected function close" );
+    ++it;
+}
+
+void dawn::Parser::expression_index( Array<Token> const& tokens, Node& tree )
+{
+    Array<Token>::const_iterator it = tokens.begin();
+    auto& node = tree.store<IndexNod>();
+
+    if ( it->type != TokenType::INDEX )
+        PARSER_PANIC( *it, "expected array name" );
+    node.name = it->value;
+    ++it;
+
+    if ( it->value != op_array_opn )
+        PARSER_PANIC( *it, "expected array open" );
+    ++it;
+
+    parse_expression( it, tokens.end(), node.expr );
+
+    if ( it->value != op_array_cls )
+        PARSER_PANIC( *it, "expected array close" );
     ++it;
 }
 

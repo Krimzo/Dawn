@@ -21,8 +21,12 @@ void dawn::NodeHandler::copy( NodeType type, void*& to, void const* from )
         to = new IdentifierNod( *static_cast<IdentifierNod const*>(from) );
         break;
 
-    case NodeType::FUNCTION:
-        to = new FunctionNod( *static_cast<FunctionNod const*>(from) );
+    case NodeType::CALL:
+        to = new CallNod( *static_cast<CallNod const*>(from) );
+        break;
+
+    case NodeType::INDEX:
+        to = new IndexNod( *static_cast<IndexNod const*>(from) );
         break;
 
     case NodeType::RETURN:
@@ -107,8 +111,12 @@ void dawn::NodeHandler::destruct( NodeType type, void* ptr )
         delete static_cast<IdentifierNod*>(ptr);
         break;
 
-    case NodeType::FUNCTION:
-        delete static_cast<FunctionNod*>(ptr);
+    case NodeType::CALL:
+        delete static_cast<CallNod*>(ptr);
+        break;
+
+    case NodeType::INDEX:
+        delete static_cast<IndexNod*>(ptr);
         break;
 
     case NodeType::RETURN:

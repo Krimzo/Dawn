@@ -201,8 +201,12 @@ void dawn::Engine::handle_expr( Node& node, ValueRef& value )
         handle_id_node( node.as<IdentifierNod>(), value );
         break;
 
-    case NodeType::FUNCTION:
-        handle_func_node( node.as<FunctionNod>(), value );
+    case NodeType::CALL:
+        handle_call_node( node.as<CallNod>(), value );
+        break;
+
+    case NodeType::INDEX:
+        handle_index_node( node.as<IndexNod>(), value );
         break;
 
     case NodeType::ENUM:
@@ -282,12 +286,40 @@ void dawn::Engine::handle_id_node( IdentifierNod& node, ValueRef& value )
     value = *ptr;
 }
 
-void dawn::Engine::handle_func_node( FunctionNod& node, ValueRef& retval )
+void dawn::Engine::handle_call_node( CallNod& node, ValueRef& retval )
 {
     auto it = functions.find( node.name.get( id_system ) );
     if ( it == functions.end() )
         ENGINE_PANIC( "function [", node.name, "] doesn't exist" );
     handle_func( it->second, node.args, retval );
+}
+
+void dawn::Engine::handle_index_node( IndexNod& node, ValueRef& retval )
+{
+    auto* ptr = variables.get( node.name.get( id_system ) );
+    if ( !ptr )
+        ENGINE_PANIC( "variable [", node.name, "] doesn't exist" );
+
+    ValueRef expr_val;
+    handle_expr( node.expr, expr_val );
+    Int index = expr_val.value().to_int();
+
+    if ( ptr->value().type() == ValueType::STRING )
+    {
+        auto& left_val = ptr->value().as<String>();
+        if ( index < 0 || index >= (Int) left_val.size() )
+            ENGINE_PANIC( "String access [", index, "] out of bounds" );
+        retval = Value{ left_val[index] };
+    }
+    else if ( ptr->value().type() == ValueType::ARRAY )
+    {
+        auto& left_val = ptr->value().as<ArrayVal>();
+        if ( index < 0 || index >= (Int) left_val.data.size() )
+            ENGINE_PANIC( "Array access [", index, "] out of bounds" );
+        retval = left_val.data[index];
+    }
+    else
+        ENGINE_PANIC( "Cannot index type [", ptr->value().type(), "]" );
 }
 
 void dawn::Engine::handle_return_node( ReturnNod& node, ValueRef& retval, Bool& didret )
@@ -712,43 +744,28 @@ void dawn::Engine::handle_as_node( AssignNod& node, ValueRef& value )
 void dawn::Engine::handle_ac_string_node( ValueRef const& left, Node& right, ValueRef& value )
 {
     auto& left_val = left.value().as<String>();
-
     if ( right.type() == NodeType::IDENTIFIER )
     {
         auto& id_node = right.as<IdentifierNod>();
-
         if ( id_node.name.get( id_system ) == pre_names._count.get( id_system ) )
-        {
             value = ValueRef{ Value{ (Int) left_val.size() } };
-            return;
-        }
+        else
+            ENGINE_PANIC( "String access [", id_node.name, "] doesn't exist" );
     }
-
-    ValueRef right_val;
-    handle_expr( right, right_val );
-
-    Int index = right_val.value().to_int();
-    if ( index < 0 || index >= (Int) left_val.size() )
-        ENGINE_PANIC( "String access [", index, "] out of bounds" );
-
-    value = ValueRef{ Value{ left_val[index] } };
+    else
+        ENGINE_PANIC( "String access must be an identifier" );
 }
 
 void dawn::Engine::handle_ac_enum_node( ValueRef const& left, Node& right, ValueRef& value )
 {
     auto& left_val = const_cast<EnumVal&>(left.value().as<EnumVal>());
-
     if ( right.type() == NodeType::IDENTIFIER )
     {
         auto& id_node = right.as<IdentifierNod>();
-
         if ( id_node.name.get( id_system ) == pre_names._value.get( id_system ) )
-        {
             value = left_val.parent->keys_value.at( left_val.key.get( id_system ) );
-            return;
-        }
-
-        ENGINE_PANIC( "Enum access [", id_node.name, "] doesn't exist" );
+        else
+            ENGINE_PANIC( "Enum access [", id_node.name, "] doesn't exist" );
     }
     else
         ENGINE_PANIC( "Enum access must be an identifier" );
@@ -757,59 +774,39 @@ void dawn::Engine::handle_ac_enum_node( ValueRef const& left, Node& right, Value
 void dawn::Engine::handle_ac_struct_node( ValueRef const& left, Node& right, ValueRef& value )
 {
     auto& left_val = const_cast<StructVal&>(left.value().as<StructVal>());
-
     if ( right.type() == NodeType::IDENTIFIER )
     {
         auto& id_node = right.as<IdentifierNod>();
-
         if ( !left_val.members.contains( id_node.name.get( id_system ) ) )
             ENGINE_PANIC( "Member [", id_node.name, "] doesn't exist" );
-
         value = left_val.members.at( id_node.name.get( id_system ) );
-        return;
     }
-    else if ( right.type() == NodeType::FUNCTION )
+    else if ( right.type() == NodeType::CALL )
     {
-        auto& func_node = right.as<FunctionNod>();
-
+        auto& func_node = right.as<CallNod>();
         auto method_ptr = left_val.parent->get_method( id_system, func_node.name.get( id_system ) );
         if ( !method_ptr )
             ENGINE_PANIC( "Method [", func_node.name, "] doesn't exist" );
-
         Array<Node> args( 1 );
         args.front().store<RefNod>().value_ref = left;
         args.insert( args.end(), func_node.args.begin(), func_node.args.end() );
-
         handle_func( *method_ptr, args, value );
-        return;
     }
     else
-        ENGINE_PANIC( "Struct access must be an identifier or function call" );
+        ENGINE_PANIC( "Struct access must be an identifier or a function call" );
 }
 
 void dawn::Engine::handle_ac_array_node( ValueRef const& left, Node& right, ValueRef& value )
 {
     auto& left_val = left.value().as<ArrayVal>();
-
     if ( right.type() == NodeType::IDENTIFIER )
     {
         auto& id_node = right.as<IdentifierNod>();
-
         if ( id_node.name.get( id_system ) == pre_names._count.get( id_system ) )
-        {
             value = ValueRef{ Value{ (Int) left_val.data.size() } };
-            return;
-        }
-
-        ENGINE_PANIC( "Array access [", id_node.name, "] doesn't exist" );
+        else
+            ENGINE_PANIC( "Array access [", id_node.name, "] doesn't exist" );
     }
-
-    ValueRef right_val;
-    handle_expr( right, right_val );
-
-    Int index = right_val.value().to_int();
-    if ( index < 0 || index >= (Int) left_val.data.size() )
-        ENGINE_PANIC( "Array access [", index, "] out of bounds" );
-
-    value = left_val.data[index];
+    else
+        ENGINE_PANIC( "Array access must be an identifier" );
 }

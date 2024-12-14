@@ -52,7 +52,8 @@ private:
     void handle_cast_node( CastNod& node, ValueRef& value );
     void handle_var_node( VariableNod& node, Int& push_count );
     void handle_id_node( IdentifierNod& node, ValueRef& value );
-    void handle_func_node( FunctionNod& node, ValueRef& retval );
+    void handle_call_node( CallNod& node, ValueRef& retval );
+    void handle_index_node( IndexNod& node, ValueRef& retval );
     void handle_return_node( ReturnNod& node, ValueRef& retval, Bool& didret );
     void handle_break_node( BreakNod& node, Bool* didbrk );
     void handle_continue_node( ContinueNod& node, Bool* didcon );

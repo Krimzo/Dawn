@@ -26,10 +26,16 @@ struct IdentifierNod
     ID name;
 };
 
-struct FunctionNod
+struct CallNod
 {
     ID name;
     Array<Node> args;
+};
+
+struct IndexNod
+{
+    ID name;
+    Node expr;
 };
 
 struct ReturnNod
