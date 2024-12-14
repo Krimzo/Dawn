@@ -721,7 +721,7 @@ void dawn::Engine::handle_ac_string_node( ValueRef const& left, Node& right, Val
     {
         auto& id_node = right.as<IdentifierNod>();
 
-        if ( id_node.name.get( id_system ) == pre_names._length.get( id_system ) )
+        if ( id_node.name.get( id_system ) == pre_names._count.get( id_system ) )
         {
             value = ValueRef{ Value{ (Int) left_val.size() } };
             return;
@@ -799,7 +799,7 @@ void dawn::Engine::handle_ac_array_node( ValueRef const& left, Node& right, Valu
     {
         auto& id_node = right.as<IdentifierNod>();
 
-        if ( id_node.name.get( id_system ) == pre_names._length.get( id_system ) )
+        if ( id_node.name.get( id_system ) == pre_names._count.get( id_system ) )
         {
             value = ValueRef{ Value{ (Int) left_val.data.size() } };
             return;

@@ -15,7 +15,7 @@ struct PredefinedNames
     NAME_GEN( float );
     NAME_GEN( char );
     NAME_GEN( string );
-    NAME_GEN( length );
+    NAME_GEN( count );
     NAME_GEN( value );
 };
 
