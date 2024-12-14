@@ -635,8 +635,8 @@ void dawn::Parser::expression_type_make( Array<Token> const& tokens, Node& tree 
             break;
         }
 
-        if ( it->value != op_link )
-            PARSER_PANIC( *it, "expected bind operator" );
+        if ( it->value != op_assign )
+            PARSER_PANIC( *it, "expected assign operator" );
         ++it;
 
         auto& arg = args.emplace_back( name, Node{} );

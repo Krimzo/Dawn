@@ -113,7 +113,7 @@ enum ExampleEnum {
 func enum_examp() {
 	let someone = ExampleEnum{me}
 	let someone_else = ExampleEnum{you}
-	let value = someone->value
+	let value = someone::value
 }
 
 // Struct
@@ -122,20 +122,20 @@ struct Person {
 	age = 0
 
 	func get_age() {
-		return self->age
+		return self::age
 	}
 
 	func who() {
-		print("Person ", self->name, " is ", self->age, " years old")
+		print("Person ", self::name, " is ", self::age, " years old")
 	}
 }
 
 func struct_examp() {
 	var people = []
 	people += [Person{}]
-	people += [Person{ name: "Krim", age: 23 }]
+	people += [Person{ name="Krim", age=23 }]
 
 	for ref person: people {
-		person->who()
+		person::who()
 	}
 }
