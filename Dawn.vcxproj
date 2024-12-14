@@ -24,7 +24,9 @@
     <ClCompile Include="source\util.cpp" />
     <ClCompile Include="source\dawn.cpp" />
     <ClCompile Include="source\values.cpp" />
+    <ClCompile Include="source\_dev_main.cpp" />
     <ClCompile Include="source\_main.cpp" />
+    <ClCompile Include="source\_shp_main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\dawn.h" />
@@ -32,6 +34,7 @@
     <ClInclude Include="source\err.h" />
     <ClInclude Include="source\id.h" />
     <ClInclude Include="source\lexer.h" />
+    <ClInclude Include="source\_main.h" />
     <ClInclude Include="source\memory.h" />
     <ClInclude Include="source\node.h" />
     <ClInclude Include="source\nodes.h" />
