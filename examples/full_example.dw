@@ -41,8 +41,8 @@ func func_examp(let a) {
 	return a * a
 }
 
-// Logic
-func logic_examp() {
+// If
+func if_examp() {
 	let a = (5 + 1.0) * 2.
 	if a < 10.0 {
 		print("res = " + string(a))
