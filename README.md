@@ -111,6 +111,18 @@ for ref i: 0 >> 5 {
 }
 ```
 
+# Throwing
+```dawn
+var a = 5
+try {
+    throw a
+}
+catch some_val {
+    some_val += 7
+}
+print(a)
+```
+
 # Misc
 ```dawn
 import "path..." // import other module
