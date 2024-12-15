@@ -49,9 +49,9 @@ dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path, Set<String
         return std::nullopt;
     imports.insert( abs_path );
 
-    if ( auto source = read_file( path ) )
+    if ( auto source = read_file( abs_path ) )
         return eval( *source, imports );
-    return format( "file [", path, "] could not be opened" );
+    return dawn::format( "file [", abs_path, "] could not be opened" );
 }
 
 void dawn::Dawn::bind_func( StringRef const& name, Function::CppFunc cpp_func ) noexcept
@@ -87,6 +87,10 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<Node>& 
     catch ( String const& msg )
     {
         return msg;
+    }
+    catch ( ValueRef const& err )
+    {
+        return dawn::format( "Uncaught error: ", err.value().to_string() );
     }
     return std::nullopt;
 }

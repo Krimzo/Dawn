@@ -832,6 +832,16 @@ void dawn::Parser::parse_scope( Array<Token>::const_iterator& it, Array<Token>::
             auto& instr = scope.instr.emplace_back();
             scope_continue( it, end, instr );
         }
+        else if ( it->value == kw_throw )
+        {
+            auto& instr = scope.instr.emplace_back();
+            scope_throw( it, end, instr );
+        }
+        else if ( it->value == kw_try )
+        {
+            auto& instr = scope.instr.emplace_back();
+            scope_try( it, end, instr );
+        }
         else if ( it->value == op_scope_opn )
         {
             auto& chld_scp = scope.instr.emplace_back().store<Scope>();
@@ -878,6 +888,38 @@ void dawn::Parser::scope_continue( Array<Token>::const_iterator& it, Array<Token
     ++it;
 
     tree.store<ContinueNod>();
+}
+
+void dawn::Parser::scope_throw( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
+{
+    if ( it->value != kw_throw )
+        PARSER_PANIC( *it, "expected throw" );
+    ++it;
+
+    auto& node = tree.store<ThrowNod>();
+    parse_expression( it, end, node.expr );
+}
+
+void dawn::Parser::scope_try( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
+{
+    if ( it->value != kw_try )
+        PARSER_PANIC( *it, "expected try" );
+    ++it;
+
+    auto& node = tree.store<TryNod>();
+
+    parse_scope( it, end, node.try_scope );
+
+    if ( it->value != kw_catch )
+        PARSER_PANIC( *it, "expected catch" );
+    ++it;
+
+    if ( it->type != TokenType::NAME )
+        PARSER_PANIC( *it, "expected catch name" );
+    node.catch_name = it->value;
+    ++it;
+
+    parse_scope( it, end, node.catch_scope );
 }
 
 void dawn::Parser::scope_if( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )

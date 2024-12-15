@@ -41,6 +41,14 @@ void dawn::NodeHandler::copy( NodeType type, void*& to, void const* from )
         to = new ContinueNod( *static_cast<ContinueNod const*>(from) );
         break;
 
+    case NodeType::THROW:
+        to = new ThrowNod( *static_cast<ThrowNod const*>(from) );
+        break;
+
+    case NodeType::TRY:
+        to = new TryNod( *static_cast<TryNod const*>(from) );
+        break;
+
     case NodeType::IF:
         to = new IfNod( *static_cast<IfNod const*>(from) );
         break;
@@ -129,6 +137,14 @@ void dawn::NodeHandler::destruct( NodeType type, void* ptr )
 
     case NodeType::CONTINUE:
         delete static_cast<ContinueNod*>(ptr);
+        break;
+
+    case NodeType::THROW:
+        delete static_cast<ThrowNod*>(ptr);
+        break;
+
+    case NodeType::TRY:
+        delete static_cast<TryNod*>(ptr);
         break;
 
     case NodeType::IF:

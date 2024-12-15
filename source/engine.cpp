@@ -104,10 +104,11 @@ void dawn::Engine::handle_func( Function& func, Array<Node>& args, ValueRef& ret
             add_var( func.args[i].kind, func.args[i].name.get( id_system ), arg_val );
         }
 
+        PopHandler pop_handler{ *this };
+        pop_handler.count = (Int) args.size();
+
         Bool didret = false;
         handle_scope( std::get<Scope>( func.body ), retval, didret, nullptr, nullptr );
-
-        variables.pop( (Int) args.size() );
     }
     else
     {
@@ -123,17 +124,15 @@ void dawn::Engine::handle_func( Function& func, Array<Node>& args, ValueRef& ret
 
 void dawn::Engine::handle_scope( Scope& scope, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon )
 {
-    Int push_count = 0;
+    PopHandler pop_handler{ *this };
 
     for ( auto& instr : scope.instr )
     {
         if ( didret || (didbrk && *didbrk) || (didcon && *didcon) )
             break;
 
-        handle_instr( instr, retval, push_count, didret, didbrk, didcon );
+        handle_instr( instr, retval, pop_handler.count, didret, didbrk, didcon );
     }
-
-    variables.pop( push_count );
 }
 
 void dawn::Engine::handle_instr( Node& node, ValueRef& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon )
@@ -158,6 +157,14 @@ void dawn::Engine::handle_instr( Node& node, ValueRef& retval, Int& push_count, 
 
     case NodeType::CONTINUE:
         handle_continue_node( node.as<ContinueNod>(), didcon );
+        break;
+
+    case NodeType::THROW:
+        handle_throw_node( node.as<ThrowNod>() );
+        break;
+
+    case NodeType::TRY:
+        handle_try_node( node.as<TryNod>(), retval, didret, didbrk, didcon );
         break;
 
     case NodeType::IF:
@@ -342,6 +349,30 @@ void dawn::Engine::handle_continue_node( ContinueNod& node, Bool* didcon )
     *didcon = true;
 }
 
+void dawn::Engine::handle_throw_node( ThrowNod& node )
+{
+    ValueRef throw_val;
+    handle_expr( node.expr, throw_val );
+    throw throw_val;
+}
+
+void dawn::Engine::handle_try_node( TryNod& node, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon )
+{
+    try
+    {
+        handle_scope( node.try_scope, retval, didret, didbrk, didcon );
+    }
+    catch ( ValueRef const& val )
+    {
+        add_var( VariableKind::REF, node.catch_name.get( id_system ), val );
+
+        PopHandler pop_handler{ *this };
+        pop_handler.count = 1;
+
+        handle_scope( node.catch_scope, retval, didret, didbrk, didcon );
+    }
+}
+
 void dawn::Engine::handle_if_node( IfNod& node, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon )
 {
     ValueRef check_val;
@@ -446,8 +477,11 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
                 didcon = false;
 
             add_var( node.var.kind, node.var.name.get( id_system ), Value{ i } );
+
+            PopHandler pop_handler{ *this };
+            pop_handler.count = 1;
+
             handle_scope( node.scope, retval, didret, &didbrk, &didcon );
-            variables.pop();
         }
     }
     else if ( loop_val.value().type() == ValueType::STRING )
@@ -464,8 +498,11 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
                 didcon = false;
 
             add_var( node.var.kind, node.var.name.get( id_system ), Value{ c } );
+
+            PopHandler pop_handler{ *this };
+            pop_handler.count = 1;
+
             handle_scope( node.scope, retval, didret, &didbrk, &didcon );
-            variables.pop();
         }
     }
     else if ( loop_val.value().type() == ValueType::ARRAY )
@@ -482,8 +519,11 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
                 didcon = false;
 
             add_var( node.var.kind, node.var.name.get( id_system ), value );
+
+            PopHandler pop_handler{ *this };
+            pop_handler.count = 1;
+
             handle_scope( node.scope, retval, didret, &didbrk, &didcon );
-            variables.pop();
         }
     }
     else
@@ -809,4 +849,13 @@ void dawn::Engine::handle_ac_array_node( ValueRef const& left, Node& right, Valu
     }
     else
         ENGINE_PANIC( "Array access must be an identifier" );
+}
+
+dawn::PopHandler::PopHandler( Engine& engine )
+    : engine( engine )
+{}
+
+dawn::PopHandler::~PopHandler() noexcept
+{
+    engine.variables.pop( count );
 }

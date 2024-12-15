@@ -55,6 +55,8 @@ private:
     void scope_return( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree );
     void scope_break( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree );
     void scope_continue( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree );
+    void scope_throw( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree );
+    void scope_try( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree );
     void scope_if( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree );
     void scope_switch( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree );
     void scope_loop( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree );

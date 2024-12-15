@@ -6,7 +6,7 @@
 
 namespace dawn
 {
-#define NAME_GEN(NAME) ID _##NAME = String( #NAME );
+#define NAME_GEN(NAME) ID _##NAME = String( #NAME )
 
 struct PredefinedNames
 {
@@ -57,6 +57,8 @@ private:
     void handle_return_node( ReturnNod& node, ValueRef& retval, Bool& didret );
     void handle_break_node( BreakNod& node, Bool* didbrk );
     void handle_continue_node( ContinueNod& node, Bool* didcon );
+    void handle_throw_node( ThrowNod& node );
+    void handle_try_node( TryNod& node, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
     void handle_if_node( IfNod& node, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
     void handle_switch_node( SwitchNod& node, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
     void handle_loop_node( LoopNod& node, ValueRef& retval, Bool& didret );
@@ -74,5 +76,14 @@ private:
     void handle_ac_enum_node( ValueRef const& left, Node& right, ValueRef& value );
     void handle_ac_struct_node( ValueRef const& left, Node& right, ValueRef& value );
     void handle_ac_array_node( ValueRef const& left, Node& right, ValueRef& value );
+};
+
+struct PopHandler
+{
+    Engine& engine;
+    Int count = 0;
+
+    PopHandler( Engine& engine );
+    ~PopHandler() noexcept;
 };
 }

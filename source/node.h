@@ -15,6 +15,8 @@ struct IndexNod;
 struct ReturnNod;
 struct BreakNod;
 struct ContinueNod;
+struct ThrowNod;
+struct TryNod;
 struct IfNod;
 struct SwitchNod;
 struct LoopNod;
@@ -40,6 +42,8 @@ enum struct NodeType
     RETURN,
     BREAK,
     CONTINUE,
+    THROW,
+    TRY,
     IF,
     SWITCH,
     LOOP,
@@ -85,6 +89,12 @@ struct NodeHandler
 
         else if constexpr ( std::is_same_v<T, ContinueNod> )
             return NodeType::CONTINUE;
+
+        else if constexpr ( std::is_same_v<T, ThrowNod> )
+            return NodeType::THROW;
+
+        else if constexpr ( std::is_same_v<T, TryNod> )
+            return NodeType::TRY;
 
         else if constexpr ( std::is_same_v<T, IfNod> )
             return NodeType::IF;

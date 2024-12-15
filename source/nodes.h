@@ -51,6 +51,18 @@ struct ContinueNod
 {
 };
 
+struct ThrowNod
+{
+    Node expr;
+};
+
+struct TryNod
+{
+    Scope try_scope;
+    ID catch_name;
+    Scope catch_scope;
+};
+
 struct IfNod
 {
     struct Part

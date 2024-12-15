@@ -618,10 +618,9 @@ dawn::Int dawn::Value::to_int() const
 
     case ValueType::STRING:
     {
-        auto optres = parse_int( as<String>() );
-        if ( !optres )
-            PANIC( "string \"", as<String>(), "\" to int failed" );
-        return *optres;
+        if ( auto optres = parse_int( as<String>() ) )
+            return *optres;
+        throw ValueRef{ Value{ format( "string \"", as<String>(), "\" to int failed" ) } };
     }
 
     default:
@@ -650,10 +649,9 @@ dawn::Float dawn::Value::to_float() const
 
     case ValueType::STRING:
     {
-        auto optres = parse_float( as<String>() );
-        if ( !optres )
-            PANIC( "string \"", as<String>(), "\" to float failed" );
-        return *optres;
+        if ( auto optres = parse_float( as<String>() ) )
+            return *optres;
+        throw ValueRef{ Value{ format( "string \"", as<String>(), "\" to float failed" ) } };
     }
 
     default:
