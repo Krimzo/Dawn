@@ -5,6 +5,7 @@
 
 namespace dawn
 {
+inline constexpr StringRef kw_import = "import";
 inline constexpr StringRef kw_func = "func";
 inline constexpr StringRef kw_return = "return";
 inline constexpr StringRef kw_let = "let";
@@ -60,10 +61,11 @@ inline constexpr StringRef op_great = ">";
 inline constexpr StringRef op_lesseq = "<=";
 inline constexpr StringRef op_greateq = ">=";
 inline constexpr StringRef op_assign = "=";
-inline constexpr StringRef op_split = ",";
 inline constexpr StringRef op_access = "::";
-inline constexpr StringRef op_link = ":";
 inline constexpr StringRef op_range = ">>";
+
+inline constexpr StringRef op_link = ":";
+inline constexpr StringRef op_split = ",";
 inline constexpr StringRef op_expr_opn = "(";
 inline constexpr StringRef op_expr_cls = ")";
 inline constexpr StringRef op_scope_opn = "{";
@@ -80,31 +82,29 @@ inline constexpr Pair<StringRef, StringRef> comm_multiline = { "/*", "*/" };
 
 inline Map<String, Int> precedences
 {
-    { (String) op_link, 1 },
-    { (String) op_access, 2 },
-    { (String) op_not, 3 },
-    { (String) op_pow, 4 },
-    { (String) op_mod, 4 },
-    { (String) op_mul, 5 },
-    { (String) op_div, 5 },
-    { (String) op_add, 6 },
-    { (String) op_sub, 6 },
-    { (String) op_less, 7 },
-    { (String) op_great, 7 },
-    { (String) op_lesseq, 7 },
-    { (String) op_greateq, 7 },
-    { (String) op_eq, 8 },
-    { (String) op_neq, 8 },
-    { (String) op_and, 9 },
-    { (String) op_or, 10 },
-    { (String) op_range, 11 },
-    { (String) op_assign, 12 },
-    { (String) op_addas, 12 },
-    { (String) op_subas, 12 },
-    { (String) op_mulas, 12 },
-    { (String) op_divas, 12 },
-    { (String) op_powas, 12 },
-    { (String) op_modas, 12 },
-    { (String) op_split, 13 },
+    { (String) op_access, 1 },
+    { (String) op_not, 2 },
+    { (String) op_pow, 3 },
+    { (String) op_mod, 3 },
+    { (String) op_mul, 4 },
+    { (String) op_div, 4 },
+    { (String) op_add, 5 },
+    { (String) op_sub, 5 },
+    { (String) op_less, 6 },
+    { (String) op_great, 6 },
+    { (String) op_lesseq, 6 },
+    { (String) op_greateq, 6 },
+    { (String) op_eq, 7 },
+    { (String) op_neq, 7 },
+    { (String) op_and, 8 },
+    { (String) op_or, 9 },
+    { (String) op_range, 10 },
+    { (String) op_assign, 11 },
+    { (String) op_addas, 11 },
+    { (String) op_subas, 11 },
+    { (String) op_mulas, 11 },
+    { (String) op_divas, 11 },
+    { (String) op_powas, 11 },
+    { (String) op_modas, 11 },
 };
 }

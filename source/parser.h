@@ -8,6 +8,7 @@ namespace dawn
 {
 struct Module
 {
+    Set<String> imports;
     Array<Variable> variables;
     Array<Function> functions;
     Array<Enum> enums;
@@ -23,6 +24,7 @@ struct Parser
 private:
     void prepare_tokens( Array<Token>& tokens );
 
+    void parse_import( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     void parse_global_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     void parse_global_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     void parse_global_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );

@@ -3,7 +3,7 @@
 
 int dawn::_dev_main( int argc, char** argv )
 {
-    auto start_time = std::chrono::high_resolution_clock::now();
+    auto start_time = ch::high_resolution_clock::now();
 
     Dawn dawn;
 
@@ -19,8 +19,8 @@ int dawn::_dev_main( int argc, char** argv )
         return -2;
     }
 
-    auto end_time = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+    auto end_time = ch::high_resolution_clock::now();
+    auto duration = ch::duration_cast<ch::microseconds>(end_time - start_time);
     print( duration );
 
     return 0;

@@ -110,3 +110,9 @@ for ref i: 0 >> 5 {
     print(i)
 }
 ```
+
+# Misc
+```dawn
+import "path..." // import other module
+let i = int(...) // casting primitive types
+```

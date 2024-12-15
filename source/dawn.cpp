@@ -8,12 +8,25 @@ dawn::Dawn::Dawn() noexcept
 
 dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source ) noexcept
 {
+    Set<String> imports;
+    return eval( source, imports );
+}
+
+dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source, Set<String>& imports ) noexcept
+{
     try
     {
         Array<Token> tokens;
-        Module module;
         m_lexer.tokenize( source, tokens );
+
+        Module module;
         m_parser.parse( tokens, module );
+
+        for ( auto& entry : module.imports )
+        {
+            if ( auto error = eval_file( entry, imports ) )
+                return error;
+        }
         m_engine.load_mod( module );
     }
     catch ( String const& msg )
@@ -25,10 +38,20 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source ) noexcept
 
 dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path ) noexcept
 {
-    auto source = read_file( path );
-    if ( !source )
-        return format( "file [", path, "] could not be opened" );
-    return eval( *source );
+    Set<String> imports;
+    return eval_file( path, imports );
+}
+
+dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path, Set<String>& imports ) noexcept
+{
+    String abs_path = fs::absolute( path ).string();
+    if ( imports.contains( abs_path ) )
+        return std::nullopt;
+    imports.insert( abs_path );
+
+    if ( auto source = read_file( path ) )
+        return eval( *source, imports );
+    return format( "file [", path, "] could not be opened" );
 }
 
 void dawn::Dawn::bind_func( StringRef const& name, Function::CppFunc cpp_func ) noexcept

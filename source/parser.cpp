@@ -27,13 +27,17 @@ void dawn::Parser::parse( Array<Token>& tokens, Module& module )
 
     while ( it != end )
     {
-        if ( it->value == kw_enum )
+        if ( it->value == kw_import )
         {
-            parse_global_enum( it, end, module );
+            parse_import( it, end, module );
         }
         else if ( it->value == kw_struct )
         {
             parse_global_struct( it, end, module );
+        }
+        else if ( it->value == kw_enum )
+        {
+            parse_global_enum( it, end, module );
         }
         else if ( it->value == kw_func )
         {
@@ -60,6 +64,18 @@ void dawn::Parser::prepare_tokens( Array<Token>& tokens )
                 tokens[i].type = TokenType::INDEX;
         }
     }
+}
+
+void dawn::Parser::parse_import( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+{
+    if ( it->value != kw_import )
+        PARSER_PANIC( *it, "expected import keyword" );
+    ++it;
+
+    if ( it->type != TokenType::STRING )
+        PARSER_PANIC( *it, "expected import path" );
+    module.imports.insert( fs::absolute( it->lit_val ).string() );
+    ++it;
 }
 
 void dawn::Parser::parse_global_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
