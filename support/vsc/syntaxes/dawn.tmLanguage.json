@@ -1,0 +1,66 @@
+{
+    "name": "dawn",
+    "scopeName": "source.dawn",
+    "patterns": [
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#numbers"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#comments"
+        }
+    ],
+    "repository": {
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control.dawn",
+                    "match": "\\b(import|func|return|let|var|ref|if|else|elif|switch|case|default|for|while|loop|break|continue|throw|try|catch|enum|struct|self|true|false)\\b"
+                }
+            ]
+        },
+        "numbers": {
+            "name": "constant.numeric.dawn",
+            "match": "\\b\\d+\\.\\d+|\\b\\d+\\.|\\.\\d+|\\b\\d+"
+        },
+        "strings": {
+            "name": "string.quoted.double.dawn",
+            "begin": "\"|\\'",
+            "end": "\"|\\'",
+            "patterns": [
+                {
+                    "name": "constant.character.escape.dawn",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        "comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.double-slash.dawn",
+                    "match": "//.*$"
+                },
+                {
+                    "name": "comment.block.dawn",
+                    "begin": "/\\*",
+                    "end": "\\*/",
+                    "beginCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.comment.dawn"
+                        }
+                    },
+                    "endCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.comment.dawn"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
