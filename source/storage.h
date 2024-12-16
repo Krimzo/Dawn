@@ -109,11 +109,11 @@ struct DynStorage
         return *this;
     }
 
-    DynStorage( DynStorage&& other )
+    DynStorage( DynStorage&& other ) noexcept
         : DynStorage( other )
     {}
 
-    DynStorage& operator=( DynStorage&& other )
+    DynStorage& operator=( DynStorage&& other ) noexcept
     {
         return (*this = other);
     }

@@ -23,11 +23,6 @@ struct Stack
         m_data.resize( m_data.size() - n );
     }
 
-    T const& peek() const
-    {
-        return m_data.back().second;
-    }
-
     T* get( Int id )
     {
         for ( auto it = m_data.rbegin(); it != m_data.rend(); ++it )

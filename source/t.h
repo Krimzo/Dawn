@@ -38,7 +38,6 @@ using StringStream = std::stringstream;
 using IFileStream = std::ifstream;
 using OFileStream = std::ofstream;
 
-using Any = std::any;
 template<typename T> using Opt = std::optional<T>;
 template<typename... Args> using Variant = std::variant<Args...>;
 template<typename T1, typename T2> using Pair = std::pair<T1, T2>;
