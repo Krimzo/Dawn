@@ -23,7 +23,7 @@ int dawn::_shp_main( int argc, char** argv )
     Array<Node> args_node;
     args_node.emplace_back( make_value_node( args_val ) );
 
-    ValueRef retval;
+    ValueRef retval = Value{ Int( 0 ) };
     if ( auto error = dawn.call_func( "main", args_node, retval ) )
     {
         print( error.value() );
