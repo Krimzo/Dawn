@@ -10,7 +10,7 @@ int dawn::_shp_main( int argc, char** argv )
     }
 
     String path = argv[1];
-    if ( !fs::path().has_extension() )
+    if ( !fs::path( path ).has_extension() )
         path += ".dw";
 
     Dawn dawn;
