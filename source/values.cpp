@@ -254,27 +254,18 @@ dawn::ValueRef dawn::ValueRef::op_add( Engine& engine, ValueRef const& other ) c
 
     case ValueType::STRUCT:
     {
-        switch ( other.type() )
-        {
-        case ValueType::STRUCT:
-        {
-            auto& left = as<StructVal>();
-            Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__add.get( engine.id_system ), false );
-            if ( !op )
-                PANIC( "struct [", left.parent->name, "] + struct [", other.type(), "] not supported" );
+        auto& left = as<StructVal>();
+        Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__add.get( engine.id_system ), false );
+        if ( !op )
+            PANIC( "struct [", left.parent->name, "] + struct [", other.type(), "] not supported" );
 
-            ValueRef retval;
-            op->arg_vals.resize( 2 );
-            op->arg_vals[0] = *this;
-            op->arg_vals[1] = other;
+        ValueRef retval;
+        op->arg_vals.resize( 2 );
+        op->arg_vals[0] = *this;
+        op->arg_vals[1] = other;
 
-            engine.handle_func( *op, op->arg_vals, retval );
-            return retval;
-        }
-
-        default:
-            PANIC( "[", type(), "] + [", other.type(), "] not supported" );
-        }
+        engine.handle_func( *op, op->arg_vals, retval );
+        return retval;
     }
 
     default:
@@ -318,27 +309,18 @@ dawn::ValueRef dawn::ValueRef::op_sub( Engine& engine, ValueRef const& other ) c
 
     case ValueType::STRUCT:
     {
-        switch ( other.type() )
-        {
-        case ValueType::STRUCT:
-        {
-            auto& left = as<StructVal>();
-            Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__sub.get( engine.id_system ), false );
-            if ( !op )
-                PANIC( "struct [", left.parent->name, "] - struct [", other.type(), "] not supported" );
+        auto& left = as<StructVal>();
+        Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__sub.get( engine.id_system ), false );
+        if ( !op )
+            PANIC( "struct [", left.parent->name, "] - struct [", other.type(), "] not supported" );
 
-            ValueRef retval;
-            op->arg_vals.resize( 2 );
-            op->arg_vals[0] = *this;
-            op->arg_vals[1] = other;
+        ValueRef retval;
+        op->arg_vals.resize( 2 );
+        op->arg_vals[0] = *this;
+        op->arg_vals[1] = other;
 
-            engine.handle_func( *op, op->arg_vals, retval );
-            return retval;
-        }
-
-        default:
-            PANIC( "[", type(), "] - [", other.type(), "] not supported" );
-        }
+        engine.handle_func( *op, op->arg_vals, retval );
+        return retval;
     }
 
     default:
@@ -382,27 +364,18 @@ dawn::ValueRef dawn::ValueRef::op_mul( Engine& engine, ValueRef const& other ) c
 
     case ValueType::STRUCT:
     {
-        switch ( other.type() )
-        {
-        case ValueType::STRUCT:
-        {
-            auto& left = as<StructVal>();
-            Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__mul.get( engine.id_system ), false );
-            if ( !op )
-                PANIC( "struct [", left.parent->name, "] * struct [", other.type(), "] not supported" );
+        auto& left = as<StructVal>();
+        Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__mul.get( engine.id_system ), false );
+        if ( !op )
+            PANIC( "struct [", left.parent->name, "] * struct [", other.type(), "] not supported" );
 
-            ValueRef retval;
-            op->arg_vals.resize( 2 );
-            op->arg_vals[0] = *this;
-            op->arg_vals[1] = other;
+        ValueRef retval;
+        op->arg_vals.resize( 2 );
+        op->arg_vals[0] = *this;
+        op->arg_vals[1] = other;
 
-            engine.handle_func( *op, op->arg_vals, retval );
-            return retval;
-        }
-
-        default:
-            PANIC( "[", type(), "] * [", other.type(), "] not supported" );
-        }
+        engine.handle_func( *op, op->arg_vals, retval );
+        return retval;
     }
 
     default:
@@ -446,27 +419,18 @@ dawn::ValueRef dawn::ValueRef::op_div( Engine& engine, ValueRef const& other ) c
 
     case ValueType::STRUCT:
     {
-        switch ( other.type() )
-        {
-        case ValueType::STRUCT:
-        {
-            auto& left = as<StructVal>();
-            Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__div.get( engine.id_system ), false );
-            if ( !op )
-                PANIC( "struct [", left.parent->name, "] / struct [", other.type(), "] not supported" );
+        auto& left = as<StructVal>();
+        Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__div.get( engine.id_system ), false );
+        if ( !op )
+            PANIC( "struct [", left.parent->name, "] / struct [", other.type(), "] not supported" );
 
-            ValueRef retval;
-            op->arg_vals.resize( 2 );
-            op->arg_vals[0] = *this;
-            op->arg_vals[1] = other;
+        ValueRef retval;
+        op->arg_vals.resize( 2 );
+        op->arg_vals[0] = *this;
+        op->arg_vals[1] = other;
 
-            engine.handle_func( *op, op->arg_vals, retval );
-            return retval;
-        }
-
-        default:
-            PANIC( "[", type(), "] / [", other.type(), "] not supported" );
-        }
+        engine.handle_func( *op, op->arg_vals, retval );
+        return retval;
     }
 
     default:
@@ -510,27 +474,18 @@ dawn::ValueRef dawn::ValueRef::op_pow( Engine& engine, ValueRef const& other ) c
 
     case ValueType::STRUCT:
     {
-        switch ( other.type() )
-        {
-        case ValueType::STRUCT:
-        {
-            auto& left = as<StructVal>();
-            Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__pow.get( engine.id_system ), false );
-            if ( !op )
-                PANIC( "struct [", left.parent->name, "] ^ struct [", other.type(), "] not supported" );
+        auto& left = as<StructVal>();
+        Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__pow.get( engine.id_system ), false );
+        if ( !op )
+            PANIC( "struct [", left.parent->name, "] ^ struct [", other.type(), "] not supported" );
 
-            ValueRef retval;
-            op->arg_vals.resize( 2 );
-            op->arg_vals[0] = *this;
-            op->arg_vals[1] = other;
+        ValueRef retval;
+        op->arg_vals.resize( 2 );
+        op->arg_vals[0] = *this;
+        op->arg_vals[1] = other;
 
-            engine.handle_func( *op, op->arg_vals, retval );
-            return retval;
-        }
-
-        default:
-            PANIC( "[", type(), "] ^ [", other.type(), "] not supported" );
-        }
+        engine.handle_func( *op, op->arg_vals, retval );
+        return retval;
     }
 
     default:
@@ -574,27 +529,18 @@ dawn::ValueRef dawn::ValueRef::op_mod( Engine& engine, ValueRef const& other ) c
 
     case ValueType::STRUCT:
     {
-        switch ( other.type() )
-        {
-        case ValueType::STRUCT:
-        {
-            auto& left = as<StructVal>();
-            Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__mod.get( engine.id_system ), false );
-            if ( !op )
-                PANIC( "struct [", left.parent->name, "] % struct [", other.type(), "] not supported" );
+        auto& left = as<StructVal>();
+        Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__mod.get( engine.id_system ), false );
+        if ( !op )
+            PANIC( "struct [", left.parent->name, "] % struct [", other.type(), "] not supported" );
 
-            ValueRef retval;
-            op->arg_vals.resize( 2 );
-            op->arg_vals[0] = *this;
-            op->arg_vals[1] = other;
+        ValueRef retval;
+        op->arg_vals.resize( 2 );
+        op->arg_vals[0] = *this;
+        op->arg_vals[1] = other;
 
-            engine.handle_func( *op, op->arg_vals, retval );
-            return retval;
-        }
-
-        default:
-            PANIC( "[", type(), "] % [", other.type(), "] not supported" );
-        }
+        engine.handle_func( *op, op->arg_vals, retval );
+        return retval;
     }
 
     default:
@@ -693,27 +639,18 @@ dawn::ValueRef dawn::ValueRef::op_cmpr( Engine& engine, ValueRef const& other ) 
 
     case ValueType::STRUCT:
     {
-        switch ( other.type() )
-        {
-        case ValueType::STRUCT:
-        {
-            auto& left = as<StructVal>();
-            Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__cmpr.get( engine.id_system ), false );
-            if ( !op )
-                PANIC( "struct [", left.parent->name, "] <=> struct [", other.type(), "] not supported" );
+        auto& left = as<StructVal>();
+        Operator* op = left.parent->get_operator( engine.id_system, engine.predefines.__cmpr.get( engine.id_system ), false );
+        if ( !op )
+            PANIC( "struct [", left.parent->name, "] <=> struct [", other.type(), "] not supported" );
 
-            ValueRef retval;
-            op->arg_vals.resize( 2 );
-            op->arg_vals[0] = *this;
-            op->arg_vals[1] = other;
+        ValueRef retval;
+        op->arg_vals.resize( 2 );
+        op->arg_vals[0] = *this;
+        op->arg_vals[1] = other;
 
-            engine.handle_func( *op, op->arg_vals, retval );
-            return retval;
-        }
-
-        default:
-            PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
-        }
+        engine.handle_func( *op, op->arg_vals, retval );
+        return retval;
     }
 
     case ValueType::ARRAY:

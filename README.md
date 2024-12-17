@@ -43,6 +43,10 @@ struct Person {
     func who() {
         print(self::name, " is ", self::age, " years old")
     }
+
+    oper +(ref age) {
+        return Person{ name = self::name, age = self::age + age }
+    }
 }
 let person = Person{ age=23, name="Krim" }
 person::who()
