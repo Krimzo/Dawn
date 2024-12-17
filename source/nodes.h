@@ -30,6 +30,7 @@ struct CallNod
 {
     ID name;
     Array<Node> args;
+    Array<ValueRef> arg_vals;
 };
 
 struct IndexNod
@@ -149,13 +150,13 @@ struct UnaryNod
 enum struct OperatorType
 {
     ACCESS = 0,
-    RANGE,
     POW,
     MOD,
     MUL,
     DIV,
     ADD,
     SUB,
+    COMPARE,
     LESS,
     GREAT,
     LESS_EQ,
@@ -164,6 +165,7 @@ enum struct OperatorType
     NOT_EQ,
     AND,
     OR,
+    RANGE,
 };
 
 struct OperatorNod
@@ -196,6 +198,6 @@ Node make_bool_node( Bool value );
 Node make_int_node( Int value );
 Node make_float_node( Float value );
 Node make_char_node( Char value );
-Node make_string_node( StringRef const& value );
-Node make_value_node( Value const& value );
+Node make_string_node( String value );
+Node make_value_node( ValueRef const& value );
 }

@@ -26,7 +26,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.dawn",
-                    "match": "\\b(import|func|return|let|var|ref|if|else|elif|switch|case|default|for|while|loop|break|continue|throw|try|catch|enum|struct|self|true|false)\\b"
+                    "match": "\\b(import|func|oper|return|let|var|ref|if|else|elif|switch|case|default|for|while|loop|break|continue|throw|try|catch|enum|struct|self|true|false)\\b"
                 }
             ]
         },

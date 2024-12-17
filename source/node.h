@@ -161,7 +161,7 @@ struct Node : private DynStorage<NodeType, NodeHandler>
     }
 
     template<typename T, typename... Args>
-    constexpr T& store( Args const&... args )
+    constexpr T& store( Args&&... args )
     {
         return DynStorage::emplace<T>( args... );
     }

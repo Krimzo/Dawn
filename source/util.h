@@ -16,7 +16,7 @@ struct ColoredText
     String text;
 
     template<typename... Args>
-    ColoredText( Color color, Args const&... args )
+    ColoredText( Color color, Args&&... args )
         : color( color )
     {
         StringStream stream;
@@ -26,7 +26,7 @@ struct ColoredText
 };
 
 template<typename... Args>
-String format( Args const&... args )
+String format( Args&&... args )
 {
     StringStream stream;
     (stream << ... << args);
@@ -34,7 +34,7 @@ String format( Args const&... args )
 }
 
 template<typename... Args>
-void print( Args const&... args )
+void print( Args&&... args )
 {
     (std::cout << ... << args) << '\n';
 }

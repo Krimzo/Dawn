@@ -7,6 +7,7 @@ namespace dawn
 {
 inline constexpr StringRef kw_import = "import";
 inline constexpr StringRef kw_func = "func";
+inline constexpr StringRef kw_oper = "oper";
 inline constexpr StringRef kw_return = "return";
 inline constexpr StringRef kw_let = "let";
 inline constexpr StringRef kw_var = "var";
@@ -57,6 +58,7 @@ inline constexpr StringRef op_modas = "%=";
 inline constexpr StringRef op_not = "!";
 inline constexpr StringRef op_and = "&&";
 inline constexpr StringRef op_or = "||";
+inline constexpr StringRef op_cmpr = "<=>";
 inline constexpr StringRef op_eq = "==";
 inline constexpr StringRef op_neq = "!=";
 inline constexpr StringRef op_less = "<";
@@ -93,21 +95,22 @@ inline Map<String, Int> precedences
     { (String) op_div, 4 },
     { (String) op_add, 5 },
     { (String) op_sub, 5 },
-    { (String) op_less, 6 },
-    { (String) op_great, 6 },
-    { (String) op_lesseq, 6 },
-    { (String) op_greateq, 6 },
-    { (String) op_eq, 7 },
-    { (String) op_neq, 7 },
-    { (String) op_and, 8 },
-    { (String) op_or, 9 },
-    { (String) op_range, 10 },
-    { (String) op_assign, 11 },
-    { (String) op_addas, 11 },
-    { (String) op_subas, 11 },
-    { (String) op_mulas, 11 },
-    { (String) op_divas, 11 },
-    { (String) op_powas, 11 },
-    { (String) op_modas, 11 },
+    { (String) op_cmpr, 6 },
+    { (String) op_less, 7 },
+    { (String) op_great, 7 },
+    { (String) op_lesseq, 7 },
+    { (String) op_greateq, 7 },
+    { (String) op_eq, 8 },
+    { (String) op_neq, 8 },
+    { (String) op_and, 9 },
+    { (String) op_or, 10 },
+    { (String) op_range, 11 },
+    { (String) op_assign, 12 },
+    { (String) op_addas, 12 },
+    { (String) op_subas, 12 },
+    { (String) op_mulas, 12 },
+    { (String) op_divas, 12 },
+    { (String) op_powas, 12 },
+    { (String) op_modas, 12 },
 };
 }

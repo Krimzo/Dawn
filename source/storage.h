@@ -43,7 +43,7 @@ struct Storage
 
     template<typename T, typename... Args>
         requires (alignof(T) <= A && sizeof( T ) <= S)
-    T& emplace( Args const&... args )
+    T& emplace( Args&&... args )
     {
         reset();
         m_type = H::template type<T>();
@@ -119,7 +119,7 @@ struct DynStorage
     }
 
     template<typename T, typename... Args>
-    T& emplace( Args const&... args )
+    T& emplace( Args&&... args )
     {
         reset();
         m_type = H::template type<T>();

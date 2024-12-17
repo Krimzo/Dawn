@@ -34,6 +34,7 @@ private:
     void parse_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Struct& struc );
     void parse_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Enum& enu );
     void parse_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Function& function );
+    void parse_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Operator& operat );
     void parse_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Variable& variable );
 
     void parse_expression( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree );

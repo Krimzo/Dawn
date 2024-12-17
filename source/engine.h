@@ -6,23 +6,41 @@
 
 namespace dawn
 {
-#define NAME_GEN(NAME) ID _##NAME = String( #NAME )
+#define PRE_OP_GEN(NAME, OP) ID __##NAME = String( OP )
+#define PRE_NAME_GEN(NAME) ID _##NAME = String( #NAME )
 
-struct PredefinedNames
+struct Predefines
 {
-    NAME_GEN( bool );
-    NAME_GEN( int );
-    NAME_GEN( float );
-    NAME_GEN( char );
-    NAME_GEN( string );
-    NAME_GEN( count );
-    NAME_GEN( value );
+    PRE_OP_GEN( add, op_add );
+    PRE_OP_GEN( sub, op_sub );
+    PRE_OP_GEN( mul, op_mul );
+    PRE_OP_GEN( div, op_div );
+    PRE_OP_GEN( pow, op_pow );
+    PRE_OP_GEN( mod, op_mod );
+    PRE_OP_GEN( cmpr, op_cmpr );
+
+    PRE_NAME_GEN( bool );
+    PRE_NAME_GEN( int );
+    PRE_NAME_GEN( float );
+    PRE_NAME_GEN( char );
+    PRE_NAME_GEN( string );
+
+    PRE_NAME_GEN( to_bool );
+    PRE_NAME_GEN( to_int );
+    PRE_NAME_GEN( to_float );
+    PRE_NAME_GEN( to_char );
+    PRE_NAME_GEN( to_string );
+
+    PRE_NAME_GEN( count );
+    PRE_NAME_GEN( value );
 };
 
 struct Engine
 {
+    friend struct ValueRef;
+
     IDSystem id_system;
-    PredefinedNames pre_names;
+    Predefines predefines;
     Stack<ValueRef> variables;
     Map<Int, Function> functions;
     Map<Int, Enum> enums;
@@ -36,14 +54,13 @@ struct Engine
     void load_variable( Variable& entry );
 
     void bind_func( StringRef const& name, Function::CppFunc cpp_func );
-    void call_func( Int id, Array<Node>& args, ValueRef& retval );
+    void call_func( Int id, Array<ValueRef>& args, ValueRef& retval );
 
-    void add_var( Variable& var );
     void add_var( VariableKind kind, Int id, ValueRef const& value );
     ValueRef* get_var( Int id );
 
 private:
-    void handle_func( Function& func, Array<Node>& args, ValueRef& retval );
+    void handle_func( Function& func, Array<ValueRef>& args, ValueRef& retval );
     void handle_scope( Scope& scope, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
     void handle_instr( Node& node, ValueRef& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon );
     void handle_expr( Node& node, ValueRef& value );

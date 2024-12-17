@@ -190,6 +190,16 @@ void dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>:
             self_var.expr = make_nothing_node();
             self_var.name.str_id = kw_self;
         }
+        else if ( it->value == kw_oper )
+        {
+            auto& op = struc.operators.emplace_back();
+            parse_operator( it, end, op );
+
+            auto& self_var = *op.args.emplace( op.args.begin() );
+            self_var.kind = VariableKind::REF;
+            self_var.expr = make_nothing_node();
+            self_var.name.str_id = kw_self;
+        }
         else
             PARSER_PANIC( *it, "expected field name or function" );
     }
@@ -258,7 +268,6 @@ void dawn::Parser::parse_function( Array<Token>::const_iterator& it, Array<Token
     ++it;
 
     Set<String> args;
-
     while ( true )
     {
         if ( it->value == op_expr_cls )
@@ -293,6 +302,81 @@ void dawn::Parser::parse_function( Array<Token>::const_iterator& it, Array<Token
     }
 
     parse_scope( it, end, std::get<Scope>( function.body ) );
+}
+
+void dawn::Parser::parse_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Operator& operat )
+{
+    if ( it->value != kw_oper )
+        PARSER_PANIC( *it, "expected opert" );
+    ++it;
+
+    if ( it->type != TokenType::OPERATOR )
+        PARSER_PANIC( *it, "expected operator" );
+    operat.name = it->value;
+    ++it;
+
+    if ( it->value != op_expr_opn )
+        PARSER_PANIC( *it, "expected open expr" );
+    ++it;
+
+    Set<String> args;
+    while ( true )
+    {
+        if ( it->value == op_expr_cls )
+        {
+            ++it;
+            break;
+        }
+
+        auto& arg = operat.args.emplace_back();
+
+        if ( it->value != kw_let && it->value != kw_var && it->value != kw_ref )
+            PARSER_PANIC( *it, "expected let, var or ref keywords" );
+        if ( it->value == kw_let )
+            arg.kind = VariableKind::LET;
+        else if ( it->value == kw_var )
+            arg.kind = VariableKind::VAR;
+        else
+            arg.kind = VariableKind::REF;
+        ++it;
+
+        if ( it->type != TokenType::NAME )
+            PARSER_PANIC( *it, "expected arg name" );
+        arg.name = it->value;
+        ++it;
+
+        if ( args.contains( arg.name.str_id ) )
+            PARSER_PANIC( *it, "argument [", arg.name, "] already defined" );
+        args.insert( arg.name.str_id );
+
+        if ( it->value == op_split )
+            ++it;
+    }
+
+    switch ( args.size() )
+    {
+    case 0:
+        if ( operat.name.str_id != op_add
+            && operat.name.str_id != op_sub )
+            PARSER_PANIC( *it, "operator [", operat.name, "] can't be overloaded as unary" );
+        break;
+
+    case 1:
+        if ( operat.name.str_id != op_add
+            && operat.name.str_id != op_sub
+            && operat.name.str_id != op_mul
+            && operat.name.str_id != op_div
+            && operat.name.str_id != op_pow
+            && operat.name.str_id != op_mod
+            && operat.name.str_id != op_cmpr )
+            PARSER_PANIC( *it, "operator [", operat.name, "] can't be overloaded" );
+        break;
+
+    default:
+        PARSER_PANIC( *it, "operator can have at most 1 argument" );
+    }
+
+    parse_scope( it, end, std::get<Scope>( operat.body ) );
 }
 
 void dawn::Parser::parse_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Variable& variable )
@@ -1103,6 +1187,9 @@ void dawn::create_operator_node( Token const& token, Node& node )
     else if ( token.value == op_sub )
         op_nod.type = OperatorType::SUB;
 
+    else if ( token.value == op_cmpr )
+        op_nod.type = OperatorType::COMPARE;
+
     else if ( token.value == op_less )
         op_nod.type = OperatorType::LESS;
 
@@ -1177,7 +1264,7 @@ dawn::Node dawn::make_def_expr( StringRef const& type )
         return make_string_node( {} );
 
     else if ( type == op_range )
-        return make_value_node( Value{ RangeVal{} } );
+        return make_value_node( RangeVal{} );
 
     else if ( is_custom_type( type ) )
     {

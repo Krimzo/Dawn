@@ -34,7 +34,13 @@ struct Function
 
     ID name;
     Array<Variable> args;
+    Array<ValueRef> arg_vals;
     Variant<Scope, CppFunc> body;
+};
+
+struct Operator : Function
+{
+    Bool is_unary() const;
 };
 
 struct Enum
@@ -49,8 +55,10 @@ struct Struct
     ID name;
     Array<Variable> fields;
     Array<Function> methods;
+    Array<Operator> operators;
 
     Variable* get_field( IDSystem& system, Int id );
     Function* get_method( IDSystem& system, Int id );
+    Operator* get_operator( IDSystem& system, Int id, Bool is_unary );
 };
 }

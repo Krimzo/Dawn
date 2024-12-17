@@ -20,19 +20,18 @@ int dawn::_shp_main( int argc, char** argv )
         return -2;
     }
 
-    ArrayVal args_val;
+    ArrayVal arg;
     for ( int i = 2; i < argc; i++ )
-        args_val.data.emplace_back( StringRef{ argv[i] } );
+        arg.data.emplace_back( String{ argv[i] } );
 
-    Array<Node> args_node;
-    args_node.emplace_back( make_value_node( args_val ) );
-
-    ValueRef retval = Value{ Int( 0 ) };
-    if ( auto error = dawn.call_func( "main", args_node, retval ) )
+    ValueRef retval = Int( 0 );
+    Array<ValueRef> args = { arg };
+    if ( auto error = dawn.call_func( "main", args, retval ) )
     {
         print( error.value() );
         return -3;
     }
 
-    return (int) retval.value().to_int();
+    Int retcode = retval.to_int( dawn.engine );
+    return static_cast<int>(retcode);
 }

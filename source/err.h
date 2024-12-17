@@ -10,7 +10,7 @@ struct LexerError
     String msg;
 
     template<typename... Args>
-    LexerError( Int line_number, Char c, Args const&... args )
+    LexerError( Int line_number, Char c, Args&&... args )
     {
         StringStream stream;
         stream << "Lexer error at line [" << line_number
@@ -25,7 +25,7 @@ struct ParserError
     String msg;
 
     template<typename... Args>
-    ParserError( Opt<Token> const& token, Args const&... args )
+    ParserError( Opt<Token> const& token, Args&&... args )
     {
         StringStream stream;
         if ( token )
@@ -46,7 +46,7 @@ struct EngineError
     String msg;
 
     template<typename... Args>
-    EngineError( Args const&... args )
+    EngineError( Args&&... args )
     {
         StringStream stream;
         stream << "Engine error: ";

@@ -8,6 +8,8 @@
 
 namespace dawn
 {
+struct Engine;
+
 struct EnumVal
 {
     Enum* parent = nullptr;
@@ -207,15 +209,6 @@ struct ValueHandler
 struct Value : private Storage<max_val_size(), max_val_align(), ValueType, ValueHandler>
 {
     Value() = default;
-    Value( Bool value );
-    Value( Int value );
-    Value( Float value );
-    Value( Char value );
-    Value( StringRef const& value );
-    Value( EnumVal const& value );
-    Value( StructVal const& value );
-    Value( ArrayVal const& value );
-    Value( RangeVal const& value );
 
     constexpr ValueType type() const
     {
@@ -235,38 +228,10 @@ struct Value : private Storage<max_val_size(), max_val_align(), ValueType, Value
     }
 
     template<typename T, typename... Args>
-    constexpr T& store( Args const&... args )
+    constexpr T& store( Args&&... args )
     {
         return Storage::emplace<T>( args... );
     }
-
-    Value operator+() const;
-    Value operator-() const;
-    Value operator+( Value const& other ) const;
-    Value operator-( Value const& other ) const;
-    Value operator*( Value const& other ) const;
-    Value operator/( Value const& other ) const;
-    Value operator^( Value const& other ) const;
-    Value operator%( Value const& other ) const;
-
-    Value operator==( Value const& other ) const;
-    Value operator!=( Value const& other ) const;
-    Value operator<( Value const& other ) const;
-    Value operator>( Value const& other ) const;
-    Value operator<=( Value const& other ) const;
-    Value operator>=( Value const& other ) const;
-
-    Value operator!() const;
-    Value operator&&( Value const& other ) const;
-    Value operator||( Value const& other ) const;
-
-    Value operator>>( Value const& other ) const;
-
-    Bool to_bool() const;
-    Int to_int() const;
-    Float to_float() const;
-    Char to_char() const;
-    String to_string() const;
 };
 
 enum struct ValueKind
@@ -278,12 +243,57 @@ enum struct ValueKind
 struct ValueRef
 {
     ValueRef() = default;
+    ValueRef( Bool value, ValueKind kind = ValueKind::LET );
+    ValueRef( Int value, ValueKind kind = ValueKind::LET );
+    ValueRef( Float value, ValueKind kind = ValueKind::LET );
+    ValueRef( Char value, ValueKind kind = ValueKind::LET );
+    ValueRef( String value, ValueKind kind = ValueKind::LET );
+    ValueRef( EnumVal const& value, ValueKind kind = ValueKind::LET );
+    ValueRef( StructVal const& value, ValueKind kind = ValueKind::LET );
+    ValueRef( ArrayVal const& value, ValueKind kind = ValueKind::LET );
+    ValueRef( RangeVal const& value, ValueKind kind = ValueKind::LET );
     ValueRef( Value const& value, ValueKind kind = ValueKind::LET );
 
     ValueKind kind() const;
+    ValueType type() const;
 
     Value const& value() const;
     void set_value( Value const& value );
+
+    template<typename T>
+    constexpr T& as() const
+    {
+        return m_regref.value().as<T>();
+    }
+
+    ValueRef un_plus( Engine& engine ) const;
+    ValueRef un_minus( Engine& engine ) const;
+    ValueRef op_add( Engine& engine, ValueRef const& other ) const;
+    ValueRef op_sub( Engine& engine, ValueRef const& other ) const;
+    ValueRef op_mul( Engine& engine, ValueRef const& other ) const;
+    ValueRef op_div( Engine& engine, ValueRef const& other ) const;
+    ValueRef op_pow( Engine& engine, ValueRef const& other ) const;
+    ValueRef op_mod( Engine& engine, ValueRef const& other ) const;
+
+    ValueRef op_cmpr( Engine& engine, ValueRef const& other ) const;
+    ValueRef op_eq( Engine& engine, ValueRef const& other ) const;
+    ValueRef op_neq( Engine& engine, ValueRef const& other ) const;
+    ValueRef op_less( Engine& engine, ValueRef const& other ) const;
+    ValueRef op_great( Engine& engine, ValueRef const& other ) const;
+    ValueRef op_lesseq( Engine& engine, ValueRef const& other ) const;
+    ValueRef op_greateq( Engine& engine, ValueRef const& other ) const;
+
+    ValueRef un_not( Engine& engine ) const;
+    ValueRef op_and( Engine& engine, ValueRef const& other ) const;
+    ValueRef op_or( Engine& engine, ValueRef const& other ) const;
+
+    ValueRef op_range( Engine& engine, ValueRef const& other ) const;
+
+    Bool to_bool( Engine& engine ) const;
+    Int to_int( Engine& engine ) const;
+    Float to_float( Engine& engine ) const;
+    Char to_char( Engine& engine ) const;
+    String to_string( Engine& engine ) const;
 
 private:
     RegisterRef<Value> m_regref;

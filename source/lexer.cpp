@@ -7,6 +7,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
     result.keywords = {
         (String) kw_import,
         (String) kw_func,
+        (String) kw_oper,
         (String) kw_return,
         (String) kw_let,
         (String) kw_var,
@@ -54,6 +55,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) op_not,
         (String) op_and,
         (String) op_or,
+        (String) op_cmpr,
         (String) op_eq,
         (String) op_neq,
         (String) op_less,
@@ -363,6 +365,6 @@ void dawn::Lexer::extract_operator( StringRef const& source, Array<Token>& token
 
     auto& token = tokens.emplace_back();
     token.type = TokenType::OPERATOR;
-    token.value = closest_op.value();
+    token.value = *closest_op;
     token.line_number = line;
 }
