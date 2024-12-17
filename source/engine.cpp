@@ -819,17 +819,46 @@ void dawn::Engine::handle_ac_struct_node( ValueRef const& left, Node& right, Val
     }
     else if ( right.type() == NodeType::CALL )
     {
-        auto& func_node = right.as<CallNod>();
-        auto method_ptr = left_val.parent->get_method( id_system, func_node.name.get( id_system ) );
+        auto& call_node = right.as<CallNod>();
+        auto method_ptr = left_val.parent->get_method( id_system, call_node.name.get( id_system ) );
         if ( !method_ptr )
-            ENGINE_PANIC( "Method [", func_node.name, "] doesn't exist" );
+            ENGINE_PANIC( "Method [", call_node.name, "] doesn't exist" );
 
-        func_node.arg_vals.resize( 1 + func_node.args.size() );
-        func_node.arg_vals[0] = left;
-        for ( Int i = 1; i < (Int) func_node.args.size(); i++ )
-            handle_expr( func_node.args[i], func_node.arg_vals[i] );
+        call_node.arg_vals.resize( 1 + call_node.args.size() );
+        call_node.arg_vals[0] = left;
+        for ( Int i = 0; i < (Int) call_node.args.size(); i++ )
+            handle_expr( call_node.args[i], call_node.arg_vals[i + 1] );
 
-        handle_func( *method_ptr, func_node.arg_vals, value );
+        handle_func( *method_ptr, call_node.arg_vals, value );
+    }
+    else if ( right.type() == NodeType::INDEX )
+    {
+        auto& index_nod = right.as<IndexNod>();
+        if ( !left_val.members.contains( index_nod.name.get( id_system ) ) )
+            ENGINE_PANIC( "Member [", index_nod.name, "] doesn't exist" );
+
+        auto& member = left_val.members.at( index_nod.name.get( id_system ) );
+
+        ValueRef expr_val;
+        handle_expr( index_nod.expr, expr_val );
+        Int index = expr_val.to_int( *this );
+
+        if ( member.type() == ValueType::STRING )
+        {
+            auto& left_val = member.as<String>();
+            if ( index < 0 || index >= (Int) left_val.size() )
+                ENGINE_PANIC( "String access [", index, "] out of bounds" );
+            value = left_val[index];
+        }
+        else if ( member.type() == ValueType::ARRAY )
+        {
+            auto& left_val = member.as<ArrayVal>();
+            if ( index < 0 || index >= (Int) left_val.data.size() )
+                ENGINE_PANIC( "Array access [", index, "] out of bounds" );
+            value = left_val.data[index];
+        }
+        else
+            ENGINE_PANIC( "Cannot index type [", member.type(), "]" );
     }
     else
         ENGINE_PANIC( "Struct access must be an identifier or a function call" );
