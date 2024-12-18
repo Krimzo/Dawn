@@ -7,7 +7,6 @@
 namespace dawn
 {
 struct RefNod;
-struct CastNod;
 struct VariableNod;
 struct IdentifierNod;
 struct CallNod;
@@ -33,12 +32,10 @@ struct Scope;
 enum struct NodeType
 {
     EMPTY = 0,
-    REF,
-    CAST,
+
+    // instr
+    SCOPE,
     VARIABLE,
-    IDENTIFIER,
-    CALL,
-    INDEX,
     RETURN,
     BREAK,
     CONTINUE,
@@ -49,13 +46,18 @@ enum struct NodeType
     LOOP,
     WHILE,
     FOR,
+
+    // expr
+    REF,
+    IDENTIFIER,
+    CALL,
+    INDEX,
     ENUM,
     STRUCT,
     ARRAY,
     UNARY,
     OPERATOR,
     ASSIGN,
-    SCOPE,
 };
 
 struct NodeHandler
@@ -65,9 +67,6 @@ struct NodeHandler
     {
         if constexpr ( std::is_same_v<T, RefNod> )
             return NodeType::REF;
-
-        else if constexpr ( std::is_same_v<T, CastNod> )
-            return NodeType::CAST;
 
         else if constexpr ( std::is_same_v<T, VariableNod> )
             return NodeType::VARIABLE;

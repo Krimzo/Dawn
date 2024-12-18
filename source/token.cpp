@@ -19,8 +19,6 @@ std::ostream& dawn::operator<<( std::ostream& stream, TokenType type )
     case TokenType::KEYWORD: stream << "Keyword"; break;
     case TokenType::TYPE: stream << "Type"; break;
     case TokenType::NAME: stream << "Name"; break;
-    case TokenType::CALL: stream << "Call"; break;
-    case TokenType::INDEX: stream << "Index"; break;
     case TokenType::OPERATOR: stream << "Operator"; break;
     }
     return stream;

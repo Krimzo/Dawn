@@ -18,7 +18,9 @@ void dawn::Engine::load_mod( Module& module )
 
 void dawn::Engine::load_function( Function& entry )
 {
-    functions[entry.name.get( id_system )] = entry;
+    if ( stack.get( entry.name.get( id_system ) ) )
+        ENGINE_PANIC( "object [", entry.name, "] already exists" );
+    stack.push( entry.name.get( id_system ), entry );
 }
 
 void dawn::Engine::load_enum( Enum& entry )
@@ -27,7 +29,7 @@ void dawn::Engine::load_enum( Enum& entry )
     for ( auto& [key, expr] : enu.keys_expr )
     {
         ValueRef key_val;
-        handle_expr( expr.expr, key_val );
+        handle_expr( expr, key_val );
         enu.keys_value[id_system.get( key )] = ValueRef{ key_val.value() };
     }
 }
@@ -49,40 +51,40 @@ void dawn::Engine::bind_func( StringRef const& name, Function::CppFunc cpp_func 
     Function func;
     func.name = String( name );
     func.body.emplace<Function::CppFunc>( std::move( cpp_func ) );
-    functions[func.name.get( id_system )] = func;
+    load_function( func );
 }
 
 void dawn::Engine::call_func( Int id, Array<ValueRef>& args, ValueRef& retval )
 {
-    auto it = functions.find( id );
-    if ( it == functions.end() )
-    {
-        String const* ptr = id_system.get( id );
-        String name = ptr ? *ptr : String();
-        ENGINE_PANIC( "function [", name, "] doesn't exist" );
-    }
-    handle_func( it->second, args, retval );
+    ValueRef* val = stack.get( id );
+    if ( !val )
+        ENGINE_PANIC( "object [", id, "] doesn't exist" );
+
+    if ( val->type() != ValueType::FUNCTION )
+        ENGINE_PANIC( "object [", id, "] is not a function" );
+
+    handle_func( val->as<Function>(), args, retval );
 }
 
 void dawn::Engine::add_var( VariableKind kind, Int id, ValueRef const& value )
 {
     if ( kind == VariableKind::LET )
     {
-        variables.push( id, ValueRef{ value.value() } );
+        stack.push( id, ValueRef{ value.value() } );
     }
     else if ( kind == VariableKind::VAR )
     {
-        variables.push( id, ValueRef{ value.value(), ValueKind::VAR } );
+        stack.push( id, ValueRef{ value.value(), ValueKind::VAR } );
     }
     else
     {
-        variables.push( id, value );
+        stack.push( id, value );
     }
 }
 
 dawn::ValueRef* dawn::Engine::get_var( Int id )
 {
-    return variables.get( id );
+    return stack.get( id );
 }
 
 void dawn::Engine::handle_func( Function& func, Array<ValueRef>& args, ValueRef& retval )
@@ -100,6 +102,8 @@ void dawn::Engine::handle_func( Function& func, Array<ValueRef>& args, ValueRef&
 
         Bool didret = false;
         handle_scope( std::get<Scope>( func.body ), retval, didret, nullptr, nullptr );
+        if ( !didret )
+            retval = Value{};
     }
     else
     {
@@ -185,10 +189,6 @@ void dawn::Engine::handle_expr( Node& node, ValueRef& value )
         handle_ref_node( node.as<RefNod>(), value );
         break;
 
-    case NodeType::CAST:
-        handle_cast_node( node.as<CastNod>(), value );
-        break;
-
     case NodeType::IDENTIFIER:
         handle_id_node( node.as<IdentifierNod>(), value );
         break;
@@ -235,30 +235,6 @@ void dawn::Engine::handle_ref_node( RefNod& node, ValueRef& value )
     value = node.value_ref;
 }
 
-void dawn::Engine::handle_cast_node( CastNod& node, ValueRef& value )
-{
-    ValueRef cast_val;
-    handle_expr( node.expr, cast_val );
-
-    if ( node.type.get( id_system ) == predefines._bool.get( id_system ) )
-        value = cast_val.to_bool( *this );
-
-    else if ( node.type.get( id_system ) == predefines._int.get( id_system ) )
-        value = cast_val.to_int( *this );
-
-    else if ( node.type.get( id_system ) == predefines._float.get( id_system ) )
-        value = cast_val.to_float( *this );
-
-    else if ( node.type.get( id_system ) == predefines._char.get( id_system ) )
-        value = cast_val.to_char( *this );
-
-    else if ( node.type.get( id_system ) == predefines._string.get( id_system ) )
-        value = cast_val.to_string( *this );
-
-    else
-        ENGINE_PANIC( "Unknown cast type: ", node.type );
-}
-
 void dawn::Engine::handle_var_node( VariableNod& node, Int& push_count )
 {
     ValueRef value;
@@ -269,51 +245,63 @@ void dawn::Engine::handle_var_node( VariableNod& node, Int& push_count )
 
 void dawn::Engine::handle_id_node( IdentifierNod& node, ValueRef& value )
 {
-    auto* ptr = variables.get( node.name.get( id_system ) );
+    auto* ptr = stack.get( node.name.get( id_system ) );
     if ( !ptr )
-        ENGINE_PANIC( "variable [", node.name, "] doesn't exist" );
+        ENGINE_PANIC( "object [", node.name, "] doesn't exist" );
     value = *ptr;
 }
 
 void dawn::Engine::handle_call_node( CallNod& node, ValueRef& retval )
 {
-    auto it = functions.find( node.name.get( id_system ) );
-    if ( it == functions.end() )
-        ENGINE_PANIC( "function [", node.name, "] doesn't exist" );
+    ValueRef left_val;
+    handle_expr( node.left_expr, left_val );
 
-    node.arg_vals.resize( node.args.size() );
-    for ( Int i = 0; i < (Int) node.args.size(); i++ )
-        handle_expr( node.args[i], node.arg_vals[i] );
+    if ( left_val.type() != ValueType::FUNCTION )
+        ENGINE_PANIC( "Can't call [", left_val.type(), "]" );
 
-    handle_func( it->second, node.arg_vals, retval );
+    auto& func = left_val.as<Function>();
+    if ( func.is_method() )
+    {
+        node.arg_vals.resize( 1 + node.args.size() );
+        node.arg_vals[0] = func.self_val[0];
+        for ( Int i = 0; i < (Int) node.args.size(); i++ )
+            handle_expr( node.args[i], node.arg_vals[i + 1] );
+    }
+    else
+    {
+        node.arg_vals.resize( node.args.size() );
+        for ( Int i = 0; i < (Int) node.args.size(); i++ )
+            handle_expr( node.args[i], node.arg_vals[i] );
+    }
+
+    handle_func( func, node.arg_vals, retval );
 }
 
 void dawn::Engine::handle_index_node( IndexNod& node, ValueRef& retval )
 {
-    auto* ptr = variables.get( node.name.get( id_system ) );
-    if ( !ptr )
-        ENGINE_PANIC( "variable [", node.name, "] doesn't exist" );
+    ValueRef left_val;
+    handle_expr( node.left_expr, left_val );
 
     ValueRef expr_val;
     handle_expr( node.expr, expr_val );
     Int index = expr_val.to_int( *this );
 
-    if ( ptr->type() == ValueType::STRING )
+    if ( left_val.type() == ValueType::STRING )
     {
-        auto& left_val = ptr->as<String>();
-        if ( index < 0 || index >= (Int) left_val.size() )
+        auto& val = left_val.as<String>();
+        if ( index < 0 || index >= (Int) val.size() )
             ENGINE_PANIC( "String access [", index, "] out of bounds" );
-        retval = left_val[index];
+        retval = val[index];
     }
-    else if ( ptr->type() == ValueType::ARRAY )
+    else if ( left_val.type() == ValueType::ARRAY )
     {
-        auto& left_val = ptr->as<ArrayVal>();
-        if ( index < 0 || index >= (Int) left_val.data.size() )
+        auto& val = left_val.as<ArrayVal>();
+        if ( index < 0 || index >= (Int) val.data.size() )
             ENGINE_PANIC( "Array access [", index, "] out of bounds" );
-        retval = left_val.data[index];
+        retval = val.data[index];
     }
     else
-        ENGINE_PANIC( "Cannot index type [", ptr->type(), "]" );
+        ENGINE_PANIC( "Cannot index type [", left_val.type(), "]" );
 }
 
 void dawn::Engine::handle_return_node( ReturnNod& node, ValueRef& retval, Bool& didret )
@@ -539,7 +527,7 @@ void dawn::Engine::handle_struct_node( StructNod& node, ValueRef& value )
     if ( struct_it == structs.end() )
         ENGINE_PANIC( "struct [", node.type, "] doesn't exist" );
 
-    StructVal result{};
+    StructVal result;
     result.parent = &struct_it->second;
 
     for ( auto& field : struct_it->second.fields )
@@ -564,7 +552,15 @@ void dawn::Engine::handle_struct_node( StructNod& node, ValueRef& value )
         result.members[id.get( id_system )] = ValueRef{ arg_val.value() };
     }
 
-    value = ValueRef{ result };
+    for ( auto& method : struct_it->second.methods )
+    {
+        auto& member = result.members[method.name.get( id_system )];
+        member = ValueRef{ method };
+        auto& meth = member.as<Function>();
+        meth.parent = &struct_it->second;
+    }
+
+    value = result;
 }
 
 void dawn::Engine::handle_array_node( ArrayNod& node, ValueRef& value )
@@ -815,53 +811,18 @@ void dawn::Engine::handle_ac_struct_node( ValueRef const& left, Node& right, Val
         if ( !left_val.members.contains( id_node.name.get( id_system ) ) )
             ENGINE_PANIC( "Member [", id_node.name, "] doesn't exist" );
 
-        value = left_val.members.at( id_node.name.get( id_system ) );
-    }
-    else if ( right.type() == NodeType::CALL )
-    {
-        auto& call_node = right.as<CallNod>();
-        auto method_ptr = left_val.parent->get_method( id_system, call_node.name.get( id_system ) );
-        if ( !method_ptr )
-            ENGINE_PANIC( "Method [", call_node.name, "] doesn't exist" );
-
-        call_node.arg_vals.resize( 1 + call_node.args.size() );
-        call_node.arg_vals[0] = left;
-        for ( Int i = 0; i < (Int) call_node.args.size(); i++ )
-            handle_expr( call_node.args[i], call_node.arg_vals[i + 1] );
-
-        handle_func( *method_ptr, call_node.arg_vals, value );
-    }
-    else if ( right.type() == NodeType::INDEX )
-    {
-        auto& index_nod = right.as<IndexNod>();
-        if ( !left_val.members.contains( index_nod.name.get( id_system ) ) )
-            ENGINE_PANIC( "Member [", index_nod.name, "] doesn't exist" );
-
-        auto& member = left_val.members.at( index_nod.name.get( id_system ) );
-
-        ValueRef expr_val;
-        handle_expr( index_nod.expr, expr_val );
-        Int index = expr_val.to_int( *this );
-
-        if ( member.type() == ValueType::STRING )
+        auto& result = left_val.members.at( id_node.name.get( id_system ) );
+        if ( result.type() == ValueType::FUNCTION )
         {
-            auto& left_val = member.as<String>();
-            if ( index < 0 || index >= (Int) left_val.size() )
-                ENGINE_PANIC( "String access [", index, "] out of bounds" );
-            value = left_val[index];
+            auto& func = result.as<Function>();
+            func.self_val.resize( 1 );
+            func.self_val.front() = left_val;
         }
-        else if ( member.type() == ValueType::ARRAY )
-        {
-            auto& left_val = member.as<ArrayVal>();
-            if ( index < 0 || index >= (Int) left_val.data.size() )
-                ENGINE_PANIC( "Array access [", index, "] out of bounds" );
-            value = left_val.data[index];
-        }
-        else
-            ENGINE_PANIC( "Cannot index type [", member.type(), "]" );
+
+        value = result;
     }
     else
-        ENGINE_PANIC( "Struct access must be an identifier or a function call" );
+        ENGINE_PANIC( "Struct access must be an identifier" );
 }
 
 void dawn::Engine::handle_ac_array_node( ValueRef const& left, Node& right, ValueRef& value )
@@ -885,5 +846,5 @@ dawn::PopHandler::PopHandler( Engine& engine )
 
 dawn::PopHandler::~PopHandler() noexcept
 {
-    engine.variables.pop( count );
+    engine.stack.pop( count );
 }

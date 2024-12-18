@@ -41,8 +41,7 @@ struct Engine
 
     IDSystem id_system;
     Predefines predefines;
-    Stack<ValueRef> variables;
-    Map<Int, Function> functions;
+    Stack<ValueRef> stack;
     Map<Int, Enum> enums;
     Map<Int, Struct> structs;
 
@@ -66,7 +65,6 @@ private:
     void handle_expr( Node& node, ValueRef& value );
 
     void handle_ref_node( RefNod& node, ValueRef& value );
-    void handle_cast_node( CastNod& node, ValueRef& value );
     void handle_var_node( VariableNod& node, Int& push_count );
     void handle_id_node( IdentifierNod& node, ValueRef& value );
     void handle_call_node( CallNod& node, ValueRef& retval );

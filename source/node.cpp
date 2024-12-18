@@ -9,10 +9,6 @@ void dawn::NodeHandler::copy( NodeType type, void*& to, void const* from )
         to = new RefNod( *static_cast<RefNod const*>(from) );
         break;
 
-    case NodeType::CAST:
-        to = new CastNod( *static_cast<CastNod const*>(from) );
-        break;
-
     case NodeType::VARIABLE:
         to = new VariableNod( *static_cast<VariableNod const*>(from) );
         break;
@@ -105,10 +101,6 @@ void dawn::NodeHandler::destruct( NodeType type, void* ptr )
     {
     case NodeType::REF:
         delete static_cast<RefNod*>(ptr);
-        break;
-
-    case NodeType::CAST:
-        delete static_cast<CastNod*>(ptr);
         break;
 
     case NodeType::VARIABLE:

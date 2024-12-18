@@ -38,6 +38,7 @@ inline constexpr StringRef tp_int = "int";
 inline constexpr StringRef tp_float = "float";
 inline constexpr StringRef tp_char = "char";
 inline constexpr StringRef tp_string = "string";
+inline constexpr StringRef tp_function = "function";
 inline constexpr StringRef tp_enum = "enum";
 inline constexpr StringRef tp_struct = "struct";
 inline constexpr StringRef tp_array = "array";
@@ -85,26 +86,43 @@ inline constexpr StringRef lit_string = "\"";
 inline constexpr StringRef comm_line = "//";
 inline constexpr Pair<StringRef, StringRef> comm_multiline = { "/*", "*/" };
 
+inline const String prec_unary = "_unary";
+
 inline Map<String, Int> precedences
 {
     { (String) op_access, 1 },
+    { (String) op_expr_opn, 1 },
+    { (String) op_scope_opn, 1 },
+    { (String) op_array_opn, 1 },
+
+    { (String) prec_unary, 2 },
     { (String) op_not, 2 },
+
     { (String) op_pow, 3 },
     { (String) op_mod, 3 },
+
     { (String) op_mul, 4 },
     { (String) op_div, 4 },
+
     { (String) op_add, 5 },
     { (String) op_sub, 5 },
+
     { (String) op_cmpr, 6 },
+
     { (String) op_less, 7 },
     { (String) op_great, 7 },
     { (String) op_lesseq, 7 },
     { (String) op_greateq, 7 },
+
     { (String) op_eq, 8 },
     { (String) op_neq, 8 },
+
     { (String) op_and, 9 },
+
     { (String) op_or, 10 },
+
     { (String) op_range, 11 },
+
     { (String) op_assign, 12 },
     { (String) op_addas, 12 },
     { (String) op_subas, 12 },
