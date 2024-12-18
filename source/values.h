@@ -25,6 +25,9 @@ struct StructVal
 
     StructVal( StructVal const& other );
     StructVal& operator=( StructVal const& other );
+
+    ValueRef* get_member( Int id );
+    Function* get_method( Int id, Bool is_unary );
 };
 
 struct ArrayVal
@@ -51,6 +54,7 @@ consteval size_t max_val_size()
         sizeof( Float ),
         sizeof( Char ),
         sizeof( String ),
+        sizeof( Function ),
         sizeof( EnumVal ),
         sizeof( StructVal ),
         sizeof( ArrayVal ),
@@ -65,6 +69,7 @@ consteval size_t max_val_align()
         alignof(Float),
         alignof(Char),
         alignof(String),
+        alignof(Function),
         alignof(EnumVal),
         alignof(StructVal),
         alignof(ArrayVal),
@@ -79,6 +84,7 @@ enum struct ValueType
     FLOAT,
     CHAR,
     STRING,
+    FUNCTION,
     ENUM,
     STRUCT,
     ARRAY,
@@ -104,6 +110,9 @@ struct ValueHandler
 
         else if constexpr ( std::is_same_v<T, String> )
             return ValueType::STRING;
+
+        else if constexpr ( std::is_same_v<T, Function> )
+            return ValueType::FUNCTION;
 
         else if constexpr ( std::is_same_v<T, EnumVal> )
             return ValueType::ENUM;
@@ -143,6 +152,10 @@ struct ValueHandler
 
         case ValueType::STRING:
             new (to) String( *static_cast<String const*>(from) );
+            break;
+
+        case ValueType::FUNCTION:
+            new (to) Function( *static_cast<Function const*>(from) );
             break;
 
         case ValueType::ENUM:
@@ -185,6 +198,10 @@ struct ValueHandler
 
         case ValueType::STRING:
             static_cast<String*>(ptr)->~String();
+            break;
+
+        case ValueType::FUNCTION:
+            static_cast<Function*>(ptr)->~Function();
             break;
 
         case ValueType::ENUM:
@@ -248,6 +265,7 @@ struct ValueRef
     ValueRef( Float value, ValueKind kind = ValueKind::LET );
     ValueRef( Char value, ValueKind kind = ValueKind::LET );
     ValueRef( String value, ValueKind kind = ValueKind::LET );
+    ValueRef( Function const& value, ValueKind kind = ValueKind::LET );
     ValueRef( EnumVal const& value, ValueKind kind = ValueKind::LET );
     ValueRef( StructVal const& value, ValueKind kind = ValueKind::LET );
     ValueRef( ArrayVal const& value, ValueKind kind = ValueKind::LET );

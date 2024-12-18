@@ -8,6 +8,7 @@ namespace dawn
 {
 struct Value;
 struct ValueRef;
+struct Struct;
 
 enum struct VariableKind
 {
@@ -33,20 +34,26 @@ struct Function
     using CppFunc = Func<ValueRef( Array<ValueRef> const& )>;
 
     ID name;
+    Struct* parent = nullptr;
     Array<Variable> args;
     Array<ValueRef> arg_vals;
     Variant<Scope, CppFunc> body;
-};
 
-struct Operator : Function
-{
-    Bool is_unary() const;
+    inline Bool is_method() const
+    {
+        return static_cast<Bool>(parent);
+    }
+
+    inline Bool is_unary_op() const
+    {
+        return args.size() == 1;
+    }
 };
 
 struct Enum
 {
     ID name;
-    Map<String, Variable> keys_expr;
+    Map<String, Node> keys_expr;
     Map<Int, ValueRef> keys_value;
 };
 
@@ -55,10 +62,5 @@ struct Struct
     ID name;
     Array<Variable> fields;
     Array<Function> methods;
-    Array<Operator> operators;
-
-    Variable* get_field( IDSystem& system, Int id );
-    Function* get_method( IDSystem& system, Int id );
-    Operator* get_operator( IDSystem& system, Int id, Bool is_unary );
 };
 }

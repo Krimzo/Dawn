@@ -38,6 +38,7 @@ inline constexpr StringRef tp_int = "int";
 inline constexpr StringRef tp_float = "float";
 inline constexpr StringRef tp_char = "char";
 inline constexpr StringRef tp_string = "string";
+inline constexpr StringRef tp_function = "function";
 inline constexpr StringRef tp_enum = "enum";
 inline constexpr StringRef tp_struct = "struct";
 inline constexpr StringRef tp_array = "array";
@@ -88,6 +89,9 @@ inline constexpr Pair<StringRef, StringRef> comm_multiline = { "/*", "*/" };
 inline Map<String, Int> precedences
 {
     { (String) op_access, 1 },
+    { (String) op_expr_opn, 1 },
+    { (String) op_scope_opn, 1 },
+    { (String) op_array_opn, 1 },
     { (String) op_not, 2 },
     { (String) op_pow, 3 },
     { (String) op_mod, 3 },

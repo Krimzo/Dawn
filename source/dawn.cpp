@@ -72,13 +72,13 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, ValueRef& ret
     return call_func( name, args, retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<ValueRef>& args ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<ValueRef> const& args ) noexcept
 {
     ValueRef retval;
     return call_func( name, args, retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<ValueRef>& args, ValueRef& retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<ValueRef> const& args, ValueRef& retval ) noexcept
 {
     try
     {

@@ -7,7 +7,6 @@
 namespace dawn
 {
 struct RefNod;
-struct CastNod;
 struct VariableNod;
 struct IdentifierNod;
 struct CallNod;
@@ -34,7 +33,6 @@ enum struct NodeType
 {
     EMPTY = 0,
     REF,
-    CAST,
     VARIABLE,
     IDENTIFIER,
     CALL,
@@ -65,9 +63,6 @@ struct NodeHandler
     {
         if constexpr ( std::is_same_v<T, RefNod> )
             return NodeType::REF;
-
-        else if constexpr ( std::is_same_v<T, CastNod> )
-            return NodeType::CAST;
 
         else if constexpr ( std::is_same_v<T, VariableNod> )
             return NodeType::VARIABLE;

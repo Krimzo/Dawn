@@ -10,12 +10,6 @@ struct RefNod
     ValueRef value_ref;
 };
 
-struct CastNod
-{
-    ID type;
-    Node expr;
-};
-
 struct VariableNod
 {
     Variable var;
@@ -28,14 +22,13 @@ struct IdentifierNod
 
 struct CallNod
 {
-    ID name;
+    Node left_expr;
     Array<Node> args;
-    Array<ValueRef> arg_vals;
 };
 
 struct IndexNod
 {
-    ID name;
+    Node left_expr;
     Node expr;
 };
 
