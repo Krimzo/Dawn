@@ -32,11 +32,10 @@ struct Scope;
 enum struct NodeType
 {
     EMPTY = 0,
-    REF,
+
+    // instr
+    SCOPE,
     VARIABLE,
-    IDENTIFIER,
-    CALL,
-    INDEX,
     RETURN,
     BREAK,
     CONTINUE,
@@ -47,13 +46,18 @@ enum struct NodeType
     LOOP,
     WHILE,
     FOR,
+
+    // expr
+    REF,
+    IDENTIFIER,
+    CALL,
+    INDEX,
     ENUM,
     STRUCT,
     ARRAY,
     UNARY,
     OPERATOR,
     ASSIGN,
-    SCOPE,
 };
 
 struct NodeHandler
