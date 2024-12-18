@@ -53,13 +53,13 @@ struct Engine
     void load_variable( Variable& entry );
 
     void bind_func( StringRef const& name, Function::CppFunc cpp_func );
-    void call_func( Int id, Array<ValueRef> const& args, ValueRef& retval );
+    void call_func( Int id, Array<ValueRef>& args, ValueRef& retval );
 
     void add_var( VariableKind kind, Int id, ValueRef const& value );
     ValueRef* get_var( Int id );
 
 private:
-    void handle_func( Function& func, ValueRef& retval );
+    void handle_func( Function& func, Array<ValueRef>& args, ValueRef& retval );
     void handle_scope( Scope& scope, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
     void handle_instr( Node& node, ValueRef& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon );
     void handle_expr( Node& node, ValueRef& value );

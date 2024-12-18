@@ -54,17 +54,16 @@ void dawn::Engine::bind_func( StringRef const& name, Function::CppFunc cpp_func 
     load_function( func );
 }
 
-void dawn::Engine::call_func( Int id, Array<ValueRef> const& args, ValueRef& retval )
+void dawn::Engine::call_func( Int id, Array<ValueRef>& args, ValueRef& retval )
 {
     ValueRef* val = stack.get( id );
     if ( !val )
         ENGINE_PANIC( "object [", id, "] doesn't exist" );
+
     if ( val->type() != ValueType::FUNCTION )
         ENGINE_PANIC( "object [", id, "] is not a function" );
 
-    auto& func = val->as<Function>();
-    func.arg_vals = args;
-    handle_func( func, retval );
+    handle_func( val->as<Function>(), args, retval );
 }
 
 void dawn::Engine::add_var( VariableKind kind, Int id, ValueRef const& value )
@@ -88,18 +87,18 @@ dawn::ValueRef* dawn::Engine::get_var( Int id )
     return stack.get( id );
 }
 
-void dawn::Engine::handle_func( Function& func, ValueRef& retval )
+void dawn::Engine::handle_func( Function& func, Array<ValueRef>& args, ValueRef& retval )
 {
     if ( func.body.index() == 0 )
     {
-        if ( func.args.size() != func.arg_vals.size() )
+        if ( func.args.size() != args.size() )
             ENGINE_PANIC( "invalid argument count for function [", func.name, "]" );
 
-        for ( Int i = 0; i < (Int) func.arg_vals.size(); i++ )
-            add_var( func.args[i].kind, func.args[i].name.get( id_system ), func.arg_vals[i] );
+        for ( Int i = 0; i < (Int) args.size(); i++ )
+            add_var( func.args[i].kind, func.args[i].name.get( id_system ), args[i] );
 
         PopHandler pop_handler{ *this };
-        pop_handler.count = (Int) func.arg_vals.size();
+        pop_handler.count = (Int) args.size();
 
         Bool didret = false;
         handle_scope( std::get<Scope>( func.body ), retval, didret, nullptr, nullptr );
@@ -108,7 +107,7 @@ void dawn::Engine::handle_func( Function& func, ValueRef& retval )
     }
     else
     {
-        retval = std::get<Function::CppFunc>( func.body )(func.arg_vals);
+        retval = std::get<Function::CppFunc>( func.body )(args);
     }
 }
 
@@ -263,18 +262,19 @@ void dawn::Engine::handle_call_node( CallNod& node, ValueRef& retval )
     auto& func = left_val.as<Function>();
     if ( func.is_method() )
     {
-        func.arg_vals.resize( 1 + node.args.size() );
+        node.arg_vals.resize( 1 + node.args.size() );
+        node.arg_vals[0] = func.self_val[0];
         for ( Int i = 0; i < (Int) node.args.size(); i++ )
-            handle_expr( node.args[i], func.arg_vals[i + 1] );
+            handle_expr( node.args[i], node.arg_vals[i + 1] );
     }
     else
     {
-        func.arg_vals.resize( node.args.size() );
+        node.arg_vals.resize( node.args.size() );
         for ( Int i = 0; i < (Int) node.args.size(); i++ )
-            handle_expr( node.args[i], func.arg_vals[i] );
+            handle_expr( node.args[i], node.arg_vals[i] );
     }
 
-    handle_func( func, retval );
+    handle_func( func, node.arg_vals, retval );
 }
 
 void dawn::Engine::handle_index_node( IndexNod& node, ValueRef& retval )
@@ -527,8 +527,7 @@ void dawn::Engine::handle_struct_node( StructNod& node, ValueRef& value )
     if ( struct_it == structs.end() )
         ENGINE_PANIC( "struct [", node.type, "] doesn't exist" );
 
-    value = ValueRef{ StructVal{} };
-    auto& result = value.as<StructVal>();
+    StructVal result;
     result.parent = &struct_it->second;
 
     for ( auto& field : struct_it->second.fields )
@@ -558,9 +557,10 @@ void dawn::Engine::handle_struct_node( StructNod& node, ValueRef& value )
         auto& member = result.members[method.name.get( id_system )];
         member = ValueRef{ method };
         auto& meth = member.as<Function>();
-        meth.arg_vals = { value };
         meth.parent = &struct_it->second;
     }
+
+    value = result;
 }
 
 void dawn::Engine::handle_array_node( ArrayNod& node, ValueRef& value )
@@ -811,7 +811,15 @@ void dawn::Engine::handle_ac_struct_node( ValueRef const& left, Node& right, Val
         if ( !left_val.members.contains( id_node.name.get( id_system ) ) )
             ENGINE_PANIC( "Member [", id_node.name, "] doesn't exist" );
 
-        value = left_val.members.at( id_node.name.get( id_system ) );
+        auto& result = left_val.members.at( id_node.name.get( id_system ) );
+        if ( result.type() == ValueType::FUNCTION )
+        {
+            auto& func = result.as<Function>();
+            func.self_val.resize( 1 );
+            func.self_val.front() = left_val;
+        }
+
+        value = result;
     }
     else
         ENGINE_PANIC( "Struct access must be an identifier" );

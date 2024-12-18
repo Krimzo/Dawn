@@ -1,34 +1,6 @@
-//import "examples/min_fib.dw"
+import "examples/min_fib.dw"
 
-func main()
-{
-    print( 2 ^ -2. )
-
-    return
-
-    let comb = first + second
-    ref a = wasd::get_val
-
-    ((print([1, 2, 3][1])))
-    ((print(int[14][5])))
-    ((print([[1, 2], [3, 4], [5, 6]][2][1])))
-
-    print((((a))()))
-}
-
-func haha(ref data) {
-    return Nice{ value=data }
-}
-
-struct Nice {
-    value = [0, 1, 2, 3]
-
-    func get_val() {
-        print("get_val called")
-        return self::value
-    }
-
-    oper ^ (ref other) {
-        return Nice{ value = self::value + other::value }
-    }
+func main() {
+    let result = fib(30)
+    print(result)
 }

@@ -35,13 +35,13 @@ struct Function
 
     ID name;
     Struct* parent = nullptr;
+    Array<ValueRef> self_val;
     Array<Variable> args;
-    Array<ValueRef> arg_vals;
     Variant<Scope, CppFunc> body;
 
     inline Bool is_method() const
     {
-        return static_cast<Bool>(parent);
+        return !self_val.empty();
     }
 
     inline Bool is_unary_op() const

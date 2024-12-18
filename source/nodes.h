@@ -24,6 +24,7 @@ struct CallNod
 {
     Node left_expr;
     Array<Node> args;
+    Array<ValueRef> arg_vals;
 };
 
 struct IndexNod

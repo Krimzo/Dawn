@@ -404,16 +404,17 @@ void dawn::Parser::parse_expression( Array<Token>::const_iterator& it, Array<Tok
     expression_extract( it, end, expr_tokens );
 
     Int least_prec_op = -1;
-    expression_precedence( expr_tokens, least_prec_op );
+    Bool op_is_unary = false;
+    expression_precedence( expr_tokens, least_prec_op, op_is_unary );
 
     if ( least_prec_op >= 0 )
     {
-        if ( least_prec_op == 0 && is_unary( expr_tokens.front() ) )
+        if ( op_is_unary )
         {
             if ( expr_tokens.size() < 2 )
                 PARSER_PANIC( {}, "unary expected expression" );
 
-            create_unary_node( expr_tokens.front(), tree );
+            create_unary_node( expr_tokens[least_prec_op], tree );
             auto& un_nod = tree.as<UnaryNod>();
 
             auto it = expr_tokens.begin() + 1;
@@ -490,26 +491,32 @@ void dawn::Parser::expression_extract( Array<Token>::const_iterator& it, Array<T
         PARSER_PANIC( *it, "expected expression end" );
 }
 
-void dawn::Parser::expression_precedence( Array<Token> const& tokens, Int& index )
+void dawn::Parser::expression_precedence( Array<Token> const& tokens, Int& index, Bool& unary )
 {
     Int expr_depth = 0;
-    Bool was_op = true;
     Int least_precedence = -1;
+    Bool was_op = true;
     for ( Int i = 0; i < (Int) tokens.size(); i++ )
     {
         auto& token = tokens[i];
 
         Bool is_op = precedences.contains( token.value );
-        if ( is_op && index < 0 )
-            index = i;
+        Bool is_unary = was_op && dawn::is_unary( token );
 
-        if ( expr_depth == 0 && is_op && !was_op )
+        if ( index < 0 && is_op )
         {
-            Int prec = precedences.at( token.value );
+            index = i;
+            unary = is_unary;
+        }
+
+        if ( expr_depth == 0 && is_op )
+        {
+            Int prec = is_unary ? precedences.at( prec_unary ) : precedences.at( token.value );
             if ( prec >= least_precedence )
             {
                 least_precedence = prec;
                 index = i;
+                unary = is_unary;
             }
         }
         was_op = is_op;

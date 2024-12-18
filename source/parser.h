@@ -37,7 +37,7 @@ private:
 
     void parse_expression( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree );
     void expression_extract( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Array<Token>& tokens );
-    void expression_precedence( Array<Token> const& tokens, Int& index );
+    void expression_precedence( Array<Token> const& tokens, Int& index, Bool& unary );
     void expression_complex_expr( Array<Token> const& left, Array<Token> const& right, Node& tree );
     void expression_complex_scope( Array<Token> const& tokens, Node& tree );
     void expression_complex_array( Array<Token> const& left, Token op, Array<Token> const& right, Node& tree );
