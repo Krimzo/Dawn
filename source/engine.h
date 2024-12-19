@@ -33,7 +33,10 @@ struct Predefines
 
     PRE_NAME_GEN( count );
     PRE_NAME_GEN( value );
+    PRE_NAME_GEN( push );
 };
+
+using TypeMember = Func<ValueRef( ValueRef const& )>;
 
 struct Engine
 {
@@ -44,8 +47,10 @@ struct Engine
     Stack<ValueRef> stack;
     Map<Int, Enum> enums;
     Map<Int, Struct> structs;
+    Map<ValueType, Map<Int, TypeMember>> type_members;
 
-    void load_standard();
+    Engine();
+
     void load_mod( Module& module );
     void load_function( Function& entry );
     void load_enum( Enum& entry );
@@ -59,6 +64,18 @@ struct Engine
     ValueRef* get_var( Int id );
 
 private:
+    void load_standard_functions();
+    void load_nothing_members();
+    void load_bool_members();
+    void load_int_members();
+    void load_float_members();
+    void load_char_members();
+    void load_string_members();
+    void load_function_members();
+    void load_enum_members();
+    void load_array_members();
+    void load_range_members();
+
     void handle_func( Function& func, Array<ValueRef>& args, ValueRef& retval );
     void handle_scope( Scope& scope, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
     void handle_instr( Node& node, ValueRef& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon );
@@ -87,10 +104,8 @@ private:
     void handle_ac_node( OperatorNod& node, ValueRef& value );
     void handle_as_node( AssignNod& node, ValueRef& value );
 
-    void handle_ac_string_node( ValueRef const& left, Node& right, ValueRef& value );
-    void handle_ac_enum_node( ValueRef const& left, Node& right, ValueRef& value );
-    void handle_ac_struct_node( ValueRef const& left, Node& right, ValueRef& value );
-    void handle_ac_array_node( ValueRef const& left, Node& right, ValueRef& value );
+    void handle_ac_struct_node( ValueRef const& left, ID& right, ValueRef& value );
+    void handle_ac_type_node( ValueRef const& left, ID& right, ValueRef& value );
 };
 
 struct PopHandler

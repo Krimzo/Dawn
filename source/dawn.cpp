@@ -1,11 +1,6 @@
 #include "dawn.h"
 
 
-dawn::Dawn::Dawn() noexcept
-{
-    engine.load_standard();
-}
-
 dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source ) noexcept
 {
     Set<String> imports;

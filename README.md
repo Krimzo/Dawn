@@ -130,5 +130,5 @@ print(a)
 # Misc
 ```dawn
 import "path..." // import other module
-let i = int(...) // casting primitive types
+let i = to_int(...) // casting primitive types
 ```

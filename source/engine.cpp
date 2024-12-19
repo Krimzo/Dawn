@@ -1,6 +1,21 @@
 #include "engine.h"
 
 
+dawn::Engine::Engine()
+{
+    load_standard_functions();
+    load_nothing_members();
+    load_bool_members();
+    load_int_members();
+    load_float_members();
+    load_char_members();
+    load_string_members();
+    load_function_members();
+    load_enum_members();
+    load_array_members();
+    load_range_members();
+}
+
 void dawn::Engine::load_mod( Module& module )
 {
     for ( auto& entry : module.functions )
@@ -20,7 +35,7 @@ void dawn::Engine::load_function( Function& entry )
 {
     if ( stack.get( entry.name.get( id_system ) ) )
         ENGINE_PANIC( "object [", entry.name, "] already exists" );
-    stack.push( entry.name.get( id_system ), entry );
+    stack.push( entry.name.get( id_system ), ValueRef{ entry } );
 }
 
 void dawn::Engine::load_enum( Enum& entry )
@@ -103,7 +118,7 @@ void dawn::Engine::handle_func( Function& func, Array<ValueRef>& args, ValueRef&
         Bool didret = false;
         handle_scope( std::get<Scope>( func.body ), retval, didret, nullptr, nullptr );
         if ( !didret )
-            retval = Value{};
+            retval = ValueRef{ Value{} };
     }
     else
     {
@@ -291,7 +306,7 @@ void dawn::Engine::handle_index_node( IndexNod& node, ValueRef& retval )
         auto& val = left_val.as<String>();
         if ( index < 0 || index >= (Int) val.size() )
             ENGINE_PANIC( "String access [", index, "] out of bounds" );
-        retval = val[index];
+        retval = ValueRef{ val[index] };
     }
     else if ( left_val.type() == ValueType::ARRAY )
     {
@@ -417,17 +432,17 @@ void dawn::Engine::handle_while_node( WhileNod& node, ValueRef& retval, Bool& di
     Bool didbrk = false, didcon = false;
     while ( true )
     {
-        ValueRef check_val;
-        handle_expr( node.expr, check_val );
-
-        if ( !check_val.to_bool( *this ) )
-            break;
-
         if ( didret || didbrk )
             break;
 
         if ( didcon )
             didcon = false;
+
+        ValueRef check_val;
+        handle_expr( node.expr, check_val );
+
+        if ( !check_val.to_bool( *this ) )
+            break;
 
         handle_scope( node.scope, retval, didret, &didbrk, &didcon );
     }
@@ -527,7 +542,8 @@ void dawn::Engine::handle_struct_node( StructNod& node, ValueRef& value )
     if ( struct_it == structs.end() )
         ENGINE_PANIC( "struct [", node.type, "] doesn't exist" );
 
-    StructVal result;
+    value = ValueRef{ StructVal{} };
+    auto& result = value.as<StructVal>();
     result.parent = &struct_it->second;
 
     for ( auto& field : struct_it->second.fields )
@@ -559,8 +575,6 @@ void dawn::Engine::handle_struct_node( StructNod& node, ValueRef& value )
         auto& meth = member.as<Function>();
         meth.parent = &struct_it->second;
     }
-
-    value = result;
 }
 
 void dawn::Engine::handle_array_node( ArrayNod& node, ValueRef& value )
@@ -708,23 +722,14 @@ void dawn::Engine::handle_ac_node( OperatorNod& node, ValueRef& value )
     ValueRef left_val;
     handle_expr( node.left, left_val );
 
-    switch ( left_val.type() )
-    {
-    case ValueType::STRING:
-        return handle_ac_string_node( left_val, node.right, value );
+    if ( node.right.type() != NodeType::IDENTIFIER )
+        ENGINE_PANIC( "Access must be an identifier" );
+    auto& right_id = node.right.as<IdentifierNod>().name;
 
-    case ValueType::ENUM:
-        return handle_ac_enum_node( left_val, node.right, value );
-
-    case ValueType::STRUCT:
-        return handle_ac_struct_node( left_val, node.right, value );
-
-    case ValueType::ARRAY:
-        return handle_ac_array_node( left_val, node.right, value );
-
-    default:
-        ENGINE_PANIC( "Can't access member of [", left_val.type(), "]" );
-    }
+    if ( left_val.type() == ValueType::STRUCT )
+        return handle_ac_struct_node( left_val, right_id, value );
+    else
+        return handle_ac_type_node( left_val, right_id, value );
 }
 
 void dawn::Engine::handle_as_node( AssignNod& node, ValueRef& value )
@@ -772,72 +777,38 @@ void dawn::Engine::handle_as_node( AssignNod& node, ValueRef& value )
     value = left_val;
 }
 
-void dawn::Engine::handle_ac_string_node( ValueRef const& left, Node& right, ValueRef& value )
+void dawn::Engine::handle_ac_struct_node( ValueRef const& left, ID& right, ValueRef& value )
 {
-    auto& left_val = left.as<String>();
-    if ( right.type() == NodeType::IDENTIFIER )
+    auto& left_val = left.as<StructVal>();
+    if ( !left_val.members.contains( right.get( id_system ) ) )
+        ENGINE_PANIC( "Struct [", left_val.parent->name.get( id_system ), "] doesn't have member [", right.str_id, "]" );
+
+    auto& result = left_val.members.at( right.get( id_system ) );
+    if ( result.type() == ValueType::FUNCTION )
     {
-        auto& id_node = right.as<IdentifierNod>();
-        if ( id_node.name.get( id_system ) == predefines._count.get( id_system ) )
-            value = ValueRef{ (Int) left_val.size() };
-        else
-            ENGINE_PANIC( "String access [", id_node.name, "] doesn't exist" );
+        auto& func = result.as<Function>();
+        func.self_val.resize( 1 );
+        func.self_val.front() = left;
     }
-    else
-        ENGINE_PANIC( "String access must be an identifier" );
+
+    value = result;
 }
 
-void dawn::Engine::handle_ac_enum_node( ValueRef const& left, Node& right, ValueRef& value )
+void dawn::Engine::handle_ac_type_node( ValueRef const& left, ID& right, ValueRef& value )
 {
-    auto& left_val = const_cast<EnumVal&>(left.as<EnumVal>());
-    if ( right.type() == NodeType::IDENTIFIER )
+    auto& members = type_members[left.type()];
+    if ( !members.contains( right.get( id_system ) ) )
+        ENGINE_PANIC( "Type [", left.type(), "] doesn't have member [", right, "]" );
+
+    ValueRef result = members.at( right.get( id_system ) )(left);
+    if ( result.type() == ValueType::FUNCTION )
     {
-        auto& id_node = right.as<IdentifierNod>();
-        if ( id_node.name.get( id_system ) == predefines._value.get( id_system ) )
-            value = left_val.parent->keys_value.at( left_val.key.get( id_system ) );
-        else
-            ENGINE_PANIC( "Enum access [", id_node.name, "] doesn't exist" );
+        auto& func = result.as<Function>();
+        func.self_val.resize( 1 );
+        func.self_val.front() = left;
     }
-    else
-        ENGINE_PANIC( "Enum access must be an identifier" );
-}
 
-void dawn::Engine::handle_ac_struct_node( ValueRef const& left, Node& right, ValueRef& value )
-{
-    auto& left_val = const_cast<StructVal&>(left.as<StructVal>());
-    if ( right.type() == NodeType::IDENTIFIER )
-    {
-        auto& id_node = right.as<IdentifierNod>();
-        if ( !left_val.members.contains( id_node.name.get( id_system ) ) )
-            ENGINE_PANIC( "Member [", id_node.name, "] doesn't exist" );
-
-        auto& result = left_val.members.at( id_node.name.get( id_system ) );
-        if ( result.type() == ValueType::FUNCTION )
-        {
-            auto& func = result.as<Function>();
-            func.self_val.resize( 1 );
-            func.self_val.front() = left_val;
-        }
-
-        value = result;
-    }
-    else
-        ENGINE_PANIC( "Struct access must be an identifier" );
-}
-
-void dawn::Engine::handle_ac_array_node( ValueRef const& left, Node& right, ValueRef& value )
-{
-    auto& left_val = left.as<ArrayVal>();
-    if ( right.type() == NodeType::IDENTIFIER )
-    {
-        auto& id_node = right.as<IdentifierNod>();
-        if ( id_node.name.get( id_system ) == predefines._count.get( id_system ) )
-            value = ValueRef{ (Int) left_val.data.size() };
-        else
-            ENGINE_PANIC( "Array access [", id_node.name, "] doesn't exist" );
-    }
-    else
-        ENGINE_PANIC( "Array access must be an identifier" );
+    value = result;
 }
 
 dawn::PopHandler::PopHandler( Engine& engine )

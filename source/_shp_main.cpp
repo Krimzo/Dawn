@@ -24,8 +24,8 @@ int dawn::_shp_main( int argc, char** argv )
     for ( int i = 2; i < argc; i++ )
         arg.data.emplace_back( String{ argv[i] } );
 
-    ValueRef retval = Int( 0 );
-    Array<ValueRef> args = { arg };
+    ValueRef retval{ 0ll };
+    Array<ValueRef> args = { ValueRef{ arg } };
     if ( auto error = dawn.call_func( "main", args, retval ) )
     {
         print( error.value() );
