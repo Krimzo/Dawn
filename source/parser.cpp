@@ -452,7 +452,7 @@ void dawn::Parser::expression_extract( ExtractType type, Array<Token>::const_ite
         {
             --expr_depth;
             if ( expr_depth < 0 )
-                break;
+                PARSER_PANIC( *it, "unexpected expression end" );
         }
 
         tokens.push_back( *it );
