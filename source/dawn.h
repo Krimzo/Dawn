@@ -14,8 +14,6 @@ struct Dawn
     Parser parser;
     Engine engine;
 
-    Dawn() noexcept;
-
     Opt<String> eval( StringRef const& source ) noexcept;
     Opt<String> eval( StringRef const& source, Set<String>& imports ) noexcept;
 

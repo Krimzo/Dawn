@@ -145,7 +145,6 @@ void dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>:
 
             auto& self_var = *method.args.emplace( method.args.begin() );
             self_var.kind = VariableKind::REF;
-            self_var.expr = make_nothing_node();
             self_var.name.str_id = kw_self;
         }
         else if ( it->value == kw_oper )
@@ -155,7 +154,6 @@ void dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>:
 
             auto& self_var = *op.args.emplace( op.args.begin() );
             self_var.kind = VariableKind::REF;
-            self_var.expr = make_nothing_node();
             self_var.name.str_id = kw_self;
         }
         else
@@ -1145,7 +1143,7 @@ dawn::Node dawn::make_def_val( StringRef const& type )
         return make_string_node( {} );
 
     else if ( type == op_range )
-        return make_value_node( RangeVal{} );
+        return make_value_node( ValueRef{ RangeVal{} } );
 
     else if ( is_custom_type( type ) )
     {

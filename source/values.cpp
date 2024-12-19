@@ -162,10 +162,10 @@ dawn::ValueRef dawn::ValueRef::un_plus( Engine& engine ) const
     switch ( type() )
     {
     case ValueType::INT:
-        return +as<Int>();
+        return ValueRef{ +as<Int>() };
 
     case ValueType::FLOAT:
-        return +as<Float>();
+        return ValueRef{ +as<Float>() };
 
     case ValueType::STRUCT:
     {
@@ -192,10 +192,10 @@ dawn::ValueRef dawn::ValueRef::un_minus( Engine& engine ) const
     switch ( type() )
     {
     case ValueType::INT:
-        return -as<Int>();
+        return ValueRef{ -as<Int>() };
 
     case ValueType::FLOAT:
-        return -as<Float>();
+        return ValueRef{ -as<Float>() };
 
     case ValueType::STRUCT:
     {
@@ -226,10 +226,10 @@ dawn::ValueRef dawn::ValueRef::op_add( Engine& engine, ValueRef const& other ) c
         switch ( other.type() )
         {
         case ValueType::INT:
-            return as<Int>() + other.as<Int>();
+            return ValueRef{ as<Int>() + other.as<Int>() };
 
         case ValueType::FLOAT:
-            return as<Int>() + other.as<Float>();
+            return ValueRef{ as<Int>() + other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] + [", other.type(), "] not supported" );
@@ -241,10 +241,10 @@ dawn::ValueRef dawn::ValueRef::op_add( Engine& engine, ValueRef const& other ) c
         switch ( other.type() )
         {
         case ValueType::INT:
-            return as<Float>() + other.as<Int>();
+            return ValueRef{ as<Float>() + other.as<Int>() };
 
         case ValueType::FLOAT:
-            return as<Float>() + other.as<Float>();
+            return ValueRef{ as<Float>() + other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] + [", other.type(), "] not supported" );
@@ -256,7 +256,7 @@ dawn::ValueRef dawn::ValueRef::op_add( Engine& engine, ValueRef const& other ) c
         switch ( other.type() )
         {
         case ValueType::STRING:
-            return as<String>() + other.as<String>();
+            return ValueRef{ as<String>() + other.as<String>() };
 
         default:
             PANIC( "[", type(), "] + [", other.type(), "] not supported" );
@@ -272,7 +272,7 @@ dawn::ValueRef dawn::ValueRef::op_add( Engine& engine, ValueRef const& other ) c
             ArrayVal result;
             result.data.insert( result.data.end(), as<ArrayVal>().data.begin(), as<ArrayVal>().data.end() );
             result.data.insert( result.data.end(), other.as<ArrayVal>().data.begin(), other.as<ArrayVal>().data.end() );
-            return result;
+            return ValueRef{ result };
         }
 
         default:
@@ -310,10 +310,10 @@ dawn::ValueRef dawn::ValueRef::op_sub( Engine& engine, ValueRef const& other ) c
         switch ( other.type() )
         {
         case ValueType::INT:
-            return as<Int>() - other.as<Int>();
+            return ValueRef{ as<Int>() - other.as<Int>() };
 
         case ValueType::FLOAT:
-            return as<Int>() - other.as<Float>();
+            return ValueRef{ as<Int>() - other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] - [", other.type(), "] not supported" );
@@ -325,10 +325,10 @@ dawn::ValueRef dawn::ValueRef::op_sub( Engine& engine, ValueRef const& other ) c
         switch ( other.type() )
         {
         case ValueType::INT:
-            return as<Float>() - other.as<Int>();
+            return ValueRef{ as<Float>() - other.as<Int>() };
 
         case ValueType::FLOAT:
-            return as<Float>() - other.as<Float>();
+            return ValueRef{ as<Float>() - other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] - [", other.type(), "] not supported" );
@@ -365,10 +365,10 @@ dawn::ValueRef dawn::ValueRef::op_mul( Engine& engine, ValueRef const& other ) c
         switch ( other.type() )
         {
         case ValueType::INT:
-            return as<Int>() * other.as<Int>();
+            return ValueRef{ as<Int>() * other.as<Int>() };
 
         case ValueType::FLOAT:
-            return as<Int>() * other.as<Float>();
+            return ValueRef{ as<Int>() * other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] * [", other.type(), "] not supported" );
@@ -380,10 +380,10 @@ dawn::ValueRef dawn::ValueRef::op_mul( Engine& engine, ValueRef const& other ) c
         switch ( other.type() )
         {
         case ValueType::INT:
-            return as<Float>() * other.as<Int>();
+            return ValueRef{ as<Float>() * other.as<Int>() };
 
         case ValueType::FLOAT:
-            return as<Float>() * other.as<Float>();
+            return ValueRef{ as<Float>() * other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] * [", other.type(), "] not supported" );
@@ -420,10 +420,10 @@ dawn::ValueRef dawn::ValueRef::op_div( Engine& engine, ValueRef const& other ) c
         switch ( other.type() )
         {
         case ValueType::INT:
-            return as<Int>() / other.as<Int>();
+            return ValueRef{ as<Int>() / other.as<Int>() };
 
         case ValueType::FLOAT:
-            return as<Int>() / other.as<Float>();
+            return ValueRef{ as<Int>() / other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] / [", other.type(), "] not supported" );
@@ -435,10 +435,10 @@ dawn::ValueRef dawn::ValueRef::op_div( Engine& engine, ValueRef const& other ) c
         switch ( other.type() )
         {
         case ValueType::INT:
-            return as<Float>() / other.as<Int>();
+            return ValueRef{ as<Float>() / other.as<Int>() };
 
         case ValueType::FLOAT:
-            return as<Float>() / other.as<Float>();
+            return ValueRef{ as<Float>() / other.as<Float>() };
 
         default:
             PANIC( "[", type(), "] / [", other.type(), "] not supported" );
@@ -475,10 +475,10 @@ dawn::ValueRef dawn::ValueRef::op_pow( Engine& engine, ValueRef const& other ) c
         switch ( other.type() )
         {
         case ValueType::INT:
-            return (Int) std::pow( as<Int>(), other.as<Int>() );
+            return ValueRef{ (Int) std::pow( as<Int>(), other.as<Int>() ) };
 
         case ValueType::FLOAT:
-            return std::pow( as<Int>(), other.as<Float>() );
+            return ValueRef{ std::pow( as<Int>(), other.as<Float>() ) };
 
         default:
             PANIC( "[", type(), "] ^ [", other.type(), "] not supported" );
@@ -490,10 +490,10 @@ dawn::ValueRef dawn::ValueRef::op_pow( Engine& engine, ValueRef const& other ) c
         switch ( other.type() )
         {
         case ValueType::INT:
-            return std::pow( as<Float>(), other.as<Int>() );
+            return ValueRef{ std::pow( as<Float>(), other.as<Int>() ) };
 
         case ValueType::FLOAT:
-            return std::pow( as<Float>(), other.as<Float>() );
+            return ValueRef{ std::pow( as<Float>(), other.as<Float>() ) };
 
         default:
             PANIC( "[", type(), "] ^ [", other.type(), "] not supported" );
@@ -530,10 +530,10 @@ dawn::ValueRef dawn::ValueRef::op_mod( Engine& engine, ValueRef const& other ) c
         switch ( other.type() )
         {
         case ValueType::INT:
-            return as<Int>() % other.as<Int>();
+            return ValueRef{ as<Int>() % other.as<Int>() };
 
         case ValueType::FLOAT:
-            return mymod( (Float) as<Int>(), other.as<Float>() );
+            return ValueRef{ mymod( (Float) as<Int>(), other.as<Float>() ) };
 
         default:
             PANIC( "[", type(), "] % [", other.type(), "] not supported" );
@@ -545,10 +545,10 @@ dawn::ValueRef dawn::ValueRef::op_mod( Engine& engine, ValueRef const& other ) c
         switch ( other.type() )
         {
         case ValueType::INT:
-            return mymod( as<Float>(), (Float) other.as<Int>() );
+            return ValueRef{ mymod( as<Float>(), (Float) other.as<Int>() ) };
 
         case ValueType::FLOAT:
-            return mymod( as<Float>(), other.as<Float>() );
+            return ValueRef{ mymod( as<Float>(), other.as<Float>() ) };
 
         default:
             PANIC( "[", type(), "] % [", other.type(), "] not supported" );
@@ -585,7 +585,7 @@ dawn::ValueRef dawn::ValueRef::op_cmpr( Engine& engine, ValueRef const& other ) 
         switch ( other.type() )
         {
         case ValueType::BOOL:
-            return (Int) (as<Bool>() <=> other.as<Bool>())._Value;
+            return ValueRef{ (Int) (as<Bool>() <=> other.as<Bool>())._Value };
 
         default:
             PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
@@ -597,10 +597,10 @@ dawn::ValueRef dawn::ValueRef::op_cmpr( Engine& engine, ValueRef const& other ) 
         switch ( other.type() )
         {
         case ValueType::INT:
-            return (Int) (as<Int>() <=> other.as<Int>())._Value;
+            return ValueRef{ (Int) (as<Int>() <=> other.as<Int>())._Value };
 
         case ValueType::FLOAT:
-            return (Int) (as<Int>() <=> other.as<Float>())._Value;
+            return ValueRef{ (Int) (as<Int>() <=> other.as<Float>())._Value };
 
         default:
             PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
@@ -612,10 +612,10 @@ dawn::ValueRef dawn::ValueRef::op_cmpr( Engine& engine, ValueRef const& other ) 
         switch ( other.type() )
         {
         case ValueType::INT:
-            return (Int) (as<Float>() <=> other.as<Int>())._Value;
+            return ValueRef{ (Int) (as<Float>() <=> other.as<Int>())._Value };
 
         case ValueType::FLOAT:
-            return (Int) (as<Float>() <=> other.as<Float>())._Value;
+            return ValueRef{ (Int) (as<Float>() <=> other.as<Float>())._Value };
 
         default:
             PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
@@ -627,7 +627,7 @@ dawn::ValueRef dawn::ValueRef::op_cmpr( Engine& engine, ValueRef const& other ) 
         switch ( other.type() )
         {
         case ValueType::CHAR:
-            return (Int) (as<Char>() <=> other.as<Char>())._Value;
+            return ValueRef{ (Int) (as<Char>() <=> other.as<Char>())._Value };
 
         default:
             PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
@@ -639,7 +639,7 @@ dawn::ValueRef dawn::ValueRef::op_cmpr( Engine& engine, ValueRef const& other ) 
         switch ( other.type() )
         {
         case ValueType::STRING:
-            return (Int) (as<String>() <=> other.as<String>())._Value;
+            return ValueRef{ (Int) (as<String>() <=> other.as<String>())._Value };
 
         default:
             PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
@@ -657,7 +657,7 @@ dawn::ValueRef dawn::ValueRef::op_cmpr( Engine& engine, ValueRef const& other ) 
             if ( left.parent != right.parent )
                 PANIC( "enum [", left.parent->name, "] <=> enum [", right.parent->name, "] not supported" );
 
-            return (Int) (left.key.str_id <=> right.key.str_id)._Value;
+            return ValueRef{ (Int) (left.key.str_id <=> right.key.str_id)._Value };
         }
 
         default:
@@ -694,9 +694,9 @@ dawn::ValueRef dawn::ValueRef::op_cmpr( Engine& engine, ValueRef const& other ) 
             {
                 Int cmpr_res = left[i].op_cmpr( engine, right[i] ).as<Int>();
                 if ( cmpr_res != 0 )
-                    return cmpr_res;
+                    return ValueRef{ cmpr_res };
             }
-            return (Int) (left.size() <=> right.size())._Value;
+            return ValueRef{ (Int) (left.size() <=> right.size())._Value };
         }
 
         default:
@@ -753,17 +753,17 @@ dawn::ValueRef dawn::ValueRef::op_greateq( Engine& engine, ValueRef const& other
 
 dawn::ValueRef dawn::ValueRef::un_not( Engine& engine ) const
 {
-    return !to_bool( engine );
+    return ValueRef{ !to_bool( engine ) };
 }
 
 dawn::ValueRef dawn::ValueRef::op_and( Engine& engine, ValueRef const& other ) const
 {
-    return to_bool( engine ) && other.to_bool( engine );
+    return ValueRef{ to_bool( engine ) && other.to_bool( engine ) };
 }
 
 dawn::ValueRef dawn::ValueRef::op_or( Engine& engine, ValueRef const& other ) const
 {
-    return to_bool( engine ) || other.to_bool( engine );
+    return ValueRef{ to_bool( engine ) || other.to_bool( engine ) };
 }
 
 dawn::ValueRef dawn::ValueRef::op_range( Engine& engine, ValueRef const& other ) const
@@ -771,7 +771,7 @@ dawn::ValueRef dawn::ValueRef::op_range( Engine& engine, ValueRef const& other )
     RangeVal result;
     result.start_incl = to_int( engine );
     result.end_excl = other.to_int( engine );
-    return result;
+    return ValueRef{ result };
 }
 
 dawn::Bool dawn::ValueRef::to_bool( Engine& engine ) const

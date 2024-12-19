@@ -260,17 +260,17 @@ enum struct ValueKind
 struct ValueRef
 {
     ValueRef() = default;
-    ValueRef( Bool value, ValueKind kind = ValueKind::LET );
-    ValueRef( Int value, ValueKind kind = ValueKind::LET );
-    ValueRef( Float value, ValueKind kind = ValueKind::LET );
-    ValueRef( Char value, ValueKind kind = ValueKind::LET );
-    ValueRef( String value, ValueKind kind = ValueKind::LET );
-    ValueRef( Function const& value, ValueKind kind = ValueKind::LET );
-    ValueRef( EnumVal const& value, ValueKind kind = ValueKind::LET );
-    ValueRef( StructVal const& value, ValueKind kind = ValueKind::LET );
-    ValueRef( ArrayVal const& value, ValueKind kind = ValueKind::LET );
-    ValueRef( RangeVal const& value, ValueKind kind = ValueKind::LET );
-    ValueRef( Value const& value, ValueKind kind = ValueKind::LET );
+    explicit ValueRef( Bool value, ValueKind kind = ValueKind::LET );
+    explicit ValueRef( Int value, ValueKind kind = ValueKind::LET );
+    explicit ValueRef( Float value, ValueKind kind = ValueKind::LET );
+    explicit ValueRef( Char value, ValueKind kind = ValueKind::LET );
+    explicit ValueRef( String value, ValueKind kind = ValueKind::LET );
+    explicit ValueRef( Function const& value, ValueKind kind = ValueKind::LET );
+    explicit ValueRef( EnumVal const& value, ValueKind kind = ValueKind::LET );
+    explicit ValueRef( StructVal const& value, ValueKind kind = ValueKind::LET );
+    explicit ValueRef( ArrayVal const& value, ValueKind kind = ValueKind::LET );
+    explicit ValueRef( RangeVal const& value, ValueKind kind = ValueKind::LET );
+    explicit ValueRef( Value const& value, ValueKind kind = ValueKind::LET );
 
     ValueKind kind() const;
     ValueType type() const;
