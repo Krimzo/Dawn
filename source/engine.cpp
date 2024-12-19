@@ -73,10 +73,10 @@ void dawn::Engine::call_func( Int id, Array<ValueRef>& args, ValueRef& retval )
 {
     ValueRef* val = stack.get( id );
     if ( !val )
-        ENGINE_PANIC( "object [", id, "] doesn't exist" );
+        ENGINE_PANIC( "function [", *id_system.get( id ), "] doesn't exist" );
 
     if ( val->type() != ValueType::FUNCTION )
-        ENGINE_PANIC( "object [", id, "] is not a function" );
+        ENGINE_PANIC( "object [", *id_system.get( id ), "] is not a function" );
 
     handle_func( val->as<Function>(), args, retval );
 }
