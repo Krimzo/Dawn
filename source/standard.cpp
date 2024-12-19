@@ -10,6 +10,42 @@ static thread_local std::mt19937_64 RAND_ENGINE = []
 
 void dawn::Engine::load_standard()
 {
+    /* CAST */
+    bind_func( "to_bool", [this]( Array<ValueRef> const& args ) -> ValueRef
+    {
+        if ( args.size() != 1 )
+            PANIC( "to_bool expected 1 argument, but got ", args.size() );
+        return args[0].to_bool( *this );
+    } );
+
+    bind_func( "to_int", [this]( Array<ValueRef> const& args ) -> ValueRef
+    {
+        if ( args.size() != 1 )
+            PANIC( "to_int expected 1 argument, but got ", args.size() );
+        return args[0].to_int( *this );
+    } );
+
+    bind_func( "to_float", [this]( Array<ValueRef> const& args ) -> ValueRef
+    {
+        if ( args.size() != 1 )
+            PANIC( "to_float expected 1 argument, but got ", args.size() );
+        return args[0].to_float( *this );
+    } );
+
+    bind_func( "to_char", [this]( Array<ValueRef> const& args ) -> ValueRef
+    {
+        if ( args.size() != 1 )
+            PANIC( "to_char expected 1 argument, but got ", args.size() );
+        return args[0].to_char( *this );
+    } );
+
+    bind_func( "to_string", [this]( Array<ValueRef> const& args ) -> ValueRef
+    {
+        if ( args.size() != 1 )
+            PANIC( "to_string expected 1 argument, but got ", args.size() );
+        return args[0].to_string( *this );
+    } );
+
     /* UTIL */
     bind_func( "format", [this]( Array<ValueRef> const& args ) -> ValueRef
     {

@@ -106,21 +106,6 @@ void dawn::Parser::parse_global_variable( Array<Token>::const_iterator& it, Arra
     module.variables.push_back( variable );
 }
 
-void dawn::Parser::parse_type( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, String& type )
-{
-    if ( it->value != tp_bool
-        && it->value != tp_int
-        && it->value != tp_float
-        && it->value != tp_char
-        && it->value != tp_string
-        && it->value != op_range
-        && it->type != TokenType::TYPE )
-        PARSER_PANIC( *it, "invalid type" );
-
-    type = it->value;
-    ++it;
-}
-
 void dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Struct& struc )
 {
     if ( it->value != kw_struct )
@@ -642,9 +627,10 @@ void dawn::Parser::expression_complex_array( Array<Token> const& left, Token op,
 
         auto left_it = left.begin();
 
-        String val_type;
-        parse_type( left_it, left.end(), val_type );
-        node.SIZE_value_expr = make_def_expr( val_type );
+        if ( left_it->type != TokenType::TYPE )
+            PARSER_PANIC( *left_it, "expected array type" );
+        node.SIZE_value_expr = make_def_val( left_it->value );
+        ++left_it;
 
         auto right_it = right.begin();
 
@@ -1187,7 +1173,7 @@ void dawn::create_assign_node( Token const& token, Node& node )
         PARSER_PANIC( token, "unknown assign operator" );
 }
 
-dawn::Node dawn::make_def_expr( StringRef const& type )
+dawn::Node dawn::make_def_val( StringRef const& type )
 {
     if ( type == tp_bool )
         return make_bool_node( {} );

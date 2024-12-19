@@ -28,7 +28,6 @@ private:
     void parse_global_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
     void parse_global_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module );
 
-    void parse_type( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, String& type );
     void parse_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Struct& struc );
     void parse_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Enum& enu );
     void parse_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Function& function );
@@ -67,5 +66,5 @@ void create_unary_node( Token const& token, Node& node );
 void create_operator_node( Token const& token, Node& node );
 void create_assign_node( Token const& token, Node& node );
 
-Node make_def_expr( StringRef const& type );
+Node make_def_val( StringRef const& type );
 }
