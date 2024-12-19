@@ -1,0 +1,156 @@
+func main()
+{
+	var_test()
+	branch_test()
+	loop_test()
+	enum_test()
+	struct_test()
+	array_test()
+	print("Done.")
+}
+
+func assert(ref check, ref msg)
+{
+	if !check {
+		print(msg)
+	}
+}
+
+func var_test()
+{
+	let a = 2
+	var b = (
+		a + 1 * 2
+	)
+	ref c = b
+	c *= 2
+
+	assert(a == 2, "a is bad")
+	assert(b == 8, "b is bad")
+}
+
+func branch_test()
+{
+	let a = -2
+	if a < 0 {
+		print(a, " is negative")
+	}
+	elif a > 0 {
+		print(a, " is positive")
+	}
+	else {
+		print(a, " is zero")
+	}
+
+	switch a {
+		case 0, 1 {
+			print("first case")
+		}
+		case 5 {
+			print("second case")
+		}
+		default {
+			print("default case")
+		}
+	}
+}
+
+func loop_test()
+{
+	var counter = 0
+	loop {
+		if counter == 2 {
+			counter += 1
+			continue
+		}
+		if counter >= 4 {
+			break
+		}
+		print(counter)
+		counter += 1
+	}
+
+	counter = 0
+	while counter < 4 {
+		if counter == 2 {
+			counter += 1
+			continue
+		}
+		print(counter)
+		counter += 1
+	}
+
+	for ref i: 0 >> 4 {
+		print(i)
+	}
+	for ref i: "nice" {
+		print(i)
+	}
+	for ref i: [1, 2, 3] {
+		print(i)
+	}
+}
+
+enum SomeEnum
+{
+	one = 1
+	two = [2, 2.0, "two"]
+	four = "four"
+}
+
+func enum_test()
+{
+	var first_val = SomeEnum{ two }	
+	print(first_val::value[2][1])
+	assert(SomeEnum{ two } == SomeEnum{ two }, "bad enum comparsion 1")
+	assert(SomeEnum{ one } != SomeEnum{ two }, "bad enum comparsion 2")
+}
+
+struct SomeStruct
+{
+	name = "some name"
+	age
+
+	func who()
+	{
+		print(self)
+	}
+
+	oper + (ref age)
+	{
+		self::age += age
+		return self
+	}
+
+	func to_string()
+	{
+		return format("SomeStruct: ", self::name, " is ", self::age, " years old")
+	}
+}
+
+func struct_test()
+{
+	let some_val1 = SomeStruct{ age = 4 }
+	var some_val2 = SomeStruct{ name =
+		"really "
+		+
+		"cool", age =
+		2 }
+
+	print(some_val1)
+	print(some_val2 + some_val2::age)
+	print(some_val2)
+}
+
+func array_test()
+{
+	var data = []
+	data += [ int[2] + float[2 + 1] ]
+	data += [SomeStruct[2]]
+	
+	data[data::count - 1][1]::age = 17
+	print(data)
+
+	let str_val = to_string( data[data::count - 1][1] )
+	print( str_val )
+}

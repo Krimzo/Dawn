@@ -417,17 +417,17 @@ void dawn::Engine::handle_while_node( WhileNod& node, ValueRef& retval, Bool& di
     Bool didbrk = false, didcon = false;
     while ( true )
     {
-        ValueRef check_val;
-        handle_expr( node.expr, check_val );
-
-        if ( !check_val.to_bool( *this ) )
-            break;
-
         if ( didret || didbrk )
             break;
 
         if ( didcon )
             didcon = false;
+
+        ValueRef check_val;
+        handle_expr( node.expr, check_val );
+
+        if ( !check_val.to_bool( *this ) )
+            break;
 
         handle_scope( node.scope, retval, didret, &didbrk, &didcon );
     }
