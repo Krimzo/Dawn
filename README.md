@@ -1,5 +1,5 @@
 # About
-Still heavily WIP. Expect bugs.
+Dawn is currently under development and may contain bugs.
 
 ```dawn
 func main(ref args) {
@@ -20,7 +20,7 @@ let s = "nice" // string (32 bytes)
 ```dawn
 let a0 = int[10]            // array of 10 int elements
 var a1 = [4, "cool", false] // array of 3 elements
-a1[1] += " stuff"           // acces of the second element
+a1[1] += " stuff"           // access of the second element
 ```
 
 # Enums
@@ -129,6 +129,6 @@ print(a)
 
 # Misc
 ```dawn
-import "path..." // import other module
+import "path..."    // importing modules
 let i = to_int(...) // casting primitive types
 ```
