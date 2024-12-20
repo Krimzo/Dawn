@@ -22,7 +22,7 @@ struct Module
     Array<Enum> enums;
     Array<Struct> structs;
 
-    Bool contains_id( StringRef const& id ) const;
+    Bool contains_id( Int id ) const;
 };
 
 struct Parser

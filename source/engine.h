@@ -6,46 +6,12 @@
 
 namespace dawn
 {
-#define PRE_OP_GEN(NAME, OP) ID __##NAME = String( OP )
-#define PRE_NAME_GEN(NAME) ID _##NAME = String( #NAME )
-
 using TypeMember = Func<ValueRef( ValueRef const& )>;
-
-struct Predefines
-{
-    PRE_OP_GEN( add, op_add );
-    PRE_OP_GEN( sub, op_sub );
-    PRE_OP_GEN( mul, op_mul );
-    PRE_OP_GEN( div, op_div );
-    PRE_OP_GEN( pow, op_pow );
-    PRE_OP_GEN( mod, op_mod );
-    PRE_OP_GEN( cmpr, op_cmpr );
-
-    PRE_NAME_GEN( bool );
-    PRE_NAME_GEN( int );
-    PRE_NAME_GEN( float );
-    PRE_NAME_GEN( char );
-    PRE_NAME_GEN( string );
-
-    PRE_NAME_GEN( to_bool );
-    PRE_NAME_GEN( to_int );
-    PRE_NAME_GEN( to_float );
-    PRE_NAME_GEN( to_char );
-    PRE_NAME_GEN( to_string );
-
-    PRE_NAME_GEN( count );
-    PRE_NAME_GEN( value );
-    PRE_NAME_GEN( push );
-    PRE_NAME_GEN( start );
-    PRE_NAME_GEN( end );
-};
 
 struct Engine
 {
     friend struct ValueRef;
 
-    IDSystem id_system;
-    Predefines predefines;
     ScopeStack stack;
     Map<Int, Enum> enums;
     Map<Int, Struct> structs;
@@ -59,7 +25,7 @@ struct Engine
     void load_struct( Struct& entry );
     void load_variable( Variable& entry );
 
-    void bind_func( StringRef const& name, Function::CppFunc cpp_func );
+    void bind_func( Int id, Function::CppFunc cpp_func );
     void call_func( Int id, Array<ValueRef>& args, ValueRef& retval );
 
     void add_obj( VariableKind kind, Int id, ValueRef const& value );
@@ -106,7 +72,7 @@ private:
     void handle_ac_node( OperatorNod& node, ValueRef& value );
     void handle_as_node( AssignNod& node, ValueRef& value );
 
-    void handle_ac_struct_node( ValueRef const& left, ID& right, ValueRef& value );
-    void handle_ac_type_node( ValueRef const& left, ID& right, ValueRef& value );
+    void handle_ac_struct_node( ValueRef const& left, Int right, ValueRef& value );
+    void handle_ac_type_node( ValueRef const& left, Int right, ValueRef& value );
 };
 }

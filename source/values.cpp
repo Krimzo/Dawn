@@ -2,6 +2,26 @@
 #include "engine.h"
 
 
+#define OP_HELPER(op) static const Int __##op = IDSystem::get( (String) op_##op )
+#define ID_HELPER(id) static const Int _##id = IDSystem::get( #id )
+
+namespace dawn
+{
+OP_HELPER( add );
+OP_HELPER( sub );
+OP_HELPER( mul );
+OP_HELPER( div );
+OP_HELPER( pow );
+OP_HELPER( mod );
+OP_HELPER( cmpr );
+
+ID_HELPER( to_bool );
+ID_HELPER( to_int );
+ID_HELPER( to_float );
+ID_HELPER( to_char );
+ID_HELPER( to_string );
+}
+
 dawn::StructVal::StructVal( StructVal const& other )
 {
     parent = other.parent;
@@ -168,9 +188,9 @@ dawn::ValueRef dawn::ValueRef::un_plus( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( engine.predefines.__add.get( engine.id_system ), true );
+        Function* op = left.get_method( __add, true );
         if ( !op )
-            PANIC( "+ struct [", left.parent->name, "] not supported" );
+            PANIC( "+ struct [", IDSystem::get( left.parent->id ), "] not supported" );
 
         ValueRef retval;
         op->self_val.resize( 1 );
@@ -198,9 +218,9 @@ dawn::ValueRef dawn::ValueRef::un_minus( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( engine.predefines.__sub.get( engine.id_system ), true );
+        Function* op = left.get_method( __sub, true );
         if ( !op )
-            PANIC( "- struct [", left.parent->name, "] not supported" );
+            PANIC( "- struct [", IDSystem::get( left.parent->id ), "] not supported" );
 
         ValueRef retval;
         op->self_val.resize( 1 );
@@ -281,9 +301,9 @@ dawn::ValueRef dawn::ValueRef::op_add( Engine& engine, ValueRef const& other ) c
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( engine.predefines.__add.get( engine.id_system ), false );
+        Function* op = left.get_method( __add, false );
         if ( !op )
-            PANIC( "struct [", left.parent->name, "] + struct [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] + struct [", other.type(), "] not supported" );
 
         ValueRef retval;
         op->self_val.resize( 2 );
@@ -336,9 +356,9 @@ dawn::ValueRef dawn::ValueRef::op_sub( Engine& engine, ValueRef const& other ) c
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( engine.predefines.__sub.get( engine.id_system ), false );
+        Function* op = left.get_method( __sub, false );
         if ( !op )
-            PANIC( "struct [", left.parent->name, "] - struct [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] - struct [", other.type(), "] not supported" );
 
         ValueRef retval;
         op->self_val.resize( 2 );
@@ -391,9 +411,9 @@ dawn::ValueRef dawn::ValueRef::op_mul( Engine& engine, ValueRef const& other ) c
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( engine.predefines.__mul.get( engine.id_system ), false );
+        Function* op = left.get_method( __mul, false );
         if ( !op )
-            PANIC( "struct [", left.parent->name, "] * struct [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] * struct [", other.type(), "] not supported" );
 
         ValueRef retval;
         op->self_val.resize( 2 );
@@ -446,9 +466,9 @@ dawn::ValueRef dawn::ValueRef::op_div( Engine& engine, ValueRef const& other ) c
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( engine.predefines.__div.get( engine.id_system ), false );
+        Function* op = left.get_method( __div, false );
         if ( !op )
-            PANIC( "struct [", left.parent->name, "] / struct [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] / struct [", other.type(), "] not supported" );
 
         ValueRef retval;
         op->self_val.resize( 2 );
@@ -501,9 +521,9 @@ dawn::ValueRef dawn::ValueRef::op_pow( Engine& engine, ValueRef const& other ) c
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( engine.predefines.__pow.get( engine.id_system ), false );
+        Function* op = left.get_method( __pow, false );
         if ( !op )
-            PANIC( "struct [", left.parent->name, "] ^ struct [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] ^ struct [", other.type(), "] not supported" );
 
         ValueRef retval;
         op->self_val.resize( 2 );
@@ -556,9 +576,9 @@ dawn::ValueRef dawn::ValueRef::op_mod( Engine& engine, ValueRef const& other ) c
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( engine.predefines.__mod.get( engine.id_system ), false );
+        Function* op = left.get_method( __mod, false );
         if ( !op )
-            PANIC( "struct [", left.parent->name, "] % struct [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] % struct [", other.type(), "] not supported" );
 
         ValueRef retval;
         op->self_val.resize( 2 );
@@ -653,9 +673,9 @@ dawn::ValueRef dawn::ValueRef::op_cmpr( Engine& engine, ValueRef const& other ) 
             auto& left = as<EnumVal>();
             auto& right = other.as<EnumVal>();
             if ( left.parent != right.parent )
-                PANIC( "enum [", left.parent->name, "] <=> enum [", right.parent->name, "] not supported" );
+                PANIC( "enum [", IDSystem::get( left.parent->id ), "] <=> enum [", IDSystem::get( right.parent->id ), "] not supported" );
 
-            return ValueRef{ (Int) (left.key.str_id <=> right.key.str_id)._Value };
+            return ValueRef{ (Int) (left.key_id <=> right.key_id)._Value };
         }
 
         default:
@@ -666,9 +686,9 @@ dawn::ValueRef dawn::ValueRef::op_cmpr( Engine& engine, ValueRef const& other ) 
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( engine.predefines.__cmpr.get( engine.id_system ), false );
+        Function* op = left.get_method( __cmpr, false );
         if ( !op )
-            PANIC( "struct [", left.parent->name, "] <=> struct [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] <=> struct [", other.type(), "] not supported" );
 
         ValueRef retval;
         op->self_val.resize( 2 );
@@ -797,9 +817,9 @@ dawn::Bool dawn::ValueRef::to_bool( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* method = left.get_method( engine.predefines._to_bool.get( engine.id_system ), true );
+        Function* method = left.get_method( _to_bool, true );
         if ( !method )
-            PANIC( "Cannot convert struct [", left.parent->name, "] to bool" );
+            PANIC( "Cannot convert struct [", IDSystem::get( left.parent->id ), "] to bool" );
 
         ValueRef retval;
         method->self_val.resize( 1 );
@@ -843,9 +863,9 @@ dawn::Int dawn::ValueRef::to_int( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* method = left.get_method( engine.predefines._to_int.get( engine.id_system ), true );
+        Function* method = left.get_method( _to_int, true );
         if ( !method )
-            PANIC( "Cannot convert struct [", left.parent->name, "] to int" );
+            PANIC( "Cannot convert struct [", IDSystem::get( left.parent->id ), "] to int" );
 
         ValueRef retval;
         method->self_val.resize( 1 );
@@ -889,9 +909,9 @@ dawn::Float dawn::ValueRef::to_float( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* method = left.get_method( engine.predefines._to_float.get( engine.id_system ), true );
+        Function* method = left.get_method( _to_float, true );
         if ( !method )
-            PANIC( "Cannot convert struct [", left.parent->name, "] to float" );
+            PANIC( "Cannot convert struct [", IDSystem::get( left.parent->id ), "] to float" );
 
         ValueRef retval;
         method->self_val.resize( 1 );
@@ -931,9 +951,9 @@ dawn::Char dawn::ValueRef::to_char( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* method = left.get_method( engine.predefines._to_char.get( engine.id_system ), true );
+        Function* method = left.get_method( _to_char, true );
         if ( !method )
-            PANIC( "Cannot convert struct [", left.parent->name, "] to char" );
+            PANIC( "Cannot convert struct [", IDSystem::get( left.parent->id ), "] to char" );
 
         ValueRef retval;
         method->self_val.resize( 1 );
@@ -978,18 +998,18 @@ dawn::String dawn::ValueRef::to_string( Engine& engine ) const
     case ValueType::FUNCTION:
     {
         auto& func = as<Function>();
-        return format( func.parent->name, "::", func.name, "()" );
+        return format( IDSystem::get( func.parent->id ), "::", IDSystem::get( func.id ), "()" );
     }
 
     case ValueType::ENUM:
-        return as<EnumVal>().key.str_id;
+        return IDSystem::get( as<EnumVal>().key_id );
 
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* method = left.get_method( engine.predefines._to_string.get( engine.id_system ), true );
+        Function* method = left.get_method( _to_string, true );
         if ( !method )
-            return format( left.parent->name, "{}" );
+            return format( IDSystem::get( left.parent->id ), "{}" );
 
         ValueRef retval;
         method->self_val.resize( 1 );

@@ -33,38 +33,38 @@ void dawn::Engine::load_mod( Module& module )
 
 void dawn::Engine::load_function( Function& entry )
 {
-    if ( stack.root().get( entry.name.get( id_system ) ) )
-        ENGINE_PANIC( "object [", entry.name, "] already exists" );
-    stack.root().set( entry.name.get( id_system ), ValueRef{ entry } );
+    if ( stack.root().get( entry.id ) )
+        ENGINE_PANIC( "object [", IDSystem::get( entry.id ), "] already exists" );
+    stack.root().set( entry.id, ValueRef{ entry } );
 }
 
 void dawn::Engine::load_enum( Enum& entry )
 {
-    auto& enu = (enums[entry.name.get( id_system )] = entry);
+    auto& enu = (enums[entry.id] = entry);
     for ( auto& [key, expr] : enu.keys_expr )
     {
         ValueRef key_val;
         handle_expr( expr, key_val );
-        enu.keys_value[id_system.get( key )] = ValueRef{ key_val.value() };
+        enu.keys_value[key] = ValueRef{ key_val.value() };
     }
 }
 
 void dawn::Engine::load_struct( Struct& entry )
 {
-    structs[entry.name.get( id_system )] = entry;
+    structs[entry.id] = entry;
 }
 
 void dawn::Engine::load_variable( Variable& entry )
 {
     ValueRef value;
     handle_expr( entry.expr, value );
-    add_obj( entry.kind, entry.name.get( id_system ), value );
+    add_obj( entry.kind, entry.id, value );
 }
 
-void dawn::Engine::bind_func( StringRef const& name, Function::CppFunc cpp_func )
+void dawn::Engine::bind_func( Int id, Function::CppFunc cpp_func )
 {
     Function func;
-    func.name = String( name );
+    func.id = id;
     func.body.emplace<Function::CppFunc>( std::move( cpp_func ) );
     load_function( func );
 }
@@ -73,10 +73,10 @@ void dawn::Engine::call_func( Int id, Array<ValueRef>& args, ValueRef& retval )
 {
     ValueRef* val = stack.root().get( id );
     if ( !val )
-        ENGINE_PANIC( "function [", *id_system.get( id ), "] doesn't exist" );
+        ENGINE_PANIC( "function [", IDSystem::get( id ), "] doesn't exist" );
 
     if ( val->type() != ValueType::FUNCTION )
-        ENGINE_PANIC( "object [", *id_system.get( id ), "] is not a function" );
+        ENGINE_PANIC( "object [", IDSystem::get( id ), "] is not a function" );
 
     handle_func( val->as<Function>(), args, retval );
 }
@@ -107,12 +107,12 @@ void dawn::Engine::handle_func( Function& func, Array<ValueRef>& args, ValueRef&
     if ( func.body.index() == 0 )
     {
         if ( func.args.size() != args.size() )
-            ENGINE_PANIC( "invalid argument count for function [", func.name, "]" );
+            ENGINE_PANIC( "invalid argument count for function [", IDSystem::get( func.id ), "]" );
 
         auto stack_helper = stack.push_from_root();
 
         for ( Int i = 0; i < (Int) args.size(); i++ )
-            add_obj( func.args[i].kind, func.args[i].name.get( id_system ), args[i] );
+            add_obj( func.args[i].kind, func.args[i].id, args[i] );
 
         Bool didret = false;
         handle_scope( std::get<Scope>( func.body ), retval, didret, nullptr, nullptr );
@@ -251,14 +251,14 @@ void dawn::Engine::handle_var_node( VariableNod& node )
 {
     ValueRef value;
     handle_expr( node.var.expr, value );
-    add_obj( node.var.kind, node.var.name.get( id_system ), value );
+    add_obj( node.var.kind, node.var.id, value );
 }
 
 void dawn::Engine::handle_id_node( IdentifierNod& node, ValueRef& value )
 {
-    auto* ptr = get_obj( node.name.get( id_system ) );
+    auto* ptr = get_obj( node.id );
     if ( !ptr )
-        ENGINE_PANIC( "object [", node.name, "] doesn't exist" );
+        ENGINE_PANIC( "object [", IDSystem::get( node.id ), "] doesn't exist" );
     value = *ptr;
 }
 
@@ -352,7 +352,7 @@ void dawn::Engine::handle_try_node( TryNod& node, ValueRef& retval, Bool& didret
     catch ( ValueRef const& val )
     {
         auto stack_helper = stack.push_from_current();
-        add_obj( VariableKind::REF, node.catch_name.get( id_system ), val );
+        add_obj( VariableKind::REF, node.catch_id, val );
         handle_scope( node.catch_scope, retval, didret, didbrk, didcon );
     }
 }
@@ -472,7 +472,7 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
                 didcon = false;
 
             auto stack_helper = stack.push_from_current();
-            add_obj( node.var.kind, node.var.name.get( id_system ), ValueRef{ i } );
+            add_obj( node.var.kind, node.var.id, ValueRef{ i } );
             handle_scope( node.scope, retval, didret, &didbrk, &didcon );
         }
     }
@@ -490,7 +490,7 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
                 didcon = false;
 
             auto stack_helper = stack.push_from_current();
-            add_obj( node.var.kind, node.var.name.get( id_system ), ValueRef{ c } );
+            add_obj( node.var.kind, node.var.id, ValueRef{ c } );
             handle_scope( node.scope, retval, didret, &didbrk, &didcon );
         }
     }
@@ -508,7 +508,7 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
                 didcon = false;
 
             auto stack_helper = stack.push_from_current();
-            add_obj( node.var.kind, node.var.name.get( id_system ), value );
+            add_obj( node.var.kind, node.var.id, value );
             handle_scope( node.scope, retval, didret, &didbrk, &didcon );
         }
     }
@@ -518,25 +518,25 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
 
 void dawn::Engine::handle_enum_node( EnumNod& node, ValueRef& value )
 {
-    auto enum_it = enums.find( node.type.get( id_system ) );
+    auto enum_it = enums.find( node.type_id );
     if ( enum_it == enums.end() )
-        ENGINE_PANIC( "enum [", node.type, "] doesn't exist" );
+        ENGINE_PANIC( "enum [", IDSystem::get( node.type_id ), "] doesn't exist" );
 
-    if ( !enum_it->second.keys_value.contains( node.key.get( id_system ) ) )
-        ENGINE_PANIC( "enum [", node.type, "] doesn't have key [", node.key, "]" );
+    if ( !enum_it->second.keys_value.contains( node.key_id ) )
+        ENGINE_PANIC( "enum [", IDSystem::get( node.type_id ), "] doesn't have key [", IDSystem::get( node.key_id ), "]" );
 
     EnumVal result{};
     result.parent = &enum_it->second;
-    result.key = node.key;
+    result.key_id = node.key_id;
 
     value = ValueRef{ result };
 }
 
 void dawn::Engine::handle_struct_node( StructNod& node, ValueRef& value )
 {
-    auto struct_it = structs.find( node.type.get( id_system ) );
+    auto struct_it = structs.find( node.type_id );
     if ( struct_it == structs.end() )
-        ENGINE_PANIC( "struct [", node.type, "] doesn't exist" );
+        ENGINE_PANIC( "struct [", IDSystem::get( node.type_id ), "] doesn't exist" );
 
     value = ValueRef{ StructVal{} };
     auto& result = value.as<StructVal>();
@@ -544,29 +544,29 @@ void dawn::Engine::handle_struct_node( StructNod& node, ValueRef& value )
 
     for ( auto& field : struct_it->second.fields )
     {
-        auto arg_it = std::find_if( node.args.begin(), node.args.end(), [&]( auto& arg ) { return arg.first.get( id_system ) == field.name.get( id_system ); } );
+        auto arg_it = std::find_if( node.args.begin(), node.args.end(), [&]( auto& arg ) { return arg.first == field.id; } );
         if ( arg_it != node.args.end() )
             continue;
 
         ValueRef field_val;
         handle_expr( field.expr, field_val );
-        result.members[field.name.get( id_system )] = ValueRef{ field_val.value() };
+        result.members[field.id] = ValueRef{ field_val.value() };
     }
 
     for ( auto& [id, arg] : node.args )
     {
-        auto field_it = std::find_if( struct_it->second.fields.begin(), struct_it->second.fields.end(), [&]( auto& field ) { return field.name.get( id_system ) == id.get( id_system ); } );
+        auto field_it = std::find_if( struct_it->second.fields.begin(), struct_it->second.fields.end(), [&]( auto& field ) { return field.id == id; } );
         if ( field_it == struct_it->second.fields.end() )
-            ENGINE_PANIC( "struct [", node.type, "] doesn't contain member [", id, "]" );
+            ENGINE_PANIC( "struct [", IDSystem::get( node.type_id ), "] doesn't contain member [", IDSystem::get( id ), "]" );
 
         ValueRef arg_val;
         handle_expr( arg, arg_val );
-        result.members[id.get( id_system )] = ValueRef{ arg_val.value() };
+        result.members[id] = ValueRef{ arg_val.value() };
     }
 
     for ( auto& method : struct_it->second.methods )
     {
-        auto& member = result.members[method.name.get( id_system )];
+        auto& member = result.members[method.id];
         member = ValueRef{ method };
         auto& meth = member.as<Function>();
         meth.parent = &struct_it->second;
@@ -720,8 +720,8 @@ void dawn::Engine::handle_ac_node( OperatorNod& node, ValueRef& value )
 
     if ( node.right.type() != NodeType::IDENTIFIER )
         ENGINE_PANIC( "Access must be an identifier" );
-    auto& right_id = node.right.as<IdentifierNod>().name;
 
+    Int right_id = node.right.as<IdentifierNod>().id;
     if ( left_val.type() == ValueType::STRUCT )
         return handle_ac_struct_node( left_val, right_id, value );
     else
@@ -773,13 +773,13 @@ void dawn::Engine::handle_as_node( AssignNod& node, ValueRef& value )
     value = left_val;
 }
 
-void dawn::Engine::handle_ac_struct_node( ValueRef const& left, ID& right, ValueRef& value )
+void dawn::Engine::handle_ac_struct_node( ValueRef const& left, Int right, ValueRef& value )
 {
     auto& left_val = left.as<StructVal>();
-    if ( !left_val.members.contains( right.get( id_system ) ) )
-        ENGINE_PANIC( "Struct [", left_val.parent->name.get( id_system ), "] doesn't have member [", right.str_id, "]" );
+    if ( !left_val.members.contains( right ) )
+        ENGINE_PANIC( "Struct [", IDSystem::get( left_val.parent->id ), "] doesn't have member [", IDSystem::get( right ), "]" );
 
-    auto& result = left_val.members.at( right.get( id_system ) );
+    auto& result = left_val.members.at( right );
     if ( result.type() == ValueType::FUNCTION )
     {
         auto& func = result.as<Function>();
@@ -790,13 +790,13 @@ void dawn::Engine::handle_ac_struct_node( ValueRef const& left, ID& right, Value
     value = result;
 }
 
-void dawn::Engine::handle_ac_type_node( ValueRef const& left, ID& right, ValueRef& value )
+void dawn::Engine::handle_ac_type_node( ValueRef const& left, Int right, ValueRef& value )
 {
     auto& members = type_members[(Int) left.type()];
-    if ( !members.contains( right.get( id_system ) ) )
-        ENGINE_PANIC( "Type [", left.type(), "] doesn't have member [", right, "]" );
+    if ( !members.contains( right ) )
+        ENGINE_PANIC( "Type [", left.type(), "] doesn't have member [", IDSystem::get( right ), "]" );
 
-    ValueRef result = members.at( right.get( id_system ) )(left);
+    ValueRef result = members.at( right )(left);
     if ( result.type() == ValueType::FUNCTION )
     {
         auto& func = result.as<Function>();

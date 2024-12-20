@@ -49,9 +49,9 @@ dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path, Set<String
     return dawn::format( "file [", abs_path, "] could not be opened" );
 }
 
-void dawn::Dawn::bind_func( StringRef const& name, Function::CppFunc cpp_func ) noexcept
+void dawn::Dawn::bind_func( String const& name, Function::CppFunc cpp_func ) noexcept
 {
-    engine.bind_func( name, cpp_func );
+    engine.bind_func( IDSystem::get( name ), cpp_func );
 }
 
 dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name ) noexcept
@@ -77,7 +77,7 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<ValueRe
 {
     try
     {
-        engine.call_func( engine.id_system.get( name ), args, retval );
+        engine.call_func( IDSystem::get( name ), args, retval );
     }
     catch ( String const& msg )
     {
@@ -92,10 +92,10 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<ValueRe
 
 void dawn::Dawn::add_obj( VariableKind kind, String const& name, ValueRef const& value ) noexcept
 {
-    engine.add_obj( kind, engine.id_system.get( name ), value );
+    engine.add_obj( kind, IDSystem::get( name ), value );
 }
 
 dawn::ValueRef* dawn::Dawn::get_obj( String const& name ) noexcept
 {
-    return engine.get_obj( engine.id_system.get( name ) );
+    return engine.get_obj( IDSystem::get( name ) );
 }

@@ -19,8 +19,8 @@ enum struct VariableKind
 
 struct Variable
 {
-    VariableKind kind;
-    ID name;
+    VariableKind kind = {};
+    Int id = -1;
     Node expr;
 };
 
@@ -33,7 +33,7 @@ struct Function
 {
     using CppFunc = Func<ValueRef( Array<ValueRef> const& )>;
 
-    ID name;
+    Int id = -1;
     Struct* parent = nullptr;
     Array<ValueRef> self_val;
     Array<Variable> args;
@@ -52,14 +52,14 @@ struct Function
 
 struct Enum
 {
-    ID name;
-    Map<String, Node> keys_expr;
+    Int id = -1;
+    Map<Int, Node> keys_expr;
     Map<Int, ValueRef> keys_value;
 };
 
 struct Struct
 {
-    ID name;
+    Int id = -1;
     Array<Variable> fields;
     Array<Function> methods;
 };

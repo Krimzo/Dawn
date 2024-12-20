@@ -7,27 +7,14 @@ namespace dawn
 {
 struct IDSystem
 {
-    Int get( String const& str_id );
-    String const* get( Int int_id );
+    IDSystem() = delete;
+
+    static Int get( String const& str_id );
+    static String const& get( Int int_id );
 
 private:
-    Map<String, Int> m_str_int;
-    Map<Int, String> m_int_str;
-    Int m_current = 1;
+    static Map<String, Int> m_str_int;
+    static Map<Int, String> m_int_str;
+    static Int m_current;
 };
-
-struct ID
-{
-    String str_id;
-
-    ID() = default;
-    ID( String str_id );
-
-    Int get( IDSystem& system );
-
-private:
-    Int int_id = 0;
-};
-
-std::ostream& operator<<( std::ostream& stream, ID const& id );
 }

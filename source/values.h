@@ -13,7 +13,7 @@ struct Engine;
 struct EnumVal
 {
     Enum* parent = nullptr;
-    ID key;
+    Int key_id = -1;
 };
 
 struct StructVal

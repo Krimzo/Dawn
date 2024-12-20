@@ -17,7 +17,7 @@ struct VariableNod
 
 struct IdentifierNod
 {
-    ID name;
+    Int id = -1;
 };
 
 struct CallNod
@@ -54,7 +54,7 @@ struct ThrowNod
 struct TryNod
 {
     Scope try_scope;
-    ID catch_name;
+    Int catch_id = -1;
     Scope catch_scope;
 };
 
@@ -104,14 +104,14 @@ struct ForNod
 
 struct EnumNod
 {
-    ID type;
-    ID key;
+    Int type_id = -1;
+    Int key_id = -1;
 };
 
 struct StructNod
 {
-    ID type;
-    Array<Pair<ID, Node>> args;
+    Int type_id = -1;
+    Array<Pair<Int, Node>> args;
 };
 
 struct ArrayNod
@@ -182,7 +182,7 @@ enum struct AssignType
 
 struct AssignNod
 {
-    AssignType type;
+    AssignType type = {};
     Node left;
     Node right;
 };
