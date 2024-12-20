@@ -32,17 +32,8 @@ struct Storage
         return *this;
     }
 
-    Storage( Storage&& other )
-        : Storage( other )
-    {}
-
-    Storage& operator=( Storage&& other )
-    {
-        return (*this = other);
-    }
-
     template<typename T, typename... Args>
-        requires (alignof(T) <= A && sizeof( T ) <= S)
+        requires (alignof(T) <= A and sizeof( T ) <= S)
     T& emplace( Args&&... args )
     {
         reset();
@@ -50,24 +41,20 @@ struct Storage
         return *new (m_buffer) T( args... );
     }
 
-    constexpr E type() const
+    constexpr E type() const noexcept
     {
         return m_type;
     }
 
     template<typename T>
-    T& as()
+    T& as() noexcept
     {
-        if ( m_type != H::template type<T>() )
-            throw std::bad_cast();
         return *reinterpret_cast<T*>(m_buffer);
     }
 
     template<typename T>
-    T const& as() const
+    T const& as() const noexcept
     {
-        if ( m_type != H::template type<T>() )
-            throw std::bad_cast();
         return *reinterpret_cast<T const*>(m_buffer);
     }
 
@@ -109,15 +96,6 @@ struct DynStorage
         return *this;
     }
 
-    DynStorage( DynStorage&& other ) noexcept
-        : DynStorage( other )
-    {}
-
-    DynStorage& operator=( DynStorage&& other ) noexcept
-    {
-        return (*this = other);
-    }
-
     template<typename T, typename... Args>
     T& emplace( Args&&... args )
     {
@@ -127,24 +105,20 @@ struct DynStorage
         return *static_cast<T*>(m_ptr);
     }
 
-    constexpr E type() const
+    constexpr E type() const noexcept
     {
         return m_type;
     }
 
     template<typename T>
-    T& as()
+    T& as() noexcept
     {
-        if ( m_type != H::template type<T>() )
-            throw std::bad_cast();
         return *static_cast<T*>(m_ptr);
     }
 
     template<typename T>
-    T const& as() const
+    T const& as() const noexcept
     {
-        if ( m_type != H::template type<T>() )
-            throw std::bad_cast();
         return *static_cast<T const*>(m_ptr);
     }
 
