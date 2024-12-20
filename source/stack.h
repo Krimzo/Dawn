@@ -1,39 +1,47 @@
 #pragma once
 
-#include "util.h"
+#include "values.h"
 
 
 namespace dawn
 {
-template<typename T>
-struct Stack
+struct StackHelper;
+
+struct ScopeObject
 {
-    Stack( Int reserve = 512 )
-    {
-        m_data.reserve( reserve );
-    }
+    WeakRegisterRef<ScopeObject> parent;
+    Array<Pair<Int, ValueRef>> objects;
 
-    void push( Int id, T const& val )
-    {
-        m_data.emplace_back( id, val );
-    }
+    ScopeObject();
 
-    void pop( Int n = 1 )
-    {
-        m_data.resize( m_data.size() - n );
-    }
+    ValueRef& set( Int id, ValueRef const& value );
+    ValueRef* get( Int id );
+};
 
-    T* get( Int id )
-    {
-        for ( auto it = m_data.rbegin(); it != m_data.rend(); ++it )
-        {
-            if ( it->first == id )
-                return &it->second;
-        }
-        return nullptr;
-    }
+struct ScopeStack
+{
+    ScopeStack();
+
+    [[nodiscard]] StackHelper push_from_root();
+    [[nodiscard]] StackHelper push_from_current();
+    void pop();
+
+    ScopeObject& root();
+    ScopeObject& current();
 
 private:
-    Array<Pair<Int, T>> m_data;
+    Array<RegisterRef<ScopeObject>> m_scopes;
+};
+
+struct StackHelper
+{
+    friend struct ScopeStack;
+
+    ScopeStack& stack;
+
+    ~StackHelper() noexcept;
+
+private:
+    explicit StackHelper( ScopeStack& stack );
 };
 }

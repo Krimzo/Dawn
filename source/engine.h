@@ -9,6 +9,8 @@ namespace dawn
 #define PRE_OP_GEN(NAME, OP) ID __##NAME = String( OP )
 #define PRE_NAME_GEN(NAME) ID _##NAME = String( #NAME )
 
+using TypeMember = Func<ValueRef( ValueRef const& )>;
+
 struct Predefines
 {
     PRE_OP_GEN( add, op_add );
@@ -36,15 +38,13 @@ struct Predefines
     PRE_NAME_GEN( push );
 };
 
-using TypeMember = Func<ValueRef( ValueRef const& )>;
-
 struct Engine
 {
     friend struct ValueRef;
 
     IDSystem id_system;
     Predefines predefines;
-    Stack<ValueRef> stack;
+    ScopeStack stack;
     Map<Int, Enum> enums;
     Map<Int, Struct> structs;
     Map<ValueType, Map<Int, TypeMember>> type_members;
@@ -60,8 +60,8 @@ struct Engine
     void bind_func( StringRef const& name, Function::CppFunc cpp_func );
     void call_func( Int id, Array<ValueRef>& args, ValueRef& retval );
 
-    void add_var( VariableKind kind, Int id, ValueRef const& value );
-    ValueRef* get_var( Int id );
+    void add_obj( VariableKind kind, Int id, ValueRef const& value );
+    ValueRef* get_obj( Int id );
 
 private:
     void load_standard_functions();
@@ -78,11 +78,11 @@ private:
 
     void handle_func( Function& func, Array<ValueRef>& args, ValueRef& retval );
     void handle_scope( Scope& scope, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
-    void handle_instr( Node& node, ValueRef& retval, Int& push_count, Bool& didret, Bool* didbrk, Bool* didcon );
+    void handle_instr( Node& node, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
     void handle_expr( Node& node, ValueRef& value );
 
     void handle_ref_node( RefNod& node, ValueRef& value );
-    void handle_var_node( VariableNod& node, Int& push_count );
+    void handle_var_node( VariableNod& node );
     void handle_id_node( IdentifierNod& node, ValueRef& value );
     void handle_call_node( CallNod& node, ValueRef& retval );
     void handle_index_node( IndexNod& node, ValueRef& retval );
@@ -106,14 +106,5 @@ private:
 
     void handle_ac_struct_node( ValueRef const& left, ID& right, ValueRef& value );
     void handle_ac_type_node( ValueRef const& left, ID& right, ValueRef& value );
-};
-
-struct PopHandler
-{
-    Engine& engine;
-    Int count = 0;
-
-    PopHandler( Engine& engine );
-    ~PopHandler() noexcept;
 };
 }

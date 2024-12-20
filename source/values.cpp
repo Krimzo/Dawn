@@ -2,8 +2,6 @@
 #include "engine.h"
 
 
-static dawn::Memory<dawn::Value> _MEMORY{ 2048 };
-
 dawn::StructVal::StructVal( StructVal const& other )
 {
     parent = other.parent;
@@ -65,69 +63,69 @@ dawn::ArrayVal& dawn::ArrayVal::operator=( ArrayVal const& other )
 }
 
 dawn::ValueRef::ValueRef( Bool value, ValueKind kind )
-    : m_regref( _MEMORY.new_register() ), m_kind( kind )
+    : m_regref( get_global_memory().value_memory.new_register() ), m_kind( kind )
 {
     m_regref.value().store<Bool>( value );
 }
 
 dawn::ValueRef::ValueRef( Int value, ValueKind kind )
-    : m_regref( _MEMORY.new_register() ), m_kind( kind )
+    : m_regref( get_global_memory().value_memory.new_register() ), m_kind( kind )
 {
     m_regref.value().store<Int>( value );
 }
 
 dawn::ValueRef::ValueRef( Float value, ValueKind kind )
-    : m_regref( _MEMORY.new_register() ), m_kind( kind )
+    : m_regref( get_global_memory().value_memory.new_register() ), m_kind( kind )
 {
     m_regref.value().store<Float>( value );
 }
 
 dawn::ValueRef::ValueRef( Char value, ValueKind kind )
-    : m_regref( _MEMORY.new_register() ), m_kind( kind )
+    : m_regref( get_global_memory().value_memory.new_register() ), m_kind( kind )
 {
     m_regref.value().store<Char>( value );
 }
 
 dawn::ValueRef::ValueRef( String value, ValueKind kind )
-    : m_regref( _MEMORY.new_register() ), m_kind( kind )
+    : m_regref( get_global_memory().value_memory.new_register() ), m_kind( kind )
 {
     m_regref.value().store<String>( std::move( value ) );
 }
 
 dawn::ValueRef::ValueRef( Function const& value, ValueKind kind )
-    : m_regref( _MEMORY.new_register() ), m_kind( kind )
+    : m_regref( get_global_memory().value_memory.new_register() ), m_kind( kind )
 {
     m_regref.value().store<Function>( value );
 }
 
 dawn::ValueRef::ValueRef( EnumVal const& value, ValueKind kind )
-    : m_regref( _MEMORY.new_register() ), m_kind( kind )
+    : m_regref( get_global_memory().value_memory.new_register() ), m_kind( kind )
 {
     m_regref.value().store<EnumVal>( value );
 }
 
 dawn::ValueRef::ValueRef( StructVal const& value, ValueKind kind )
-    : m_regref( _MEMORY.new_register() ), m_kind( kind )
+    : m_regref( get_global_memory().value_memory.new_register() ), m_kind( kind )
 {
     m_regref.value().store<StructVal>( value );
     reapply_kind();
 }
 
 dawn::ValueRef::ValueRef( ArrayVal const& value, ValueKind kind )
-    : m_regref( _MEMORY.new_register() ), m_kind( kind )
+    : m_regref( get_global_memory().value_memory.new_register() ), m_kind( kind )
 {
     m_regref.value().store<ArrayVal>( value );
     reapply_kind();
 }
 
 dawn::ValueRef::ValueRef( RangeVal const& value, ValueKind kind )
-    : m_regref( _MEMORY.new_register() ), m_kind( kind )
+    : m_regref( get_global_memory().value_memory.new_register() ), m_kind( kind )
 {
     m_regref.value().store<RangeVal>( value );
 }
 
 dawn::ValueRef::ValueRef( Value const& value, ValueKind kind )
-    : m_regref( _MEMORY.new_register() ), m_kind( kind )
+    : m_regref( get_global_memory().value_memory.new_register() ), m_kind( kind )
 {
     m_regref.value() = value;
     reapply_kind();

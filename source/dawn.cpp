@@ -90,12 +90,12 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<ValueRe
     return std::nullopt;
 }
 
-void dawn::Dawn::add_var( VariableKind kind, String const& name, ValueRef const& value ) noexcept
+void dawn::Dawn::add_obj( VariableKind kind, String const& name, ValueRef const& value ) noexcept
 {
-    engine.add_var( kind, engine.id_system.get( name ), value );
+    engine.add_obj( kind, engine.id_system.get( name ), value );
 }
 
-dawn::ValueRef* dawn::Dawn::get_var( String const& name ) noexcept
+dawn::ValueRef* dawn::Dawn::get_obj( String const& name ) noexcept
 {
-    return engine.get_var( engine.id_system.get( name ) );
+    return engine.get_obj( engine.id_system.get( name ) );
 }

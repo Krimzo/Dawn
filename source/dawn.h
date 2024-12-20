@@ -26,7 +26,7 @@ struct Dawn
     Opt<String> call_func( String const& name, Array<ValueRef>& args ) noexcept;
     Opt<String> call_func( String const& name, Array<ValueRef>& args, ValueRef& retval ) noexcept;
 
-    void add_var( VariableKind kind, String const& name, ValueRef const& value ) noexcept;
-    ValueRef* get_var( String const& name ) noexcept;
+    void add_obj( VariableKind kind, String const& name, ValueRef const& value ) noexcept;
+    ValueRef* get_obj( String const& name ) noexcept;
 };
 }

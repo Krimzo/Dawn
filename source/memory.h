@@ -26,6 +26,35 @@ struct Register
 };
 
 template<typename T>
+struct WeakRegisterRef
+{
+    WeakRegisterRef() noexcept = default;
+
+    WeakRegisterRef( Memory<T>* memory, Int index ) noexcept
+        : m_memory( memory ), m_index( index )
+    {}
+
+    constexpr Bool valid() const noexcept
+    {
+        return m_memory;
+    }
+
+    T& value() const noexcept
+    {
+        return regist().value;
+    }
+
+private:
+    Memory<T>* m_memory = nullptr;
+    Int m_index = -1;
+
+    Register<T>& regist() const noexcept
+    {
+        return m_memory->m_space[m_index];
+    }
+};
+
+template<typename T>
 struct RegisterRef
 {
     RegisterRef() noexcept = default;
@@ -66,16 +95,7 @@ struct RegisterRef
         return *this;
     }
 
-    RegisterRef( RegisterRef&& other ) noexcept
-        : RegisterRef( other )
-    {}
-
-    RegisterRef& operator=( RegisterRef&& other ) noexcept
-    {
-        return (*this = other);
-    }
-
-    constexpr Bool valid() const
+    constexpr Bool valid() const noexcept
     {
         return m_memory;
     }
@@ -83,6 +103,11 @@ struct RegisterRef
     T& value() const noexcept
     {
         return regist().value;
+    }
+
+    WeakRegisterRef<T> as_weak() const noexcept
+    {
+        return { m_memory, m_index };
     }
 
 private:
@@ -98,6 +123,7 @@ private:
 template<typename T>
 struct Memory
 {
+    friend struct WeakRegisterRef<T>;
     friend struct RegisterRef<T>;
 
     Memory( Int initial_count = 1 )
@@ -137,4 +163,15 @@ private:
         m_space.resize( m_space.size() * 2 );
     }
 };
+
+struct Value;
+struct ScopeObject;
+
+struct GlobalMemory
+{
+    Memory<Value> value_memory{ 2048 };
+    Memory<ScopeObject> scope_memory{ 128 };
+};
+
+GlobalMemory& get_global_memory();
 }
