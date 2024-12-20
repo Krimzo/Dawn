@@ -151,37 +151,37 @@ void dawn::Engine::load_standard_functions()
 
 void dawn::Engine::load_nothing_members()
 {
-    auto& nothing_members = type_members[ValueType::NOTHING];
+    auto& nothing_members = type_members[(Int) ValueType::NOTHING];
 
 }
 
 void dawn::Engine::load_bool_members()
 {
-    auto& bool_members = type_members[ValueType::BOOL];
+    auto& bool_members = type_members[(Int) ValueType::BOOL];
 
 }
 
 void dawn::Engine::load_int_members()
 {
-    auto& int_members = type_members[ValueType::INT];
+    auto& int_members = type_members[(Int) ValueType::INT];
 
 }
 
 void dawn::Engine::load_float_members()
 {
-    auto& float_members = type_members[ValueType::FLOAT];
+    auto& float_members = type_members[(Int) ValueType::FLOAT];
 
 }
 
 void dawn::Engine::load_char_members()
 {
-    auto& char_members = type_members[ValueType::CHAR];
+    auto& char_members = type_members[(Int) ValueType::CHAR];
 
 }
 
 void dawn::Engine::load_string_members()
 {
-    auto& string_members = type_members[ValueType::STRING];
+    auto& string_members = type_members[(Int) ValueType::STRING];
 
     string_members[predefines._count.get( id_system )] = [this]( ValueRef const& self_val ) -> ValueRef
     {
@@ -211,13 +211,13 @@ void dawn::Engine::load_string_members()
 
 void dawn::Engine::load_function_members()
 {
-    auto& function_members = type_members[ValueType::FUNCTION];
+    auto& function_members = type_members[(Int) ValueType::FUNCTION];
 
 }
 
 void dawn::Engine::load_enum_members()
 {
-    auto& enum_members = type_members[ValueType::ENUM];
+    auto& enum_members = type_members[(Int) ValueType::ENUM];
 
     enum_members[predefines._value.get( id_system )] = [this]( ValueRef const& self_val ) -> ValueRef
     {
@@ -228,7 +228,7 @@ void dawn::Engine::load_enum_members()
 
 void dawn::Engine::load_array_members()
 {
-    auto& array_members = type_members[ValueType::ARRAY];
+    auto& array_members = type_members[(Int) ValueType::ARRAY];
 
     array_members[predefines._count.get( id_system )] = [this]( ValueRef const& self_val ) -> ValueRef
     {
@@ -258,6 +258,17 @@ void dawn::Engine::load_array_members()
 
 void dawn::Engine::load_range_members()
 {
-    auto& range_members = type_members[ValueType::RANGE];
+    auto& range_members = type_members[(Int) ValueType::RANGE];
 
+    range_members[predefines._start.get( id_system )] = [this]( ValueRef const& self_val ) -> ValueRef
+    {
+        auto& self = self_val.as<RangeVal>();
+        return (ValueRef) self.start_incl;
+    };
+
+    range_members[predefines._end.get( id_system )] = [this]( ValueRef const& self_val ) -> ValueRef
+    {
+        auto& self = self_val.as<RangeVal>();
+        return (ValueRef) self.end_excl;
+    };
 }

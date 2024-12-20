@@ -36,6 +36,8 @@ struct Predefines
     PRE_NAME_GEN( count );
     PRE_NAME_GEN( value );
     PRE_NAME_GEN( push );
+    PRE_NAME_GEN( start );
+    PRE_NAME_GEN( end );
 };
 
 struct Engine
@@ -47,7 +49,7 @@ struct Engine
     ScopeStack stack;
     Map<Int, Enum> enums;
     Map<Int, Struct> structs;
-    Map<ValueType, Map<Int, TypeMember>> type_members;
+    Map<Int, TypeMember> type_members[(Int) ValueType::_COUNT] = {};
 
     Engine();
 

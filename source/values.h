@@ -89,6 +89,7 @@ enum struct ValueType
     STRUCT,
     ARRAY,
     RANGE,
+    _COUNT,
 };
 
 struct ValueHandler

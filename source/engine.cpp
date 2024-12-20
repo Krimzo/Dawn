@@ -792,7 +792,7 @@ void dawn::Engine::handle_ac_struct_node( ValueRef const& left, ID& right, Value
 
 void dawn::Engine::handle_ac_type_node( ValueRef const& left, ID& right, ValueRef& value )
 {
-    auto& members = type_members[left.type()];
+    auto& members = type_members[(Int) left.type()];
     if ( !members.contains( right.get( id_system ) ) )
         ENGINE_PANIC( "Type [", left.type(), "] doesn't have member [", right, "]" );
 
