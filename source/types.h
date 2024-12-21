@@ -1,7 +1,8 @@
 #pragma once
 
-#include "node.h"
 #include "id.h"
+#include "node.h"
+#include "memory.h"
 
 
 namespace dawn
@@ -9,6 +10,7 @@ namespace dawn
 struct Value;
 struct ValueRef;
 struct Struct;
+struct ScopeObject;
 
 enum struct VariableKind
 {
@@ -20,7 +22,7 @@ enum struct VariableKind
 struct Variable
 {
     VariableKind kind = {};
-    Int id = -1;
+    Int id = 0;
     Node expr;
 };
 
@@ -33,33 +35,27 @@ struct Function
 {
     using CppFunc = Func<ValueRef( Array<ValueRef> const& )>;
 
-    Int id = -1;
-    Struct* parent = nullptr;
+    Int id = 0;
+    RegisterRef<ScopeObject> lambda_parent;
     Array<ValueRef> self_val;
     Array<Variable> args;
     Variant<Scope, CppFunc> body;
 
-    inline Bool is_method() const
-    {
-        return !self_val.empty();
-    }
-
-    inline Bool is_unary_op() const
-    {
-        return args.size() == 1;
-    }
+    Bool is_lambda() const;
+    Bool is_method() const;
+    Bool is_unary_op() const;
 };
 
 struct Enum
 {
-    Int id = -1;
+    Int id = 0;
     Map<Int, Node> keys_expr;
     Map<Int, ValueRef> keys_value;
 };
 
 struct Struct
 {
-    Int id = -1;
+    Int id = 0;
     Array<Variable> fields;
     Array<Function> methods;
 };

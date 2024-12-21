@@ -103,6 +103,28 @@ func loop_examp() {
 	}
 }
 
+// Throw
+func throw_examp() {
+	var a = 5
+	try {
+		throw a
+	}
+	catch err {
+		err *= 2
+	}
+	print(a)
+}
+
+// Lambda
+func lambda_examp() {
+	let sum = `ref a, ref b` {
+		return a + b
+	}
+	print(sum(2, 3))
+
+	``{ print("cool") }()
+}
+
 // Enum
 enum ExampleEnum {
 	me = 0.0

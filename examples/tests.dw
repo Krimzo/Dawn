@@ -3,6 +3,8 @@ func main()
 	var_test()
 	branch_test()
 	loop_test()
+	throw_test()
+	lambda_test()
 	enum_test()
 	struct_test()
 	array_test()
@@ -89,6 +91,26 @@ func loop_test()
 	for ref i: [1, 2, 3] {
 		print(i)
 	}
+}
+
+func throw_test()
+{
+	var a = 5
+	try {
+		throw a
+	}
+	catch err {
+		err += 2
+	}
+	assert(a == 7, "throw is bad")
+}
+
+func lambda_test()
+{
+	let sum = `ref a, ref b` {
+		return a + b
+	}
+	assert(sum(4, 3) == 7, "lambda is bad")
 }
 
 enum SomeEnum

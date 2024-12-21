@@ -998,7 +998,12 @@ dawn::String dawn::ValueRef::to_string( Engine& engine ) const
     case ValueType::FUNCTION:
     {
         auto& func = as<Function>();
-        return format( IDSystem::get( func.parent->id ), "::", IDSystem::get( func.id ), "()" );
+        if ( func.is_lambda() )
+            return "lambda()";
+        else if ( func.is_method() )
+            return format( IDSystem::get( func.self_val.front().as<StructVal>().parent->id ), "::", IDSystem::get( func.id ), "()" );
+        else
+            return format( IDSystem::get( func.id ), "()" );
     }
 
     case ValueType::ENUM:

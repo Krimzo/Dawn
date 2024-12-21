@@ -107,9 +107,14 @@ void dawn::Engine::handle_func( Function& func, Array<ValueRef>& args, ValueRef&
     if ( func.body.index() == 0 )
     {
         if ( func.args.size() != args.size() )
-            ENGINE_PANIC( "invalid argument count for function [", IDSystem::get( func.id ), "]" );
+        {
+            if ( func.is_lambda() )
+                ENGINE_PANIC( "invalid argument count for [lambda]" );
+            else
+                ENGINE_PANIC( "invalid argument count for function [", IDSystem::get( func.id ), "]" );
+        }
 
-        auto stack_helper = stack.push_from_root();
+        auto stack_helper = stack.push( func );
 
         for ( Int i = 0; i < (Int) args.size(); i++ )
             add_obj( func.args[i].kind, func.args[i].id, args[i] );
@@ -244,6 +249,12 @@ void dawn::Engine::handle_expr( Node& node, ValueRef& value )
 
 void dawn::Engine::handle_ref_node( RefNod& node, ValueRef& value )
 {
+    if ( node.value_ref.type() == ValueType::FUNCTION )
+    {
+        auto& func = node.value_ref.as<Function>();
+        if ( func.is_lambda() )
+            func.lambda_parent = stack.peek();
+    }
     value = node.value_ref;
 }
 
@@ -346,12 +357,12 @@ void dawn::Engine::handle_try_node( TryNod& node, ValueRef& retval, Bool& didret
 {
     try
     {
-        auto stack_helper = stack.push_from_current();
+        auto stack_helper = stack.push();
         handle_scope( node.try_scope, retval, didret, didbrk, didcon );
     }
     catch ( ValueRef const& val )
     {
-        auto stack_helper = stack.push_from_current();
+        auto stack_helper = stack.push();
         add_obj( VariableKind::REF, node.catch_id, val );
         handle_scope( node.catch_scope, retval, didret, didbrk, didcon );
     }
@@ -364,7 +375,7 @@ void dawn::Engine::handle_if_node( IfNod& node, ValueRef& retval, Bool& didret, 
 
     if ( check_val.to_bool( *this ) )
     {
-        auto stack_helper = stack.push_from_current();
+        auto stack_helper = stack.push();
         handle_scope( node.if_part.scope, retval, didret, didbrk, didcon );
         return;
     }
@@ -374,7 +385,7 @@ void dawn::Engine::handle_if_node( IfNod& node, ValueRef& retval, Bool& didret, 
         handle_expr( elif_part.expr, check_val );
         if ( check_val.to_bool( *this ) )
         {
-            auto stack_helper = stack.push_from_current();
+            auto stack_helper = stack.push();
             handle_scope( elif_part.scope, retval, didret, didbrk, didcon );
             return;
         }
@@ -382,7 +393,7 @@ void dawn::Engine::handle_if_node( IfNod& node, ValueRef& retval, Bool& didret, 
 
     if ( node.else_part )
     {
-        auto stack_helper = stack.push_from_current();
+        auto stack_helper = stack.push();
         handle_scope( node.else_part->scope, retval, didret, didbrk, didcon );
     }
 }
@@ -401,7 +412,7 @@ void dawn::Engine::handle_switch_node( SwitchNod& node, ValueRef& retval, Bool& 
 
             if ( check_val.op_eq( *this, case_val ).to_bool( *this ) )
             {
-                auto stack_helper = stack.push_from_current();
+                auto stack_helper = stack.push();
                 handle_scope( case_part.scope, retval, didret, didbrk, didcon );
                 return;
             }
@@ -410,7 +421,7 @@ void dawn::Engine::handle_switch_node( SwitchNod& node, ValueRef& retval, Bool& 
 
     if ( node.def_scope )
     {
-        auto stack_helper = stack.push_from_current();
+        auto stack_helper = stack.push();
         handle_scope( *node.def_scope, retval, didret, didbrk, didcon );
     }
 }
@@ -426,7 +437,7 @@ void dawn::Engine::handle_loop_node( LoopNod& node, ValueRef& retval, Bool& didr
         if ( didcon )
             didcon = false;
 
-        auto stack_helper = stack.push_from_current();
+        auto stack_helper = stack.push();
         handle_scope( node.scope, retval, didret, &didbrk, &didcon );
     }
 }
@@ -448,7 +459,7 @@ void dawn::Engine::handle_while_node( WhileNod& node, ValueRef& retval, Bool& di
         if ( !check_val.to_bool( *this ) )
             break;
 
-        auto stack_helper = stack.push_from_current();
+        auto stack_helper = stack.push();
         handle_scope( node.scope, retval, didret, &didbrk, &didcon );
     }
 }
@@ -471,7 +482,7 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
             if ( didcon )
                 didcon = false;
 
-            auto stack_helper = stack.push_from_current();
+            auto stack_helper = stack.push();
             add_obj( node.var.kind, node.var.id, ValueRef{ i } );
             handle_scope( node.scope, retval, didret, &didbrk, &didcon );
         }
@@ -489,7 +500,7 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
             if ( didcon )
                 didcon = false;
 
-            auto stack_helper = stack.push_from_current();
+            auto stack_helper = stack.push();
             add_obj( node.var.kind, node.var.id, ValueRef{ c } );
             handle_scope( node.scope, retval, didret, &didbrk, &didcon );
         }
@@ -507,7 +518,7 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
             if ( didcon )
                 didcon = false;
 
-            auto stack_helper = stack.push_from_current();
+            auto stack_helper = stack.push();
             add_obj( node.var.kind, node.var.id, value );
             handle_scope( node.scope, retval, didret, &didbrk, &didcon );
         }
@@ -565,12 +576,7 @@ void dawn::Engine::handle_struct_node( StructNod& node, ValueRef& value )
     }
 
     for ( auto& method : struct_it->second.methods )
-    {
-        auto& member = result.members[method.id];
-        member = ValueRef{ method };
-        auto& meth = member.as<Function>();
-        meth.parent = &struct_it->second;
-    }
+        result.members[method.id] = ValueRef{ method };
 }
 
 void dawn::Engine::handle_array_node( ArrayNod& node, ValueRef& value )

@@ -121,10 +121,19 @@ var a = 5
 try {
     throw a
 }
-catch some_val {
-    some_val += 7
+catch err {
+    err += 7
 }
 print(a)
+```
+
+# Lambdas
+```dawn
+let sub = `ref a, ref b` {
+    return a - b
+}
+print(sub(5, 3))
+``{ print("lambdas are cool") }()
 ```
 
 # Misc

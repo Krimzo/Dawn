@@ -67,6 +67,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) op_access,
         (String) op_link,
         (String) op_range,
+        (String) op_lambda,
         (String) op_expr_opn,
         (String) op_expr_cls,
         (String) op_scope_opn,

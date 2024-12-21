@@ -1,6 +1,7 @@
 #pragma once
 
 #include "values.h"
+#include "stack.h"
 
 
 namespace dawn
@@ -17,7 +18,7 @@ struct VariableNod
 
 struct IdentifierNod
 {
-    Int id = -1;
+    Int id = 0;
 };
 
 struct CallNod
@@ -54,7 +55,7 @@ struct ThrowNod
 struct TryNod
 {
     Scope try_scope;
-    Int catch_id = -1;
+    Int catch_id = 0;
     Scope catch_scope;
 };
 
@@ -104,13 +105,13 @@ struct ForNod
 
 struct EnumNod
 {
-    Int type_id = -1;
-    Int key_id = -1;
+    Int type_id = 0;
+    Int key_id = 0;
 };
 
 struct StructNod
 {
-    Int type_id = -1;
+    Int type_id = 0;
     Array<Pair<Int, Node>> args;
 };
 

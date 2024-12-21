@@ -12,6 +12,7 @@ dawn::Int dawn::IDSystem::get( String const& str_id )
         return it->second;
 
     ++m_current;
+
     m_str_int[str_id] = m_current;
     m_int_str[m_current] = str_id;
     return m_current;

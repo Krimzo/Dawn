@@ -31,18 +31,18 @@ dawn::ScopeStack::ScopeStack()
     m_scopes.push_back( get_global_memory().scope_memory.new_register() );
 }
 
-dawn::StackHelper dawn::ScopeStack::push_from_root()
+dawn::StackHelper dawn::ScopeStack::push()
 {
     auto& scope = m_scopes.emplace_back( get_global_memory().scope_memory.new_register() ).value();
-    scope.parent = m_scopes.front().as_weak();
+    scope.parent = *(++m_scopes.rbegin());
     scope.objects.clear();
     return StackHelper{ *this };
 }
 
-dawn::StackHelper dawn::ScopeStack::push_from_current()
+dawn::StackHelper dawn::ScopeStack::push( Function const& func )
 {
     auto& scope = m_scopes.emplace_back( get_global_memory().scope_memory.new_register() ).value();
-    scope.parent = (++m_scopes.rbegin())->as_weak();
+    scope.parent = func.is_lambda() ? func.lambda_parent : m_scopes.front();
     scope.objects.clear();
     return StackHelper{ *this };
 }
@@ -60,6 +60,11 @@ dawn::ScopeObject& dawn::ScopeStack::root()
 dawn::ScopeObject& dawn::ScopeStack::current()
 {
     return m_scopes.back().value();
+}
+
+dawn::RegisterRef<dawn::ScopeObject> dawn::ScopeStack::peek() const
+{
+    return m_scopes.back();
 }
 
 dawn::StackHelper::~StackHelper() noexcept

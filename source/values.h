@@ -2,8 +2,6 @@
 
 #include "err.h"
 #include "types.h"
-#include "memory.h"
-#include "storage.h"
 
 
 namespace dawn
@@ -13,7 +11,7 @@ struct Engine;
 struct EnumVal
 {
     Enum* parent = nullptr;
-    Int key_id = -1;
+    Int key_id = 0;
 };
 
 struct StructVal
@@ -278,6 +276,11 @@ struct ValueRef
 
     Value const& value() const;
     void set_value( Value const& value );
+
+    constexpr Bool valid() const noexcept
+    {
+        return m_regref.valid();
+    }
 
     template<typename T>
     constexpr T& as() const

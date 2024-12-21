@@ -225,14 +225,14 @@ void dawn::Parser::parse_function( Array<Token>::const_iterator& it, Array<Token
     {
         auto& arg = function.args.emplace_back();
 
-        if ( it->value != kw_let && it->value != kw_var && it->value != kw_ref )
-            PARSER_PANIC( *it, "expected let, var or ref keywords" );
         if ( it->value == kw_let )
             arg.kind = VariableKind::LET;
         else if ( it->value == kw_var )
             arg.kind = VariableKind::VAR;
-        else
+        else if ( it->value == kw_ref )
             arg.kind = VariableKind::REF;
+        else
+            PARSER_PANIC( *it, "expected let, var or ref keywords" );
         ++it;
 
         if ( it->type != TokenType::NAME )
@@ -276,14 +276,14 @@ void dawn::Parser::parse_operator( Array<Token>::const_iterator& it, Array<Token
     {
         auto& arg = operat.args.emplace_back();
 
-        if ( it->value != kw_let && it->value != kw_var && it->value != kw_ref )
-            PARSER_PANIC( *it, "expected let, var or ref keywords" );
         if ( it->value == kw_let )
             arg.kind = VariableKind::LET;
         else if ( it->value == kw_var )
             arg.kind = VariableKind::VAR;
-        else
+        else if ( it->value == kw_ref )
             arg.kind = VariableKind::REF;
+        else
+            PARSER_PANIC( *it, "expected let, var or ref keywords" );
         ++it;
 
         if ( it->type != TokenType::NAME )
@@ -332,14 +332,14 @@ void dawn::Parser::parse_operator( Array<Token>::const_iterator& it, Array<Token
 
 void dawn::Parser::parse_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Variable& variable )
 {
-    if ( it->value != kw_let && it->value != kw_var && it->value != kw_ref )
-        PARSER_PANIC( *it, "expected let, var or ref keywords" );
     if ( it->value == kw_let )
         variable.kind = VariableKind::LET;
     else if ( it->value == kw_var )
         variable.kind = VariableKind::VAR;
-    else
+    else if ( it->value == kw_ref )
         variable.kind = VariableKind::REF;
+    else
+        PARSER_PANIC( *it, "expected let, var or ref keywords" );
     ++it;
 
     if ( it->type != TokenType::NAME )
@@ -442,7 +442,9 @@ void dawn::Parser::expression_extract( ExtractType type, Array<Token>::const_ite
                 {
                     if ( it == first_it )
                         break;
-                    if ( (it - 1)->type != TokenType::TYPE )
+                    auto it_before = it - 1;
+                    if ( it_before->value != op_lambda &&
+                        it_before->type != TokenType::TYPE )
                         break;
                 }
             }
@@ -547,47 +549,105 @@ void dawn::Parser::expression_complex_scope( Array<Token>& left, Array<Token>& r
 
     right.pop_back();
 
-    if ( left.size() != 1 || left.front().type != TokenType::TYPE )
-        PARSER_PANIC( left.front(), "expected custom type" );
-
-    Array<Pair<Int, Node>> args;
-    Opt<Int> key;
-    for ( auto it = right.begin(); it != right.end(); )
+    if ( left.size() == 1 && left.front().type == TokenType::TYPE )
     {
-        if ( it->type != TokenType::NAME )
-            PARSER_PANIC( *it, "expected field init name" );
-
-        Int name_id = IDSystem::get( it->value );
-        if ( std::find_if( args.begin(), args.end(), [&]( auto const& entry ) { return entry.first == name_id; } ) != args.end() )
-            PARSER_PANIC( *it, "argument [", it->value, "] already passed" );
-        ++it;
-
-        if ( it == right.end() && args.empty() )
+        Array<Pair<Int, Node>> args;
+        Opt<Int> key;
+        for ( auto it = right.begin(); it != right.end(); )
         {
-            key = name_id;
-            break;
+            if ( it->type != TokenType::NAME )
+                PARSER_PANIC( *it, "expected field init name" );
+
+            Int name_id = IDSystem::get( it->value );
+            if ( std::find_if( args.begin(), args.end(), [&]( auto const& entry ) { return entry.first == name_id; } ) != args.end() )
+                PARSER_PANIC( *it, "argument [", it->value, "] already passed" );
+            ++it;
+
+            if ( it == right.end() && args.empty() )
+            {
+                key = name_id;
+                break;
+            }
+
+            if ( it->value != op_assign )
+                PARSER_PANIC( *it, "expected assign operator" );
+            ++it;
+
+            auto& arg = args.emplace_back( name_id, Node{} );
+            parse_expression( ExtractType::SPLITTER, it, right.end(), arg.second );
         }
 
-        if ( it->value != op_assign )
-            PARSER_PANIC( *it, "expected assign operator" );
-        ++it;
-
-        auto& arg = args.emplace_back( name_id, Node{} );
-        parse_expression( ExtractType::SPLITTER, it, right.end(), arg.second );
+        if ( key )
+        {
+            auto& node = tree.store<EnumNod>();
+            node.type_id = IDSystem::get( left.front().value );
+            node.key_id = *key;
+        }
+        else
+        {
+            auto& node = tree.store<StructNod>();
+            node.type_id = IDSystem::get( left.front().value );
+            node.args = args;
+        }
     }
-
-    if ( key )
+    else if ( left.size() >= 2 && left.front().value == op_lambda && left.back().value == op_lambda )
     {
-        auto& node = tree.store<EnumNod>();
-        node.type_id = IDSystem::get( left.front().value );
-        node.key_id = *key;
+        left.erase( left.begin() );
+        left.pop_back();
+
+        auto& nod = tree.store<RefNod>();
+        nod.value_ref = ValueRef{ Function{} };
+        auto& func = nod.value_ref.as<Function>();
+
+        Set<Int> args;
+        for ( auto it = left.begin(); it != left.end(); )
+        {
+            auto& arg = func.args.emplace_back();
+
+            if ( it->value == kw_let )
+                arg.kind = VariableKind::LET;
+            else if ( it->value == kw_var )
+                arg.kind = VariableKind::VAR;
+            else if ( it->value == kw_ref )
+                arg.kind = VariableKind::REF;
+            else
+                PARSER_PANIC( *it, "expected let, var or ref keywords" );
+            ++it;
+
+            if ( it->type != TokenType::NAME )
+                PARSER_PANIC( *it, "expected arg name" );
+            arg.id = IDSystem::get( it->value );
+
+            if ( args.contains( arg.id ) )
+                PARSER_PANIC( *it, "argument [", it->value, "] already defined" );
+            args.insert( arg.id );
+            ++it;
+
+            if ( it != left.end() )
+            {
+                if ( it->value != op_split )
+                    PARSER_PANIC( *it, "expected split or lambda close" );
+                ++it;
+            }
+        }
+
+        Token left_scope;
+        left_scope.value = op_scope_opn;
+        left_scope.type = TokenType::OPERATOR;
+        left_scope.line_number = -1;
+        right.insert( right.begin(), left_scope );
+
+        Token right_scope;
+        right_scope.value = op_scope_cls;
+        right_scope.type = TokenType::OPERATOR;
+        right_scope.line_number = -1;
+        right.push_back( right_scope );
+
+        auto right_it = right.begin();
+        parse_scope( right_it, right.end(), std::get<Scope>( func.body ) );
     }
     else
-    {
-        auto& node = tree.store<StructNod>();
-        node.type_id = IDSystem::get( left.front().value );
-        node.args = args;
-    }
+        PARSER_PANIC( left.front(), "unknown scope expression" );
 }
 
 void dawn::Parser::expression_complex_array( Array<Token>& left, Array<Token>& right, Node& tree )
@@ -750,7 +810,6 @@ void dawn::Parser::parse_scope( Array<Token>::const_iterator& it, Array<Token>::
     ++it;
 
     Set<Int> vars;
-
     while ( it->value != op_scope_cls )
     {
         if ( it->value == kw_let || it->value == kw_var || it->value == kw_ref )
@@ -997,14 +1056,14 @@ void dawn::Parser::scope_for( Array<Token>::const_iterator& it, Array<Token>::co
 
     auto& node = tree.store<ForNod>();
 
-    if ( it->value != kw_let && it->value != kw_var && it->value != kw_ref )
-        PARSER_PANIC( *it, "expected let, var or ref keywords" );
     if ( it->value == kw_let )
         node.var.kind = VariableKind::LET;
     else if ( it->value == kw_var )
         node.var.kind = VariableKind::VAR;
-    else
+    else if ( it->value == kw_ref )
         node.var.kind = VariableKind::REF;
+    else
+        PARSER_PANIC( *it, "expected let, var or ref keywords" );
     ++it;
 
     if ( it->type != TokenType::NAME )
