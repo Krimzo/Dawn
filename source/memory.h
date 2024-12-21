@@ -135,8 +135,8 @@ struct ScopeObject;
 
 struct GlobalMemory
 {
-    Memory<Value> value_memory{ 2048 };
     Memory<ScopeObject> scope_memory{ 128 };
+    Memory<Value> value_memory{ 2048 };
 
     ~GlobalMemory() noexcept;
 };
