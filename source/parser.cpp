@@ -490,7 +490,7 @@ void dawn::Parser::expression_precedence( Array<Token>& tokens, Int& index, Bool
         if ( expr_depth == 0 && is_op )
         {
             Int prec = is_unary ? precedences.at( prec_unary ) : precedences.at( token.value );
-            if ( prec >= least_precedence )
+            if ( is_unary && prec > least_precedence || !is_unary && prec >= least_precedence )
             {
                 least_precedence = prec;
                 index = i;
