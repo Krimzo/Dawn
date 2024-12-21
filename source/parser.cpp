@@ -418,6 +418,7 @@ void dawn::Parser::expression_extract( ExtractType type, Array<Token>::const_ite
     Array<Token>::const_iterator first_it = it;
     Int last_line = it->line_number;
     Int expr_depth = 0;
+    Bool in_lambda = false;
 
     for ( ; it != end; ++it )
     {
@@ -450,16 +451,9 @@ void dawn::Parser::expression_extract( ExtractType type, Array<Token>::const_ite
             }
         }
 
-        if ( it->value == op_expr_opn || it->value == op_scope_opn || it->value == op_array_opn )
-        {
-            ++expr_depth;
-        }
-        else if ( it->value == op_expr_cls || it->value == op_scope_cls || it->value == op_array_cls )
-        {
-            --expr_depth;
-            if ( expr_depth < 0 )
-                PARSER_PANIC( *it, "unexpected expression end" );
-        }
+        expr_depth += token_depth( *it, in_lambda );
+        if ( expr_depth < 0 )
+            PARSER_PANIC( *it, "unexpected expression end" );
 
         tokens.push_back( *it );
         last_line = it->line_number;
@@ -471,9 +465,11 @@ void dawn::Parser::expression_extract( ExtractType type, Array<Token>::const_ite
 
 void dawn::Parser::expression_precedence( Array<Token>& tokens, Int& index, Bool& unary )
 {
-    Int expr_depth = 0;
     Int least_precedence = -1;
     Bool was_op = true;
+    Int expr_depth = 0;
+    Bool in_lambda = false;
+
     for ( Int i = 0; i < (Int) tokens.size(); i++ )
     {
         auto& token = tokens[i];
@@ -499,16 +495,9 @@ void dawn::Parser::expression_precedence( Array<Token>& tokens, Int& index, Bool
         }
         was_op = is_op;
 
-        if ( token.value == op_expr_opn || token.value == op_scope_opn || token.value == op_array_opn )
-        {
-            ++expr_depth;
-        }
-        else if ( token.value == op_expr_cls || token.value == op_scope_cls || token.value == op_array_cls )
-        {
-            --expr_depth;
-            if ( expr_depth < 0 )
-                PARSER_PANIC( token, "expected expression end" );
-        }
+        expr_depth += token_depth( token, in_lambda );
+        if ( expr_depth < 0 )
+            PARSER_PANIC( token, "unexpected expression end" );
     }
 }
 
@@ -1082,6 +1071,22 @@ void dawn::Parser::scope_for( Array<Token>::const_iterator& it, Array<Token>::co
 dawn::Bool dawn::is_unary( Token const& token )
 {
     return token.value == op_add || token.value == op_sub || token.value == op_not;
+}
+
+dawn::Int dawn::token_depth( Token const& token, Bool& in_lambda )
+{
+    if ( token.value == op_lambda )
+    {
+        in_lambda = !in_lambda;
+        return in_lambda ? 1 : -1;
+    }
+
+    if ( token.value == op_expr_opn || token.value == op_scope_opn || token.value == op_array_opn )
+        return 1;
+    else if ( token.value == op_expr_cls || token.value == op_scope_cls || token.value == op_array_cls )
+        return -1;
+
+    return 0;
 }
 
 void dawn::create_unary_node( Token const& token, Node& node )
