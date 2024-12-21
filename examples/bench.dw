@@ -1,3 +1,8 @@
+func main() {
+    let result = fib(30)
+    print(result)
+}
+
 func fib(ref n) {
     if n <= 1 {
         return n

@@ -1,6 +1,0 @@
-import "examples/min_fib.dw"
-
-func main() {
-    let result = fib(30)
-    print(result)
-}
