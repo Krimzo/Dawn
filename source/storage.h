@@ -41,7 +41,7 @@ struct Storage
         return *new (m_buffer) T( args... );
     }
 
-    constexpr E type() const noexcept
+    E type() const noexcept
     {
         return m_type;
     }
@@ -105,7 +105,7 @@ struct DynStorage
         return *static_cast<T*>(m_ptr);
     }
 
-    constexpr E type() const noexcept
+    E type() const noexcept
     {
         return m_type;
     }

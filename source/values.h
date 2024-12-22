@@ -129,7 +129,7 @@ struct ValueHandler
             static_assert(false, "Invalid value type");
     }
 
-    static constexpr void copy( ValueType type, void* to, void const* from )
+    static void copy( ValueType type, void* to, void const* from )
     {
         switch ( type )
         {
@@ -175,7 +175,7 @@ struct ValueHandler
         }
     }
 
-    static constexpr void destruct( ValueType type, void* ptr )
+    static void destruct( ValueType type, void* ptr )
     {
         switch ( type )
         {
@@ -226,27 +226,32 @@ struct Value : private Storage<max_val_size(), max_val_align(), ValueType, Value
 {
     Value() = default;
 
-    constexpr ValueType type() const
+    ValueType type() const
     {
         return Storage::type();
     }
 
     template<typename T>
-    constexpr T const& as() const
+    T const& as() const
     {
         return Storage::as<T>();
     }
 
     template<typename T>
-    constexpr T& as()
+    T& as()
     {
         return Storage::as<T>();
     }
 
     template<typename T, typename... Args>
-    constexpr T& store( Args&&... args )
+    T& store( Args&&... args )
     {
         return Storage::emplace<T>( args... );
+    }
+
+    void reset()
+    {
+        Storage::reset();
     }
 };
 
@@ -277,13 +282,13 @@ struct ValueRef
     Value const& value() const;
     void set_value( Value const& value );
 
-    constexpr Bool valid() const noexcept
+    Bool valid() const noexcept
     {
         return m_regref.valid();
     }
 
     template<typename T>
-    constexpr T& as() const
+    T& as() const
     {
         return m_regref.value().as<T>();
     }

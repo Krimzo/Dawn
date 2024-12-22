@@ -1,4 +1,5 @@
 #include "stack.h"
+#include "pools.h"
 
 
 dawn::ScopeObject::ScopeObject()
@@ -28,12 +29,12 @@ dawn::ValueRef* dawn::ScopeObject::get( Int id )
 dawn::ScopeStack::ScopeStack()
 {
     m_scopes.reserve( 128 );
-    m_scopes.push_back( get_global_memory().scope_memory.new_register() );
+    m_scopes.push_back( memory_pools().scope_memory.new_register() );
 }
 
 dawn::StackHelper dawn::ScopeStack::push()
 {
-    auto& scope = m_scopes.emplace_back( get_global_memory().scope_memory.new_register() ).value();
+    auto& scope = m_scopes.emplace_back( memory_pools().scope_memory.new_register() ).value();
     scope.parent = *(++m_scopes.rbegin());
     scope.objects.clear();
     return StackHelper{ *this };
@@ -41,7 +42,7 @@ dawn::StackHelper dawn::ScopeStack::push()
 
 dawn::StackHelper dawn::ScopeStack::push( Function const& func )
 {
-    auto& scope = m_scopes.emplace_back( get_global_memory().scope_memory.new_register() ).value();
+    auto& scope = m_scopes.emplace_back( memory_pools().scope_memory.new_register() ).value();
     scope.parent = func.is_lambda() ? func.lambda_parent : m_scopes.front();
     scope.objects.clear();
     return StackHelper{ *this };

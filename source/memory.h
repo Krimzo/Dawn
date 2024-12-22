@@ -6,13 +6,10 @@
 namespace dawn
 {
 template<typename T>
-struct Memory;
-
-template<typename T>
 struct Register
 {
-    T value = {};
     Int count = 0;
+    T value = {};
 
     void incr()
     {
@@ -30,116 +27,123 @@ struct RegisterRef
 {
     RegisterRef() noexcept = default;
 
-    RegisterRef( Memory<T>* memory, Int index ) noexcept
-        : m_memory( memory ), m_index( index )
+    RegisterRef( Register<T>* regptr ) noexcept
+        : m_regptr( regptr )
     {
-        if ( valid() )
-            regist().incr();
+        if ( m_regptr )
+            m_regptr->incr();
     }
 
     ~RegisterRef() noexcept
     {
-        if ( valid() )
-            regist().decr();
+        if ( m_regptr )
+            m_regptr->decr();
     }
 
     RegisterRef( RegisterRef const& other ) noexcept
-        : m_memory( other.m_memory ), m_index( other.m_index )
+        : m_regptr( other.m_regptr )
     {
-        if ( valid() )
-            regist().incr();
+        if ( m_regptr )
+            m_regptr->incr();
     }
 
     RegisterRef& operator=( RegisterRef const& other ) noexcept
     {
         if ( this != &other )
         {
-            if ( valid() )
-                regist().decr();
+            if ( m_regptr )
+                m_regptr->decr();
 
-            m_memory = other.m_memory;
-            m_index = other.m_index;
+            m_regptr = other.m_regptr;
 
-            if ( valid() )
-                regist().incr();
+            if ( m_regptr )
+                m_regptr->incr();
         }
         return *this;
     }
 
-    constexpr Bool valid() const noexcept
+    Bool valid() const noexcept
     {
-        return m_memory;
+        return static_cast<Bool>(m_regptr);
     }
 
     T& value() const noexcept
     {
-        return regist().value;
+        return m_regptr->value;
     }
 
 private:
-    Memory<T>* m_memory = nullptr;
-    Int m_index = -1;
+    Register<T>* m_regptr = nullptr;
+};
 
-    Register<T>& regist() const noexcept
+template<typename T, Int S>
+struct MemoryChunk
+{
+    Int m_current = 0;
+    Register<T> m_space[S] = {};
+
+    Register<T>* move_to_unused()
     {
-        return m_memory->m_space[m_index];
+        Int start_index = m_current;
+        while ( m_space[m_current].count != 0 )
+        {
+            increment_current();
+            if ( m_current == start_index )
+                return nullptr;
+        }
+        return m_space + m_current;
+    }
+
+    void increment_current()
+    {
+        if ( ++m_current == S )
+            m_current = 0;
     }
 };
 
-template<typename T>
-struct Memory
+template<typename T, Int ChunkSize>
+struct MemoryPool
 {
-    friend struct GlobalMemory;
-    friend struct RegisterRef<T>;
+    friend struct MemoryPools;
 
-    Memory( Int initial_count = 1 )
+    MemoryPool()
     {
-        m_space.resize( std::max( initial_count, Int( 1 ) ) );
+        allocate_chunk();
     }
 
     RegisterRef<T> new_register()
     {
-        move_to_unused();
-        return { this, m_current };
+        return { move_to_unused() };
     }
 
 private:
-    Array<Register<T>> m_space;
-    Int m_current = 0;
+    List<MemoryChunk<T, ChunkSize>> m_chunks;
+    List<MemoryChunk<T, ChunkSize>>::iterator m_current;
 
-    void move_to_unused()
+    Register<T>* move_to_unused()
     {
-        Int first_index = m_current;
-        while ( m_space[m_current].count > 0 )
+        auto start_iterator = m_current;
+        while ( true )
         {
+            if ( Register<T>* ptr = m_current->move_to_unused() )
+                return ptr;
+
             increment_current();
-            if ( m_current == first_index )
-                allocate_more();
+            if ( m_current == start_iterator )
+                allocate_chunk();
         }
     }
 
     void increment_current()
     {
-        if ( ++m_current >= (Int) m_space.size() )
-            m_current = 0;
+        if ( ++m_current == m_chunks.end() )
+            m_current = m_chunks.begin();
     }
 
-    void allocate_more()
+    void allocate_chunk()
     {
-        m_space.resize( m_space.size() * 2 );
+        m_chunks.emplace_front();
+        m_current = m_chunks.begin();
     }
 };
-
-struct Value;
-struct ScopeObject;
-
-struct GlobalMemory
-{
-    Memory<ScopeObject> scope_memory{ 128 };
-    Memory<Value> value_memory{ 2048 };
-
-    ~GlobalMemory() noexcept;
-};
-
-GlobalMemory& get_global_memory();
 }

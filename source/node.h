@@ -142,25 +142,25 @@ struct NodeHandler
 
 struct Node : private DynStorage<NodeType, NodeHandler>
 {
-    constexpr NodeType type() const
+    NodeType type() const
     {
         return DynStorage::type();
     }
 
     template<typename T>
-    constexpr T const& as() const
+    T const& as() const
     {
         return DynStorage::as<T>();
     }
 
     template<typename T>
-    constexpr T& as()
+    T& as()
     {
         return DynStorage::as<T>();
     }
 
     template<typename T, typename... Args>
-    constexpr T& store( Args&&... args )
+    T& store( Args&&... args )
     {
         return DynStorage::emplace<T>( args... );
     }
