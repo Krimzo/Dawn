@@ -34,6 +34,6 @@ dawn::Node dawn::make_string_node( String value )
 dawn::Node dawn::make_value_node( ValueRef const& value )
 {
     Node result;
-    result.store<RefNod>().value_ref = value;
+    result.emplace<RefNod>().value_ref = value;
     return result;
 }

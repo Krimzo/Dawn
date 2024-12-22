@@ -222,38 +222,7 @@ struct ValueHandler
     }
 };
 
-struct Value : private Storage<max_val_size(), max_val_align(), ValueType, ValueHandler>
-{
-    Value() = default;
-
-    ValueType type() const
-    {
-        return Storage::type();
-    }
-
-    template<typename T>
-    T const& as() const
-    {
-        return Storage::as<T>();
-    }
-
-    template<typename T>
-    T& as()
-    {
-        return Storage::as<T>();
-    }
-
-    template<typename T, typename... Args>
-    T& store( Args&&... args )
-    {
-        return Storage::emplace<T>( args... );
-    }
-
-    void reset()
-    {
-        Storage::reset();
-    }
-};
+using Value = Storage<max_val_size(), max_val_align(), ValueType, ValueHandler>;
 
 enum struct ValueKind
 {

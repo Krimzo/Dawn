@@ -140,29 +140,5 @@ struct NodeHandler
     static void destruct( NodeType type, void* ptr );
 };
 
-struct Node : private DynStorage<NodeType, NodeHandler>
-{
-    NodeType type() const
-    {
-        return DynStorage::type();
-    }
-
-    template<typename T>
-    T const& as() const
-    {
-        return DynStorage::as<T>();
-    }
-
-    template<typename T>
-    T& as()
-    {
-        return DynStorage::as<T>();
-    }
-
-    template<typename T, typename... Args>
-    T& store( Args&&... args )
-    {
-        return DynStorage::emplace<T>( args... );
-    }
-};
+using Node = DynStorage<NodeType, NodeHandler>;
 }

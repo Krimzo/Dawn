@@ -29,7 +29,7 @@ struct ScopeStack
     ScopeObject& root();
     ScopeObject& current();
 
-    RegisterRef<ScopeObject> peek() const;
+    RegisterRef<ScopeObject> const& peek() const;
 
 private:
     Array<RegisterRef<ScopeObject>> m_scopes;

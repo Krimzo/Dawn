@@ -33,7 +33,7 @@ struct Storage
     }
 
     template<typename T, typename... Args>
-        requires (alignof(T) <= A and sizeof( T ) <= S)
+        requires (sizeof( T ) <= S and alignof(T) <= A)
     T& emplace( Args&&... args )
     {
         reset();

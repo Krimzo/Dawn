@@ -7,9 +7,7 @@
 
 namespace dawn
 {
-struct Value;
 struct ValueRef;
-struct Struct;
 struct ScopeObject;
 
 enum struct VariableKind

@@ -86,63 +86,63 @@ dawn::ArrayVal& dawn::ArrayVal::operator=( ArrayVal const& other )
 dawn::ValueRef::ValueRef( Bool value, ValueKind kind )
     : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
 {
-    m_regref.value().store<Bool>( value );
+    m_regref.value().emplace<Bool>( value );
 }
 
 dawn::ValueRef::ValueRef( Int value, ValueKind kind )
     : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
 {
-    m_regref.value().store<Int>( value );
+    m_regref.value().emplace<Int>( value );
 }
 
 dawn::ValueRef::ValueRef( Float value, ValueKind kind )
     : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
 {
-    m_regref.value().store<Float>( value );
+    m_regref.value().emplace<Float>( value );
 }
 
 dawn::ValueRef::ValueRef( Char value, ValueKind kind )
     : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
 {
-    m_regref.value().store<Char>( value );
+    m_regref.value().emplace<Char>( value );
 }
 
 dawn::ValueRef::ValueRef( String value, ValueKind kind )
     : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
 {
-    m_regref.value().store<String>( std::move( value ) );
+    m_regref.value().emplace<String>( std::move( value ) );
 }
 
 dawn::ValueRef::ValueRef( Function const& value, ValueKind kind )
     : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
 {
-    m_regref.value().store<Function>( value );
+    m_regref.value().emplace<Function>( value );
 }
 
 dawn::ValueRef::ValueRef( EnumVal const& value, ValueKind kind )
     : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
 {
-    m_regref.value().store<EnumVal>( value );
+    m_regref.value().emplace<EnumVal>( value );
 }
 
 dawn::ValueRef::ValueRef( StructVal const& value, ValueKind kind )
     : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
 {
-    m_regref.value().store<StructVal>( value );
+    m_regref.value().emplace<StructVal>( value );
     reapply_kind();
 }
 
 dawn::ValueRef::ValueRef( ArrayVal const& value, ValueKind kind )
     : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
 {
-    m_regref.value().store<ArrayVal>( value );
+    m_regref.value().emplace<ArrayVal>( value );
     reapply_kind();
 }
 
 dawn::ValueRef::ValueRef( RangeVal const& value, ValueKind kind )
     : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
 {
-    m_regref.value().store<RangeVal>( value );
+    m_regref.value().emplace<RangeVal>( value );
 }
 
 dawn::ValueRef::ValueRef( Value const& value, ValueKind kind )
@@ -731,42 +731,42 @@ dawn::ValueRef dawn::ValueRef::op_cmpr( Engine& engine, ValueRef const& other ) 
 dawn::ValueRef dawn::ValueRef::op_eq( Engine& engine, ValueRef const& other ) const
 {
     auto result = op_cmpr( engine, other );
-    result.m_regref.value().store<Bool>( result.as<Int>() == 0 );
+    result.m_regref.value().emplace<Bool>( result.as<Int>() == 0 );
     return result;
 }
 
 dawn::ValueRef dawn::ValueRef::op_neq( Engine& engine, ValueRef const& other ) const
 {
     auto result = op_cmpr( engine, other );
-    result.m_regref.value().store<Bool>( result.as<Int>() != 0 );
+    result.m_regref.value().emplace<Bool>( result.as<Int>() != 0 );
     return result;
 }
 
 dawn::ValueRef dawn::ValueRef::op_less( Engine& engine, ValueRef const& other ) const
 {
     auto result = op_cmpr( engine, other );
-    result.m_regref.value().store<Bool>( result.as<Int>() < 0 );
+    result.m_regref.value().emplace<Bool>( result.as<Int>() < 0 );
     return result;
 }
 
 dawn::ValueRef dawn::ValueRef::op_great( Engine& engine, ValueRef const& other ) const
 {
     auto result = op_cmpr( engine, other );
-    result.m_regref.value().store<Bool>( result.as<Int>() > 0 );
+    result.m_regref.value().emplace<Bool>( result.as<Int>() > 0 );
     return result;
 }
 
 dawn::ValueRef dawn::ValueRef::op_lesseq( Engine& engine, ValueRef const& other ) const
 {
     auto result = op_cmpr( engine, other );
-    result.m_regref.value().store<Bool>( result.as<Int>() <= 0 );
+    result.m_regref.value().emplace<Bool>( result.as<Int>() <= 0 );
     return result;
 }
 
 dawn::ValueRef dawn::ValueRef::op_greateq( Engine& engine, ValueRef const& other ) const
 {
     auto result = op_cmpr( engine, other );
-    result.m_regref.value().store<Bool>( result.as<Int>() >= 0 );
+    result.m_regref.value().emplace<Bool>( result.as<Int>() >= 0 );
     return result;
 }
 

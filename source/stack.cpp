@@ -63,7 +63,7 @@ dawn::ScopeObject& dawn::ScopeStack::current()
     return m_scopes.back().value();
 }
 
-dawn::RegisterRef<dawn::ScopeObject> dawn::ScopeStack::peek() const
+dawn::RegisterRef<dawn::ScopeObject> const& dawn::ScopeStack::peek() const
 {
     return m_scopes.back();
 }
