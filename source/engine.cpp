@@ -85,21 +85,21 @@ void dawn::Engine::add_obj( VariableKind kind, Int id, ValueRef const& value )
 {
     if ( kind == VariableKind::LET )
     {
-        stack.peek().set( id, ValueRef{ value.value() } );
+        stack.current().set( id, ValueRef{ value.value() } );
     }
     else if ( kind == VariableKind::VAR )
     {
-        stack.peek().set( id, ValueRef{ value.value(), ValueKind::VAR } );
+        stack.current().set( id, ValueRef{ value.value(), ValueKind::VAR } );
     }
     else
     {
-        stack.peek().set( id, value );
+        stack.current().set( id, value );
     }
 }
 
 dawn::ValueRef* dawn::Engine::get_obj( Int id )
 {
-    return stack.peek().get( id );
+    return stack.current().get( id );
 }
 
 void dawn::Engine::handle_func( Function& func, Array<ValueRef>& args, ValueRef& retval )
@@ -249,6 +249,12 @@ void dawn::Engine::handle_expr( Node& node, ValueRef& value )
 
 void dawn::Engine::handle_ref_node( RefNod& node, ValueRef& value )
 {
+    if ( node.value_ref.type() == ValueType::FUNCTION )
+    {
+        auto& func = node.value_ref.as<Function>();
+        if ( func.is_lambda() )
+            func.lambda_parent = stack.peek();
+    }
     value = node.value_ref;
 }
 

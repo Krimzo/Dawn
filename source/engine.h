@@ -12,7 +12,7 @@ struct Engine
 {
     friend struct ValueRef;
 
-    ScopeStack stack = 1024;
+    ScopeStack stack;
     Map<Int, Enum> enums;
     Map<Int, Struct> structs;
     Map<Int, TypeMember> type_members[(Int) ValueType::_COUNT] = {};
