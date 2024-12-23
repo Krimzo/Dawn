@@ -1,5 +1,4 @@
 #include "stack.h"
-#include "pools.h"
 
 
 dawn::ScopeObject::ScopeObject()
@@ -19,53 +18,49 @@ dawn::ValueRef* dawn::ScopeObject::get( Int id )
         if ( obj_id == id )
             return &obj;
     }
-
-    if ( !parent.valid() )
-        return nullptr;
-
-    return parent.value().get( id );
+    return parent ? parent->get( id ) : nullptr;
 }
 
-dawn::ScopeStack::ScopeStack()
+dawn::ScopeStack::ScopeStack( Int size )
 {
-    m_scopes.reserve( 128 );
-    m_scopes.push_back( memory_pools().scope_memory.new_register() );
+    m_scopes.resize( size );
 }
 
 dawn::StackHelper dawn::ScopeStack::push()
 {
-    auto& scope = m_scopes.emplace_back( memory_pools().scope_memory.new_register() ).value();
-    scope.parent = *(++m_scopes.rbegin());
+    if ( ++m_current == m_scopes.size() )
+        PANIC( "stack overflow" );
+
+    auto& scope = peek();
+    scope.parent = &m_scopes[m_current - 1];
     scope.objects.clear();
     return StackHelper{ *this };
 }
 
 dawn::StackHelper dawn::ScopeStack::push( Function const& func )
 {
-    auto& scope = m_scopes.emplace_back( memory_pools().scope_memory.new_register() ).value();
-    scope.parent = func.is_lambda() ? func.lambda_parent : m_scopes.front();
+    if ( ++m_current == m_scopes.size() )
+        PANIC( "stack overflow" );
+
+    auto& scope = peek();
+    scope.parent = &root();
     scope.objects.clear();
     return StackHelper{ *this };
 }
 
 void dawn::ScopeStack::pop()
 {
-    m_scopes.pop_back();
+    --m_current;
 }
 
 dawn::ScopeObject& dawn::ScopeStack::root()
 {
-    return m_scopes.front().value();
+    return m_scopes[0];
 }
 
-dawn::ScopeObject& dawn::ScopeStack::current()
+dawn::ScopeObject& dawn::ScopeStack::peek()
 {
-    return m_scopes.back().value();
-}
-
-dawn::RegisterRef<dawn::ScopeObject> const& dawn::ScopeStack::peek() const
-{
-    return m_scopes.back();
+    return m_scopes[m_current];
 }
 
 dawn::StackHelper::~StackHelper() noexcept

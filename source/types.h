@@ -34,7 +34,6 @@ struct Function
     using CppFunc = Func<ValueRef( Array<ValueRef> const& )>;
 
     Int id = 0;
-    RegisterRef<ScopeObject> lambda_parent;
     Array<ValueRef> self_val;
     Array<Variable> args;
     Variant<Scope, CppFunc> body;

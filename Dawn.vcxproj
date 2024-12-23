@@ -12,7 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\engine.cpp" />
-    <ClCompile Include="source\pools.cpp" />
     <ClCompile Include="source\stack.cpp" />
     <ClCompile Include="source\standard.cpp" />
     <ClCompile Include="source\err.cpp" />
@@ -36,7 +35,6 @@
     <ClInclude Include="source\err.h" />
     <ClInclude Include="source\id.h" />
     <ClInclude Include="source\lexer.h" />
-    <ClInclude Include="source\pools.h" />
     <ClInclude Include="source\_main.h" />
     <ClInclude Include="source\memory.h" />
     <ClInclude Include="source\node.h" />

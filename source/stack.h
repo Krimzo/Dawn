@@ -9,7 +9,7 @@ struct StackHelper;
 
 struct ScopeObject
 {
-    RegisterRef<ScopeObject> parent;
+    ScopeObject* parent = nullptr;
     Array<Pair<Int, ValueRef>> objects;
 
     ScopeObject();
@@ -20,19 +20,18 @@ struct ScopeObject
 
 struct ScopeStack
 {
-    ScopeStack();
+    ScopeStack( Int size );
 
     [[nodiscard]] StackHelper push();
     [[nodiscard]] StackHelper push( Function const& func );
     void pop();
 
     ScopeObject& root();
-    ScopeObject& current();
-
-    RegisterRef<ScopeObject> const& peek() const;
+    ScopeObject& peek();
 
 private:
-    Array<RegisterRef<ScopeObject>> m_scopes;
+    Array<ScopeObject> m_scopes;
+    Int m_current = 0;
 };
 
 struct StackHelper
