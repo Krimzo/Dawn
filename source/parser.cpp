@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "pools.h"
 
 
 dawn::Bool dawn::Module::contains_id( Int id ) const
@@ -132,13 +133,14 @@ void dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>:
             field.id = name_id;
             ++it;
 
+            field.expr = node_pool().new_register();
             if ( it->value == op_assign )
             {
                 ++it;
-                parse_expression( ExtractType::NEW_LINE, it, end, field.expr );
+                parse_expression( ExtractType::NEW_LINE, it, end, field.expr.value() );
             }
             else
-                field.expr = make_nothing_node();
+                field.expr.value() = make_nothing_node();
         }
         else if ( it->value == kw_func )
         {
@@ -348,13 +350,14 @@ void dawn::Parser::parse_variable( Array<Token>::const_iterator& it, Array<Token
     Int name_line = it->line_number;
     ++it;
 
+    variable.expr = node_pool().new_register();
     if ( it->value == op_assign )
     {
         ++it;
-        parse_expression( ExtractType::NEW_LINE, it, end, variable.expr );
+        parse_expression( ExtractType::NEW_LINE, it, end, variable.expr.value() );
     }
     else
-        variable.expr = make_nothing_node();
+        variable.expr.value() = make_nothing_node();
 }
 
 void dawn::Parser::parse_expression( ExtractType type, Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
@@ -383,7 +386,8 @@ void dawn::Parser::parse_expression( ExtractType type, Array<Token>::const_itera
             auto& un_nod = tree.as<UnaryNod>();
 
             auto it = expr_tokens.begin() + 1;
-            parse_expression( ExtractType::DEFAULT, it, expr_tokens.end(), un_nod.right );
+            un_nod.right = node_pool().new_register();
+            parse_expression( ExtractType::DEFAULT, it, expr_tokens.end(), un_nod.right.value() );
         }
         else
         {
@@ -516,7 +520,8 @@ void dawn::Parser::expression_complex_expr( Array<Token>& left, Array<Token>& ri
         auto& nod = tree.emplace<CallNod>();
 
         auto left_it = left.begin();
-        parse_expression( ExtractType::DEFAULT, left_it, left.end(), nod.left_expr );
+        nod.left_expr = node_pool().new_register();
+        parse_expression( ExtractType::DEFAULT, left_it, left.end(), nod.left_expr.value() );
 
         for ( auto it = right.begin(); it != right.end(); )
             parse_expression( ExtractType::SPLITTER, it, right.end(), nod.args.emplace_back() );
@@ -661,10 +666,12 @@ void dawn::Parser::expression_complex_array( Array<Token>& left, Array<Token>& r
     else if ( left.size() == 1 && left.front().type == TokenType::TYPE )
     {
         auto& node = tree.emplace<ArrayNod>();
-        node.SIZE_value_expr = make_def_val( left.front().value );
+        node.SIZE_value_expr = node_pool().new_register();
+        node.SIZE_value_expr.value() = make_def_val( left.front().value );
 
         auto right_it = right.begin();
-        parse_expression( ExtractType::DEFAULT, right_it, right.end(), node.SIZE_size_expr );
+        node.SIZE_size_expr = node_pool().new_register();
+        parse_expression( ExtractType::DEFAULT, right_it, right.end(), node.SIZE_size_expr.value() );
         node.init_type = ArrayNod::InitType::SIZE;
     }
     else
@@ -672,10 +679,12 @@ void dawn::Parser::expression_complex_array( Array<Token>& left, Array<Token>& r
         auto& nod = tree.emplace<IndexNod>();
 
         auto left_it = left.begin();
-        parse_expression( ExtractType::DEFAULT, left_it, left.end(), nod.left_expr );
+        nod.left_expr = node_pool().new_register();
+        parse_expression( ExtractType::DEFAULT, left_it, left.end(), nod.left_expr.value() );
 
         auto right_it = right.begin();
-        parse_expression( ExtractType::DEFAULT, right_it, right.end(), nod.expr );
+        nod.expr = node_pool().new_register();
+        parse_expression( ExtractType::DEFAULT, right_it, right.end(), nod.expr.value() );
     }
 }
 
@@ -693,16 +702,16 @@ void dawn::Parser::expression_complex_default( Array<Token>& left, Token op, Arr
     {
         create_operator_node( op, tree );
         auto& op_node = tree.as<OperatorNod>();
-        op_node.left = left_expr;
-        op_node.right = right_expr;
+        op_node.sides.emplace_back( left_expr );
+        op_node.sides.emplace_back( right_expr );
     }
     catch ( ... )
     {
         tree = {};
         create_assign_node( op, tree );
         auto& as_node = tree.as<AssignNod>();
-        as_node.left = left_expr;
-        as_node.right = right_expr;
+        as_node.sides.emplace_back( left_expr );
+        as_node.sides.emplace_back( right_expr );
     }
 }
 
@@ -882,10 +891,11 @@ void dawn::Parser::scope_return( Array<Token>::const_iterator& it, Array<Token>:
     ++it;
 
     auto& node = tree.emplace<ReturnNod>();
+    node.expr = node_pool().new_register();
     if ( it->line_number == return_line )
-        parse_expression( ExtractType::NEW_LINE, it, end, node.expr );
+        parse_expression( ExtractType::NEW_LINE, it, end, node.expr.value() );
     else
-        node.expr = make_nothing_node();
+        node.expr.value() = make_nothing_node();
 }
 
 void dawn::Parser::scope_break( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
@@ -913,7 +923,8 @@ void dawn::Parser::scope_throw( Array<Token>::const_iterator& it, Array<Token>::
     ++it;
 
     auto& node = tree.emplace<ThrowNod>();
-    parse_expression( ExtractType::NEW_LINE, it, end, node.expr );
+    node.expr = node_pool().new_register();
+    parse_expression( ExtractType::NEW_LINE, it, end, node.expr.value() );
 }
 
 void dawn::Parser::scope_try( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
@@ -946,22 +957,23 @@ void dawn::Parser::scope_if( Array<Token>::const_iterator& it, Array<Token>::con
 
     auto& node = tree.emplace<IfNod>();
 
-    parse_expression( ExtractType::SCOPE_START, it, end, node.if_part.expr );
-    parse_scope( it, end, node.if_part.scope );
+    parse_expression( ExtractType::SCOPE_START, it, end, node.parts.emplace_back().expr );
+    parse_scope( it, end, node.parts.back().scope );
 
     while ( true )
     {
         if ( it->value == kw_elif )
         {
             ++it;
-            auto& part = node.elif_parts.emplace_back();
+            auto& part = node.parts.emplace_back();
             parse_expression( ExtractType::SCOPE_START, it, end, part.expr );
             parse_scope( it, end, part.scope );
         }
         else if ( it->value == kw_else )
         {
             ++it;
-            auto& part = node.else_part.emplace();
+            auto& part = node.parts.emplace_back();
+            part.expr = make_bool_node( true );
             parse_scope( it, end, part.scope );
             break;
         }
@@ -978,7 +990,8 @@ void dawn::Parser::scope_switch( Array<Token>::const_iterator& it, Array<Token>:
 
     auto& node = tree.emplace<SwitchNod>();
 
-    parse_expression( ExtractType::SCOPE_START, it, end, node.main_expr );
+    node.main_expr = node_pool().new_register();
+    parse_expression( ExtractType::SCOPE_START, it, end, node.main_expr.value() );
 
     if ( it->value != op_scope_opn )
         PARSER_PANIC( *it, "expected scope open" );
@@ -1033,7 +1046,8 @@ void dawn::Parser::scope_while( Array<Token>::const_iterator& it, Array<Token>::
     ++it;
 
     auto& node = tree.emplace<WhileNod>();
-    parse_expression( ExtractType::SCOPE_START, it, end, node.expr );
+    node.expr = node_pool().new_register();
+    parse_expression( ExtractType::SCOPE_START, it, end, node.expr.value() );
     parse_scope( it, end, node.scope );
 }
 
@@ -1064,7 +1078,8 @@ void dawn::Parser::scope_for( Array<Token>::const_iterator& it, Array<Token>::co
         PARSER_PANIC( *it, "expected link operator" );
     ++it;
 
-    parse_expression( ExtractType::SCOPE_START, it, end, node.expr );
+    node.expr = node_pool().new_register();
+    parse_expression( ExtractType::SCOPE_START, it, end, node.expr.value() );
     parse_scope( it, end, node.scope );
 }
 

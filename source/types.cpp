@@ -1,5 +1,5 @@
 #include "types.h"
-#include "stack.h"
+#include "nodes.h"
 
 
 dawn::Bool dawn::Function::is_lambda() const

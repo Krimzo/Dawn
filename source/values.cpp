@@ -84,69 +84,69 @@ dawn::ArrayVal& dawn::ArrayVal::operator=( ArrayVal const& other )
 }
 
 dawn::ValueRef::ValueRef( Bool value, ValueKind kind )
-    : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
+    : m_regref( value_pool().new_register() ), m_kind( kind )
 {
     m_regref.value().emplace<Bool>( value );
 }
 
 dawn::ValueRef::ValueRef( Int value, ValueKind kind )
-    : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
+    : m_regref( value_pool().new_register() ), m_kind( kind )
 {
     m_regref.value().emplace<Int>( value );
 }
 
 dawn::ValueRef::ValueRef( Float value, ValueKind kind )
-    : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
+    : m_regref( value_pool().new_register() ), m_kind( kind )
 {
     m_regref.value().emplace<Float>( value );
 }
 
 dawn::ValueRef::ValueRef( Char value, ValueKind kind )
-    : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
+    : m_regref( value_pool().new_register() ), m_kind( kind )
 {
     m_regref.value().emplace<Char>( value );
 }
 
 dawn::ValueRef::ValueRef( String value, ValueKind kind )
-    : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
+    : m_regref( value_pool().new_register() ), m_kind( kind )
 {
     m_regref.value().emplace<String>( std::move( value ) );
 }
 
 dawn::ValueRef::ValueRef( Function const& value, ValueKind kind )
-    : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
+    : m_regref( value_pool().new_register() ), m_kind( kind )
 {
     m_regref.value().emplace<Function>( value );
 }
 
 dawn::ValueRef::ValueRef( EnumVal const& value, ValueKind kind )
-    : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
+    : m_regref( value_pool().new_register() ), m_kind( kind )
 {
     m_regref.value().emplace<EnumVal>( value );
 }
 
 dawn::ValueRef::ValueRef( StructVal const& value, ValueKind kind )
-    : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
+    : m_regref( value_pool().new_register() ), m_kind( kind )
 {
     m_regref.value().emplace<StructVal>( value );
     reapply_kind();
 }
 
 dawn::ValueRef::ValueRef( ArrayVal const& value, ValueKind kind )
-    : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
+    : m_regref( value_pool().new_register() ), m_kind( kind )
 {
     m_regref.value().emplace<ArrayVal>( value );
     reapply_kind();
 }
 
 dawn::ValueRef::ValueRef( RangeVal const& value, ValueKind kind )
-    : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
+    : m_regref( value_pool().new_register() ), m_kind( kind )
 {
     m_regref.value().emplace<RangeVal>( value );
 }
 
 dawn::ValueRef::ValueRef( Value const& value, ValueKind kind )
-    : m_regref( memory_pools().value_memory.new_register() ), m_kind( kind )
+    : m_regref( value_pool().new_register() ), m_kind( kind )
 {
     m_regref.value() = value;
     reapply_kind();

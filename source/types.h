@@ -1,12 +1,15 @@
 #pragma once
 
 #include "id.h"
-#include "node.h"
+#include "storage.h"
 #include "memory.h"
 
 
 namespace dawn
 {
+struct Node;
+using NodeRef = RegisterRef<Node>;
+
 struct ValueRef;
 struct ScopeObject;
 
@@ -21,7 +24,7 @@ struct Variable
 {
     VariableKind kind = {};
     Int id = 0;
-    Node expr;
+    NodeRef expr;
 };
 
 struct Scope

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "memory.h"
-#include "values.h"
+#include "nodes.h"
 #include "stack.h"
 
 
@@ -11,9 +11,12 @@ struct MemoryPools
 {
     MemoryPool<ScopeObject, 256> scope_memory;
     MemoryPool<Value, 1024> value_memory;
+    MemoryPool<Node, 1024> node_memory;
 
     ~MemoryPools() noexcept;
 };
 
-MemoryPools& memory_pools();
+MemoryPool<ScopeObject, 256>& scope_pool();
+MemoryPool<Value, 1024>& value_pool();
+MemoryPool<Node, 1024>& node_pool();
 }

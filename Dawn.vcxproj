@@ -18,7 +18,6 @@
     <ClCompile Include="source\err.cpp" />
     <ClCompile Include="source\id.cpp" />
     <ClCompile Include="source\lexer.cpp" />
-    <ClCompile Include="source\node.cpp" />
     <ClCompile Include="source\nodes.cpp" />
     <ClCompile Include="source\parser.cpp" />
     <ClCompile Include="source\token.cpp" />
@@ -39,7 +38,6 @@
     <ClInclude Include="source\pools.h" />
     <ClInclude Include="source\_main.h" />
     <ClInclude Include="source\memory.h" />
-    <ClInclude Include="source\node.h" />
     <ClInclude Include="source\nodes.h" />
     <ClInclude Include="source\parser.h" />
     <ClInclude Include="source\stack.h" />
