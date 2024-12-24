@@ -4,10 +4,10 @@
 dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source ) noexcept
 {
     Set<String> imports;
-    return eval( source, imports );
+    return eval( source, std::nullopt, imports );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source, Set<String>& imports ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source, Opt<String> const& parent_path, Set<String>& imported ) noexcept
 {
     try
     {
@@ -17,9 +17,13 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source, Set<String>& 
         Module module;
         parser.parse( tokens, module );
 
-        for ( auto& entry : module.imports )
+        for ( auto& import_path : module.imports )
         {
-            if ( auto error = eval_file( entry, imports ) )
+            String path = import_path;
+            if ( !fs::path( path ).is_absolute() && parent_path )
+                path = *parent_path + "/" + path;
+
+            if ( auto error = eval_file( path, imported ) )
                 return error;
         }
         engine.load_mod( module );
@@ -37,16 +41,20 @@ dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path ) noexcept
     return eval_file( path, imports );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path, Set<String>& imports ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path, Set<String>& imported ) noexcept
 {
     String abs_path = fs::absolute( path ).string();
-    if ( imports.contains( abs_path ) )
+    if ( imported.contains( abs_path ) )
         return std::nullopt;
-    imports.insert( abs_path );
 
-    if ( auto source = read_file( abs_path ) )
-        return eval( *source, imports );
-    return dawn::format( "file [", abs_path, "] could not be opened" );
+    imported.insert( abs_path );
+    String parent_path = fs::path( abs_path ).parent_path().string();
+
+    auto source = read_file( abs_path );
+    if ( !source )
+        return dawn::format( "file [", abs_path, "] could not be opened" );
+
+    return eval( *source, parent_path, imported );
 }
 
 void dawn::Dawn::bind_func( String const& name, Function::CppFunc cpp_func ) noexcept

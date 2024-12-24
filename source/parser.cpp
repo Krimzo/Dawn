@@ -55,7 +55,7 @@ void dawn::Parser::parse_import( Array<Token>::const_iterator& it, Array<Token>:
 
     if ( it->type != TokenType::STRING )
         PARSER_PANIC( *it, "expected import path" );
-    module.imports.insert( fs::absolute( it->lit_val ).string() );
+    module.imports.insert( it->lit_val );
     ++it;
 }
 
@@ -253,7 +253,7 @@ void dawn::Parser::parse_function( Array<Token>::const_iterator& it, Array<Token
     }
     ++it;
 
-    parse_scope( it, end, std::get<Scope>( function.body ) );
+    parse_scope( it, end, *std::get_if<Scope>( &function.body ) );
 }
 
 void dawn::Parser::parse_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Function& operat )
@@ -327,7 +327,7 @@ void dawn::Parser::parse_operator( Array<Token>::const_iterator& it, Array<Token
         PARSER_PANIC( *it, "operator can have at most 1 argument" );
     }
 
-    parse_scope( it, end, std::get<Scope>( operat.body ) );
+    parse_scope( it, end, *std::get_if<Scope>( &operat.body ) );
 }
 
 void dawn::Parser::parse_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Variable& variable )
@@ -633,7 +633,7 @@ void dawn::Parser::expression_complex_scope( Array<Token>& left, Array<Token>& r
         right.push_back( right_scope );
 
         auto right_it = right.begin();
-        parse_scope( right_it, right.end(), std::get<Scope>( func.body ) );
+        parse_scope( right_it, right.end(), *std::get_if<Scope>( &func.body ) );
     }
     else
         PARSER_PANIC( left.front(), "unknown scope expression" );

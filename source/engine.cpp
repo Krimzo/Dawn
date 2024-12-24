@@ -120,13 +120,13 @@ void dawn::Engine::handle_func( Function& func, Array<ValueRef>& args, ValueRef&
             add_obj( func.args[i].kind, func.args[i].id, args[i] );
 
         Bool didret = false;
-        handle_scope( std::get<Scope>( func.body ), retval, didret, nullptr, nullptr );
+        handle_scope( *std::get_if<Scope>( &func.body ), retval, didret, nullptr, nullptr );
         if ( !didret )
             retval = ValueRef{ Value{} };
     }
     else
     {
-        retval = std::get<Function::CppFunc>( func.body )(args);
+        retval = (*std::get_if<Function::CppFunc>( &func.body ))(args);
     }
 }
 

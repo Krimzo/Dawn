@@ -15,10 +15,10 @@ struct Dawn
     Engine engine;
 
     Opt<String> eval( StringRef const& source ) noexcept;
-    Opt<String> eval( StringRef const& source, Set<String>& imports ) noexcept;
+    Opt<String> eval( StringRef const& source, Opt<String> const& parent_path, Set<String>& imported ) noexcept;
 
     Opt<String> eval_file( StringRef const& path ) noexcept;
-    Opt<String> eval_file( StringRef const& path, Set<String>& imports ) noexcept;
+    Opt<String> eval_file( StringRef const& path, Set<String>& imported ) noexcept;
 
     void bind_func( String const& name, Function::CppFunc cpp_func ) noexcept;
     Opt<String> call_func( String const& name ) noexcept;

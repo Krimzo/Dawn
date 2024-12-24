@@ -9,12 +9,8 @@ int dawn::_shp_main( int argc, char** argv )
         return -1;
     }
 
-    String path = argv[1];
-    if ( !fs::path( path ).has_extension() )
-        path += ".dw";
-
     Dawn dawn;
-    if ( auto error = dawn.eval_file( path ) )
+    if ( auto error = dawn.eval_file( argv[1] ) )
     {
         print( error.value() );
         return -2;
