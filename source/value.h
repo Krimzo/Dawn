@@ -1,7 +1,7 @@
 #pragma once
 
 #include "err.h"
-#include "types.h"
+#include "type.h"
 
 
 namespace dawn

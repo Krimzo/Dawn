@@ -1,8 +1,8 @@
 #pragma once
 
-#include "util.h"
 #include "lexer.h"
 #include "parser.h"
+#include "compiler.h"
 #include "engine.h"
 
 
@@ -12,6 +12,7 @@ struct Dawn
 {
     Lexer lexer;
     Parser parser;
+    Compiler compiler;
     Engine engine;
 
     Opt<String> eval( StringRef const& source ) noexcept;

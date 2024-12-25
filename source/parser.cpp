@@ -1,5 +1,5 @@
 #include "parser.h"
-#include "pools.h"
+#include "pool.h"
 
 
 dawn::Bool dawn::Module::contains_id( Int id ) const
