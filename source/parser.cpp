@@ -1226,7 +1226,7 @@ dawn::Node dawn::make_def_val( StringRef const& type )
         return make_string_node( {} );
 
     else if ( type == op_range )
-        return make_value_node( ValueRef{ RangeVal{} } );
+        return make_ref_node( ValueRef{ RangeVal{} } );
 
     else if ( is_custom_type( type ) )
     {

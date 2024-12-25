@@ -243,7 +243,7 @@ void dawn::Engine::handle_expr( Node& node, ValueRef& value )
         break;
 
     default:
-        ENGINE_PANIC( "unknown expr node type: ", typeid(node).name() );
+        ENGINE_PANIC( "unknown expr node type: ", node.type() );
     }
 }
 
