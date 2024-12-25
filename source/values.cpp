@@ -170,7 +170,7 @@ dawn::Value const& dawn::ValueRef::value() const
 void dawn::ValueRef::set_value( Value const& value )
 {
     if ( m_kind == ValueKind::LET )
-        PANIC( "Cannot set value of a let variable" );
+        PANIC( "can't set value of a let variable" );
 
     m_regref.value() = value;
     reapply_kind();
@@ -820,7 +820,7 @@ dawn::Bool dawn::ValueRef::to_bool( Engine& engine ) const
         auto& left = as<StructVal>();
         Function* method = left.get_method( _to_bool, true );
         if ( !method )
-            PANIC( "Cannot convert struct [", IDSystem::get( left.parent->id ), "] to bool" );
+            PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to bool" );
 
         ValueRef retval;
         method->self_val.resize( 1 );
@@ -831,7 +831,7 @@ dawn::Bool dawn::ValueRef::to_bool( Engine& engine ) const
     }
 
     default:
-        PANIC( "Cannot convert [", type(), "] to bool" );
+        PANIC( "can't convert [", type(), "] to bool" );
     }
 }
 
@@ -866,7 +866,7 @@ dawn::Int dawn::ValueRef::to_int( Engine& engine ) const
         auto& left = as<StructVal>();
         Function* method = left.get_method( _to_int, true );
         if ( !method )
-            PANIC( "Cannot convert struct [", IDSystem::get( left.parent->id ), "] to int" );
+            PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to int" );
 
         ValueRef retval;
         method->self_val.resize( 1 );
@@ -877,7 +877,7 @@ dawn::Int dawn::ValueRef::to_int( Engine& engine ) const
     }
 
     default:
-        PANIC( "Cannot convert [", type(), "] to int" );
+        PANIC( "can't convert [", type(), "] to int" );
     }
 }
 
@@ -912,7 +912,7 @@ dawn::Float dawn::ValueRef::to_float( Engine& engine ) const
         auto& left = as<StructVal>();
         Function* method = left.get_method( _to_float, true );
         if ( !method )
-            PANIC( "Cannot convert struct [", IDSystem::get( left.parent->id ), "] to float" );
+            PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to float" );
 
         ValueRef retval;
         method->self_val.resize( 1 );
@@ -923,7 +923,7 @@ dawn::Float dawn::ValueRef::to_float( Engine& engine ) const
     }
 
     default:
-        PANIC( "Cannot convert [", type(), "] to float" );
+        PANIC( "can't convert [", type(), "] to float" );
     }
 }
 
@@ -954,7 +954,7 @@ dawn::Char dawn::ValueRef::to_char( Engine& engine ) const
         auto& left = as<StructVal>();
         Function* method = left.get_method( _to_char, true );
         if ( !method )
-            PANIC( "Cannot convert struct [", IDSystem::get( left.parent->id ), "] to char" );
+            PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to char" );
 
         ValueRef retval;
         method->self_val.resize( 1 );
@@ -965,7 +965,7 @@ dawn::Char dawn::ValueRef::to_char( Engine& engine ) const
     }
 
     default:
-        PANIC( "Cannot convert [", type(), "] to char" );
+        PANIC( "can't convert [", type(), "] to char" );
     }
 }
 
@@ -1046,7 +1046,7 @@ dawn::String dawn::ValueRef::to_string( Engine& engine ) const
     }
 
     default:
-        PANIC( "Cannot convert [", type(), "] to string" );
+        PANIC( "can't convert [", type(), "] to string" );
     }
 }
 

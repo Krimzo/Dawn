@@ -73,10 +73,10 @@ void dawn::Engine::call_func( Int id, Vector<ValueRef>& args, ValueRef& retval )
 {
     ValueRef* val = stack.root().get( id );
     if ( !val )
-        ENGINE_PANIC( "function [", IDSystem::get( id ), "] doesn't exist" );
+        ENGINE_PANIC( "object [", IDSystem::get( id ), "] doesn't exist" );
 
     if ( val->type() != ValueType::FUNCTION )
-        ENGINE_PANIC( "object [", IDSystem::get( id ), "] is not a function" );
+        ENGINE_PANIC( "object [", IDSystem::get( id ), "] can't be called" );
 
     handle_func( val->as<Function>(), args, retval );
 }
@@ -243,7 +243,7 @@ void dawn::Engine::handle_expr( Node& node, ValueRef& value )
         break;
 
     default:
-        ENGINE_PANIC( "Unknown expr node type: ", typeid(node).name() );
+        ENGINE_PANIC( "unknown expr node type: ", typeid(node).name() );
     }
 }
 
@@ -279,7 +279,7 @@ void dawn::Engine::handle_call_node( CallNod& node, ValueRef& retval )
     handle_expr( node.left_expr.value(), left_val );
 
     if ( left_val.type() != ValueType::FUNCTION )
-        ENGINE_PANIC( "Can't call [", left_val.type(), "]" );
+        ENGINE_PANIC( "can't call [", left_val.type(), "]" );
 
     auto& func = left_val.as<Function>();
     if ( func.is_method() )
@@ -312,18 +312,18 @@ void dawn::Engine::handle_index_node( IndexNod& node, ValueRef& retval )
     {
         auto& val = left_val.as<String>();
         if ( index < 0 || index >= (Int) val.size() )
-            ENGINE_PANIC( "String access [", index, "] out of bounds" );
+            ENGINE_PANIC( "string access [", index, "] out of bounds" );
         retval = ValueRef{ val[index] };
     }
     else if ( left_val.type() == ValueType::ARRAY )
     {
         auto& val = left_val.as<ArrayVal>();
         if ( index < 0 || index >= (Int) val.data.size() )
-            ENGINE_PANIC( "Array access [", index, "] out of bounds" );
+            ENGINE_PANIC( "array access [", index, "] out of bounds" );
         retval = val.data[index];
     }
     else
-        ENGINE_PANIC( "Cannot index type [", left_val.type(), "]" );
+        ENGINE_PANIC( "can't index type [", left_val.type(), "]" );
 }
 
 void dawn::Engine::handle_return_node( ReturnNod& node, ValueRef& retval, Bool& didret )
@@ -499,7 +499,7 @@ void dawn::Engine::handle_for_node( ForNod& node, ValueRef& retval, Bool& didret
         }
     }
     else
-        ENGINE_PANIC( "Can't for loop [", loop_val.type(), "]" );
+        ENGINE_PANIC( "can't for loop [", loop_val.type(), "]" );
 }
 
 void dawn::Engine::handle_enum_node( EnumNod& node, ValueRef& value )
@@ -565,7 +565,7 @@ void dawn::Engine::handle_array_node( ArrayNod& node, ValueRef& value )
 
         Int size = size_val.to_int( *this );
         if ( size < 0 )
-            ENGINE_PANIC( "Array size cannot be negative" );
+            ENGINE_PANIC( "array size can't be negative" );
 
         ValueRef value_val;
         handle_expr( node.SIZE_value_expr.value(), value_val );
@@ -608,7 +608,7 @@ void dawn::Engine::handle_un_node( UnaryNod& node, ValueRef& value )
         break;
 
     default:
-        ENGINE_PANIC( "Unknown unary node type: ", typeid(node).name() );
+        ENGINE_PANIC( "unknown unary node type: ", typeid(node).name() );
     }
 }
 
@@ -690,7 +690,7 @@ void dawn::Engine::handle_op_node( OperatorNod& node, ValueRef& value )
         break;
 
     default:
-        ENGINE_PANIC( "Unknown operator node type: ", typeid(node).name() );
+        ENGINE_PANIC( "unknown operator node type: ", typeid(node).name() );
     }
 }
 
@@ -700,7 +700,7 @@ void dawn::Engine::handle_ac_node( OperatorNod& node, ValueRef& value )
     handle_expr( node.sides[0], left_val );
 
     if ( node.sides[1].type() != NodeType::IDENTIFIER )
-        ENGINE_PANIC( "Access must be an identifier" );
+        ENGINE_PANIC( "access must be an identifier" );
 
     Int right_id = node.sides[1].as<IdentifierNod>().id;
     if ( left_val.type() == ValueType::STRUCT )
@@ -748,7 +748,7 @@ void dawn::Engine::handle_as_node( AssignNod& node, ValueRef& value )
         break;
 
     default:
-        ENGINE_PANIC( "Unknown assign node type: ", typeid(node).name() );
+        ENGINE_PANIC( "unknown assign node type: ", typeid(node).name() );
     }
 
     value = left_val;
@@ -758,7 +758,7 @@ void dawn::Engine::handle_ac_struct_node( ValueRef const& left, Int right, Value
 {
     auto& left_val = left.as<StructVal>();
     if ( !left_val.members.contains( right ) )
-        ENGINE_PANIC( "Struct [", IDSystem::get( left_val.parent->id ), "] doesn't have member [", IDSystem::get( right ), "]" );
+        ENGINE_PANIC( "struct [", IDSystem::get( left_val.parent->id ), "] doesn't have member [", IDSystem::get( right ), "]" );
 
     auto& result = left_val.members.at( right );
     if ( result.type() == ValueType::FUNCTION )
@@ -775,7 +775,7 @@ void dawn::Engine::handle_ac_type_node( ValueRef const& left, Int right, ValueRe
 {
     auto& members = type_members[(Int) left.type()];
     if ( !members.contains( right ) )
-        ENGINE_PANIC( "Type [", left.type(), "] doesn't have member [", IDSystem::get( right ), "]" );
+        ENGINE_PANIC( "type [", left.type(), "] doesn't have member [", IDSystem::get( right ), "]" );
 
     ValueRef result = members.at( right )(left);
     if ( result.type() == ValueType::FUNCTION )
