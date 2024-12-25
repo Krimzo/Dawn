@@ -30,7 +30,7 @@ struct StructVal
 
 struct ArrayVal
 {
-    Array<ValueRef> data;
+    Vector<ValueRef> data;
 
     ArrayVal() = default;
 

@@ -10,7 +10,7 @@ struct StackHelper;
 struct ScopeObject
 {
     RegisterRef<ScopeObject> parent;
-    Array<Pair<Int, ValueRef>> objects;
+    Vector<Pair<Int, ValueRef>> objects;
 
     ScopeObject();
 
@@ -32,7 +32,7 @@ struct ScopeStack
     RegisterRef<ScopeObject> const& peek() const;
 
 private:
-    Array<RegisterRef<ScopeObject>> m_scopes;
+    Vector<RegisterRef<ScopeObject>> m_scopes;
 };
 
 struct StackHelper

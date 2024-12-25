@@ -19,7 +19,7 @@ dawn::Bool dawn::Module::contains_id( Int id ) const
     return false;
 }
 
-void dawn::Parser::parse( Array<Token>& tokens, Module& module )
+void dawn::Parser::parse( Vector<Token>& tokens, Module& module )
 {
     for ( auto it = tokens.begin(); it != tokens.end(); )
     {
@@ -48,7 +48,7 @@ void dawn::Parser::parse( Array<Token>& tokens, Module& module )
     }
 }
 
-void dawn::Parser::parse_import( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+void dawn::Parser::parse_import( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module )
 {
     if ( it->value != kw_import )
         PARSER_PANIC( *it, "expected import keyword" );
@@ -60,7 +60,7 @@ void dawn::Parser::parse_import( Array<Token>::const_iterator& it, Array<Token>:
     ++it;
 }
 
-void dawn::Parser::parse_global_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+void dawn::Parser::parse_global_struct( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module )
 {
     Struct struc;
     parse_struct( it, end, struc );
@@ -71,7 +71,7 @@ void dawn::Parser::parse_global_struct( Array<Token>::const_iterator& it, Array<
     module.structs.push_back( struc );
 }
 
-void dawn::Parser::parse_global_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+void dawn::Parser::parse_global_enum( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module )
 {
     Enum enu;
     parse_enum( it, end, enu );
@@ -82,7 +82,7 @@ void dawn::Parser::parse_global_enum( Array<Token>::const_iterator& it, Array<To
     module.enums.push_back( enu );
 }
 
-void dawn::Parser::parse_global_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+void dawn::Parser::parse_global_function( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module )
 {
     Function function;
     parse_function( it, end, function );
@@ -93,7 +93,7 @@ void dawn::Parser::parse_global_function( Array<Token>::const_iterator& it, Arra
     module.functions.push_back( function );
 }
 
-void dawn::Parser::parse_global_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Module& module )
+void dawn::Parser::parse_global_variable( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module )
 {
     Variable variable;
     parse_variable( it, end, variable );
@@ -104,7 +104,7 @@ void dawn::Parser::parse_global_variable( Array<Token>::const_iterator& it, Arra
     module.variables.push_back( variable );
 }
 
-void dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Struct& struc )
+void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Struct& struc )
 {
     if ( it->value != kw_struct )
         PARSER_PANIC( *it, "expected struct" );
@@ -166,7 +166,7 @@ void dawn::Parser::parse_struct( Array<Token>::const_iterator& it, Array<Token>:
     ++it;
 }
 
-void dawn::Parser::parse_enum( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Enum& enu )
+void dawn::Parser::parse_enum( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Enum& enu )
 {
     if ( it->value != kw_enum )
         PARSER_PANIC( *it, "expected enum" );
@@ -207,7 +207,7 @@ void dawn::Parser::parse_enum( Array<Token>::const_iterator& it, Array<Token>::c
     ++it;
 }
 
-void dawn::Parser::parse_function( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Function& function )
+void dawn::Parser::parse_function( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& function )
 {
     if ( it->value != kw_func )
         PARSER_PANIC( *it, "expected function" );
@@ -258,7 +258,7 @@ void dawn::Parser::parse_function( Array<Token>::const_iterator& it, Array<Token
     parse_scope( it, end, *std::get_if<Scope>( &function.body ) );
 }
 
-void dawn::Parser::parse_operator( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Function& operat )
+void dawn::Parser::parse_operator( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& operat )
 {
     if ( it->value != kw_oper )
         PARSER_PANIC( *it, "expected opert" );
@@ -332,7 +332,7 @@ void dawn::Parser::parse_operator( Array<Token>::const_iterator& it, Array<Token
     parse_scope( it, end, *std::get_if<Scope>( &operat.body ) );
 }
 
-void dawn::Parser::parse_variable( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Variable& variable )
+void dawn::Parser::parse_variable( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Variable& variable )
 {
     if ( it->value == kw_let )
         variable.kind = VariableKind::LET;
@@ -360,7 +360,7 @@ void dawn::Parser::parse_variable( Array<Token>::const_iterator& it, Array<Token
         variable.expr.value() = make_nothing_node();
 }
 
-void dawn::Parser::parse_expression( ExtractType type, Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::parse_expression( ExtractType type, Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
 {
     if ( it == end )
     {
@@ -368,7 +368,7 @@ void dawn::Parser::parse_expression( ExtractType type, Array<Token>::const_itera
         return;
     }
 
-    Array<Token> expr_tokens;
+    Vector<Token> expr_tokens;
     expression_extract( type, it, end, expr_tokens );
 
     Int least_prec_op = -1;
@@ -394,9 +394,9 @@ void dawn::Parser::parse_expression( ExtractType type, Array<Token>::const_itera
             if ( (Int) expr_tokens.size() < least_prec_op + 2 )
                 PARSER_PANIC( {}, "operator expected expression" );
 
-            Array<Token> left;
+            Vector<Token> left;
             left.insert( left.end(), expr_tokens.begin(), expr_tokens.begin() + least_prec_op );
-            Array<Token> right;
+            Vector<Token> right;
             right.insert( right.end(), expr_tokens.begin() + least_prec_op + 1, expr_tokens.end() );
 
             auto& op = expr_tokens[least_prec_op];
@@ -417,9 +417,9 @@ void dawn::Parser::parse_expression( ExtractType type, Array<Token>::const_itera
         expression_pure( expr_tokens, tree );
 }
 
-void dawn::Parser::expression_extract( ExtractType type, Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Array<Token>& tokens )
+void dawn::Parser::expression_extract( ExtractType type, Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Vector<Token>& tokens )
 {
-    Array<Token>::const_iterator first_it = it;
+    Vector<Token>::const_iterator first_it = it;
     Int last_line = it->line_number;
     Int expr_depth = 0;
     Bool in_lambda = false;
@@ -467,7 +467,7 @@ void dawn::Parser::expression_extract( ExtractType type, Array<Token>::const_ite
         PARSER_PANIC( *it, "expected expression end" );
 }
 
-void dawn::Parser::expression_precedence( Array<Token>& tokens, Int& index, Bool& unary )
+void dawn::Parser::expression_precedence( Vector<Token>& tokens, Int& index, Bool& unary )
 {
     Int least_precedence = -1;
     Bool was_op = true;
@@ -505,7 +505,7 @@ void dawn::Parser::expression_precedence( Array<Token>& tokens, Int& index, Bool
     }
 }
 
-void dawn::Parser::expression_complex_expr( Array<Token>& left, Array<Token>& right, Node& tree )
+void dawn::Parser::expression_complex_expr( Vector<Token>& left, Vector<Token>& right, Node& tree )
 {
     if ( right.empty() )
         PARSER_PANIC( {}, "right expression expected" );
@@ -533,7 +533,7 @@ void dawn::Parser::expression_complex_expr( Array<Token>& left, Array<Token>& ri
     }
 }
 
-void dawn::Parser::expression_complex_scope( Array<Token>& left, Array<Token>& right, Node& tree )
+void dawn::Parser::expression_complex_scope( Vector<Token>& left, Vector<Token>& right, Node& tree )
 {
     if ( right.empty() )
         PARSER_PANIC( {}, "right scope expression expected" );
@@ -545,7 +545,7 @@ void dawn::Parser::expression_complex_scope( Array<Token>& left, Array<Token>& r
 
     if ( left.size() == 1 && left.front().type == TokenType::TYPE )
     {
-        Array<Pair<Int, Node>> args;
+        Vector<Pair<Int, Node>> args;
         Opt<Int> key;
         for ( auto it = right.begin(); it != right.end(); )
         {
@@ -644,7 +644,7 @@ void dawn::Parser::expression_complex_scope( Array<Token>& left, Array<Token>& r
         PARSER_PANIC( left.front(), "unknown scope expression" );
 }
 
-void dawn::Parser::expression_complex_array( Array<Token>& left, Array<Token>& right, Node& tree )
+void dawn::Parser::expression_complex_array( Vector<Token>& left, Vector<Token>& right, Node& tree )
 {
     if ( right.empty() )
         PARSER_PANIC( {}, "right array expression expected" );
@@ -688,7 +688,7 @@ void dawn::Parser::expression_complex_array( Array<Token>& left, Array<Token>& r
     }
 }
 
-void dawn::Parser::expression_complex_default( Array<Token>& left, Token op, Array<Token>& right, Node& tree )
+void dawn::Parser::expression_complex_default( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree )
 {
     auto it = left.begin();
     Node left_expr;
@@ -715,7 +715,7 @@ void dawn::Parser::expression_complex_default( Array<Token>& left, Token op, Arr
     }
 }
 
-void dawn::Parser::expression_pure( Array<Token>& tokens, Node& tree )
+void dawn::Parser::expression_pure( Vector<Token>& tokens, Node& tree )
 {
     if ( tokens.empty() )
     {
@@ -801,7 +801,7 @@ void dawn::Parser::expression_single_identifier( Token const& token, Node& tree 
     tree.emplace<IdentifierNod>().id = IDSystem::get( token.value );
 }
 
-void dawn::Parser::parse_scope( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Scope& scope )
+void dawn::Parser::parse_scope( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Scope& scope )
 {
     if ( it->value != op_scope_opn )
         PARSER_PANIC( *it, "expected scope open" );
@@ -883,7 +883,7 @@ void dawn::Parser::parse_scope( Array<Token>::const_iterator& it, Array<Token>::
     ++it;
 }
 
-void dawn::Parser::scope_return( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_return( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
 {
     if ( it->value != kw_return )
         PARSER_PANIC( *it, "expected return" );
@@ -898,7 +898,7 @@ void dawn::Parser::scope_return( Array<Token>::const_iterator& it, Array<Token>:
         node.expr.value() = make_nothing_node();
 }
 
-void dawn::Parser::scope_break( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_break( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
 {
     if ( it->value != kw_break )
         PARSER_PANIC( *it, "expected break" );
@@ -907,7 +907,7 @@ void dawn::Parser::scope_break( Array<Token>::const_iterator& it, Array<Token>::
     tree.emplace<BreakNod>();
 }
 
-void dawn::Parser::scope_continue( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_continue( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
 {
     if ( it->value != kw_continue )
         PARSER_PANIC( *it, "expected continue" );
@@ -916,7 +916,7 @@ void dawn::Parser::scope_continue( Array<Token>::const_iterator& it, Array<Token
     tree.emplace<ContinueNod>();
 }
 
-void dawn::Parser::scope_throw( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_throw( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
 {
     if ( it->value != kw_throw )
         PARSER_PANIC( *it, "expected throw" );
@@ -927,7 +927,7 @@ void dawn::Parser::scope_throw( Array<Token>::const_iterator& it, Array<Token>::
     parse_expression( ExtractType::NEW_LINE, it, end, node.expr.value() );
 }
 
-void dawn::Parser::scope_try( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_try( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
 {
     if ( it->value != kw_try )
         PARSER_PANIC( *it, "expected try" );
@@ -949,7 +949,7 @@ void dawn::Parser::scope_try( Array<Token>::const_iterator& it, Array<Token>::co
     parse_scope( it, end, node.catch_scope );
 }
 
-void dawn::Parser::scope_if( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_if( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
 {
     if ( it->value != kw_if )
         PARSER_PANIC( *it, "expected if keyword" );
@@ -982,7 +982,7 @@ void dawn::Parser::scope_if( Array<Token>::const_iterator& it, Array<Token>::con
     }
 }
 
-void dawn::Parser::scope_switch( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_switch( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
 {
     if ( it->value != kw_switch )
         PARSER_PANIC( *it, "expected switch keyword" );
@@ -1005,7 +1005,7 @@ void dawn::Parser::scope_switch( Array<Token>::const_iterator& it, Array<Token>:
 
             auto& casee = node.cases.emplace_back();
 
-            Array<Token> case_tokens;
+            Vector<Token> case_tokens;
             expression_extract( ExtractType::SCOPE_START, it, end, case_tokens );
 
             for ( auto it = case_tokens.begin(); it != case_tokens.end(); )
@@ -1029,7 +1029,7 @@ void dawn::Parser::scope_switch( Array<Token>::const_iterator& it, Array<Token>:
     ++it;
 }
 
-void dawn::Parser::scope_loop( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_loop( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
 {
     if ( it->value != kw_loop )
         PARSER_PANIC( *it, "expected loop keyword" );
@@ -1039,7 +1039,7 @@ void dawn::Parser::scope_loop( Array<Token>::const_iterator& it, Array<Token>::c
     parse_scope( it, end, node.scope );
 }
 
-void dawn::Parser::scope_while( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_while( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
 {
     if ( it->value != kw_while )
         PARSER_PANIC( *it, "expected while keyword" );
@@ -1051,7 +1051,7 @@ void dawn::Parser::scope_while( Array<Token>::const_iterator& it, Array<Token>::
     parse_scope( it, end, node.scope );
 }
 
-void dawn::Parser::scope_for( Array<Token>::const_iterator& it, Array<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_for( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
 {
     if ( it->value != kw_for )
         PARSER_PANIC( *it, "expected for keyword" );

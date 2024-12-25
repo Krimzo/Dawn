@@ -23,8 +23,8 @@ struct IdentifierNod
 struct CallNod
 {
     NodeRef left_expr;
-    Array<Node> args;
-    Array<ValueRef> arg_vals;
+    Vector<Node> args;
+    Vector<ValueRef> arg_vals;
 };
 
 struct IndexNod
@@ -67,19 +67,19 @@ struct IfNod
         Scope scope;
     };
 
-    Array<Part<Node>> parts;
+    Vector<Part<Node>> parts;
 };
 
 struct SwitchNod
 {
     struct Part
     {
-        Array<Node> exprs;
+        Vector<Node> exprs;
         Scope scope;
     };
 
     NodeRef main_expr;
-    Array<Part> cases;
+    Vector<Part> cases;
     Opt<Scope> def_scope;
 };
 
@@ -110,7 +110,7 @@ struct EnumNod
 struct StructNod
 {
     Int type_id = 0;
-    Array<Pair<Int, Node>> args;
+    Vector<Pair<Int, Node>> args;
 };
 
 struct ArrayNod
@@ -124,7 +124,7 @@ struct ArrayNod
     InitType init_type;
     NodeRef SIZE_value_expr;
     NodeRef SIZE_size_expr;
-    Array<Node> LIST_list;
+    Vector<Node> LIST_list;
 };
 
 enum struct UnaryType
@@ -164,7 +164,7 @@ enum struct OperatorType
 struct OperatorNod
 {
     OperatorType type;
-    Array<Node> sides;
+    Vector<Node> sides;
 };
 
 enum struct AssignType
@@ -181,7 +181,7 @@ enum struct AssignType
 struct AssignNod
 {
     AssignType type = {};
-    Array<Node> sides;
+    Vector<Node> sides;
 };
 
 enum struct NodeType

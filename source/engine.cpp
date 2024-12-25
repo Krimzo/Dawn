@@ -69,7 +69,7 @@ void dawn::Engine::bind_func( Int id, Function::CppFunc cpp_func )
     load_function( func );
 }
 
-void dawn::Engine::call_func( Int id, Array<ValueRef>& args, ValueRef& retval )
+void dawn::Engine::call_func( Int id, Vector<ValueRef>& args, ValueRef& retval )
 {
     ValueRef* val = stack.root().get( id );
     if ( !val )
@@ -102,7 +102,7 @@ dawn::ValueRef* dawn::Engine::get_obj( Int id )
     return stack.current().get( id );
 }
 
-void dawn::Engine::handle_func( Function& func, Array<ValueRef>& args, ValueRef& retval )
+void dawn::Engine::handle_func( Function& func, Vector<ValueRef>& args, ValueRef& retval )
 {
     if ( func.body.index() == 0 )
     {

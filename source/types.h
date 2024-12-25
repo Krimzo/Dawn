@@ -29,17 +29,17 @@ struct Variable
 
 struct Scope
 {
-    Array<Node> instr;
+    Vector<Node> instr;
 };
 
 struct Function
 {
-    using CppFunc = Func<ValueRef( Array<ValueRef> const& )>;
+    using CppFunc = Func<ValueRef( Vector<ValueRef> const& )>;
 
     Int id = 0;
     RegisterRef<ScopeObject> lambda_parent;
-    Array<ValueRef> self_val;
-    Array<Variable> args;
+    Vector<ValueRef> self_val;
+    Vector<Variable> args;
     Variant<Scope, CppFunc> body;
 
     Bool is_lambda() const;
@@ -57,7 +57,7 @@ struct Enum
 struct Struct
 {
     Int id = 0;
-    Array<Variable> fields;
-    Array<Function> methods;
+    Vector<Variable> fields;
+    Vector<Function> methods;
 };
 }

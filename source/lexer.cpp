@@ -84,7 +84,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
     return result;
 }
 
-void dawn::Lexer::tokenize( StringRef const& source, Array<Token>& tokens )
+void dawn::Lexer::tokenize( StringRef const& source, Vector<Token>& tokens )
 {
     Int line = 1;
     for ( Int i = 0; i < (Int) source.size(); i++ )
@@ -131,7 +131,7 @@ dawn::Bool dawn::Lexer::is_space( StringRef const& source, Int i )
     return isspace( source[i] );
 }
 
-void dawn::Lexer::extract_space( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_space( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
 {
     for ( ; i < (Int) source.size(); i++ )
     {
@@ -151,7 +151,7 @@ dawn::Bool dawn::Lexer::is_comment( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.comment_line );
 }
 
-void dawn::Lexer::extract_comment( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_comment( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
 {
     for ( ; i < (Int) source.size(); i++ )
     {
@@ -168,7 +168,7 @@ dawn::Bool dawn::Lexer::is_mlcomment( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.comment_multiline.first );
 }
 
-void dawn::Lexer::extract_mlcomment( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_mlcomment( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
 {
     for ( ; i < (Int) source.size(); i++ )
     {
@@ -188,7 +188,7 @@ dawn::Bool dawn::Lexer::is_word( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.separator_identifier ) || isalpha( source[i] );
 }
 
-void dawn::Lexer::extract_word( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_word( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
 {
     String buffer;
     for ( ; i < (Int) source.size(); i++ )
@@ -226,7 +226,7 @@ dawn::Bool dawn::Lexer::is_number( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.separator_number ) || isdigit( source[i] );
 }
 
-void dawn::Lexer::extract_number( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_number( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
 {
     String buffer;
     Bool is_float = false;
@@ -261,7 +261,7 @@ dawn::Bool dawn::Lexer::is_char( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.literal_char );
 }
 
-void dawn::Lexer::extract_char( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_char( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
 {
     if ( source.substr( i ).size() < 3 )
         LEXER_PANIC( line, source[i], "char literal too short" );
@@ -300,7 +300,7 @@ dawn::Bool dawn::Lexer::is_string( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.literal_string );
 }
 
-void dawn::Lexer::extract_string( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
 {
     String buffer;
     i += lang_def.literal_string.size();
@@ -347,7 +347,7 @@ dawn::Bool dawn::Lexer::is_operator( StringRef const& source, Int i )
     return false;
 }
 
-void dawn::Lexer::extract_operator( StringRef const& source, Array<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_operator( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
 {
     Int op_size = 0;
     Opt<String> closest_op;

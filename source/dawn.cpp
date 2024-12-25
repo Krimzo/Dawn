@@ -11,7 +11,7 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source, Opt<String> c
 {
     try
     {
-        Array<Token> tokens;
+        Vector<Token> tokens;
         lexer.tokenize( source, tokens );
 
         Module module;
@@ -64,24 +64,24 @@ void dawn::Dawn::bind_func( String const& name, Function::CppFunc cpp_func ) noe
 
 dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name ) noexcept
 {
-    Array<ValueRef> args;
+    Vector<ValueRef> args;
     ValueRef retval;
     return call_func( name, args, retval );
 }
 
 dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, ValueRef& retval ) noexcept
 {
-    Array<ValueRef> args;
+    Vector<ValueRef> args;
     return call_func( name, args, retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<ValueRef>& args ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Vector<ValueRef>& args ) noexcept
 {
     ValueRef retval;
     return call_func( name, args, retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Array<ValueRef>& args, ValueRef& retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Vector<ValueRef>& args, ValueRef& retval ) noexcept
 {
     try
     {
