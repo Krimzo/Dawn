@@ -1,7 +1,7 @@
 #pragma once
 
 #include "err.h"
-#include "type.h"
+#include "btype.h"
 
 
 namespace dawn
@@ -10,13 +10,13 @@ struct Engine;
 
 struct EnumVal
 {
-    Enum* parent = nullptr;
+    BEnum* parent = nullptr;
     Int key_id = 0;
 };
 
 struct StructVal
 {
-    Struct* parent = nullptr;
+    BStruct* parent = nullptr;
     Map<Int, ValueRef> members;
 
     StructVal() = default;
@@ -25,7 +25,7 @@ struct StructVal
     StructVal& operator=( StructVal const& other );
 
     ValueRef* get_member( Int id );
-    Function* get_method( Int id, Bool is_unary );
+    BFunction* get_method( Int id, Bool is_unary );
 };
 
 struct ArrayVal
@@ -52,7 +52,7 @@ consteval size_t max_val_size()
         sizeof( Float ),
         sizeof( Char ),
         sizeof( String ),
-        sizeof( Function ),
+        sizeof( BFunction ),
         sizeof( EnumVal ),
         sizeof( StructVal ),
         sizeof( ArrayVal ),
@@ -67,7 +67,7 @@ consteval size_t max_val_align()
         alignof(Float),
         alignof(Char),
         alignof(String),
-        alignof(Function),
+        alignof(BFunction),
         alignof(EnumVal),
         alignof(StructVal),
         alignof(ArrayVal),
@@ -110,7 +110,7 @@ struct ValueHandler
         else if constexpr ( std::is_same_v<T, String> )
             return ValueType::STRING;
 
-        else if constexpr ( std::is_same_v<T, Function> )
+        else if constexpr ( std::is_same_v<T, BFunction> )
             return ValueType::FUNCTION;
 
         else if constexpr ( std::is_same_v<T, EnumVal> )
@@ -154,7 +154,7 @@ struct ValueHandler
             break;
 
         case ValueType::FUNCTION:
-            new (to) Function( *static_cast<Function const*>(from) );
+            new (to) BFunction( *static_cast<BFunction const*>(from) );
             break;
 
         case ValueType::ENUM:
@@ -200,7 +200,7 @@ struct ValueHandler
             break;
 
         case ValueType::FUNCTION:
-            static_cast<Function*>(ptr)->~Function();
+            static_cast<BFunction*>(ptr)->~BFunction();
             break;
 
         case ValueType::ENUM:
@@ -222,7 +222,9 @@ struct ValueHandler
     }
 };
 
-using Value = Storage<max_val_size(), max_val_align(), ValueType, ValueHandler>;
+struct Value : Storage<max_val_size(), max_val_align(), ValueType, ValueHandler>
+{
+};
 
 enum struct ValueKind
 {
@@ -238,7 +240,7 @@ struct ValueRef
     explicit ValueRef( Float value, ValueKind kind = ValueKind::LET );
     explicit ValueRef( Char value, ValueKind kind = ValueKind::LET );
     explicit ValueRef( StringRef const& value, ValueKind kind = ValueKind::LET );
-    explicit ValueRef( Function const& value, ValueKind kind = ValueKind::LET );
+    explicit ValueRef( BFunction const& value, ValueKind kind = ValueKind::LET );
     explicit ValueRef( EnumVal const& value, ValueKind kind = ValueKind::LET );
     explicit ValueRef( StructVal const& value, ValueKind kind = ValueKind::LET );
     explicit ValueRef( ArrayVal const& value, ValueKind kind = ValueKind::LET );

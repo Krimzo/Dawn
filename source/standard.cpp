@@ -191,7 +191,7 @@ void dawn::Engine::load_string_members()
 
     string_members[IDSystem::get( "push" )] = [this]( ValueRef const& self_val ) -> ValueRef
     {
-        Function func;
+        BFunction func;
         func.body = [this]( Vector<ValueRef> const& args ) -> ValueRef
         {
             if ( args.size() != 2 )
@@ -238,7 +238,7 @@ void dawn::Engine::load_array_members()
 
     array_members[IDSystem::get( "push" )] = [this]( ValueRef const& self_val ) -> ValueRef
     {
-        Function func;
+        BFunction func;
         func.body = [this]( Vector<ValueRef> const& args ) -> ValueRef
         {
             if ( args.size() != 2 )

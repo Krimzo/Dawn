@@ -23,7 +23,7 @@ struct ScopeStack
     ScopeStack();
 
     [[nodiscard]] StackHelper push();
-    [[nodiscard]] StackHelper push( Function const& func );
+    [[nodiscard]] StackHelper push( BFunction const& func );
     void pop();
 
     ScopeObject& root();

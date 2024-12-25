@@ -24,7 +24,6 @@
     <ClCompile Include="source\node.cpp" />
     <ClCompile Include="source\parser.cpp" />
     <ClCompile Include="source\token.cpp" />
-    <ClCompile Include="source\type.cpp" />
     <ClCompile Include="source\util.cpp" />
     <ClCompile Include="source\dawn.cpp" />
     <ClCompile Include="source\value.cpp" />

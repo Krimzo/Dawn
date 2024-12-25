@@ -1,5 +1,14 @@
 func main()
 {
+    if true
+    {
+        print("nice")
+    }
+    else
+    {
+        print("not nice")
+    }
+
     let result = fib(30)
     print(result)
 }

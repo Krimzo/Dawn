@@ -50,7 +50,7 @@ dawn::ValueRef* dawn::StructVal::get_member( Int id )
     return &it->second;
 }
 
-dawn::Function* dawn::StructVal::get_method( Int id, Bool is_unary )
+dawn::BFunction* dawn::StructVal::get_method( Int id, Bool is_unary )
 {
     auto it = members.find( id );
     if ( it == members.end() )
@@ -58,7 +58,7 @@ dawn::Function* dawn::StructVal::get_method( Int id, Bool is_unary )
     if ( it->second.type() != ValueType::FUNCTION )
         return nullptr;
 
-    auto& func = it->second.as<Function>();
+    auto& func = it->second.as<BFunction>();
     if ( is_unary && !func.is_unary_op() )
         return nullptr;
     return &func;
@@ -113,10 +113,10 @@ dawn::ValueRef::ValueRef( StringRef const& value, ValueKind kind )
     m_regref.value().emplace<String>( value );
 }
 
-dawn::ValueRef::ValueRef( Function const& value, ValueKind kind )
+dawn::ValueRef::ValueRef( BFunction const& value, ValueKind kind )
     : m_regref( value_pool().new_register() ), m_kind( kind )
 {
-    m_regref.value().emplace<Function>( value );
+    m_regref.value().emplace<BFunction>( value );
 }
 
 dawn::ValueRef::ValueRef( EnumVal const& value, ValueKind kind )
@@ -189,7 +189,7 @@ dawn::ValueRef dawn::ValueRef::un_plus( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( __add, true );
+        BFunction* op = left.get_method( __add, true );
         if ( !op )
             PANIC( "+ struct [", IDSystem::get( left.parent->id ), "] not supported" );
 
@@ -219,7 +219,7 @@ dawn::ValueRef dawn::ValueRef::un_minus( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( __sub, true );
+        BFunction* op = left.get_method( __sub, true );
         if ( !op )
             PANIC( "- struct [", IDSystem::get( left.parent->id ), "] not supported" );
 
@@ -302,7 +302,7 @@ dawn::ValueRef dawn::ValueRef::op_add( Engine& engine, ValueRef const& other ) c
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( __add, false );
+        BFunction* op = left.get_method( __add, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] + struct [", other.type(), "] not supported" );
 
@@ -357,7 +357,7 @@ dawn::ValueRef dawn::ValueRef::op_sub( Engine& engine, ValueRef const& other ) c
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( __sub, false );
+        BFunction* op = left.get_method( __sub, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] - struct [", other.type(), "] not supported" );
 
@@ -412,7 +412,7 @@ dawn::ValueRef dawn::ValueRef::op_mul( Engine& engine, ValueRef const& other ) c
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( __mul, false );
+        BFunction* op = left.get_method( __mul, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] * struct [", other.type(), "] not supported" );
 
@@ -467,7 +467,7 @@ dawn::ValueRef dawn::ValueRef::op_div( Engine& engine, ValueRef const& other ) c
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( __div, false );
+        BFunction* op = left.get_method( __div, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] / struct [", other.type(), "] not supported" );
 
@@ -522,7 +522,7 @@ dawn::ValueRef dawn::ValueRef::op_pow( Engine& engine, ValueRef const& other ) c
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( __pow, false );
+        BFunction* op = left.get_method( __pow, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] ^ struct [", other.type(), "] not supported" );
 
@@ -577,7 +577,7 @@ dawn::ValueRef dawn::ValueRef::op_mod( Engine& engine, ValueRef const& other ) c
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( __mod, false );
+        BFunction* op = left.get_method( __mod, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] % struct [", other.type(), "] not supported" );
 
@@ -687,7 +687,7 @@ dawn::ValueRef dawn::ValueRef::op_cmpr( Engine& engine, ValueRef const& other ) 
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* op = left.get_method( __cmpr, false );
+        BFunction* op = left.get_method( __cmpr, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] <=> struct [", other.type(), "] not supported" );
 
@@ -818,7 +818,7 @@ dawn::Bool dawn::ValueRef::to_bool( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* method = left.get_method( _to_bool, true );
+        BFunction* method = left.get_method( _to_bool, true );
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to bool" );
 
@@ -864,7 +864,7 @@ dawn::Int dawn::ValueRef::to_int( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* method = left.get_method( _to_int, true );
+        BFunction* method = left.get_method( _to_int, true );
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to int" );
 
@@ -910,7 +910,7 @@ dawn::Float dawn::ValueRef::to_float( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* method = left.get_method( _to_float, true );
+        BFunction* method = left.get_method( _to_float, true );
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to float" );
 
@@ -952,7 +952,7 @@ dawn::Char dawn::ValueRef::to_char( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* method = left.get_method( _to_char, true );
+        BFunction* method = left.get_method( _to_char, true );
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to char" );
 
@@ -998,7 +998,7 @@ dawn::String dawn::ValueRef::to_string( Engine& engine ) const
 
     case ValueType::FUNCTION:
     {
-        auto& func = as<Function>();
+        auto& func = as<BFunction>();
         if ( func.is_lambda() )
             return "lambda()";
         else if ( func.is_method() )
@@ -1013,7 +1013,7 @@ dawn::String dawn::ValueRef::to_string( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* method = left.get_method( _to_string, true );
+        BFunction* method = left.get_method( _to_string, true );
         if ( !method )
             return format( IDSystem::get( left.parent->id ), "{}" );
 

@@ -10,7 +10,12 @@ struct RefNod
     ValueRef value_ref;
 };
 
-struct VariableNod
+struct FuncNod
+{
+    Function func;
+};
+
+struct VarNod
 {
     Variable var;
 };
@@ -24,7 +29,6 @@ struct CallNod
 {
     NodeRef left_expr;
     Vector<Node> args;
-    Vector<ValueRef> arg_vals;
 };
 
 struct IndexNod
@@ -191,6 +195,7 @@ enum struct NodeType
     // instr
     SCOPE,
     VARIABLE,
+    FUNCTION,
     RETURN,
     BREAK,
     CONTINUE,
@@ -223,7 +228,10 @@ struct NodeHandler
         if constexpr ( std::is_same_v<T, RefNod> )
             return NodeType::REF;
 
-        else if constexpr ( std::is_same_v<T, VariableNod> )
+        else if constexpr ( std::is_same_v<T, FuncNod> )
+            return NodeType::FUNCTION;
+
+        else if constexpr ( std::is_same_v<T, VarNod> )
             return NodeType::VARIABLE;
 
         else if constexpr ( std::is_same_v<T, IdentifierNod> )
@@ -298,8 +306,12 @@ struct NodeHandler
             new (to) RefNod( *static_cast<RefNod const*>(from) );
             break;
 
+        case NodeType::FUNCTION:
+            new (to) FuncNod( *static_cast<FuncNod const*>(from) );
+            break;
+
         case NodeType::VARIABLE:
-            new (to) VariableNod( *static_cast<VariableNod const*>(from) );
+            new (to) VarNod( *static_cast<VarNod const*>(from) );
             break;
 
         case NodeType::IDENTIFIER:
@@ -392,8 +404,12 @@ struct NodeHandler
             static_cast<RefNod*>(ptr)->~RefNod();
             break;
 
+        case NodeType::FUNCTION:
+            static_cast<FuncNod*>(ptr)->~FuncNod();
+            break;
+
         case NodeType::VARIABLE:
-            static_cast<VariableNod*>(ptr)->~VariableNod();
+            static_cast<VarNod*>(ptr)->~VarNod();
             break;
 
         case NodeType::IDENTIFIER:
@@ -483,7 +499,8 @@ consteval size_t max_nod_size()
 {
     return std::max( {
         sizeof( RefNod ),
-        sizeof( VariableNod ),
+        sizeof( FuncNod ),
+        sizeof( VarNod ),
         sizeof( IdentifierNod ),
         sizeof( CallNod ),
         sizeof( IndexNod ),
@@ -510,7 +527,8 @@ consteval size_t max_nod_align()
 {
     return std::max( {
         alignof(RefNod),
-        alignof(VariableNod),
+        alignof(FuncNod),
+        alignof(VarNod),
         alignof(IdentifierNod),
         alignof(CallNod),
         alignof(IndexNod),

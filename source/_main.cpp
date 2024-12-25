@@ -3,7 +3,7 @@
 
 int main( int argc, char** argv )
 {
-    if constexpr ( false )
+    if constexpr ( true )
         return dawn::_dev_main( argc, argv );
     else
         return dawn::_shp_main( argc, argv );

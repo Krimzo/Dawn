@@ -3,6 +3,7 @@
 #include "memory.h"
 #include "node.h"
 #include "stack.h"
+#include "instruction.h"
 
 
 namespace dawn

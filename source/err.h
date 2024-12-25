@@ -41,6 +41,20 @@ struct ParserError
     }
 };
 
+struct CompilerError
+{
+    String msg;
+
+    template<typename... Args>
+    CompilerError( Args&&... args )
+    {
+        StringStream stream;
+        stream << "Compiler error: ";
+        (stream << ... << args);
+        msg = stream.str();
+    }
+};
+
 struct EngineError
 {
     String msg;
@@ -57,10 +71,12 @@ struct EngineError
 
 std::ostream& operator<<( std::ostream& stream, LexerError const& error );
 std::ostream& operator<<( std::ostream& stream, ParserError const& error );
+std::ostream& operator<<( std::ostream& stream, CompilerError const& error );
 std::ostream& operator<<( std::ostream& stream, EngineError const& error );
 
 #define PANIC(...) throw format( "Error: ", __VA_ARGS__ )
 #define LEXER_PANIC(...) throw format( LexerError{ __VA_ARGS__ } )
 #define PARSER_PANIC(...) throw format( ParserError{ __VA_ARGS__ } )
+#define COMPILER_PANIC(...) throw format( CompilerError{ __VA_ARGS__ } )
 #define ENGINE_PANIC(...) throw format( EngineError{ __VA_ARGS__ } )
 }

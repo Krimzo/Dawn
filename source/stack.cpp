@@ -40,7 +40,7 @@ dawn::StackHelper dawn::ScopeStack::push()
     return StackHelper{ *this };
 }
 
-dawn::StackHelper dawn::ScopeStack::push( Function const& func )
+dawn::StackHelper dawn::ScopeStack::push( BFunction const& func )
 {
     auto& scope = m_scopes.emplace_back( scope_pool().new_register() ).value();
     scope.parent = func.is_lambda() ? func.lambda_parent : m_scopes.front();

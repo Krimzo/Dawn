@@ -16,119 +16,122 @@ dawn::Engine::Engine()
     load_range_members();
 }
 
-void dawn::Engine::load_mod( Module& module )
+void dawn::Engine::load_bin( Binary const& binary )
 {
-    for ( auto& entry : module.functions )
+    for ( auto& entry : binary.functions )
         load_function( entry );
 
-    for ( auto& entry : module.enums )
+    for ( auto& entry : binary.enums )
         load_enum( entry );
 
-    for ( auto& entry : module.structs )
+    for ( auto& entry : binary.structs )
         load_struct( entry );
 
-    for ( auto& entry : module.variables )
+    for ( auto& entry : binary.variables )
         load_variable( entry );
 }
 
-void dawn::Engine::load_function( Function& entry )
+void dawn::Engine::load_function( BFunction const& entry )
 {
-    if ( stack.root().get( entry.id ) )
-        ENGINE_PANIC( "object [", IDSystem::get( entry.id ), "] already exists" );
-    stack.root().set( entry.id, ValueRef{ entry } );
+    //if ( stack.root().get( entry.id ) )
+    //    ENGINE_PANIC( "object [", IDSystem::get( entry.id ), "] already exists" );
+    //stack.root().set( entry.id, ValueRef{ entry } );
 }
 
-void dawn::Engine::load_enum( Enum& entry )
+void dawn::Engine::load_enum( BEnum const& entry )
 {
-    auto& enu = (enums[entry.id] = entry);
-    for ( auto& [key, expr] : enu.keys_expr )
-    {
-        ValueRef key_val;
-        handle_expr( expr, key_val );
-        enu.keys_value[key] = ValueRef{ key_val.value() };
-    }
+    //auto& enu = (enums[entry.id] = entry);
+    //for ( auto& [key, expr] : enu.keys_expr )
+    //{
+    //    ValueRef key_val;
+    //    handle_expr( expr, key_val );
+    //    enu.keys_value[key] = ValueRef{ key_val.value() };
+    //}
 }
 
-void dawn::Engine::load_struct( Struct& entry )
+void dawn::Engine::load_struct( BStruct const& entry )
 {
     structs[entry.id] = entry;
 }
 
-void dawn::Engine::load_variable( Variable& entry )
+void dawn::Engine::load_variable( BVariable const& entry )
 {
-    ValueRef value;
-    handle_expr( entry.expr.value(), value );
-    add_obj( entry.kind, entry.id, value );
+    //ValueRef value;
+    //handle_expr( entry.expr.value(), value );
+    //add_obj( entry.kind, entry.id, value );
 }
 
-void dawn::Engine::bind_func( Int id, Function::CppFunc cpp_func )
+void dawn::Engine::bind_func( Int id, BFunction::CppFunc cpp_func )
 {
-    Function func;
-    func.id = id;
-    func.body.emplace<Function::CppFunc>( std::move( cpp_func ) );
-    load_function( func );
+    //BFunction func;
+    //func.id = id;
+    //func.body.emplace<BFunction::CppFunc>( std::move( cpp_func ) );
+    //load_function( func );
 }
 
 void dawn::Engine::call_func( Int id, Vector<ValueRef>& args, ValueRef& retval )
 {
-    ValueRef* val = stack.root().get( id );
-    if ( !val )
-        ENGINE_PANIC( "object [", IDSystem::get( id ), "] doesn't exist" );
-
-    if ( val->type() != ValueType::FUNCTION )
-        ENGINE_PANIC( "object [", IDSystem::get( id ), "] can't be called" );
-
-    handle_func( val->as<Function>(), args, retval );
+    //ValueRef* val = stack.root().get( id );
+    //if ( !val )
+    //    ENGINE_PANIC( "object [", IDSystem::get( id ), "] doesn't exist" );
+    //
+    //if ( val->type() != ValueType::FUNCTION )
+    //    ENGINE_PANIC( "object [", IDSystem::get( id ), "] can't be called" );
+    //
+    //handle_func( val->as<BFunction>(), args, retval );
 }
 
 void dawn::Engine::add_obj( VariableKind kind, Int id, ValueRef const& value )
 {
-    if ( kind == VariableKind::LET )
-    {
-        stack.current().set( id, ValueRef{ value.value() } );
-    }
-    else if ( kind == VariableKind::VAR )
-    {
-        stack.current().set( id, ValueRef{ value.value(), ValueKind::VAR } );
-    }
-    else
-    {
-        stack.current().set( id, value );
-    }
+    //if ( kind == VariableKind::LET )
+    //{
+    //    stack.current().set( id, ValueRef{ value.value() } );
+    //}
+    //else if ( kind == VariableKind::VAR )
+    //{
+    //    stack.current().set( id, ValueRef{ value.value(), ValueKind::VAR } );
+    //}
+    //else
+    //{
+    //    stack.current().set( id, value );
+    //}
 }
 
 dawn::ValueRef* dawn::Engine::get_obj( Int id )
 {
-    return stack.current().get( id );
+    return nullptr;
+    //return stack.current().get( id );
 }
 
-void dawn::Engine::handle_func( Function& func, Vector<ValueRef>& args, ValueRef& retval )
+void dawn::Engine::handle_func( BFunction& func, Vector<ValueRef>& args, ValueRef& retval )
 {
-    if ( func.body.index() == 0 )
-    {
-        if ( func.args.size() != args.size() )
-        {
-            if ( func.is_lambda() )
-                ENGINE_PANIC( "invalid argument count for [lambda]" );
-            else
-                ENGINE_PANIC( "invalid argument count for function [", IDSystem::get( func.id ), "]" );
-        }
-
-        auto stack_helper = stack.push( func );
-
-        for ( Int i = 0; i < (Int) args.size(); i++ )
-            add_obj( func.args[i].kind, func.args[i].id, args[i] );
-
-        Bool didret = false;
-        handle_scope( *std::get_if<Scope>( &func.body ), retval, didret, nullptr, nullptr );
-        if ( !didret )
-            retval = ValueRef{ Value{} };
-    }
-    else
-    {
-        retval = (*std::get_if<Function::CppFunc>( &func.body ))(args);
-    }
+    //if ( func.body.index() == 0 )
+    //{
+    //    if ( func.args.size() != args.size() )
+    //    {
+    //        if ( func.is_lambda() )
+    //            ENGINE_PANIC( "invalid argument count for [lambda]" );
+    //        else
+    //            ENGINE_PANIC( "invalid argument count for function [", IDSystem::get( func.id ), "]" );
+    //    }
+    //
+    //    auto stack_helper = stack.push( func );
+    //
+    //    for ( Int i = 0; i < (Int) args.size(); i++ )
+    //        add_obj( func.args[i].kind, func.args[i].id, args[i] );
+    //
+    //    Bool didret = false;
+    //    handle_scope( *std::get_if<Scope>( &func.body ), retval, didret, nullptr, nullptr );
+    //    if ( !didret )
+    //        retval = ValueRef{ Value{} };
+    //}
+    //else
+    //{
+    //    retval = (*std::get_if<Function::CppFunc>( &func.body ))(args);
+    //}
 }
+
+/*
 
 void dawn::Engine::handle_scope( Scope& scope, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon )
 {
@@ -251,7 +254,7 @@ void dawn::Engine::handle_ref_node( RefNod& node, ValueRef& value )
 {
     if ( node.value_ref.type() == ValueType::FUNCTION )
     {
-        auto& func = node.value_ref.as<Function>();
+        auto& func = node.value_ref.as<BFunction>();
         if ( func.is_lambda() )
             func.lambda_parent = stack.peek();
     }
@@ -281,7 +284,7 @@ void dawn::Engine::handle_call_node( CallNod& node, ValueRef& retval )
     if ( left_val.type() != ValueType::FUNCTION )
         ENGINE_PANIC( "can't call [", left_val.type(), "]" );
 
-    auto& func = left_val.as<Function>();
+    auto& func = left_val.as<BFunction>();
     if ( func.is_method() )
     {
         node.arg_vals.resize( 1 + node.args.size() );
@@ -763,7 +766,7 @@ void dawn::Engine::handle_ac_struct_node( ValueRef const& left, Int right, Value
     auto& result = left_val.members.at( right );
     if ( result.type() == ValueType::FUNCTION )
     {
-        auto& func = result.as<Function>();
+        auto& func = result.as<BFunction>();
         func.self_val.resize( 1 );
         func.self_val.front() = left;
     }
@@ -780,10 +783,12 @@ void dawn::Engine::handle_ac_type_node( ValueRef const& left, Int right, ValueRe
     ValueRef result = members.at( right )(left);
     if ( result.type() == ValueType::FUNCTION )
     {
-        auto& func = result.as<Function>();
+        auto& func = result.as<BFunction>();
         func.self_val.resize( 1 );
         func.self_val.front() = left;
     }
 
     value = result;
 }
+
+*/

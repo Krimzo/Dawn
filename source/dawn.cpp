@@ -17,6 +17,18 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source, Opt<String> c
         Module module;
         parser.parse( tokens, module );
 
+        Binary binary;
+        compiler.compile( module, binary );
+
+        for ( auto& func : binary.functions )
+        {
+            print( IDSystem::get( func.id ), ": " );
+            auto& instrs = *std::get_if<BFunction::DawnFunc>( &func.body );
+            for ( Int i = 0; i < (Int) instrs.size(); i++ )
+                print( "  ", i, ". ", instrs[i] );
+            print();
+        }
+
         for ( auto& import_path : module.imports )
         {
             String path = import_path;
@@ -26,7 +38,7 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source, Opt<String> c
             if ( auto error = eval_file( path, imported ) )
                 return error;
         }
-        engine.load_mod( module );
+        engine.load_bin( binary );
     }
     catch ( String const& msg )
     {
@@ -57,7 +69,7 @@ dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path, Set<String
     return eval( *source, parent_path, imported );
 }
 
-void dawn::Dawn::bind_func( String const& name, Function::CppFunc cpp_func ) noexcept
+void dawn::Dawn::bind_func( String const& name, BFunction::CppFunc cpp_func ) noexcept
 {
     engine.bind_func( IDSystem::get( name ), cpp_func );
 }

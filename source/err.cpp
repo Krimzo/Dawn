@@ -13,6 +13,12 @@ std::ostream& dawn::operator<<( std::ostream& stream, ParserError const& error )
     return stream;
 }
 
+std::ostream& dawn::operator<<( std::ostream& stream, CompilerError const& error )
+{
+    stream << error.msg;
+    return stream;
+}
+
 std::ostream& dawn::operator<<( std::ostream& stream, EngineError const& error )
 {
     stream << error.msg;
