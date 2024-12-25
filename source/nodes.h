@@ -180,7 +180,7 @@ enum struct AssignType
 
 struct AssignNod
 {
-    AssignType type = {};
+    AssignType type;
     Vector<Node> sides;
 };
 
@@ -542,6 +542,6 @@ Node make_bool_node( Bool value );
 Node make_int_node( Int value );
 Node make_float_node( Float value );
 Node make_char_node( Char value );
-Node make_string_node( String value );
+Node make_string_node( StringRef const& value );
 Node make_value_node( ValueRef const& value );
 }

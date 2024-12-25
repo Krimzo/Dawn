@@ -26,9 +26,9 @@ dawn::Node dawn::make_char_node( Char value )
     return make_value_node( ValueRef{ value } );
 }
 
-dawn::Node dawn::make_string_node( String value )
+dawn::Node dawn::make_string_node( StringRef const& value )
 {
-    return make_value_node( ValueRef{ std::move( value ) } );
+    return make_value_node( ValueRef{ value } );
 }
 
 dawn::Node dawn::make_value_node( ValueRef const& value )

@@ -237,7 +237,7 @@ struct ValueRef
     explicit ValueRef( Int value, ValueKind kind = ValueKind::LET );
     explicit ValueRef( Float value, ValueKind kind = ValueKind::LET );
     explicit ValueRef( Char value, ValueKind kind = ValueKind::LET );
-    explicit ValueRef( String value, ValueKind kind = ValueKind::LET );
+    explicit ValueRef( StringRef const& value, ValueKind kind = ValueKind::LET );
     explicit ValueRef( Function const& value, ValueKind kind = ValueKind::LET );
     explicit ValueRef( EnumVal const& value, ValueKind kind = ValueKind::LET );
     explicit ValueRef( StructVal const& value, ValueKind kind = ValueKind::LET );

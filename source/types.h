@@ -22,7 +22,7 @@ enum struct VariableKind
 
 struct Variable
 {
-    VariableKind kind = {};
+    VariableKind kind;
     Int id = 0;
     NodeRef expr;
 };

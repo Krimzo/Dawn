@@ -107,10 +107,10 @@ dawn::ValueRef::ValueRef( Char value, ValueKind kind )
     m_regref.value().emplace<Char>( value );
 }
 
-dawn::ValueRef::ValueRef( String value, ValueKind kind )
+dawn::ValueRef::ValueRef( StringRef const& value, ValueKind kind )
     : m_regref( value_pool().new_register() ), m_kind( kind )
 {
-    m_regref.value().emplace<String>( std::move( value ) );
+    m_regref.value().emplace<String>( value );
 }
 
 dawn::ValueRef::ValueRef( Function const& value, ValueKind kind )
