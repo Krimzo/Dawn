@@ -10,6 +10,150 @@ static thread_local std::mt19937_64 RAND_ENGINE = []
 
 void dawn::Engine::load_standard_functions()
 {
+    /* TYPE */
+    bind_func( IDSystem::get( "typeid" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
+    {
+        if ( arg_count != 1 )
+            PANIC( "typeid expected 1 argument, but got ", arg_count );
+
+        switch ( args[0].type() )
+        {
+        case ValueType::NOTHING:
+        {
+            static const ValueRef id = ValueRef{ IDSystem::get( (String) tp_nothing ) };
+            return id;
+        }
+
+        case ValueType::BOOL:
+        {
+            static const ValueRef id = ValueRef{ IDSystem::get( (String) tp_bool ) };
+            return id;
+        }
+
+        case ValueType::INT:
+        {
+            static const ValueRef id = ValueRef{ IDSystem::get( (String) tp_int ) };
+            return id;
+        }
+
+        case ValueType::FLOAT:
+        {
+            static const ValueRef id = ValueRef{ IDSystem::get( (String) tp_float ) };
+            return id;
+        }
+
+        case ValueType::CHAR:
+        {
+            static const ValueRef id = ValueRef{ IDSystem::get( (String) tp_char ) };
+            return id;
+        }
+
+        case ValueType::STRING:
+        {
+            static const ValueRef id = ValueRef{ IDSystem::get( (String) tp_string ) };
+            return id;
+        }
+
+        case ValueType::FUNCTION:
+        {
+            static const ValueRef id = ValueRef{ IDSystem::get( (String) tp_function ) };
+            return id;
+        }
+
+        case ValueType::ENUM:
+        {
+            return ValueRef{ args[0].as<EnumVal>().parent->id };
+        }
+
+        case ValueType::STRUCT:
+        {
+            return ValueRef{ args[0].as<StructVal>().parent->id };
+        }
+
+        case ValueType::ARRAY:
+        {
+            static const ValueRef id = ValueRef{ IDSystem::get( (String) tp_array ) };
+            return id;
+        }
+
+        case ValueType::RANGE:
+        {
+            static const ValueRef id = ValueRef{ IDSystem::get( (String) tp_range ) };
+            return id;
+        }
+
+        default:
+            PANIC( "unknown value type: ", (Int) args[0].type() );
+        }
+    } );
+
+    bind_func( IDSystem::get( "typename" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
+    {
+        if ( arg_count != 1 )
+            PANIC( "typename expected 1 argument, but got ", arg_count );
+
+        switch ( args[0].type() )
+        {
+        case ValueType::NOTHING:
+        {
+            return ValueRef{ tp_nothing };
+        }
+
+        case ValueType::BOOL:
+        {
+            return ValueRef{ tp_bool };
+        }
+
+        case ValueType::INT:
+        {
+            return ValueRef{ tp_int };
+        }
+
+        case ValueType::FLOAT:
+        {
+            return ValueRef{ tp_float };
+        }
+
+        case ValueType::CHAR:
+        {
+            return ValueRef{ tp_char };
+        }
+
+        case ValueType::STRING:
+        {
+            return ValueRef{ tp_string };
+        }
+
+        case ValueType::FUNCTION:
+        {
+            return ValueRef{ tp_function };
+        }
+
+        case ValueType::ENUM:
+        {
+            return ValueRef{ IDSystem::get( args[0].as<EnumVal>().parent->id ) };
+        }
+
+        case ValueType::STRUCT:
+        {
+            return ValueRef{ IDSystem::get( args[0].as<StructVal>().parent->id ) };
+        }
+
+        case ValueType::ARRAY:
+        {
+            return ValueRef{ tp_array };
+        }
+
+        case ValueType::RANGE:
+        {
+            return ValueRef{ tp_range };
+        }
+
+        default:
+            PANIC( "unknown value type: ", (Int) args[0].type() );
+        }
+    } );
+
     /* CAST */
     bind_func( IDSystem::get( "to_bool" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
