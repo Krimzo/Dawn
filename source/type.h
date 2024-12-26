@@ -34,11 +34,11 @@ struct Scope
 
 struct Function
 {
-    using CppFunc = Func<ValueRef( Vector<ValueRef> const& )>;
+    using CppFunc = Func<ValueRef( ValueRef const*, Int )>;
 
     Int id = 0;
     RegisterRef<ScopeObject> lambda_parent;
-    Vector<ValueRef> self_val;
+    Vector<ValueRef> self_vals;
     Vector<Variable> args;
     Variant<Scope, CppFunc> body;
 

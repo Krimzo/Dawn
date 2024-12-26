@@ -11,80 +11,77 @@ static thread_local std::mt19937_64 RAND_ENGINE = []
 void dawn::Engine::load_standard_functions()
 {
     /* CAST */
-    bind_func( IDSystem::get( "to_bool" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "to_bool" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
-        if ( args.size() != 1 )
-            PANIC( "to_bool expected 1 argument, but got ", args.size() );
+        if ( arg_count != 1 )
+            PANIC( "to_bool expected 1 argument, but got ", arg_count );
         return (ValueRef) args[0].to_bool( *this );
     } );
 
-    bind_func( IDSystem::get( "to_int" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "to_int" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
-        if ( args.size() != 1 )
-            PANIC( "to_int expected 1 argument, but got ", args.size() );
+        if ( arg_count != 1 )
+            PANIC( "to_int expected 1 argument, but got ", arg_count );
         return (ValueRef) args[0].to_int( *this );
     } );
 
-    bind_func( IDSystem::get( "to_float" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "to_float" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
-        if ( args.size() != 1 )
-            PANIC( "to_float expected 1 argument, but got ", args.size() );
+        if ( arg_count != 1 )
+            PANIC( "to_float expected 1 argument, but got ", arg_count );
         return (ValueRef) args[0].to_float( *this );
     } );
 
-    bind_func( IDSystem::get( "to_char" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "to_char" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
-        if ( args.size() != 1 )
-            PANIC( "to_char expected 1 argument, but got ", args.size() );
+        if ( arg_count != 1 )
+            PANIC( "to_char expected 1 argument, but got ", arg_count );
         return (ValueRef) args[0].to_char( *this );
     } );
 
-    bind_func( IDSystem::get( "to_string" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "to_string" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
-        if ( args.size() != 1 )
-            PANIC( "to_string expected 1 argument, but got ", args.size() );
+        if ( arg_count != 1 )
+            PANIC( "to_string expected 1 argument, but got ", arg_count );
         return (ValueRef) args[0].to_string( *this );
     } );
 
     /* UTIL */
-    bind_func( IDSystem::get( "format" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "format" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
         StringStream stream;
-        for ( auto& arg : args )
-            stream << arg.to_string( *this );
-
+        for ( Int i = 0; i < arg_count; i++ )
+            stream << args[i].to_string( *this );
         return (ValueRef) stream.str();
     } );
 
-    bind_func( IDSystem::get( "print" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "print" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
         StringStream stream;
-        for ( auto& arg : args )
-            stream << arg.to_string( *this );
+        for ( Int i = 0; i < arg_count; i++ )
+            stream << args[i].to_string( *this );
         print( stream.str() );
         return (ValueRef) Value {};
     } );
 
-    bind_func( IDSystem::get( "rand_int" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "rand_int" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
-        if ( args.size() != 1 )
+        if ( arg_count != 1 )
             PANIC( "rand_int expects 1 argument" );
-
         return (ValueRef) Int( RAND_ENGINE() % args[0].to_int( *this ) );
     } );
 
-    bind_func( IDSystem::get( "rand_flt" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "rand_flt" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
-        if ( args.size() != 0 )
+        if ( arg_count != 0 )
             PANIC( "rand_flt expects 0 arguments" );
-
         return (ValueRef) ((Float) RAND_ENGINE() / UINT64_MAX);
     } );
 
     /* MATH */
-    bind_func( IDSystem::get( "min" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "min" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
-        if ( args.size() != 2 )
+        if ( arg_count != 2 )
             PANIC( "min expects 2 arguments" );
 
         if ( args[0].type() == ValueType::INT )
@@ -96,9 +93,9 @@ void dawn::Engine::load_standard_functions()
         PANIC( "min expects an int or float" );
     } );
 
-    bind_func( IDSystem::get( "max" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "max" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
-        if ( args.size() != 2 )
+        if ( arg_count != 2 )
             PANIC( "max expects 2 arguments" );
 
         if ( args[0].type() == ValueType::INT )
@@ -110,9 +107,9 @@ void dawn::Engine::load_standard_functions()
         PANIC( "max expects an int or float" );
     } );
 
-    bind_func( IDSystem::get( "abs" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "abs" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
-        if ( args.size() != 1 )
+        if ( arg_count != 1 )
             PANIC( "abs expects 1 argument" );
 
         if ( args[0].type() == ValueType::INT )
@@ -124,25 +121,25 @@ void dawn::Engine::load_standard_functions()
         PANIC( "abs expects an int or float" );
     } );
 
-    bind_func( IDSystem::get( "sqrt" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "sqrt" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
-        if ( args.size() != 1 )
+        if ( arg_count != 1 )
             PANIC( "sqrt expects 1 argument" );
 
         return (ValueRef) std::sqrt( args[0].to_float( *this ) );
     } );
 
-    bind_func( IDSystem::get( "sin" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "sin" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
-        if ( args.size() != 1 )
+        if ( arg_count != 1 )
             PANIC( "sin expects 1 argument" );
 
         return (ValueRef) std::sin( args[0].to_float( *this ) );
     } );
 
-    bind_func( IDSystem::get( "cos" ), [this]( Vector<ValueRef> const& args ) -> ValueRef
+    bind_func( IDSystem::get( "cos" ), [this]( ValueRef const* args, Int arg_count ) -> ValueRef
     {
-        if ( args.size() != 1 )
+        if ( arg_count != 1 )
             PANIC( "cos expects 1 argument" );
 
         return (ValueRef) std::cos( args[0].to_float( *this ) );
@@ -192,12 +189,12 @@ void dawn::Engine::load_string_members()
     string_members[IDSystem::get( "push" )] = [this]( ValueRef const& self_val ) -> ValueRef
     {
         Function func;
-        func.body = [this]( Vector<ValueRef> const& args ) -> ValueRef
+        func.body = [this]( ValueRef const* args, Int arg_count ) -> ValueRef
         {
-            if ( args.size() != 2 )
+            if ( arg_count != 2 )
                 ENGINE_PANIC( "push expected a value" );
 
-            auto& self = args.front();
+            auto& self = args[0];
             if ( self.kind() == ValueKind::LET )
                 ENGINE_PANIC( "can't push to a let string" );
 
@@ -239,12 +236,12 @@ void dawn::Engine::load_array_members()
     array_members[IDSystem::get( "push" )] = [this]( ValueRef const& self_val ) -> ValueRef
     {
         Function func;
-        func.body = [this]( Vector<ValueRef> const& args ) -> ValueRef
+        func.body = [this]( ValueRef const* args, Int arg_count ) -> ValueRef
         {
-            if ( args.size() != 2 )
+            if ( arg_count != 2 )
                 ENGINE_PANIC( "push expected a value" );
 
-            auto& self = args.front();
+            auto& self = args[0];
             if ( self.kind() == ValueKind::LET )
                 ENGINE_PANIC( "can't push to a let array" );
 

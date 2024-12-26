@@ -194,10 +194,10 @@ dawn::ValueRef dawn::ValueRef::un_plus( Engine& engine ) const
             PANIC( "+ struct [", IDSystem::get( left.parent->id ), "] not supported" );
 
         ValueRef retval;
-        op->self_val.resize( 1 );
-        op->self_val[0] = *this;
+        op->self_vals.resize( 1 );
+        op->self_vals[0] = *this;
 
-        engine.handle_func( *op, op->self_val, retval );
+        engine.handle_func( *op, op->self_vals.data(), (Int) op->self_vals.size(), retval );
         return retval;
     }
 
@@ -224,10 +224,10 @@ dawn::ValueRef dawn::ValueRef::un_minus( Engine& engine ) const
             PANIC( "- struct [", IDSystem::get( left.parent->id ), "] not supported" );
 
         ValueRef retval;
-        op->self_val.resize( 1 );
-        op->self_val[0] = *this;
+        op->self_vals.resize( 1 );
+        op->self_vals[0] = *this;
 
-        engine.handle_func( *op, op->self_val, retval );
+        engine.handle_func( *op, op->self_vals.data(), (Int) op->self_vals.size(), retval );
         return retval;
     }
 
@@ -307,11 +307,11 @@ dawn::ValueRef dawn::ValueRef::op_add( Engine& engine, ValueRef const& other ) c
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] + struct [", other.type(), "] not supported" );
 
         ValueRef retval;
-        op->self_val.resize( 2 );
-        op->self_val[0] = *this;
-        op->self_val[1] = other;
+        op->self_vals.resize( 2 );
+        op->self_vals[0] = *this;
+        op->self_vals[1] = other;
 
-        engine.handle_func( *op, op->self_val, retval );
+        engine.handle_func( *op, op->self_vals.data(), (Int) op->self_vals.size(), retval );
         return retval;
     }
 
@@ -362,11 +362,11 @@ dawn::ValueRef dawn::ValueRef::op_sub( Engine& engine, ValueRef const& other ) c
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] - struct [", other.type(), "] not supported" );
 
         ValueRef retval;
-        op->self_val.resize( 2 );
-        op->self_val[0] = *this;
-        op->self_val[1] = other;
+        op->self_vals.resize( 2 );
+        op->self_vals[0] = *this;
+        op->self_vals[1] = other;
 
-        engine.handle_func( *op, op->self_val, retval );
+        engine.handle_func( *op, op->self_vals.data(), (Int) op->self_vals.size(), retval );
         return retval;
     }
 
@@ -417,11 +417,11 @@ dawn::ValueRef dawn::ValueRef::op_mul( Engine& engine, ValueRef const& other ) c
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] * struct [", other.type(), "] not supported" );
 
         ValueRef retval;
-        op->self_val.resize( 2 );
-        op->self_val[0] = *this;
-        op->self_val[1] = other;
+        op->self_vals.resize( 2 );
+        op->self_vals[0] = *this;
+        op->self_vals[1] = other;
 
-        engine.handle_func( *op, op->self_val, retval );
+        engine.handle_func( *op, op->self_vals.data(), (Int) op->self_vals.size(), retval );
         return retval;
     }
 
@@ -472,11 +472,11 @@ dawn::ValueRef dawn::ValueRef::op_div( Engine& engine, ValueRef const& other ) c
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] / struct [", other.type(), "] not supported" );
 
         ValueRef retval;
-        op->self_val.resize( 2 );
-        op->self_val[0] = *this;
-        op->self_val[1] = other;
+        op->self_vals.resize( 2 );
+        op->self_vals[0] = *this;
+        op->self_vals[1] = other;
 
-        engine.handle_func( *op, op->self_val, retval );
+        engine.handle_func( *op, op->self_vals.data(), (Int) op->self_vals.size(), retval );
         return retval;
     }
 
@@ -527,11 +527,11 @@ dawn::ValueRef dawn::ValueRef::op_pow( Engine& engine, ValueRef const& other ) c
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] ^ struct [", other.type(), "] not supported" );
 
         ValueRef retval;
-        op->self_val.resize( 2 );
-        op->self_val[0] = *this;
-        op->self_val[1] = other;
+        op->self_vals.resize( 2 );
+        op->self_vals[0] = *this;
+        op->self_vals[1] = other;
 
-        engine.handle_func( *op, op->self_val, retval );
+        engine.handle_func( *op, op->self_vals.data(), (Int) op->self_vals.size(), retval );
         return retval;
     }
 
@@ -582,11 +582,11 @@ dawn::ValueRef dawn::ValueRef::op_mod( Engine& engine, ValueRef const& other ) c
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] % struct [", other.type(), "] not supported" );
 
         ValueRef retval;
-        op->self_val.resize( 2 );
-        op->self_val[0] = *this;
-        op->self_val[1] = other;
+        op->self_vals.resize( 2 );
+        op->self_vals[0] = *this;
+        op->self_vals[1] = other;
 
-        engine.handle_func( *op, op->self_val, retval );
+        engine.handle_func( *op, op->self_vals.data(), (Int) op->self_vals.size(), retval );
         return retval;
     }
 
@@ -692,11 +692,11 @@ dawn::ValueRef dawn::ValueRef::op_cmpr( Engine& engine, ValueRef const& other ) 
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] <=> struct [", other.type(), "] not supported" );
 
         ValueRef retval;
-        op->self_val.resize( 2 );
-        op->self_val[0] = *this;
-        op->self_val[1] = other;
+        op->self_vals.resize( 2 );
+        op->self_vals[0] = *this;
+        op->self_vals[1] = other;
 
-        engine.handle_func( *op, op->self_val, retval );
+        engine.handle_func( *op, op->self_vals.data(), (Int) op->self_vals.size(), retval );
         return retval;
     }
 
@@ -823,10 +823,10 @@ dawn::Bool dawn::ValueRef::to_bool( Engine& engine ) const
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to bool" );
 
         ValueRef retval;
-        method->self_val.resize( 1 );
-        method->self_val[0] = *this;
+        method->self_vals.resize( 1 );
+        method->self_vals[0] = *this;
 
-        engine.handle_func( *method, method->self_val, retval );
+        engine.handle_func( *method, method->self_vals.data(), (Int) method->self_vals.size(), retval );
         return retval.to_bool( engine );
     }
 
@@ -869,10 +869,10 @@ dawn::Int dawn::ValueRef::to_int( Engine& engine ) const
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to int" );
 
         ValueRef retval;
-        method->self_val.resize( 1 );
-        method->self_val[0] = *this;
+        method->self_vals.resize( 1 );
+        method->self_vals[0] = *this;
 
-        engine.handle_func( *method, method->self_val, retval );
+        engine.handle_func( *method, method->self_vals.data(), (Int) method->self_vals.size(), retval );
         return retval.to_int( engine );
     }
 
@@ -915,10 +915,10 @@ dawn::Float dawn::ValueRef::to_float( Engine& engine ) const
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to float" );
 
         ValueRef retval;
-        method->self_val.resize( 1 );
-        method->self_val[0] = *this;
+        method->self_vals.resize( 1 );
+        method->self_vals[0] = *this;
 
-        engine.handle_func( *method, method->self_val, retval );
+        engine.handle_func( *method, method->self_vals.data(), (Int) method->self_vals.size(), retval );
         return retval.to_float( engine );
     }
 
@@ -957,10 +957,10 @@ dawn::Char dawn::ValueRef::to_char( Engine& engine ) const
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to char" );
 
         ValueRef retval;
-        method->self_val.resize( 1 );
-        method->self_val[0] = *this;
+        method->self_vals.resize( 1 );
+        method->self_vals[0] = *this;
 
-        engine.handle_func( *method, method->self_val, retval );
+        engine.handle_func( *method, method->self_vals.data(), (Int) method->self_vals.size(), retval );
         return retval.to_char( engine );
     }
 
@@ -1002,7 +1002,7 @@ dawn::String dawn::ValueRef::to_string( Engine& engine ) const
         if ( func.is_lambda() )
             return "lambda()";
         else if ( func.is_method() )
-            return format( IDSystem::get( func.self_val.front().as<StructVal>().parent->id ), "::", IDSystem::get( func.id ), "()" );
+            return format( IDSystem::get( func.self_vals[0].as<StructVal>().parent->id ), "::", IDSystem::get( func.id ), "()" );
         else
             return format( IDSystem::get( func.id ), "()" );
     }
@@ -1018,10 +1018,10 @@ dawn::String dawn::ValueRef::to_string( Engine& engine ) const
             return format( IDSystem::get( left.parent->id ), "{}" );
 
         ValueRef retval;
-        method->self_val.resize( 1 );
-        method->self_val[0] = *this;
+        method->self_vals.resize( 1 );
+        method->self_vals[0] = *this;
 
-        engine.handle_func( *method, method->self_val, retval );
+        engine.handle_func( *method, method->self_vals.data(), (Int) method->self_vals.size(), retval );
         return retval.to_string( engine );
     }
 

@@ -64,28 +64,28 @@ void dawn::Dawn::bind_func( String const& name, Function::CppFunc cpp_func ) noe
 
 dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name ) noexcept
 {
-    Vector<ValueRef> args;
+    std::initializer_list<ValueRef> args;
     ValueRef retval;
     return call_func( name, args, retval );
 }
 
 dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, ValueRef& retval ) noexcept
 {
-    Vector<ValueRef> args;
+    std::initializer_list<ValueRef> args;
     return call_func( name, args, retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Vector<ValueRef>& args ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, std::initializer_list<ValueRef> const& args ) noexcept
 {
     ValueRef retval;
     return call_func( name, args, retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Vector<ValueRef>& args, ValueRef& retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, std::initializer_list<ValueRef> const& args, ValueRef& retval ) noexcept
 {
     try
     {
-        engine.call_func( IDSystem::get( name ), args, retval );
+        engine.call_func( IDSystem::get( name ), args.begin(), (Int) args.size(), retval );
     }
     catch ( String const& msg )
     {

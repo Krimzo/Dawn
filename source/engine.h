@@ -26,7 +26,7 @@ struct Engine
     void load_variable( Variable& entry );
 
     void bind_func( Int id, Function::CppFunc cpp_func );
-    void call_func( Int id, Vector<ValueRef>& args, ValueRef& retval );
+    void call_func( Int id, ValueRef const* args, Int arg_count, ValueRef& retval );
 
     void add_obj( VariableKind kind, Int id, ValueRef const& value );
     ValueRef* get_obj( Int id );
@@ -44,7 +44,7 @@ private:
     void load_array_members();
     void load_range_members();
 
-    void handle_func( Function& func, Vector<ValueRef>& args, ValueRef& retval );
+    void handle_func( Function& func, ValueRef const* args, Int arg_count, ValueRef& retval );
     void handle_scope( Scope& scope, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
     void handle_instr( Node& node, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
     void handle_expr( Node& node, ValueRef& value );

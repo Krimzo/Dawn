@@ -69,7 +69,7 @@ void dawn::Engine::bind_func( Int id, Function::CppFunc cpp_func )
     load_function( func );
 }
 
-void dawn::Engine::call_func( Int id, Vector<ValueRef>& args, ValueRef& retval )
+void dawn::Engine::call_func( Int id, ValueRef const* args, Int arg_count, ValueRef& retval )
 {
     ValueRef* val = stack.root().get( id );
     if ( !val )
@@ -78,7 +78,7 @@ void dawn::Engine::call_func( Int id, Vector<ValueRef>& args, ValueRef& retval )
     if ( val->type() != ValueType::FUNCTION )
         ENGINE_PANIC( "object [", IDSystem::get( id ), "] can't be called" );
 
-    handle_func( val->as<Function>(), args, retval );
+    handle_func( val->as<Function>(), args, arg_count, retval );
 }
 
 void dawn::Engine::add_obj( VariableKind kind, Int id, ValueRef const& value )
@@ -102,11 +102,11 @@ dawn::ValueRef* dawn::Engine::get_obj( Int id )
     return stack.current().get( id );
 }
 
-void dawn::Engine::handle_func( Function& func, Vector<ValueRef>& args, ValueRef& retval )
+void dawn::Engine::handle_func( Function& func, ValueRef const* args, Int arg_count, ValueRef& retval )
 {
     if ( func.body.index() == 0 )
     {
-        if ( func.args.size() != args.size() )
+        if ( func.args.size() != arg_count )
         {
             if ( func.is_lambda() )
                 ENGINE_PANIC( "invalid argument count for [lambda]" );
@@ -116,7 +116,7 @@ void dawn::Engine::handle_func( Function& func, Vector<ValueRef>& args, ValueRef
 
         auto stack_helper = stack.push( func );
 
-        for ( Int i = 0; i < (Int) args.size(); i++ )
+        for ( Int i = 0; i < arg_count; i++ )
             add_obj( func.args[i].kind, func.args[i].id, args[i] );
 
         Bool didret = false;
@@ -126,7 +126,7 @@ void dawn::Engine::handle_func( Function& func, Vector<ValueRef>& args, ValueRef
     }
     else
     {
-        retval = (*std::get_if<Function::CppFunc>( &func.body ))(args);
+        retval = (*std::get_if<Function::CppFunc>( &func.body ))(args, arg_count);
     }
 }
 
@@ -280,23 +280,44 @@ void dawn::Engine::handle_call_node( CallNod& node, ValueRef& retval )
 
     if ( left_val.type() != ValueType::FUNCTION )
         ENGINE_PANIC( "can't call [", left_val.type(), "]" );
-
     auto& func = left_val.as<Function>();
+
+    Int arg_count = func.is_method() ? (1 + node.args.size()) : node.args.size();
+    ValueRef* args_ptr = (ValueRef*) _alloca( arg_count * sizeof( ValueRef ) );
+    for ( Int i = 0; i < arg_count; i++ )
+        new (args_ptr + i) ValueRef();
+
+    struct Destructor
+    {
+        ValueRef* args_ptr;
+        Int arg_count;
+
+        Destructor( ValueRef* args_ptr, Int arg_count )
+            : args_ptr( args_ptr ), arg_count( arg_count )
+        {}
+
+        ~Destructor() noexcept
+        {
+            for ( Int i = 0; i < arg_count; i++ )
+                args_ptr[i].~ValueRef();
+        }
+    };
+
+    Destructor destructor{ args_ptr, arg_count };
+
     if ( func.is_method() )
     {
-        node.arg_vals.resize( 1 + node.args.size() );
-        node.arg_vals[0] = func.self_val[0];
+        args_ptr[0] = func.self_vals[0];
         for ( Int i = 0; i < (Int) node.args.size(); i++ )
-            handle_expr( node.args[i], node.arg_vals[i + 1] );
+            handle_expr( node.args[i], args_ptr[1 + i] );
     }
     else
     {
-        node.arg_vals.resize( node.args.size() );
         for ( Int i = 0; i < (Int) node.args.size(); i++ )
-            handle_expr( node.args[i], node.arg_vals[i] );
+            handle_expr( node.args[i], args_ptr[i] );
     }
 
-    handle_func( func, node.arg_vals, retval );
+    handle_func( func, args_ptr, arg_count, retval );
 }
 
 void dawn::Engine::handle_index_node( IndexNod& node, ValueRef& retval )
@@ -764,8 +785,8 @@ void dawn::Engine::handle_ac_struct_node( ValueRef const& left, Int right, Value
     if ( result.type() == ValueType::FUNCTION )
     {
         auto& func = result.as<Function>();
-        func.self_val.resize( 1 );
-        func.self_val.front() = left;
+        func.self_vals.resize( 1 );
+        func.self_vals[0] = left;
     }
 
     value = result;
@@ -781,8 +802,8 @@ void dawn::Engine::handle_ac_type_node( ValueRef const& left, Int right, ValueRe
     if ( result.type() == ValueType::FUNCTION )
     {
         auto& func = result.as<Function>();
-        func.self_val.resize( 1 );
-        func.self_val.front() = left;
+        func.self_vals.resize( 1 );
+        func.self_vals[0] = left;
     }
 
     value = result;

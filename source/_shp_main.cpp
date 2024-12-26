@@ -21,8 +21,7 @@ int dawn::_shp_main( int argc, char** argv )
         arg.data.emplace_back( String{ argv[i] } );
 
     ValueRef retval{ 0ll };
-    Vector<ValueRef> args = { ValueRef{ arg } };
-    if ( auto error = dawn.call_func( "main", args, retval ) )
+    if ( auto error = dawn.call_func( "main", { ValueRef{ arg } }, retval ) )
     {
         print( error.value() );
         return -3;

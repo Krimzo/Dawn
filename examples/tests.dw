@@ -107,10 +107,11 @@ func throw_test()
 
 func lambda_test()
 {
+	let c = 12
 	let sum = `ref a, ref b` {
-		return a + b
+		return a + b + c
 	}
-	assert(sum(4, 3) == 7, "lambda is bad")
+	assert(sum(4, 3) == 19, "lambda is bad")
 }
 
 enum SomeEnum
@@ -159,7 +160,7 @@ func struct_test()
 		"cool", age =
 		2 }
 
-	print(some_val1)
+	some_val1::who()
 	print(some_val2 + some_val2::age)
 	print(some_val2)
 }
