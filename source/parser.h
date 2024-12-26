@@ -1,7 +1,7 @@
 #pragma once
 
 #include "lexer.h"
-#include "nodes.h"
+#include "node.h"
 
 
 namespace dawn

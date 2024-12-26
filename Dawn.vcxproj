@@ -12,19 +12,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\engine.cpp" />
-    <ClCompile Include="source\pools.cpp" />
+    <ClCompile Include="source\pool.cpp" />
     <ClCompile Include="source\stack.cpp" />
     <ClCompile Include="source\standard.cpp" />
     <ClCompile Include="source\err.cpp" />
     <ClCompile Include="source\id.cpp" />
     <ClCompile Include="source\lexer.cpp" />
-    <ClCompile Include="source\nodes.cpp" />
+    <ClCompile Include="source\node.cpp" />
     <ClCompile Include="source\parser.cpp" />
     <ClCompile Include="source\token.cpp" />
-    <ClCompile Include="source\types.cpp" />
+    <ClCompile Include="source\type.cpp" />
     <ClCompile Include="source\util.cpp" />
     <ClCompile Include="source\dawn.cpp" />
-    <ClCompile Include="source\values.cpp" />
+    <ClCompile Include="source\value.cpp" />
     <ClCompile Include="source\_dev_main.cpp" />
     <ClCompile Include="source\_main.cpp" />
     <ClCompile Include="source\_shp_main.cpp" />
@@ -35,19 +35,19 @@
     <ClInclude Include="source\err.h" />
     <ClInclude Include="source\id.h" />
     <ClInclude Include="source\lexer.h" />
-    <ClInclude Include="source\pools.h" />
+    <ClInclude Include="source\pool.h" />
     <ClInclude Include="source\_main.h" />
     <ClInclude Include="source\memory.h" />
-    <ClInclude Include="source\nodes.h" />
+    <ClInclude Include="source\node.h" />
     <ClInclude Include="source\parser.h" />
     <ClInclude Include="source\stack.h" />
     <ClInclude Include="source\storage.h" />
     <ClInclude Include="source\syntax.h" />
     <ClInclude Include="source\t.h" />
     <ClInclude Include="source\token.h" />
-    <ClInclude Include="source\types.h" />
+    <ClInclude Include="source\type.h" />
     <ClInclude Include="source\util.h" />
-    <ClInclude Include="source\values.h" />
+    <ClInclude Include="source\value.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
