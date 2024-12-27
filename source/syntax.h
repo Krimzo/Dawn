@@ -89,7 +89,7 @@ inline constexpr Pair<StringRef, StringRef> comm_multiline = { "/*", "*/" };
 
 inline const String prec_unary = "_unary";
 
-inline Map<String, Int> precedences
+inline HMap<String, Int> precedences
 {
     { (String) op_access, 1 },
     { (String) op_expr_opn, 1 },

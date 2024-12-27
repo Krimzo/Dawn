@@ -146,8 +146,11 @@ void dawn::Engine::handle_instr( Node const& node, ValueRef& retval, Bool& didre
     switch ( node.type() )
     {
     case NodeType::SCOPE:
+    {
+        auto stack_helper = stack.push();
         handle_scope( node.as<Scope>(), retval, didret, didbrk, didcon );
-        break;
+    }
+    break;
 
     case NodeType::VARIABLE:
         handle_var_node( node.as<VariableNod>() );
@@ -294,7 +297,8 @@ void dawn::Engine::handle_call_node( CallNod const& node, ValueRef& retval )
 
         Destructor( ValueRef* args_ptr, Int arg_count )
             : args_ptr( args_ptr ), arg_count( arg_count )
-        {}
+        {
+        }
 
         ~Destructor() noexcept
         {

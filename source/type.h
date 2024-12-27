@@ -50,8 +50,8 @@ struct Function
 struct Enum
 {
     Int id = 0;
-    Map<Int, Node> keys_expr;
-    Map<Int, ValueRef> keys_value;
+    OMap<Int, Node> keys_expr;
+    OMap<Int, ValueRef> keys_value;
 };
 
 struct Struct

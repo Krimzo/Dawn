@@ -1,8 +1,8 @@
 #include "id.h"
 
 
-dawn::Map<dawn::String, dawn::Int> dawn::IDSystem::m_str_int = {};
-dawn::Map<dawn::Int, dawn::String> dawn::IDSystem::m_int_str = {};
+dawn::HMap<dawn::String, dawn::Int> dawn::IDSystem::m_str_int = {};
+dawn::OMap<dawn::Int, dawn::String> dawn::IDSystem::m_int_str = {};
 dawn::Int dawn::IDSystem::m_current = 0;
 
 dawn::Int dawn::IDSystem::get( String const& str_id )

@@ -17,7 +17,7 @@ struct EnumVal
 struct StructVal
 {
     Struct* parent = nullptr;
-    Map<Int, ValueRef> members;
+    OMap<Int, ValueRef> members;
 
     StructVal() = default;
 

@@ -13,9 +13,9 @@ struct Engine
     friend struct ValueRef;
 
     ScopeStack stack;
-    Map<Int, Enum> enums;
-    Map<Int, Struct> structs;
-    Map<Int, TypeMember> type_members[(Int) ValueType::_COUNT] = {};
+    OMap<Int, Enum> enums;
+    OMap<Int, Struct> structs;
+    OMap<Int, TypeMember> type_members[(Int) ValueType::_COUNT] = {};
 
     Engine();
 

@@ -4,7 +4,7 @@
 
 dawn::ScopeObject::ScopeObject()
 {
-    objects.reserve( 8 );
+    objects.reserve( 16 );
 }
 
 dawn::ValueRef& dawn::ScopeObject::set( Int id, ValueRef const& value )
@@ -75,4 +75,5 @@ dawn::StackHelper::~StackHelper() noexcept
 
 dawn::StackHelper::StackHelper( ScopeStack& stack )
     : stack( stack )
-{}
+{
+}
