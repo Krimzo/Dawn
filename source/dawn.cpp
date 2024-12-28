@@ -85,7 +85,7 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, std::initiali
 {
     try
     {
-        engine.call_func( IDSystem::get( name ), args.begin(), (Int) args.size(), retval );
+        retval = engine.call_func( IDSystem::get( name ), args.begin(), (Int) args.size() );
     }
     catch ( String const& msg )
     {
