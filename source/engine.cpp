@@ -589,11 +589,11 @@ dawn::ValueRef dawn::Engine::handle_un_node( UnaryNod const& node )
 
 dawn::ValueRef dawn::Engine::handle_op_node( OperatorNod const& node )
 {
-    if ( OperatorType::ACCESS == node.type )
-        return handle_ac_node( node );
-
     switch ( node.type )
     {
+    case OperatorType::ACCESS:
+        return handle_ac_node( node );
+
     case OperatorType::POW:
         return handle_expr( node.sides[0] ).op_pow( *this, handle_expr( node.sides[1] ) );
 
