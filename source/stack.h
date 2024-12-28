@@ -44,9 +44,6 @@ struct StackHelper
     StackHelper( ScopeStack const& ) = delete;
     void operator=( ScopeStack const& ) = delete;
 
-    StackHelper( ScopeStack&& ) = delete;
-    void operator=( ScopeStack&& ) = delete;
-
     ~StackHelper() noexcept;
 
 private:

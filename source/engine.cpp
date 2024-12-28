@@ -287,27 +287,30 @@ void dawn::Engine::handle_call_node( CallNod const& node, ValueRef& retval )
 
     Int arg_count = func.is_method() ? (1 + node.args.size()) : node.args.size();
     ValueRef* args_ptr = (ValueRef*) _alloca( arg_count * sizeof( ValueRef ) );
-    for ( Int i = 0; i < arg_count; i++ )
-        new (args_ptr + i) ValueRef();
 
-    struct Destructor
+    struct SAllocManager
     {
         ValueRef* args_ptr;
         Int arg_count;
 
-        Destructor( ValueRef* args_ptr, Int arg_count )
+        SAllocManager( ValueRef* args_ptr, Int arg_count )
             : args_ptr( args_ptr ), arg_count( arg_count )
         {
+            for ( Int i = 0; i < arg_count; i++ )
+                new (args_ptr + i) ValueRef();
         }
 
-        ~Destructor() noexcept
+        ~SAllocManager() noexcept
         {
             for ( Int i = 0; i < arg_count; i++ )
                 args_ptr[i].~ValueRef();
         }
+
+        SAllocManager( SAllocManager const& ) = delete;
+        void operator=( SAllocManager const& ) = delete;
     };
 
-    Destructor destructor{ args_ptr, arg_count };
+    SAllocManager alloc_manager{ args_ptr, arg_count };
 
     if ( func.is_method() )
     {
