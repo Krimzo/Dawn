@@ -45,8 +45,8 @@ private:
     void load_range_members();
 
     ValueRef handle_func( Function const& func, ValueRef const* args, Int arg_count );
-    void handle_scope( Scope const& scope, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
-    void handle_instr( Node const& node, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
+    void handle_scope( Scope const& scope, ValueRef& retval, Bool* didbrk, Bool* didcon );
+    void handle_instr( Node const& node, ValueRef& retval, Bool* didbrk, Bool* didcon );
     ValueRef handle_expr( Node const& node );
 
     ValueRef handle_ref_node( RefNod const& node );
@@ -54,16 +54,16 @@ private:
     ValueRef handle_id_node( IdentifierNod const& node );
     ValueRef handle_call_node( CallNod const& node );
     ValueRef handle_index_node( IndexNod const& node );
-    void handle_return_node( ReturnNod const& node, ValueRef& retval, Bool& didret );
+    void handle_return_node( ReturnNod const& node, ValueRef& retval );
     void handle_break_node( BreakNod const& node, Bool* didbrk );
     void handle_continue_node( ContinueNod const& node, Bool* didcon );
     void handle_throw_node( ThrowNod const& node );
-    void handle_try_node( TryNod const& node, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
-    void handle_if_node( IfNod const& node, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
-    void handle_switch_node( SwitchNod const& node, ValueRef& retval, Bool& didret, Bool* didbrk, Bool* didcon );
-    void handle_loop_node( LoopNod const& node, ValueRef& retval, Bool& didret );
-    void handle_while_node( WhileNod const& node, ValueRef& retval, Bool& didret );
-    void handle_for_node( ForNod const& node, ValueRef& retval, Bool& didret );
+    void handle_try_node( TryNod const& node, ValueRef& retval, Bool* didbrk, Bool* didcon );
+    void handle_if_node( IfNod const& node, ValueRef& retval, Bool* didbrk, Bool* didcon );
+    void handle_switch_node( SwitchNod const& node, ValueRef& retval, Bool* didbrk, Bool* didcon );
+    void handle_loop_node( LoopNod const& node, ValueRef& retval );
+    void handle_while_node( WhileNod const& node, ValueRef& retval );
+    void handle_for_node( ForNod const& node, ValueRef& retval );
     ValueRef handle_enum_node( EnumNod const& node );
     ValueRef handle_struct_node( StructNod const& node );
     ValueRef handle_array_node( ArrayNod const& node );

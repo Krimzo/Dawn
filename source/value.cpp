@@ -176,6 +176,16 @@ void dawn::ValueRef::set_value( Value const& value )
     reapply_kind();
 }
 
+dawn::Bool dawn::ValueRef::valid() const noexcept
+{
+    return m_regref.valid();
+}
+
+dawn::ValueRef::operator bool() const noexcept
+{
+    return m_regref.valid();
+}
+
 dawn::ValueRef dawn::ValueRef::un_plus( Engine& engine ) const
 {
     switch ( type() )

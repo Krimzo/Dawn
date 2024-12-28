@@ -251,10 +251,8 @@ struct ValueRef
     Value const& value() const;
     void set_value( Value const& value );
 
-    Bool valid() const noexcept
-    {
-        return m_regref.valid();
-    }
+    Bool valid() const noexcept;
+    operator bool() const noexcept;
 
     template<typename T>
     T& as() const
