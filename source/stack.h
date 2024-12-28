@@ -9,13 +9,25 @@ struct StackHelper;
 
 struct ScopeObject
 {
-    RegisterRef<ScopeObject> parent;
-    Vector<Pair<Int, ValueRef>> objects;
+    enum struct ViewType
+    {
+        LOCAL = 0,
+        GLOBAL = 1,
+    };
 
-    ScopeObject();
+    using LocalType = Vector<Pair<Int, ValueRef>>;
+    using GlobalType = Vector<ValueRef>;
+
+    ScopeObject( ViewType type = ViewType::LOCAL );
 
     ValueRef& set( Int id, ValueRef const& value );
     ValueRef* get( Int id );
+
+    void reset( RegisterRef<ScopeObject> const& parent );
+
+private:
+    RegisterRef<ScopeObject> m_parent;
+    Variant<LocalType, GlobalType> m_objects;
 };
 
 struct ScopeStack

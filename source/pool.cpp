@@ -8,27 +8,19 @@ dawn::MemoryPools::~MemoryPools() noexcept
     for ( auto& chunk : node_memory.m_chunks )
     {
         for ( auto& regist : chunk.m_space )
-        {
-            auto& node = regist.value;
-            node.reset();
-        }
+            regist.value.reset();
+
     }
     for ( auto& chunk : value_memory.m_chunks )
     {
         for ( auto& regist : chunk.m_space )
-        {
-            auto& value = regist.value;
-            value.reset();
-        }
+            regist.value.reset();
+
     }
     for ( auto& chunk : scope_memory.m_chunks )
     {
         for ( auto& regist : chunk.m_space )
-        {
-            auto& scope = regist.value;
-            scope.objects.clear();
-            scope.parent = {};
-        }
+            regist.value.reset( {} );
     }
 }
 
