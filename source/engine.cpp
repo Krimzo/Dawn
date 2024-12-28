@@ -269,20 +269,20 @@ dawn::ValueRef dawn::Engine::handle_call_node( CallNod const& node )
 
     struct SAllocManager
     {
-        ValueRef* args_ptr;
-        Int arg_count;
+        ValueRef* ptr;
+        Int count;
 
-        SAllocManager( ValueRef* args_ptr, Int arg_count )
-            : args_ptr( args_ptr ), arg_count( arg_count )
+        SAllocManager( ValueRef* ptr, Int count )
+            : ptr( ptr ), count( count )
         {
-            for ( Int i = 0; i < arg_count; i++ )
-                new (args_ptr + i) ValueRef();
+            for ( Int i = 0; i < count; i++ )
+                new (ptr + i) ValueRef();
         }
 
         ~SAllocManager() noexcept
         {
-            for ( Int i = 0; i < arg_count; i++ )
-                args_ptr[i].~ValueRef();
+            for ( Int i = 0; i < count; i++ )
+                ptr[i].~ValueRef();
         }
 
         SAllocManager( SAllocManager const& ) = delete;
