@@ -5,60 +5,60 @@
 
 namespace dawn
 {
-struct StackHelper;
+struct PopHandler;
 
-struct ScopeObject
+enum struct FrameType
 {
-    enum struct ViewType
-    {
-        LOCAL = 0,
-        GLOBAL = 1,
-    };
+    LOCAL = 0,
+    GLOBAL = 1,
+};
 
-    using LocalType = Vector<Pair<Int, ValueRef>>;
-    using GlobalType = Vector<ValueRef>;
+struct Frame
+{
+    using LocalFrame = Vector<Pair<Int, ValueRef>>;
+    using GlobalFrame = Vector<ValueRef>;
 
-    ScopeObject( ViewType type = ViewType::LOCAL );
+    Frame( FrameType type = FrameType::LOCAL );
 
     ValueRef& set( Int id, ValueRef const& value );
     ValueRef* get( Int id );
 
-    void reset( RegisterRef<ScopeObject> const& parent );
+    void reset( RegisterRef<Frame> const& parent );
 
 private:
-    RegisterRef<ScopeObject> m_parent;
-    Variant<LocalType, GlobalType> m_objects;
+    RegisterRef<Frame> m_parent;
+    Variant<LocalFrame, GlobalFrame> m_frame;
 };
 
-struct ScopeStack
+struct Stack
 {
-    ScopeStack();
+    Stack();
 
-    [[nodiscard]] StackHelper push();
-    [[nodiscard]] StackHelper push( Function const& func );
+    [[nodiscard]] PopHandler push();
+    [[nodiscard]] PopHandler push( Function const& func );
     void pop();
 
-    ScopeObject& root();
-    ScopeObject& current();
+    Frame& root();
+    Frame& current();
 
-    RegisterRef<ScopeObject> const& peek() const;
+    RegisterRef<Frame> const& peek() const;
 
 private:
-    Vector<RegisterRef<ScopeObject>> m_scopes;
+    Vector<RegisterRef<Frame>> m_frames;
 };
 
-struct StackHelper
+struct PopHandler
 {
-    friend struct ScopeStack;
+    friend struct Stack;
 
-    ScopeStack& stack;
+    Stack& stack;
 
-    StackHelper( ScopeStack const& ) = delete;
-    void operator=( ScopeStack const& ) = delete;
+    PopHandler( PopHandler const& ) = delete;
+    void operator=( PopHandler const& ) = delete;
 
-    ~StackHelper() noexcept;
+    ~PopHandler() noexcept;
 
 private:
-    explicit StackHelper( ScopeStack& stack );
+    explicit PopHandler( Stack& stack );
 };
 }

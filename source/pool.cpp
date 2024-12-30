@@ -17,16 +17,16 @@ dawn::MemoryPools::~MemoryPools() noexcept
             regist.value.reset();
 
     }
-    for ( auto& chunk : scope_memory.m_chunks )
+    for ( auto& chunk : frame_memory.m_chunks )
     {
         for ( auto& regist : chunk.m_space )
             regist.value.reset( {} );
     }
 }
 
-dawn::MemoryPool<dawn::ScopeObject, 256>& dawn::scope_pool()
+dawn::MemoryPool<dawn::Frame, 256>& dawn::frame_pool()
 {
-    return pools.scope_memory;
+    return pools.frame_memory;
 }
 
 dawn::MemoryPool<dawn::Value, 1024>& dawn::value_pool()

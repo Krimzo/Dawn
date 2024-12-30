@@ -11,7 +11,7 @@ struct Node;
 using NodeRef = RegisterRef<Node>;
 
 struct ValueRef;
-struct ScopeObject;
+struct Frame;
 
 enum struct VariableKind
 {
@@ -37,7 +37,7 @@ struct Function
     using CppFunc = Func<ValueRef( ValueRef const*, Int )>;
 
     Int id = 0;
-    RegisterRef<ScopeObject> lambda_parent;
+    RegisterRef<Frame> lambda_parent;
     Vector<ValueRef> self_vals;
     Vector<Variable> args;
     Variant<Scope, CppFunc> body;

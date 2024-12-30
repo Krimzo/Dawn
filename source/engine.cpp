@@ -52,7 +52,7 @@ void dawn::Engine::load_struct( Struct const& entry )
 
 void dawn::Engine::load_variable( Variable const& entry )
 {
-    add_obj( entry.kind, entry.id, handle_expr( entry.expr.value() ) );
+    add_var( entry.kind, entry.id, handle_expr( entry.expr.value() ) );
 }
 
 void dawn::Engine::bind_func( Int id, Function::CppFunc cpp_func )
@@ -75,7 +75,7 @@ dawn::ValueRef dawn::Engine::call_func( Int id, ValueRef const* args, Int arg_co
     return handle_func( val->as<Function>(), args, arg_count );
 }
 
-void dawn::Engine::add_obj( VariableKind kind, Int id, ValueRef const& value )
+void dawn::Engine::add_var( VariableKind kind, Int id, ValueRef const& value )
 {
     if ( kind == VariableKind::LET )
     {
@@ -91,7 +91,7 @@ void dawn::Engine::add_obj( VariableKind kind, Int id, ValueRef const& value )
     }
 }
 
-dawn::ValueRef* dawn::Engine::get_obj( Int id )
+dawn::ValueRef* dawn::Engine::get_var( Int id )
 {
     return stack.current().get( id );
 }
@@ -108,10 +108,10 @@ dawn::ValueRef dawn::Engine::handle_func( Function const& func, ValueRef const* 
                 ENGINE_PANIC( "invalid argument count for function [", IDSystem::get( func.id ), "]" );
         }
 
-        auto stack_helper = stack.push( func );
+        auto pop_handler = stack.push( func );
 
         for ( Int i = 0; i < arg_count; i++ )
-            add_obj( func.args[i].kind, func.args[i].id, args[i] );
+            add_var( func.args[i].kind, func.args[i].id, args[i] );
 
         ValueRef retval;
         handle_scope( *std::get_if<Scope>( &func.body ), retval, nullptr, nullptr );
@@ -140,7 +140,7 @@ void dawn::Engine::handle_instr( Node const& node, ValueRef& retval, Bool* didbr
     {
     case NodeType::SCOPE:
     {
-        auto stack_helper = stack.push();
+        auto pop_handler = stack.push();
         handle_scope( node.as<Scope>(), retval, didbrk, didcon );
     }
     break;
@@ -246,12 +246,12 @@ dawn::ValueRef dawn::Engine::handle_ref_node( RefNod const& node )
 
 void dawn::Engine::handle_var_node( VariableNod const& node )
 {
-    add_obj( node.var.kind, node.var.id, handle_expr( node.var.expr.value() ) );
+    add_var( node.var.kind, node.var.id, handle_expr( node.var.expr.value() ) );
 }
 
 dawn::ValueRef dawn::Engine::handle_id_node( IdentifierNod const& node )
 {
-    auto* ptr = get_obj( node.id );
+    auto* ptr = get_var( node.id );
     if ( !ptr )
         ENGINE_PANIC( "object [", IDSystem::get( node.id ), "] doesn't exist" );
     return *ptr;
@@ -358,13 +358,13 @@ void dawn::Engine::handle_try_node( TryNod const& node, ValueRef& retval, Bool* 
 {
     try
     {
-        auto stack_helper = stack.push();
+        auto pop_handler = stack.push();
         handle_scope( node.try_scope, retval, didbrk, didcon );
     }
     catch ( ValueRef const& val )
     {
-        auto stack_helper = stack.push();
-        add_obj( VariableKind::REF, node.catch_id, val );
+        auto pop_handler = stack.push();
+        add_var( VariableKind::REF, node.catch_id, val );
         handle_scope( node.catch_scope, retval, didbrk, didcon );
     }
 }
@@ -376,7 +376,7 @@ void dawn::Engine::handle_if_node( IfNod const& node, ValueRef& retval, Bool* di
         if ( !handle_expr( part.expr ).to_bool( *this ) )
             continue;
 
-        auto stack_helper = stack.push();
+        auto pop_handler = stack.push();
         handle_scope( part.scope, retval, didbrk, didcon );
         break;
     }
@@ -393,7 +393,7 @@ void dawn::Engine::handle_switch_node( SwitchNod const& node, ValueRef& retval, 
             if ( !check_val.op_eq( *this, handle_expr( expr ) ).to_bool( *this ) )
                 continue;
 
-            auto stack_helper = stack.push();
+            auto pop_handler = stack.push();
             handle_scope( case_part.scope, retval, didbrk, didcon );
             return;
         }
@@ -401,7 +401,7 @@ void dawn::Engine::handle_switch_node( SwitchNod const& node, ValueRef& retval, 
 
     if ( node.def_scope )
     {
-        auto stack_helper = stack.push();
+        auto pop_handler = stack.push();
         handle_scope( *node.def_scope, retval, didbrk, didcon );
     }
 }
@@ -415,7 +415,7 @@ void dawn::Engine::handle_loop_node( LoopNod const& node, ValueRef& retval )
             break;
         didcon = false;
 
-        auto stack_helper = stack.push();
+        auto pop_handler = stack.push();
         handle_scope( node.scope, retval, &didbrk, &didcon );
     }
 }
@@ -432,7 +432,7 @@ void dawn::Engine::handle_while_node( WhileNod const& node, ValueRef& retval )
         if ( !handle_expr( node.expr.value() ).to_bool( *this ) )
             break;
 
-        auto stack_helper = stack.push();
+        auto pop_handler = stack.push();
         handle_scope( node.scope, retval, &didbrk, &didcon );
     }
 }
@@ -452,8 +452,8 @@ void dawn::Engine::handle_for_node( ForNod const& node, ValueRef& retval )
                 break;
             didcon = false;
 
-            auto stack_helper = stack.push();
-            add_obj( node.var.kind, node.var.id, ValueRef{ i } );
+            auto pop_handler = stack.push();
+            add_var( node.var.kind, node.var.id, ValueRef{ i } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -468,8 +468,8 @@ void dawn::Engine::handle_for_node( ForNod const& node, ValueRef& retval )
                 break;
             didcon = false;
 
-            auto stack_helper = stack.push();
-            add_obj( node.var.kind, node.var.id, ValueRef{ c } );
+            auto pop_handler = stack.push();
+            add_var( node.var.kind, node.var.id, ValueRef{ c } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -484,8 +484,8 @@ void dawn::Engine::handle_for_node( ForNod const& node, ValueRef& retval )
                 break;
             didcon = false;
 
-            auto stack_helper = stack.push();
-            add_obj( node.var.kind, node.var.id, value );
+            auto pop_handler = stack.push();
+            add_var( node.var.kind, node.var.id, value );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }

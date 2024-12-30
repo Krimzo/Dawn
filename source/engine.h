@@ -12,7 +12,7 @@ struct Engine
 {
     friend struct ValueRef;
 
-    ScopeStack stack;
+    Stack stack;
     OMap<Int, Enum> enums;
     OMap<Int, Struct> structs;
     OMap<Int, TypeMember> type_members[(Int) ValueType::_COUNT] = {};
@@ -28,8 +28,8 @@ struct Engine
     void bind_func( Int id, Function::CppFunc cpp_func );
     ValueRef call_func( Int id, ValueRef const* args, Int arg_count );
 
-    void add_obj( VariableKind kind, Int id, ValueRef const& value );
-    ValueRef* get_obj( Int id );
+    void add_var( VariableKind kind, Int id, ValueRef const& value );
+    ValueRef* get_var( Int id );
 
 private:
     void load_standard_functions();
