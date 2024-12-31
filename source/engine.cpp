@@ -114,12 +114,12 @@ dawn::ValueRef dawn::Engine::handle_func( Function const& func, ValueRef const* 
             add_var( func.args[i].kind, func.args[i].id, args[i] );
 
         ValueRef retval;
-        handle_scope( *std::get_if<Scope>( &func.body ), retval, nullptr, nullptr );
+        handle_scope( std::get<Scope>( func.body ), retval, nullptr, nullptr );
         return retval ? retval : ValueRef{ Value{} };
     }
     else
     {
-        return (*std::get_if<Function::CppFunc>( &func.body ))(args, arg_count);
+        return std::get<Function::CppFunc>( func.body )(args, arg_count);
     }
 }
 

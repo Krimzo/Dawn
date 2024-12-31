@@ -20,12 +20,12 @@ dawn::ValueRef& dawn::Frame::set( Int id, ValueRef const& value )
 {
     if ( m_frame.index() == 0 )
     {
-        auto& frame = *std::get_if<LocalFrame>( &m_frame );
+        auto& frame = std::get<LocalFrame>( m_frame );
         return frame.emplace_back( id, value ).second;
     }
     else
     {
-        auto& frame = *std::get_if<GlobalFrame>( &m_frame );
+        auto& frame = std::get<GlobalFrame>( m_frame );
         if ( (Int) frame.size() <= id )
             frame.resize( (id + 1) * 2 );
         return frame[id] = value;
@@ -36,7 +36,7 @@ dawn::ValueRef* dawn::Frame::get( Int id )
 {
     if ( m_frame.index() == 0 )
     {
-        auto& frame = *std::get_if<LocalFrame>( &m_frame );
+        auto& frame = std::get<LocalFrame>( m_frame );
         for ( auto& [obj_id, obj] : frame )
         {
             if ( obj_id == id )
@@ -45,7 +45,7 @@ dawn::ValueRef* dawn::Frame::get( Int id )
     }
     else
     {
-        auto& frame = *std::get_if<GlobalFrame>( &m_frame );
+        auto& frame = std::get<GlobalFrame>( m_frame );
         if ( (Int) frame.size() > id )
         {
             auto& obj = frame[id];
@@ -60,12 +60,12 @@ void dawn::Frame::reset( RegisterRef<Frame> const& parent )
 {
     if ( m_frame.index() == 0 )
     {
-        auto& frame = *std::get_if<LocalFrame>( &m_frame );
+        auto& frame = std::get<LocalFrame>( m_frame );
         frame.clear();
     }
     else
     {
-        auto& frame = *std::get_if<GlobalFrame>( &m_frame );
+        auto& frame = std::get<GlobalFrame>( m_frame );
         frame.clear();
     }
     m_parent = parent;

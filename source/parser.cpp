@@ -255,7 +255,7 @@ void dawn::Parser::parse_function( Vector<Token>::const_iterator& it, Vector<Tok
     }
     ++it;
 
-    parse_scope( it, end, *std::get_if<Scope>( &function.body ) );
+    parse_scope( it, end, std::get<Scope>( function.body ) );
 }
 
 void dawn::Parser::parse_operator( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& operat )
@@ -329,7 +329,7 @@ void dawn::Parser::parse_operator( Vector<Token>::const_iterator& it, Vector<Tok
         PARSER_PANIC( *it, "operator can have at most 1 argument" );
     }
 
-    parse_scope( it, end, *std::get_if<Scope>( &operat.body ) );
+    parse_scope( it, end, std::get<Scope>( operat.body ) );
 }
 
 void dawn::Parser::parse_variable( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Variable& variable )
@@ -638,7 +638,7 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Vector<Token>&
         right.push_back( right_scope );
 
         auto right_it = right.begin();
-        parse_scope( right_it, right.end(), *std::get_if<Scope>( &func.body ) );
+        parse_scope( right_it, right.end(), std::get<Scope>( func.body ) );
     }
     else
         PARSER_PANIC( left.front(), "unknown scope expression" );
