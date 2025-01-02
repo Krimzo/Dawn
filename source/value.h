@@ -25,7 +25,7 @@ struct StructVal
     StructVal& operator=( StructVal const& other );
 
     ValueRef* get_member( Int id );
-    Function* get_method( Int id, Bool is_unary );
+    Function* get_method( Int id, Bool unary );
 };
 
 struct ArrayVal

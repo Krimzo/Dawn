@@ -239,7 +239,7 @@ dawn::ValueRef dawn::Engine::handle_ref_node( RefNod const& node )
     {
         auto& func = node.value_ref.as<Function>();
         if ( func.is_lambda() )
-            func.lambda_parent = stack.peek();
+            func.parent = stack.peek();
     }
     return node.value_ref;
 }
@@ -293,7 +293,7 @@ dawn::ValueRef dawn::Engine::handle_call_node( CallNod const& node )
 
     if ( func.is_method() )
     {
-        args_ptr[0] = func.self_vals[0];
+        args_ptr[0] = func.self[0];
         for ( Int i = 0; i < (Int) node.args.size(); i++ )
             args_ptr[1 + i] = handle_expr( node.args[i] );
     }
@@ -710,8 +710,11 @@ dawn::ValueRef dawn::Engine::handle_ac_struct_node( ValueRef const& left, Int ri
     if ( result.type() == ValueType::FUNCTION )
     {
         auto& func = result.as<Function>();
-        func.self_vals.resize( 1 );
-        func.self_vals[0] = left;
+        if ( !func.is_lambda() )
+        {
+            func.self.resize( 1 );
+            func.self[0] = left;
+        }
     }
 
     return result;
@@ -727,8 +730,11 @@ dawn::ValueRef dawn::Engine::handle_ac_type_node( ValueRef const& left, Int righ
     if ( result.type() == ValueType::FUNCTION )
     {
         auto& func = result.as<Function>();
-        func.self_vals.resize( 1 );
-        func.self_vals[0] = left;
+        if ( !func.is_lambda() )
+        {
+            func.self.resize( 1 );
+            func.self[0] = left;
+        }
     }
 
     return result;

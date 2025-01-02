@@ -9,10 +9,5 @@ dawn::Bool dawn::Function::is_lambda() const
 
 dawn::Bool dawn::Function::is_method() const
 {
-    return !self_vals.empty();
-}
-
-dawn::Bool dawn::Function::is_unary_op() const
-{
-    return args.size() == 1;
+    return !self.empty();
 }

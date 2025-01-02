@@ -36,15 +36,21 @@ struct Function
 {
     using CppFunc = Func<ValueRef( ValueRef const*, Int )>;
 
+    struct Arg
+    {
+        VariableKind kind;
+        Int id = 0;
+    };
+
     Int id = 0;
-    RegisterRef<Frame> lambda_parent;
-    Vector<ValueRef> self_vals;
-    Vector<Variable> args;
+    Vector<Arg> args;
     Variant<Scope, CppFunc> body;
+
+    RegisterRef<Frame> parent;
+    Vector<ValueRef> self;
 
     Bool is_lambda() const;
     Bool is_method() const;
-    Bool is_unary_op() const;
 };
 
 struct Enum
