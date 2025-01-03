@@ -33,7 +33,7 @@ struct Storage
     }
 
     template<typename T, typename... Args>
-        requires (sizeof( T ) <= S and alignof(T) <= A)
+        requires ((Int) H::template type<T>() > 0 and sizeof( T ) <= S and alignof(T) <= A)
     T& emplace( Args&&... args )
     {
         reset();
@@ -47,12 +47,14 @@ struct Storage
     }
 
     template<typename T>
+        requires ((Int) H::template type<T>() > 0)
     T& as() noexcept
     {
         return *reinterpret_cast<T*>(m_buffer);
     }
 
     template<typename T>
+        requires ((Int) H::template type<T>() > 0)
     T const& as() const noexcept
     {
         return *reinterpret_cast<T const*>(m_buffer);

@@ -109,7 +109,7 @@ struct EnumNod
 struct StructNod
 {
     Int type_id = 0;
-    Vector<Pair<Int, Node>> args;
+    OMap<Int, Node> args;
 };
 
 struct ArrayNod

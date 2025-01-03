@@ -2,6 +2,7 @@
 
 #include "err.h"
 #include "type.h"
+#include "salloc.h"
 
 
 namespace dawn
@@ -255,6 +256,7 @@ struct ValueRef
     operator bool() const noexcept;
 
     template<typename T>
+        requires ((Int) ValueHandler::template type<T>() > 0)
     T& as() const
     {
         return m_regref.value().as<T>();

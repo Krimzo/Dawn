@@ -124,12 +124,10 @@ void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token
         if ( it->type == TokenType::NAME )
         {
             Int name_id = IDSystem::get( it->value );
-
-            auto find_it = std::find_if( struc.fields.begin(), struc.fields.end(), [&]( auto const& field ) { return field.id == name_id; } );
-            if ( find_it != struc.fields.end() )
+            if ( struc.fields.contains( name_id ) )
                 PARSER_PANIC( *it, "field [", it->value, "] already defined" );
 
-            auto& field = struc.fields.emplace_back();
+            auto& field = struc.fields[name_id];
             field.id = name_id;
             ++it;
 
@@ -144,21 +142,25 @@ void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token
         }
         else if ( it->value == kw_func )
         {
-            auto& method = struc.methods.emplace_back();
+            Function method;
             parse_function( it, end, method );
 
             auto& self_var = *method.args.emplace( method.args.begin() );
             self_var.kind = VariableKind::REF;
             self_var.id = IDSystem::get( (String) kw_self );
+
+            struc.methods[method.id] = method;
         }
         else if ( it->value == kw_oper )
         {
-            auto& op = struc.methods.emplace_back();
+            Function op;
             parse_operator( it, end, op );
 
             auto& self_var = *op.args.emplace( op.args.begin() );
             self_var.kind = VariableKind::REF;
             self_var.id = IDSystem::get( (String) kw_self );
+
+            struc.methods[op.id] = op;
         }
         else
             PARSER_PANIC( *it, "expected field name or function" );
@@ -545,7 +547,7 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Vector<Token>&
 
     if ( left.size() == 1 && left.front().type == TokenType::TYPE )
     {
-        Vector<Pair<Int, Node>> args;
+        OMap<Int, Node> args;
         Opt<Int> key;
         for ( auto it = right.begin(); it != right.end(); )
         {
@@ -553,7 +555,7 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Vector<Token>&
                 PARSER_PANIC( *it, "expected field init name" );
 
             Int name_id = IDSystem::get( it->value );
-            if ( std::find_if( args.begin(), args.end(), [&]( auto const& entry ) { return entry.first == name_id; } ) != args.end() )
+            if ( args.contains( name_id ) )
                 PARSER_PANIC( *it, "argument [", it->value, "] already passed" );
             ++it;
 
@@ -567,8 +569,8 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Vector<Token>&
                 PARSER_PANIC( *it, "expected assign operator" );
             ++it;
 
-            auto& arg = args.emplace_back( name_id, Node{} );
-            parse_expression( ExtractType::SPLITTER, it, right.end(), arg.second );
+            auto& arg = args[name_id];
+            parse_expression( ExtractType::SPLITTER, it, right.end(), arg );
         }
 
         if ( key )

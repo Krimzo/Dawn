@@ -90,7 +90,7 @@ dawn::PopHandler dawn::Stack::push( Function const& func )
 {
     m_frames.emplace_back( frame_pool().new_register() )
         .value()
-        .reset( func.is_lambda() ? func.parent : m_frames.front() );
+        .reset( func.is_lambda() ? func.frame : m_frames.front() );
     return PopHandler{ *this };
 }
 

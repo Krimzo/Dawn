@@ -239,7 +239,7 @@ dawn::ValueRef dawn::Engine::handle_ref_node( RefNod const& node )
     {
         auto& func = node.value_ref.as<Function>();
         if ( func.is_lambda() )
-            func.parent = stack.peek();
+            func.frame = stack.peek();
     }
     return node.value_ref;
 }
@@ -265,35 +265,13 @@ dawn::ValueRef dawn::Engine::handle_call_node( CallNod const& node )
 
     auto& func = left_val.as<Function>();
     Int arg_count = func.is_method() ? (1 + node.args.size()) : node.args.size();
-    ValueRef* args_ptr = (ValueRef*) _alloca( arg_count * sizeof( ValueRef ) );
 
-    struct SAllocManager
-    {
-        ValueRef* ptr;
-        Int count;
-
-        SAllocManager( ValueRef* ptr, Int count )
-            : ptr( ptr ), count( count )
-        {
-            for ( Int i = 0; i < count; i++ )
-                new (ptr + i) ValueRef();
-        }
-
-        ~SAllocManager() noexcept
-        {
-            for ( Int i = 0; i < count; i++ )
-                ptr[i].~ValueRef();
-        }
-
-        SAllocManager( SAllocManager const& ) = delete;
-        void operator=( SAllocManager const& ) = delete;
-    };
-
+    ValueRef* args_ptr = SALLOC( ValueRef, arg_count );
     SAllocManager alloc_manager{ args_ptr, arg_count };
 
     if ( func.is_method() )
     {
-        args_ptr[0] = func.self[0];
+        args_ptr[0] = *func.self;
         for ( Int i = 0; i < (Int) node.args.size(); i++ )
             args_ptr[1 + i] = handle_expr( node.args[i] );
     }
@@ -516,29 +494,26 @@ dawn::ValueRef dawn::Engine::handle_struct_node( StructNod const& node )
         ENGINE_PANIC( "struct [", IDSystem::get( node.type_id ), "] doesn't exist" );
 
     ValueRef value{ StructVal{} };
-    auto& result = value.as<StructVal>();
-    result.parent = &struct_it->second;
 
-    for ( auto& field : struct_it->second.fields )
+    auto& struc_val = value.as<StructVal>();
+    struc_val.parent = &struct_it->second;
+
+    for ( auto& [id, field] : struct_it->second.fields )
     {
-        auto arg_it = std::find_if( node.args.begin(), node.args.end(), [&]( auto& arg ) { return arg.first == field.id; } );
-        if ( arg_it != node.args.end() )
+        if ( node.args.contains( id ) )
             continue;
-
-        result.members[field.id] = ValueRef{ handle_expr( field.expr.value() ).value() };
+        struc_val.members[id] = ValueRef{ handle_expr( field.expr.value() ).value() };
     }
 
     for ( auto& [id, arg] : node.args )
     {
-        auto field_it = std::find_if( struct_it->second.fields.begin(), struct_it->second.fields.end(), [&]( auto& field ) { return field.id == id; } );
-        if ( field_it == struct_it->second.fields.end() )
+        if ( !struct_it->second.fields.contains( id ) )
             ENGINE_PANIC( "struct [", IDSystem::get( node.type_id ), "] doesn't contain member [", IDSystem::get( id ), "]" );
-
-        result.members[id] = ValueRef{ handle_expr( arg ).value() };
+        struc_val.members[id] = ValueRef{ handle_expr( arg ).value() };
     }
 
-    for ( auto& method : struct_it->second.methods )
-        result.members[method.id] = ValueRef{ method };
+    for ( auto& [id, method] : struct_it->second.methods )
+        struc_val.members[id] = ValueRef{ method };
 
     return value;
 }
@@ -711,10 +686,7 @@ dawn::ValueRef dawn::Engine::handle_ac_struct_node( ValueRef const& left, Int ri
     {
         auto& func = result.as<Function>();
         if ( !func.is_lambda() )
-        {
-            func.self.resize( 1 );
-            func.self[0] = left;
-        }
+            *func.self = left;
     }
 
     return result;
@@ -731,10 +703,7 @@ dawn::ValueRef dawn::Engine::handle_ac_type_node( ValueRef const& left, Int righ
     {
         auto& func = result.as<Function>();
         if ( !func.is_lambda() )
-        {
-            func.self.resize( 1 );
-            func.self[0] = left;
-        }
+            *func.self = left;
     }
 
     return result;

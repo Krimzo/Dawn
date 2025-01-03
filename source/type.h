@@ -3,6 +3,7 @@
 #include "id.h"
 #include "storage.h"
 #include "memory.h"
+#include "holder.h"
 
 
 namespace dawn
@@ -46,8 +47,8 @@ struct Function
     Vector<Arg> args;
     Variant<Scope, CppFunc> body;
 
-    RegisterRef<Frame> parent;
-    Vector<ValueRef> self;
+    RegisterRef<Frame> frame;
+    Holder<ValueRef> self;
 
     Bool is_lambda() const;
     Bool is_method() const;
@@ -63,7 +64,7 @@ struct Enum
 struct Struct
 {
     Int id = 0;
-    Vector<Variable> fields;
-    Vector<Function> methods;
+    OMap<Int, Variable> fields;
+    OMap<Int, Function> methods;
 };
 }
