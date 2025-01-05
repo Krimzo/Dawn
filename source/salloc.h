@@ -5,7 +5,7 @@
 
 namespace dawn
 {
-#define SALLOC(T, N) (T*) _alloca( (N) * sizeof( T ) )
+#define SALLOC(T, N) static_cast<T*>(_alloca((N) * sizeof(T)))
 
 template<typename T>
 struct SAllocManager
