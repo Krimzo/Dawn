@@ -35,7 +35,7 @@ struct Stack
     Stack();
 
     [[nodiscard]] PopHandler push();
-    [[nodiscard]] PopHandler push( Function const& func );
+    [[nodiscard]] PopHandler push_from( RegisterRef<Frame> const& frame );
     void pop();
 
     Frame& root();

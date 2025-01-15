@@ -86,11 +86,11 @@ dawn::PopHandler dawn::Stack::push()
     return PopHandler{ *this };
 }
 
-dawn::PopHandler dawn::Stack::push( Function const& func )
+dawn::PopHandler dawn::Stack::push_from( RegisterRef<Frame> const& frame )
 {
     m_frames.emplace_back( frame_pool().new_register() )
         .value()
-        .reset( func.is_lambda() ? func.frame : m_frames.front() );
+        .reset( frame.valid() ? frame : m_frames.front() );
     return PopHandler{ *this };
 }
 

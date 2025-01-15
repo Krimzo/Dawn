@@ -108,7 +108,7 @@ dawn::ValueRef dawn::Engine::handle_func( Function const& func, ValueRef const* 
                 ENGINE_PANIC( "invalid argument count for function [", IDSystem::get( func.id ), "]" );
         }
 
-        auto pop_handler = stack.push( func );
+        auto pop_handler = stack.push_from( func.is_lambda() ? func.frame : RegisterRef<Frame>{} );
 
         for ( Int i = 0; i < arg_count; i++ )
             add_var( func.args[i].kind, func.args[i].id, args[i] );
@@ -492,27 +492,26 @@ dawn::ValueRef dawn::Engine::handle_struct_node( StructNod const& node )
     auto struct_it = structs.find( node.type_id );
     if ( struct_it == structs.end() )
         ENGINE_PANIC( "struct [", IDSystem::get( node.type_id ), "] doesn't exist" );
+    auto& struc = struct_it->second;
 
     ValueRef value{ StructVal{} };
 
     auto& struc_val = value.as<StructVal>();
-    struc_val.parent = &struct_it->second;
+    struc_val.parent = &struc;
 
-    for ( auto& [id, field] : struct_it->second.fields )
+    static const Int self_id = IDSystem::get( (String) kw_self );
+    auto pop_handler = stack.push_from( RegisterRef<Frame>{} );
+    stack.current().set( self_id, value );
+
+    for ( Int id : struc.field_order )
     {
-        if ( node.args.contains( id ) )
-            continue;
-        struc_val.members[id] = ValueRef{ handle_expr( field.expr.value() ).value() };
+        if ( auto node_arg_it = node.args.find( id ); node_arg_it != node.args.end() )
+            struc_val.members[id] = ValueRef{ handle_expr( node_arg_it->second ).value() };
+        else
+            struc_val.members[id] = ValueRef{ handle_expr( struc.fields[id].expr.value() ).value() };
     }
 
-    for ( auto& [id, arg] : node.args )
-    {
-        if ( !struct_it->second.fields.contains( id ) )
-            ENGINE_PANIC( "struct [", IDSystem::get( node.type_id ), "] doesn't contain member [", IDSystem::get( id ), "]" );
-        struc_val.members[id] = ValueRef{ handle_expr( arg ).value() };
-    }
-
-    for ( auto& [id, method] : struct_it->second.methods )
+    for ( auto& [id, method] : struc.methods )
         struc_val.members[id] = ValueRef{ method };
 
     return value;
@@ -528,11 +527,9 @@ dawn::ValueRef dawn::Engine::handle_array_node( ArrayNod const& node )
         if ( size < 0 )
             ENGINE_PANIC( "array size can't be negative" );
 
-        ValueRef value_val = handle_expr( node.SIZE_value_expr.value() );
-
-        result.data.resize( size );
-        for ( auto& val : result.data )
-            val = ValueRef{ value_val.value() };
+        result.data.reserve( size );
+        for ( Int i = 0; i < size; i++ )
+            result.data.push_back( handle_expr( node.SIZE_value_expr.value() ) );
     }
     else
     {

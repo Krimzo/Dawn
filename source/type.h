@@ -63,8 +63,15 @@ struct Enum
 
 struct Struct
 {
+    struct Field
+    {
+        Int id = 0;
+        NodeRef expr;
+    };
+
     Int id = 0;
-    OMap<Int, Variable> fields;
+    OMap<Int, Field> fields;
+    Vector<Int> field_order;
     OMap<Int, Function> methods;
 };
 }

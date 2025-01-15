@@ -129,6 +129,7 @@ void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token
 
             auto& field = struc.fields[name_id];
             field.id = name_id;
+            struc.field_order.push_back( field.id );
             ++it;
 
             field.expr = node_pool().new_register();
