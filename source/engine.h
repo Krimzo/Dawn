@@ -6,11 +6,11 @@
 
 namespace dawn
 {
-using TypeMember = Func<ValueRef( ValueRef const& )>;
+using TypeMember = Func<Value( Value const& )>;
 
 struct Engine
 {
-    friend struct ValueRef;
+    friend struct Value;
 
     Stack stack;
     OMap<Int, Enum> enums;
@@ -26,10 +26,10 @@ struct Engine
     void load_variable( Variable const& entry );
 
     void bind_func( Int id, Function::CppFunc cpp_func );
-    ValueRef call_func( Int id, ValueRef const* args, Int arg_count );
+    Value call_func( Int id, Value const* args, Int arg_count );
 
-    void add_var( VariableKind kind, Int id, ValueRef const& value );
-    ValueRef* get_var( Int id );
+    void add_var( VariableKind kind, Int id, Value const& value );
+    Value* get_var( Int id );
 
 private:
     void load_standard_functions();
@@ -44,35 +44,35 @@ private:
     void load_array_members();
     void load_range_members();
 
-    ValueRef handle_func( Function const& func, ValueRef const* args, Int arg_count );
-    void handle_scope( Scope const& scope, ValueRef& retval, Bool* didbrk, Bool* didcon );
-    void handle_instr( Node const& node, ValueRef& retval, Bool* didbrk, Bool* didcon );
-    ValueRef handle_expr( Node const& node );
+    Value handle_func( Function const& func, Value const* args, Int arg_count );
+    void handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
+    void handle_instr( Node const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
+    Value handle_expr( Node const& node );
 
-    ValueRef handle_ref_node( RefNod const& node );
+    Value handle_ref_node( RefNod const& node );
     void handle_var_node( VariableNod const& node );
-    ValueRef handle_id_node( IdentifierNod const& node );
-    ValueRef handle_call_node( CallNod const& node );
-    ValueRef handle_index_node( IndexNod const& node );
-    void handle_return_node( ReturnNod const& node, ValueRef& retval );
+    Value handle_id_node( IdentifierNod const& node );
+    Value handle_call_node( CallNod const& node );
+    Value handle_index_node( IndexNod const& node );
+    void handle_return_node( ReturnNod const& node, Opt<Value>& retval );
     void handle_break_node( BreakNod const& node, Bool* didbrk );
     void handle_continue_node( ContinueNod const& node, Bool* didcon );
     void handle_throw_node( ThrowNod const& node );
-    void handle_try_node( TryNod const& node, ValueRef& retval, Bool* didbrk, Bool* didcon );
-    void handle_if_node( IfNod const& node, ValueRef& retval, Bool* didbrk, Bool* didcon );
-    void handle_switch_node( SwitchNod const& node, ValueRef& retval, Bool* didbrk, Bool* didcon );
-    void handle_loop_node( LoopNod const& node, ValueRef& retval );
-    void handle_while_node( WhileNod const& node, ValueRef& retval );
-    void handle_for_node( ForNod const& node, ValueRef& retval );
-    ValueRef handle_enum_node( EnumNod const& node );
-    ValueRef handle_struct_node( StructNod const& node );
-    ValueRef handle_array_node( ArrayNod const& node );
-    ValueRef handle_un_node( UnaryNod const& node );
-    ValueRef handle_op_node( OperatorNod const& node );
-    ValueRef handle_ac_node( OperatorNod const& node );
-    ValueRef handle_as_node( AssignNod const& node );
+    void handle_try_node( TryNod const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
+    void handle_if_node( IfNod const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
+    void handle_switch_node( SwitchNod const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
+    void handle_loop_node( LoopNod const& node, Opt<Value>& retval );
+    void handle_while_node( WhileNod const& node, Opt<Value>& retval );
+    void handle_for_node( ForNod const& node, Opt<Value>& retval );
+    Value handle_enum_node( EnumNod const& node );
+    Value handle_struct_node( StructNod const& node );
+    Value handle_array_node( ArrayNod const& node );
+    Value handle_un_node( UnaryNod const& node );
+    Value handle_op_node( OperatorNod const& node );
+    Value handle_ac_node( OperatorNod const& node );
+    Value handle_as_node( AssignNod const& node );
 
-    ValueRef handle_ac_struct_node( ValueRef const& left, Int right );
-    ValueRef handle_ac_type_node( ValueRef const& left, Int right );
+    Value handle_ac_struct_node( Value const& left, Int right );
+    Value handle_ac_type_node( Value const& left, Int right );
 };
 }

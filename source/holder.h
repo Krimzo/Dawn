@@ -22,11 +22,6 @@ struct Holder
         return *this;
     }
 
-    constexpr operator Bool() const
-    {
-        return static_cast<Bool>(*ptr);
-    }
-
     T& operator*() const
     {
         return *ptr;

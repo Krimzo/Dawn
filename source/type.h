@@ -11,7 +11,7 @@ namespace dawn
 struct Node;
 using NodeRef = RegisterRef<Node>;
 
-struct ValueRef;
+struct Value;
 struct Frame;
 
 enum struct VariableKind
@@ -35,7 +35,7 @@ struct Scope
 
 struct Function
 {
-    using CppFunc = Func<ValueRef( ValueRef const*, Int )>;
+    using CppFunc = Func<Value( Value const*, Int )>;
 
     struct Arg
     {
@@ -48,7 +48,7 @@ struct Function
     Variant<Scope, CppFunc> body;
 
     RegisterRef<Frame> frame;
-    Holder<ValueRef> self;
+    Holder<Value> self;
 
     Bool is_lambda() const;
     Bool is_method() const;
@@ -58,7 +58,7 @@ struct Enum
 {
     Int id = 0;
     OMap<Int, Node> keys_expr;
-    OMap<Int, ValueRef> keys_value;
+    OMap<Int, Value> keys_value;
 };
 
 struct Struct

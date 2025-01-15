@@ -15,13 +15,13 @@ enum struct FrameType
 
 struct Frame
 {
-    using LocalFrame = Vector<Pair<Int, ValueRef>>;
-    using GlobalFrame = Vector<ValueRef>;
+    using LocalFrame = Vector<Pair<Int, Value>>;
+    using GlobalFrame = Vector<Opt<Value>>;
 
     Frame( FrameType type = FrameType::LOCAL );
 
-    ValueRef& set( Int id, ValueRef const& value );
-    ValueRef* get( Int id );
+    Value& set( Int id, Value const& value );
+    Value* get( Int id );
 
     void reset( RegisterRef<Frame> const& parent );
 

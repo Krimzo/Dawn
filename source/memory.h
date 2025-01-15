@@ -72,6 +72,18 @@ struct RegisterRef
         return m_regptr->value;
     }
 
+    template<typename C>
+    RegisterRef<C>& cast()
+    {
+        return reinterpret_cast<RegisterRef<C>&>(*this);
+    }
+
+    template<typename C>
+    RegisterRef<C> const& cast() const
+    {
+        return reinterpret_cast<RegisterRef<C> const&>(*this);
+    }
+
 private:
     Register<T>* m_regptr = nullptr;
 };

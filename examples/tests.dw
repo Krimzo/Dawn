@@ -132,7 +132,7 @@ func enum_test()
 struct SomeStruct
 {
 	name = "some name"
-	age
+	age = 0
 
 	func who()
 	{

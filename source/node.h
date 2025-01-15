@@ -7,7 +7,7 @@ namespace dawn
 {
 struct RefNod
 {
-    ValueRef value_ref;
+    Value value_ref;
 };
 
 struct VariableNod
@@ -542,5 +542,5 @@ Node make_int_node( Int value );
 Node make_float_node( Float value );
 Node make_char_node( Char value );
 Node make_string_node( StringRef const& value );
-Node make_ref_node( ValueRef const& value );
+Node make_ref_node( Value const& value );
 }

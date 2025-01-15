@@ -9,5 +9,5 @@ dawn::Bool dawn::Function::is_lambda() const
 
 dawn::Bool dawn::Function::is_method() const
 {
-    return static_cast<Bool>(self);
+    return self->type() != ValueType::NOTHING;
 }

@@ -593,7 +593,7 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Vector<Token>&
         left.pop_back();
 
         auto& nod = tree.emplace<RefNod>();
-        nod.value_ref = ValueRef{ Function{} };
+        nod.value_ref = Value{ Function{} };
         auto& func = nod.value_ref.as<Function>();
 
         Set<Int> args;
@@ -1229,7 +1229,7 @@ dawn::Node dawn::make_def_val( StringRef const& type )
         return make_string_node( {} );
 
     else if ( type == op_range )
-        return make_ref_node( ValueRef{ RangeVal{} } );
+        return make_ref_node( Value{ RangeVal{} } );
 
     else if ( is_custom_type( type ) )
     {

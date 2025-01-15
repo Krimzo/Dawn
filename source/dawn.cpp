@@ -64,24 +64,24 @@ void dawn::Dawn::bind_func( String const& name, Function::CppFunc cpp_func ) noe
 
 dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name ) noexcept
 {
-    std::initializer_list<ValueRef> args;
-    ValueRef retval;
+    std::initializer_list<Value> args;
+    Value retval;
     return call_func( name, args, retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, ValueRef& retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Value& retval ) noexcept
 {
-    std::initializer_list<ValueRef> args;
+    std::initializer_list<Value> args;
     return call_func( name, args, retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, std::initializer_list<ValueRef> const& args ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, std::initializer_list<Value> const& args ) noexcept
 {
-    ValueRef retval;
+    Value retval;
     return call_func( name, args, retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, std::initializer_list<ValueRef> const& args, ValueRef& retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, std::initializer_list<Value> const& args, Value& retval ) noexcept
 {
     try
     {
@@ -91,19 +91,19 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, std::initiali
     {
         return msg;
     }
-    catch ( ValueRef const& err )
+    catch ( Value const& err )
     {
         return dawn::format( "Uncaught error: ", err.to_string( engine ) );
     }
     return std::nullopt;
 }
 
-void dawn::Dawn::add_var( VariableKind kind, String const& name, ValueRef const& value ) noexcept
+void dawn::Dawn::add_var( VariableKind kind, String const& name, Value const& value ) noexcept
 {
     engine.add_var( kind, IDSystem::get( name ), value );
 }
 
-dawn::ValueRef* dawn::Dawn::get_var( String const& name ) noexcept
+dawn::Value* dawn::Dawn::get_var( String const& name ) noexcept
 {
     return engine.get_var( IDSystem::get( name ) );
 }

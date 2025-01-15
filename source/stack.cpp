@@ -16,7 +16,7 @@ dawn::Frame::Frame( FrameType type )
     }
 }
 
-dawn::ValueRef& dawn::Frame::set( Int id, ValueRef const& value )
+dawn::Value& dawn::Frame::set( Int id, Value const& value )
 {
     if ( m_frame.index() == 0 )
     {
@@ -28,11 +28,11 @@ dawn::ValueRef& dawn::Frame::set( Int id, ValueRef const& value )
         auto& frame = std::get<GlobalFrame>( m_frame );
         if ( (Int) frame.size() <= id )
             frame.resize( (id + 1) * 2 );
-        return frame[id] = value;
+        return frame[id].emplace( value );
     }
 }
 
-dawn::ValueRef* dawn::Frame::get( Int id )
+dawn::Value* dawn::Frame::get( Int id )
 {
     if ( m_frame.index() == 0 )
     {
@@ -49,8 +49,8 @@ dawn::ValueRef* dawn::Frame::get( Int id )
         if ( (Int) frame.size() > id )
         {
             auto& obj = frame[id];
-            if ( obj.valid() )
-                return &obj;
+            if ( obj )
+                return &*obj;
         }
     }
     return m_parent.valid() ? m_parent.value().get( id ) : nullptr;

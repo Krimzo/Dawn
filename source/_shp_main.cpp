@@ -20,8 +20,8 @@ int dawn::_shp_main( int argc, char** argv )
     for ( int i = 2; i < argc; i++ )
         arg.data.emplace_back( String{ argv[i] } );
 
-    ValueRef retval{ 0ll };
-    if ( auto error = dawn.call_func( "main", { ValueRef{ arg } }, retval ) )
+    Value retval{ 0ll };
+    if ( auto error = dawn.call_func( "main", { Value{ arg } }, retval ) )
     {
         print( error.value() );
         return -3;
