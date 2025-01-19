@@ -217,6 +217,9 @@ dawn::Value dawn::Value::clone( ValueKind kind ) const
 {
     switch ( m_type )
     {
+    case ValueType::NOTHING:
+        return Value{};
+
     case ValueType::BOOL:
         return Value{ as<Bool>(), kind };
 
@@ -248,7 +251,7 @@ dawn::Value dawn::Value::clone( ValueKind kind ) const
         return Value{ as<RangeVal>(), kind };
 
     default:
-        return {};
+        PANIC( "Can't clone [", Int( kind ), "]" );
     }
 }
 

@@ -61,14 +61,10 @@ void dawn::Engine::load_standard_functions()
         }
 
         case ValueType::ENUM:
-        {
             return Value{ args[0].as<EnumVal>().parent->id };
-        }
 
         case ValueType::STRUCT:
-        {
             return Value{ args[0].as<StructVal>().parent->id };
-        }
 
         case ValueType::ARRAY:
         {
@@ -95,59 +91,37 @@ void dawn::Engine::load_standard_functions()
         switch ( args[0].type() )
         {
         case ValueType::NOTHING:
-        {
             return Value{ tp_nothing };
-        }
 
         case ValueType::BOOL:
-        {
             return Value{ tp_bool };
-        }
 
         case ValueType::INT:
-        {
             return Value{ tp_int };
-        }
 
         case ValueType::FLOAT:
-        {
             return Value{ tp_float };
-        }
 
         case ValueType::CHAR:
-        {
             return Value{ tp_char };
-        }
 
         case ValueType::STRING:
-        {
             return Value{ tp_string };
-        }
 
         case ValueType::FUNCTION:
-        {
             return Value{ tp_function };
-        }
 
         case ValueType::ENUM:
-        {
             return Value{ IDSystem::get( args[0].as<EnumVal>().parent->id ) };
-        }
 
         case ValueType::STRUCT:
-        {
             return Value{ IDSystem::get( args[0].as<StructVal>().parent->id ) };
-        }
 
         case ValueType::ARRAY:
-        {
             return Value{ tp_array };
-        }
 
         case ValueType::RANGE:
-        {
             return Value{ tp_range };
-        }
 
         default:
             PANIC( "unknown value type: ", (Int) args[0].type() );
@@ -332,7 +306,12 @@ void dawn::Engine::load_string_members()
 
     string_members[IDSystem::get( "push" )] = [this]( Value const& self_val ) -> Value
     {
+        static const Int id = IDSystem::get( "push" );
+
         Function func;
+        func.id = id;
+        *func.self = self_val;
+
         func.body = [this]( Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count != 2 )
@@ -379,7 +358,12 @@ void dawn::Engine::load_array_members()
 
     array_members[IDSystem::get( "push" )] = [this]( Value const& self_val ) -> Value
     {
+        static const Int id = IDSystem::get( "push" );
+
         Function func;
+        func.id = id;
+        *func.self = self_val;
+
         func.body = [this]( Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count != 2 )
