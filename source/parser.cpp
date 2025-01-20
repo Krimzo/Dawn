@@ -670,7 +670,7 @@ void dawn::Parser::expression_complex_array( Vector<Token>& left, Vector<Token>&
     {
         auto& node = tree.emplace<ArrayNod>();
         node.SIZE_value_expr = node_pool().new_register();
-        node.SIZE_value_expr.value() = make_def_val( left.front().value );
+        node.SIZE_value_expr.value() = make_default_val( left.front().value );
 
         auto right_it = right.begin();
         node.SIZE_size_expr = node_pool().new_register();
@@ -1211,7 +1211,7 @@ void dawn::create_assign_node( Token const& token, Node& node )
         PARSER_PANIC( token, "unknown assign operator" );
 }
 
-dawn::Node dawn::make_def_val( StringRef const& type )
+dawn::Node dawn::make_default_val( StringRef const& type )
 {
     if ( type == tp_bool )
         return make_bool_node( {} );
@@ -1227,9 +1227,6 @@ dawn::Node dawn::make_def_val( StringRef const& type )
 
     else if ( type == tp_string )
         return make_string_node( {} );
-
-    else if ( type == op_range )
-        return make_ref_node( Value{ RangeVal{} } );
 
     else if ( is_custom_type( type ) )
     {
