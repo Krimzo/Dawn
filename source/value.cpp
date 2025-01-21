@@ -158,6 +158,9 @@ dawn::ValueType dawn::Value::type() const
 
 void dawn::Value::assign( Value const& other )
 {
+    if ( m_kind == ValueKind::LET )
+        PANIC( "can't assign to a let value" );
+
     if ( m_type != other.m_type )
         PANIC( "can't assign [", other.m_type, "] to [", m_type, "]" );
 
