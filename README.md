@@ -7,6 +7,12 @@ func main(ref args) {
 }
 ```
 
+# Variables
+```dawn
+var b = 9  // variable
+ref p = b  // reference
+```
+
 # Primitives
 ```dawn
 var b = false  // bool (1 byte)
@@ -50,19 +56,6 @@ struct Person {
 }
 var person = Person{ age=23, name="Krim" }
 person::who()
-```
-
-# Variables
-```dawn
-var b = 9  // variable
-ref p = b  // reference
-```
-
-# Functions
-```dawn
-func some_fun(var arg0, ref arg2) {
-}
-some_fun(5, false)
 ```
 
 # Branching
@@ -109,7 +102,11 @@ while i < 5 {
     i += 1
 }
 
-// for can loop ranges [ start_incl >> end_excl ], strings [ "some_string" ] or arrays [ [ elem1, elem2, ... ] ]
+/* for can loop:
+    ranges ( start_incl >> end_excl )
+    strings ( "some_string" )
+    arrays ( [elem1, elem2] )
+    */
 for i : 0 >> 5 {
     print(i)
 }
@@ -119,6 +116,22 @@ for c : "stuff" {
 for val : [1, 4.2, ["other", " array"]] {
     print(val)
 }
+```
+
+# Functions
+```dawn
+func some_fun(var arg0, ref arg2) {
+}
+some_fun(5, false)
+```
+
+# Lambdas
+```dawn
+var sub = `ref a, ref b` {
+    return a - b
+}
+print(sub(5, 3))
+``{ print("lambdas are cool") }()
 ```
 
 # Errors
@@ -131,15 +144,6 @@ catch err {
     err += 7
 }
 print(a)
-```
-
-# Lambdas
-```dawn
-var sub = `ref a, ref b` {
-    return a - b
-}
-print(sub(5, 3))
-``{ print("lambdas are cool") }()
 ```
 
 # Misc
