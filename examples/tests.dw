@@ -20,7 +20,7 @@ func assert(ref check, ref msg)
 
 func var_test()
 {
-	let a = 2
+	var a = 2
 	var b = (
 		a + 1 * 2
 	)
@@ -33,7 +33,7 @@ func var_test()
 
 func branch_test()
 {
-	let a = -2
+	var a = -2
 	if a < 0 {
 		print(a, " is negative")
 	}
@@ -82,13 +82,13 @@ func loop_test()
 		counter += 1
 	}
 
-	for ref i: 0 >> 4 {
+	for i : 0 >> 4 {
 		print(i)
 	}
-	for ref i: "nice" {
+	for i : "nice" {
 		print(i)
 	}
-	for ref i: [1, 2, 3] {
+	for i : [1, 2, 3] {
 		print(i)
 	}
 }
@@ -107,8 +107,8 @@ func throw_test()
 
 func lambda_test()
 {
-	let c = 12
-	let sum = `ref a, ref b` {
+	var c = 12
+	var sum = `ref a, ref b` {
 		return a + b + c
 	}
 	assert(sum(4, 3) == 19, "lambda is bad")
@@ -153,7 +153,7 @@ struct SomeStruct
 
 func struct_test()
 {
-	let some_val1 = SomeStruct{ age = 4 }
+	var some_val1 = SomeStruct{ age = 4 }
 	var some_val2 = SomeStruct{ name =
 		"really "
 		+
@@ -170,10 +170,10 @@ func array_test()
 	var data = []
 	data += [ int[2] + float[2 + 1] ]
 	data += [SomeStruct[2]]
-	
+
 	data[data::count - 1][1]::age = 17
 	print(data)
 
-	let str_val = to_string( data[data::count - 1][1] )
+	var str_val = to_string( data[data::count - 1][1] )
 	print( str_val )
 }

@@ -16,8 +16,7 @@ struct Frame;
 
 enum struct VariableKind
 {
-    LET = 0,
-    VAR,
+    VAR = 0,
     REF,
 };
 

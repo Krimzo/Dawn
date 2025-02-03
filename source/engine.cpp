@@ -77,18 +77,10 @@ dawn::Value dawn::Engine::call_func( Int id, Value const* args, Int arg_count )
 
 void dawn::Engine::add_var( VariableKind kind, Int id, Value const& value )
 {
-    if ( kind == VariableKind::LET )
-    {
-        stack.current().set( id, value.clone( ValueKind::LET ) );
-    }
-    else if ( kind == VariableKind::VAR )
-    {
-        stack.current().set( id, value.clone( ValueKind::VAR ) );
-    }
+    if ( kind == VariableKind::VAR )
+        stack.current().set( id, value.clone() );
     else
-    {
         stack.current().set( id, value );
-    }
 }
 
 dawn::Value* dawn::Engine::get_var( Int id )

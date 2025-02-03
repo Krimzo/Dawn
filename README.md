@@ -9,16 +9,16 @@ func main(ref args) {
 
 # Primitives
 ```dawn
-let b = false  // bool (1 byte)
-let i = -10    // integer (8 bytes)
-let f = 6.0    // float (8 bytes)
-let c = 'd'    // char (1 byte)
-let s = "nice" // string (32 bytes)
+var b = false  // bool (1 byte)
+var i = -10    // integer (8 bytes)
+var f = 6.0    // float (8 bytes)
+var c = 'd'    // char (1 byte)
+var s = "nice" // string (32 bytes)
 ```
 
 # Arrays
 ```dawn
-let a0 = int[10]            // array of 10 int elements
+var a0 = int[10]            // array of 10 int elements
 var a1 = [4, "cool", false] // array of 3 elements
 a1[1] += " stuff"           // access of the second element
 ```
@@ -30,8 +30,8 @@ enum Animal {
     cat = -6 // enums can store values
     mouse    // but don't have to
 }
-let animal = Animal{cat}
-let value = animal::value
+var animal = Animal{cat}
+var value = animal::value
 ```
 
 # Structs
@@ -48,13 +48,12 @@ struct Person {
         return Person{ name = self::name, age = self::age + age }
     }
 }
-let person = Person{ age=23, name="Krim" }
+var person = Person{ age=23, name="Krim" }
 person::who()
 ```
 
 # Variables
 ```dawn
-let a = 17 // constant
 var b = 9  // variable
 ref p = b  // reference
 ```
@@ -68,7 +67,7 @@ some_fun(5, false)
 
 # Branching
 ```dawn
-let value = 5
+var value = 5
 
 if value > 0 {
     print("it's positive")
@@ -110,12 +109,19 @@ while i < 5 {
     i += 1
 }
 
-for ref i: 0 >> 5 {
+// for can loop ranges [ start_incl >> end_excl ], strings [ "some_string" ] or arrays [ [ elem1, elem2, ... ] ]
+for i : 0 >> 5 {
     print(i)
+}
+for c : "stuff" {
+    print(c)
+}
+for val : [1, 4.2, ["other", " array"]] {
+    print(val)
 }
 ```
 
-# Throwing
+# Errors
 ```dawn
 var a = 5
 try {
@@ -129,7 +135,7 @@ print(a)
 
 # Lambdas
 ```dawn
-let sub = `ref a, ref b` {
+var sub = `ref a, ref b` {
     return a - b
 }
 print(sub(5, 3))
@@ -139,5 +145,5 @@ print(sub(5, 3))
 # Misc
 ```dawn
 import "path..."    // importing modules
-let i = to_int(...) // casting primitive types
+var i = to_int(...) // casting primitive types
 ```

@@ -61,27 +61,20 @@ enum struct ValueType
     _COUNT,
 };
 
-enum struct ValueKind
-{
-    LET = 0,
-    VAR,
-};
-
 struct Value
 {
     Value() = default;
-    explicit Value( Bool value, ValueKind kind = ValueKind::LET );
-    explicit Value( Int value, ValueKind kind = ValueKind::LET );
-    explicit Value( Float value, ValueKind kind = ValueKind::LET );
-    explicit Value( Char value, ValueKind kind = ValueKind::LET );
-    explicit Value( StringRef const& value, ValueKind kind = ValueKind::LET );
-    explicit Value( Function const& value, ValueKind kind = ValueKind::LET );
-    explicit Value( EnumVal const& value, ValueKind kind = ValueKind::LET );
-    explicit Value( StructVal const& value, ValueKind kind = ValueKind::LET );
-    explicit Value( ArrayVal const& value, ValueKind kind = ValueKind::LET );
-    explicit Value( RangeVal const& value, ValueKind kind = ValueKind::LET );
+    explicit Value( Bool value );
+    explicit Value( Int value );
+    explicit Value( Float value );
+    explicit Value( Char value );
+    explicit Value( StringRef const& value );
+    explicit Value( Function const& value );
+    explicit Value( EnumVal const& value );
+    explicit Value( StructVal const& value );
+    explicit Value( ArrayVal const& value );
+    explicit Value( RangeVal const& value );
 
-    ValueKind kind() const;
     ValueType type() const;
 
     template<typename T>
@@ -91,9 +84,7 @@ struct Value
     }
 
     void assign( Value const& other );
-
     Value clone() const;
-    Value clone( ValueKind kind ) const;
 
     Value un_plus( Engine& engine ) const;
     Value un_minus( Engine& engine ) const;
@@ -128,10 +119,7 @@ private:
     struct Void {};
 
     RegisterRef<Void> m_regref;
-    ValueKind m_kind = ValueKind::LET;
     ValueType m_type = ValueType::NOTHING;
-
-    void reapply_kind();
 };
 
 std::ostream& operator<<( std::ostream& stream, ValueType type );

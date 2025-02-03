@@ -84,71 +84,64 @@ dawn::ArrayVal& dawn::ArrayVal::operator=( ArrayVal const& other )
     return *this;
 }
 
-dawn::Value::Value( Bool value, ValueKind kind )
-    : m_regref( bool_pool().new_register().cast<Void>() ), m_kind( kind ), m_type( ValueType::BOOL )
+dawn::Value::Value( Bool value )
+    : m_regref( bool_pool().new_register().cast<Void>() ), m_type( ValueType::BOOL )
 {
     m_regref.cast<Bool>().value() = value;
 }
 
-dawn::Value::Value( Int value, ValueKind kind )
-    : m_regref( int_pool().new_register().cast<Void>() ), m_kind( kind ), m_type( ValueType::INT )
+dawn::Value::Value( Int value )
+    : m_regref( int_pool().new_register().cast<Void>() ), m_type( ValueType::INT )
 {
     m_regref.cast<Int>().value() = value;
 }
 
-dawn::Value::Value( Float value, ValueKind kind )
-    : m_regref( float_pool().new_register().cast<Void>() ), m_kind( kind ), m_type( ValueType::FLOAT )
+dawn::Value::Value( Float value )
+    : m_regref( float_pool().new_register().cast<Void>() ), m_type( ValueType::FLOAT )
 {
     m_regref.cast<Float>().value() = value;
 }
 
-dawn::Value::Value( Char value, ValueKind kind )
-    : m_regref( char_pool().new_register().cast<Void>() ), m_kind( kind ), m_type( ValueType::CHAR )
+dawn::Value::Value( Char value )
+    : m_regref( char_pool().new_register().cast<Void>() ), m_type( ValueType::CHAR )
 {
     m_regref.cast<Char>().value() = value;
 }
 
-dawn::Value::Value( StringRef const& value, ValueKind kind )
-    : m_regref( string_pool().new_register().cast<Void>() ), m_kind( kind ), m_type( ValueType::STRING )
+dawn::Value::Value( StringRef const& value )
+    : m_regref( string_pool().new_register().cast<Void>() ), m_type( ValueType::STRING )
 {
     m_regref.cast<String>().value() = value;
 }
 
-dawn::Value::Value( Function const& value, ValueKind kind )
-    : m_regref( function_pool().new_register().cast<Void>() ), m_kind( kind ), m_type( ValueType::FUNCTION )
+dawn::Value::Value( Function const& value )
+    : m_regref( function_pool().new_register().cast<Void>() ), m_type( ValueType::FUNCTION )
 {
     m_regref.cast<Function>().value() = value;
 }
 
-dawn::Value::Value( EnumVal const& value, ValueKind kind )
-    : m_regref( enum_pool().new_register().cast<Void>() ), m_kind( kind ), m_type( ValueType::ENUM )
+dawn::Value::Value( EnumVal const& value )
+    : m_regref( enum_pool().new_register().cast<Void>() ), m_type( ValueType::ENUM )
 {
     m_regref.cast<EnumVal>().value() = value;
 }
 
-dawn::Value::Value( StructVal const& value, ValueKind kind )
-    : m_regref( struct_pool().new_register().cast<Void>() ), m_kind( kind ), m_type( ValueType::STRUCT )
+dawn::Value::Value( StructVal const& value )
+    : m_regref( struct_pool().new_register().cast<Void>() ), m_type( ValueType::STRUCT )
 {
     m_regref.cast<StructVal>().value() = value;
-    reapply_kind();
 }
 
-dawn::Value::Value( ArrayVal const& value, ValueKind kind )
-    : m_regref( array_pool().new_register().cast<Void>() ), m_kind( kind ), m_type( ValueType::ARRAY )
+dawn::Value::Value( ArrayVal const& value )
+    : m_regref( array_pool().new_register().cast<Void>() ), m_type( ValueType::ARRAY )
 {
     m_regref.cast<ArrayVal>().value() = value;
-    reapply_kind();
 }
 
-dawn::Value::Value( RangeVal const& value, ValueKind kind )
-    : m_regref( range_pool().new_register().cast<Void>() ), m_kind( kind ), m_type( ValueType::RANGE )
+dawn::Value::Value( RangeVal const& value )
+    : m_regref( range_pool().new_register().cast<Void>() ), m_type( ValueType::RANGE )
 {
     m_regref.cast<RangeVal>().value() = value;
-}
-
-dawn::ValueKind dawn::Value::kind() const
-{
-    return m_kind;
 }
 
 dawn::ValueType dawn::Value::type() const
@@ -158,9 +151,6 @@ dawn::ValueType dawn::Value::type() const
 
 void dawn::Value::assign( Value const& other )
 {
-    if ( m_kind == ValueKind::LET )
-        PANIC( "can't assign to a let value" );
-
     if ( m_type != other.m_type )
         PANIC( "can't assign [", other.m_type, "] to [", m_type, "]" );
 
@@ -213,48 +203,43 @@ void dawn::Value::assign( Value const& other )
 
 dawn::Value dawn::Value::clone() const
 {
-    return clone( m_kind );
-}
-
-dawn::Value dawn::Value::clone( ValueKind kind ) const
-{
     switch ( m_type )
     {
     case ValueType::NOTHING:
         return Value{};
 
     case ValueType::BOOL:
-        return Value{ as<Bool>(), kind };
+        return Value{ as<Bool>() };
 
     case ValueType::INT:
-        return Value{ as<Int>(), kind };
+        return Value{ as<Int>() };
 
     case ValueType::FLOAT:
-        return Value{ as<Float>(), kind };
+        return Value{ as<Float>() };
 
     case ValueType::CHAR:
-        return Value{ as<Char>(), kind };
+        return Value{ as<Char>() };
 
     case ValueType::STRING:
-        return Value{ as<String>(), kind };
+        return Value{ as<String>() };
 
     case ValueType::FUNCTION:
-        return Value{ as<Function>(), kind };
+        return Value{ as<Function>() };
 
     case ValueType::ENUM:
-        return Value{ as<EnumVal>(), kind };
+        return Value{ as<EnumVal>() };
 
     case ValueType::STRUCT:
-        return Value{ as<StructVal>(), kind };
+        return Value{ as<StructVal>() };
 
     case ValueType::ARRAY:
-        return Value{ as<ArrayVal>(), kind };
+        return Value{ as<ArrayVal>() };
 
     case ValueType::RANGE:
-        return Value{ as<RangeVal>(), kind };
+        return Value{ as<RangeVal>() };
 
     default:
-        PANIC( "Can't clone [", Int( kind ), "]" );
+        PANIC( "Can't clone [", Int( m_type ), "]" );
     }
 }
 
@@ -1053,34 +1038,6 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
 
     default:
         PANIC( "can't convert [", type(), "] to string" );
-    }
-}
-
-void dawn::Value::reapply_kind()
-{
-    switch ( m_type )
-    {
-    case ValueType::STRUCT:
-    {
-        auto& val = m_regref.cast<StructVal>().value();
-        for ( auto& [_, member] : val.members )
-        {
-            member.m_kind = this->m_kind;
-            member.reapply_kind();
-        }
-        break;
-    }
-
-    case ValueType::ARRAY:
-    {
-        auto& val = m_regref.cast<ArrayVal>().value();
-        for ( auto& element : val.data )
-        {
-            element.m_kind = this->m_kind;
-            element.reapply_kind();
-        }
-        break;
-    }
     }
 }
 

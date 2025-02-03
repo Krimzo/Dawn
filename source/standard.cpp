@@ -318,11 +318,7 @@ void dawn::Engine::load_string_members()
                 ENGINE_PANIC( "push expected a value" );
 
             auto& self = args[0];
-            if ( self.kind() == ValueKind::LET )
-                ENGINE_PANIC( "can't push to a let string" );
-
-            auto& self_val = self.as<String>();
-            self_val.push_back( args[1].to_char( *this ) );
+            self.as<String>().push_back( args[1].to_char( *this ) );
             return self;
         };
         return (Value) func;
@@ -370,11 +366,7 @@ void dawn::Engine::load_array_members()
                 ENGINE_PANIC( "push expected a value" );
 
             auto& self = args[0];
-            if ( self.kind() == ValueKind::LET )
-                ENGINE_PANIC( "can't push to a let array" );
-
-            auto& self_val = self.as<ArrayVal>().data;
-            self_val.push_back( args[1].clone( self.kind() ) );
+            self.as<ArrayVal>().data.push_back( args[1].clone() );
             return self;
         };
         return (Value) func;
