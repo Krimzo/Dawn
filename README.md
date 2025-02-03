@@ -127,7 +127,7 @@ some_fun(5, false)
 
 # Lambdas
 ```dawn
-var sub = `ref a, ref b` {
+var sub = `ref a, ref b`{
     return a - b
 }
 print(sub(5, 3))

@@ -108,7 +108,7 @@ func throw_test()
 func lambda_test()
 {
 	var c = 12
-	var sum = `ref a, ref b` {
+	var sum = `ref a, ref b`{
 		return a + b + c
 	}
 	assert(sum(4, 3) == 19, "lambda is bad")
