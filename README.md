@@ -9,8 +9,8 @@ func main(ref args) {
 
 # Variables
 ```dawn
-var b = 9  // variable
-ref p = b  // reference
+var b = 9 // variable
+ref p = b // reference
 ```
 
 # Primitives
