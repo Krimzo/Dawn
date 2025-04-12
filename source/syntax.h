@@ -66,7 +66,7 @@ inline constexpr StringRef op_great = ">";
 inline constexpr StringRef op_lesseq = "<=";
 inline constexpr StringRef op_greateq = ">=";
 inline constexpr StringRef op_assign = "=";
-inline constexpr StringRef op_access = "::";
+inline constexpr StringRef op_access = "->";
 inline constexpr StringRef op_range = ">>";
 
 inline constexpr StringRef op_link = ":";

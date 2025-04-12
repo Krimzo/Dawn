@@ -37,7 +37,7 @@ enum Animal {
     mouse    // but don't have to
 }
 var animal = Animal{cat}
-var value = animal::value
+var value = animal->value
 ```
 
 # Structs
@@ -47,15 +47,15 @@ struct Person {
     age = 0 // but can have them
 
     func who() {
-        print(self::name, " is ", self::age, " years old")
+        print(self->name, " is ", self->age, " years old")
     }
 
     oper +(ref age) {
-        return Person{ name = self::name, age = self::age + age }
+        return Person{ name = self->name, age = self->age + age }
     }
 }
 var person = Person{ age=23, name="Krim" }
-person::who()
+person->who()
 ```
 
 # Branching

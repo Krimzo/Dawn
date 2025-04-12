@@ -124,7 +124,7 @@ enum SomeEnum
 func enum_test()
 {
 	var first_val = SomeEnum{ two }	
-	print(first_val::value[2][1])
+	print(first_val->value[2][1])
 	assert(SomeEnum{ two } == SomeEnum{ two }, "bad enum comparsion 1")
 	assert(SomeEnum{ one } != SomeEnum{ two }, "bad enum comparsion 2")
 }
@@ -141,13 +141,13 @@ struct SomeStruct
 
 	oper + (ref age)
 	{
-		self::age += age
+		self->age += age
 		return self
 	}
 
 	func to_string()
 	{
-		return format("SomeStruct: ", self::name, " is ", self::age, " years old")
+		return format("SomeStruct: ", self->name, " is ", self->age, " years old")
 	}
 }
 
@@ -160,8 +160,8 @@ func struct_test()
 		"cool", age =
 		2 }
 
-	some_val1::who()
-	print(some_val2 + some_val2::age)
+	some_val1->who()
+	print(some_val2 + some_val2->age)
 	print(some_val2)
 }
 
@@ -171,9 +171,9 @@ func array_test()
 	data += [ int[2] + float[2 + 1] ]
 	data += [SomeStruct[2]]
 
-	data[data::count - 1][1]::age = 17
+	data[data->count - 1][1]->age = 17
 	print(data)
 
-	var str_val = to_string( data[data::count - 1][1] )
+	var str_val = to_string( data[data->count - 1][1] )
 	print( str_val )
 }
