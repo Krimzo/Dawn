@@ -63,7 +63,7 @@ void dawn::Engine::bind_func( Int id, Function::CppFunc cpp_func )
     load_function( func );
 }
 
-dawn::Value dawn::Engine::call_func( Int id, Value const* args, Int arg_count )
+dawn::Value dawn::Engine::call_func( Int id, Value* args, Int arg_count )
 {
     Value* val = stack.root().get( id );
     if ( !val )
@@ -88,7 +88,7 @@ dawn::Value* dawn::Engine::get_var( Int id )
     return stack.current().get( id );
 }
 
-dawn::Value dawn::Engine::handle_func( Function const& func, Value const* args, Int arg_count )
+dawn::Value dawn::Engine::handle_func( Function const& func, Value* args, Int arg_count )
 {
     if ( func.body.index() == 0 )
     {

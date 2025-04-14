@@ -260,7 +260,8 @@ dawn::Value dawn::Value::un_plus( Engine& engine ) const
         if ( !op )
             PANIC( "+ struct [", IDSystem::get( left.parent->id ), "] not supported" );
 
-        return engine.handle_func( *op, this, 1 );
+        Value args[1] = { *this };
+        return engine.handle_func( *op, args, (Int) std::size( args ) );
     }
 
     default:
@@ -285,7 +286,8 @@ dawn::Value dawn::Value::un_minus( Engine& engine ) const
         if ( !op )
             PANIC( "- struct [", IDSystem::get( left.parent->id ), "] not supported" );
 
-        return engine.handle_func( *op, this, 1 );
+        Value args[1] = { *this };
+        return engine.handle_func( *op, args, (Int) std::size( args ) );
     }
 
     default:
@@ -838,7 +840,8 @@ dawn::Bool dawn::Value::to_bool( Engine& engine ) const
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to bool" );
 
-        return engine.handle_func( *method, this, 1 ).to_bool( engine );
+        Value args[1] = { *this };
+        return engine.handle_func( *method, args, (Int) std::size( args ) ).to_bool( engine );
     }
 
     default:
@@ -879,7 +882,8 @@ dawn::Int dawn::Value::to_int( Engine& engine ) const
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to int" );
 
-        return engine.handle_func( *method, this, 1 ).to_int( engine );
+        Value args[1] = { *this };
+        return engine.handle_func( *method, args, (Int) std::size( args ) ).to_int( engine );
     }
 
     default:
@@ -920,7 +924,8 @@ dawn::Float dawn::Value::to_float( Engine& engine ) const
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to float" );
 
-        return engine.handle_func( *method, this, 1 ).to_float( engine );
+        Value args[1] = { *this };
+        return engine.handle_func( *method, args, (Int) std::size( args ) ).to_float( engine );
     }
 
     default:
@@ -957,7 +962,8 @@ dawn::Char dawn::Value::to_char( Engine& engine ) const
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to char" );
 
-        return engine.handle_func( *method, this, 1 ).to_char( engine );
+        Value args[1] = { *this };
+        return engine.handle_func( *method, args, (Int) std::size( args ) ).to_char( engine );
     }
 
     default:
@@ -1013,7 +1019,8 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
         if ( !method )
             return format( IDSystem::get( left.parent->id ), "{}" );
 
-        return engine.handle_func( *method, this, 1 ).to_string( engine );
+        Value args[1] = { *this };
+        return engine.handle_func( *method, args, (Int) std::size( args ) ).to_string( engine );
     }
 
     case ValueType::ARRAY:

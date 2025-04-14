@@ -21,7 +21,7 @@ int dawn::_shp_main( int argc, char** argv )
         arg.data.emplace_back( String{ argv[i] } );
 
     Value retval{ 0ll };
-    if ( auto error = dawn.call_func( "main", { Value{ arg } }, retval ) )
+    if ( auto error = dawn.call_func( "main", { Value{ arg } }, &retval ) )
     {
         print( error.value() );
         return -3;

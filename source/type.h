@@ -34,7 +34,7 @@ struct Scope
 
 struct Function
 {
-    using CppFunc = Func<Value( Value const*, Int )>;
+    using CppFunc = Func<Value( Value*, Int )>;
 
     struct Arg
     {
