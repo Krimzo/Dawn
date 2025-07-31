@@ -33,6 +33,13 @@ struct Scope
     Vector<Node> instr;
 };
 
+enum struct FunctionType
+{
+    GLOBAL = 0,
+    METHOD,
+    LAMBDA,
+};
+
 struct Function
 {
     using CppFunc = Func<Value( Value*, Int )>;
@@ -47,11 +54,10 @@ struct Function
     Vector<Arg> args;
     Variant<Scope, CppFunc> body;
 
-    RegisterRef<Frame> frame;
-    Holder<Value> self;
+    Holder<Value> METHOD_self;
+    RegisterRef<Frame> LAMBDA_frame;
 
-    Bool is_lambda() const;
-    Bool is_method() const;
+    FunctionType type() const;
 };
 
 struct Enum

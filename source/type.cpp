@@ -3,14 +3,14 @@
 #include "syntax.h"
 
 
-dawn::Bool dawn::Function::is_lambda() const
+dawn::FunctionType dawn::Function::type() const
 {
-    return id <= 0;
-}
-
-dawn::Bool dawn::Function::is_method() const
-{
-    return self->type() != ValueType::NOTHING;
+    if ( id <= 0 )
+        return FunctionType::LAMBDA;
+    else if ( METHOD_self->type() != ValueType::NOTHING )
+        return FunctionType::METHOD;
+    else
+        return FunctionType::GLOBAL;
 }
 
 dawn::Bool dawn::Enum::contains( Int id ) const

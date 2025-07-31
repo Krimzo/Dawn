@@ -264,12 +264,6 @@ void dawn::Engine::load_standard_functions()
         } );
 }
 
-void dawn::Engine::load_nothing_members()
-{
-    auto& nothing_members = type_members[(Int) ValueType::NOTHING];
-
-}
-
 void dawn::Engine::load_bool_members()
 {
     auto& bool_members = type_members[(Int) ValueType::BOOL];
@@ -312,7 +306,7 @@ void dawn::Engine::load_string_members()
             static const Int id = IDSystem::get( "push" );
             Function func;
             func.id = id;
-            *func.self = self_val;
+            *func.METHOD_self = self_val;
 
             func.body = [this]( Value* args, Int arg_count ) -> Value
                 {
@@ -362,7 +356,7 @@ void dawn::Engine::load_array_members()
             static const Int id = IDSystem::get( "push" );
             Function func;
             func.id = id;
-            *func.self = self_val;
+            *func.METHOD_self = self_val;
 
             func.body = [this]( Value* args, Int arg_count ) -> Value
                 {

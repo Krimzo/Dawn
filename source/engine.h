@@ -34,7 +34,6 @@ struct Engine
 
 private:
     void load_standard_functions();
-    void load_nothing_members();
     void load_bool_members();
     void load_int_members();
     void load_float_members();

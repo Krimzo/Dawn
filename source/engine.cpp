@@ -4,7 +4,6 @@
 dawn::Engine::Engine()
 {
     load_standard_functions();
-    load_nothing_members();
     load_bool_members();
     load_int_members();
     load_float_members();
@@ -94,13 +93,16 @@ dawn::Value dawn::Engine::handle_func( Function const& func, Value* args, Int ar
     {
         if ( func.args.size() != arg_count )
         {
-            if ( func.is_lambda() )
-                ENGINE_PANIC( "invalid argument count for [lambda]" );
+            if ( func.type() == FunctionType::LAMBDA )
+                ENGINE_PANIC( "invalid argument count for lambda" );
+            else if ( func.type() == FunctionType::METHOD )
+                ENGINE_PANIC( "invalid argument count for method [", IDSystem::get( func.id ), "]" );
             else
                 ENGINE_PANIC( "invalid argument count for function [", IDSystem::get( func.id ), "]" );
         }
 
-        auto pop_handler = stack.push_from( func.is_lambda() ? func.frame : RegisterRef<Frame>{} );
+        auto pop_handler = stack.push_from(
+            func.type() == FunctionType::LAMBDA ? func.LAMBDA_frame : RegisterRef<Frame>{} );
 
         for ( Int i = 0; i < arg_count; i++ )
             add_var( func.args[i].kind, func.args[i].id, args[i] );
@@ -230,8 +232,8 @@ dawn::Value dawn::Engine::handle_ref_node( RefNod const& node )
     if ( node.value_ref.type() == ValueType::FUNCTION )
     {
         auto& func = node.value_ref.as<Function>();
-        if ( func.is_lambda() )
-            func.frame = stack.peek();
+        if ( func.type() == FunctionType::LAMBDA )
+            func.LAMBDA_frame = stack.peek();
     }
     return node.value_ref;
 }
@@ -256,14 +258,14 @@ dawn::Value dawn::Engine::handle_call_node( CallNod const& node )
         ENGINE_PANIC( "can't call [", left_val.type(), "]" );
 
     auto& func = left_val.as<Function>();
-    Int arg_count = func.is_method() ? ( 1 + node.args.size() ) : node.args.size();
+    Int arg_count = ( func.type() == FunctionType::METHOD ) ? ( 1 + node.args.size() ) : node.args.size();
 
     Value* args_ptr = SALLOC( Value, arg_count );
     SAllocManager alloc_manager{ args_ptr, arg_count };
 
-    if ( func.is_method() )
+    if ( func.type() == FunctionType::METHOD )
     {
-        args_ptr[0] = *func.self;
+        args_ptr[0] = *func.METHOD_self;
         for ( Int i = 0; i < (Int) node.args.size(); i++ )
             args_ptr[1 + i] = handle_expr( node.args[i] );
     }
@@ -513,7 +515,10 @@ dawn::Value dawn::Engine::handle_struct_node( StructNod const& node )
 
     // methods
     for ( auto& method : struc.methods )
-        struc_val.members[method.id] = Value{ method };
+    {
+        auto& func = ( struc_val.members[method.id] = Value{ method } ).as<Function>();
+        *func.METHOD_self = value;
+    }
 
     return value;
 }
@@ -679,16 +684,7 @@ dawn::Value dawn::Engine::handle_ac_struct_node( Value const& left, Int right )
     auto& left_val = left.as<StructVal>();
     if ( !left_val.members.contains( right ) )
         ENGINE_PANIC( "struct [", IDSystem::get( left_val.parent->id ), "] doesn't have member [", IDSystem::get( right ), "]" );
-
-    auto& result = left_val.members.at( right );
-    if ( result.type() == ValueType::FUNCTION )
-    {
-        auto& func = result.as<Function>();
-        if ( !func.is_lambda() )
-            *func.self = left;
-    }
-
-    return result;
+    return left_val.members.at( right );
 }
 
 dawn::Value dawn::Engine::handle_ac_type_node( Value const& left, Int right )
@@ -696,16 +692,7 @@ dawn::Value dawn::Engine::handle_ac_type_node( Value const& left, Int right )
     auto& members = type_members[(Int) left.type()];
     if ( !members.contains( right ) )
         ENGINE_PANIC( "type [", left.type(), "] doesn't have member [", IDSystem::get( right ), "]" );
-
-    Value result = members.at( right )( left );
-    if ( result.type() == ValueType::FUNCTION )
-    {
-        auto& func = result.as<Function>();
-        if ( !func.is_lambda() )
-            *func.self = left;
-    }
-
-    return result;
+    return members.at( right )( left );
 }
 
 dawn::Value dawn::Engine::create_default_value( Int typeid_ )

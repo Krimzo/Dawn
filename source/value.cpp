@@ -56,7 +56,7 @@ dawn::Value* dawn::StructVal::get_member( Int id )
     return &it->second;
 }
 
-dawn::Function* dawn::StructVal::get_method( Int id, Bool unary )
+dawn::Function* dawn::StructVal::get_method( Int id, Bool has_no_args )
 {
     auto it = members.find( id );
     if ( it == members.end() )
@@ -64,9 +64,12 @@ dawn::Function* dawn::StructVal::get_method( Int id, Bool unary )
 
     if ( it->second.type() != ValueType::FUNCTION )
         return nullptr;
-    auto& func = it->second.as<Function>();
 
-    if ( unary && func.args.size() != 1 )
+    auto& func = it->second.as<Function>();
+    if ( func.type() != FunctionType::METHOD )
+        return nullptr;
+
+    if ( has_no_args && func.args.size() != 1 )
         return nullptr;
     return &func;
 }
@@ -1037,10 +1040,11 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
         StringStream stream;
         auto& func = as<Function>();
 
-        if ( func.is_lambda() )
+        if ( func.type() == FunctionType::LAMBDA )
             stream << "lambda" << op_lambda;
-        else if ( func.is_method() )
-            stream << IDSystem::get( func.self->as<StructVal>().parent->id ) << op_access << IDSystem::get( func.id ) << op_expr_opn;
+        else if ( func.type() == FunctionType::METHOD )
+            stream << IDSystem::get( func.METHOD_self->as<StructVal>().parent->id )
+            << op_access << IDSystem::get( func.id ) << op_expr_opn;
         else
             stream << IDSystem::get( func.id ) << op_expr_opn;
 
@@ -1050,7 +1054,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
                 stream << func.args[i].kind << ' ' << IDSystem::get( func.args[i].id ) << op_split << ' ';
             stream << func.args.back().kind << ' ' << IDSystem::get( func.args.back().id );
         }
-        stream << ( func.is_lambda() ? op_lambda : op_expr_cls );
+        stream << ( func.type() == FunctionType::LAMBDA ? op_lambda : op_expr_cls );
         return stream.str();
     }
 
