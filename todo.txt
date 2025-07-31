@@ -1,4 +1,2 @@
 enum check assigned function as a value
 enum use vector instead of map?
-enum better printing
-struct better printing

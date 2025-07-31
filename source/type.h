@@ -74,4 +74,6 @@ struct Struct
 
     Bool contains( Int id ) const;
 };
+
+std::ostream& operator<<( std::ostream& stream, VariableKind kind );
 }

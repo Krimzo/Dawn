@@ -1,5 +1,6 @@
 #include "type.h"
 #include "node.h"
+#include "syntax.h"
 
 
 dawn::Bool dawn::Function::is_lambda() const
@@ -25,4 +26,14 @@ dawn::Bool dawn::Struct::contains( Int id ) const
             return true;
     }
     return false;
+}
+
+std::ostream& dawn::operator<<( std::ostream& stream, VariableKind kind )
+{
+    switch ( kind )
+    {
+    case VariableKind::VAR: stream << kw_var; break;
+    case VariableKind::REF: stream << kw_ref; break;
+    }
+    return stream;
 }

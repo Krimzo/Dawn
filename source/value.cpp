@@ -988,7 +988,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
     {
         String result = format( as<Float>() );
         if ( std::to_string( (Int) as<Float>() ) == result )
-            result += ".0";
+            result += sep_number;
         return result;
     }
 
@@ -1000,47 +1000,77 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
 
     case ValueType::FUNCTION:
     {
+        StringStream stream;
         auto& func = as<Function>();
+
         if ( func.is_lambda() )
-            return "lambda()";
+            stream << "lambda" << op_lambda;
         else if ( func.is_method() )
-            return format( IDSystem::get( func.self->as<StructVal>().parent->id ), "::", IDSystem::get( func.id ), "()" );
+            stream << IDSystem::get( func.self->as<StructVal>().parent->id ) << op_access << IDSystem::get( func.id ) << op_expr_opn;
         else
-            return format( IDSystem::get( func.id ), "()" );
+            stream << IDSystem::get( func.id ) << op_expr_opn;
+
+        if ( !func.args.empty() )
+        {
+            for ( Int i = 0; i < (Int) func.args.size() - 1; i++ )
+                stream << func.args[i].kind << ' ' << IDSystem::get( func.args[i].id ) << op_split << ' ';
+            stream << func.args.back().kind << ' ' << IDSystem::get( func.args.back().id );
+        }
+        stream << ( func.is_lambda() ? op_lambda : op_expr_cls );
+        return stream.str();
     }
 
     case ValueType::ENUM:
-        return IDSystem::get( as<EnumVal>().key_id );
+    {
+        auto& enumval = as<EnumVal>();
+        return format( IDSystem::get( enumval.parent->id ), op_scope_opn, IDSystem::get( enumval.key_id ), op_scope_cls );
+    }
 
     case ValueType::STRUCT:
     {
         auto& left = as<StructVal>();
-        Function* method = left.get_method( _to_string, true );
-        if ( !method )
-            return format( IDSystem::get( left.parent->id ), "{}" );
+        if ( Function* method = left.get_method( _to_string, true ) )
+        {
+            Value args[1] = { *this };
+            return engine.handle_func( *method, args, (Int) std::size( args ) ).to_string( engine );
+        }
+        else
+        {
+            StringStream stream;
+            stream << IDSystem::get( left.parent->id );
+            if ( left.members.empty() )
+            {
+                stream << op_scope_opn << op_scope_cls;
+                return stream.str();
+            }
 
-        Value args[1] = { *this };
-        return engine.handle_func( *method, args, (Int) std::size( args ) ).to_string( engine );
+            auto it = left.members.begin();
+            stream << op_scope_opn;
+            for ( ; it != --left.members.end(); ++it )
+                stream << IDSystem::get( it->first ) << op_assign << it->second.to_string( engine ) << op_split << ' ';
+            stream << IDSystem::get( it->first ) << op_assign << it->second.to_string( engine ) << op_scope_cls;
+            return stream.str();
+        }
     }
 
     case ValueType::ARRAY:
     {
         auto& val = as<ArrayVal>();
         if ( val.data.empty() )
-            return "[]";
+            return format( op_array_opn, op_array_cls );
 
         StringStream stream;
-        stream << "[";
+        stream << op_array_opn;
         for ( Int i = 0; i < (Int) val.data.size() - 1; i++ )
-            stream << val.data[i].to_string( engine ) << ", ";
-        stream << val.data.back().to_string( engine ) << "]";
+            stream << val.data[i].to_string( engine ) << op_split << ' ';
+        stream << val.data.back().to_string( engine ) << op_array_cls;
         return stream.str();
     }
 
     case ValueType::RANGE:
     {
         auto& val = as<RangeVal>();
-        return format( '[', val.start_incl, ", ", val.end_excl, ')' );
+        return format( op_array_opn, val.start_incl, op_split, ' ', val.end_excl, op_expr_cls );
     }
 
     default:

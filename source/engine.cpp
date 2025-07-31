@@ -741,5 +741,5 @@ dawn::Value dawn::Engine::create_default_value( Int typeid_ )
     }
 
     else
-        ENGINE_PANIC( "type [", IDSystem::get( typeid_ ), "] doesn't have a default value" );
+        ENGINE_PANIC( "type [", IDSystem::get( typeid_ ), "] doesn't exist" );
 }
