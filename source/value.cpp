@@ -208,6 +208,8 @@ void dawn::Value::assign( Value const& other )
     default:
         PANIC( "assign to [", m_type, "] not supported" );
     }
+
+    unlock_const();
 }
 
 dawn::Value dawn::Value::clone() const
