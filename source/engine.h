@@ -74,5 +74,7 @@ private:
 
     Value handle_ac_struct_node( Value const& left, Int right );
     Value handle_ac_type_node( Value const& left, Int right );
+
+    Value create_default_value( Int typeid_ );
 };
 }

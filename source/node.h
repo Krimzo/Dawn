@@ -116,14 +116,16 @@ struct ArrayNod
 {
     enum struct InitType
     {
-        SIZE = 0,
-        LIST,
-    };
+        LIST = 0,
+        SIZE,
+    } init_type = {};
 
-    InitType init_type;
-    NodeRef SIZE_value_expr;
-    NodeRef SIZE_size_expr;
+    // list init
     Vector<Node> LIST_list;
+
+    // sized init
+    Int SIZE_typeid = 0;
+    NodeRef SIZE_expr;
 };
 
 enum struct UnaryType

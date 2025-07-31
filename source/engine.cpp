@@ -517,13 +517,14 @@ dawn::Value dawn::Engine::handle_array_node( ArrayNod const& node )
 
     if ( node.init_type == ArrayNod::InitType::SIZE )
     {
-        Int size = handle_expr( node.SIZE_size_expr.value() ).to_int( *this );
+        Int size = handle_expr( node.SIZE_expr.value() ).to_int( *this );
         if ( size < 0 )
             ENGINE_PANIC( "array size can't be negative" );
 
+        Value value = create_default_value( node.SIZE_typeid );
         result.data.reserve( size );
         for ( Int i = 0; i < size; i++ )
-            result.data.push_back( handle_expr( node.SIZE_value_expr.value() ) );
+            result.data.push_back( value.clone() );
     }
     else
     {
@@ -698,4 +699,47 @@ dawn::Value dawn::Engine::handle_ac_type_node( Value const& left, Int right )
     }
 
     return result;
+}
+
+dawn::Value dawn::Engine::create_default_value( Int typeid_ )
+{
+    static const Int _boolid = IDSystem::get( (String) tp_bool );
+    static const Int _intid = IDSystem::get( (String) tp_int );
+    static const Int _floatid = IDSystem::get( (String) tp_float );
+    static const Int _charid = IDSystem::get( (String) tp_char );
+    static const Int _stringid = IDSystem::get( (String) tp_string );
+
+    if ( typeid_ == _boolid )
+        return Value{ Bool{} };
+
+    else if ( typeid_ == _intid )
+        return Value{ Int{} };
+
+    else if ( typeid_ == _floatid )
+        return Value{ Float{} };
+
+    else if ( typeid_ == _charid )
+        return Value{ Char{} };
+
+    else if ( typeid_ == _stringid )
+        return Value{ String{} };
+
+    else if ( enums.contains( typeid_ ) )
+    {
+        auto& [first_key, _] = *enums.at( typeid_ ).keys_expr.begin();
+        EnumNod node;
+        node.type_id = typeid_;
+        node.key_id = first_key;
+        return handle_enum_node( node );
+    }
+
+    else if ( structs.contains( typeid_ ) )
+    {
+        StructNod node;
+        node.type_id = typeid_;
+        return handle_struct_node( node );
+    }
+
+    else
+        ENGINE_PANIC( "type [", IDSystem::get( typeid_ ), "] doesn't have a default value" );
 }

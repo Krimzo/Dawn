@@ -74,6 +74,4 @@ Int token_depth( Token const& token, Bool& in_lambda );
 void create_unary_node( Token const& token, Node& node );
 void create_operator_node( Token const& token, Node& node );
 void create_assign_node( Token const& token, Node& node );
-
-Node make_default_val( StringRef const& type );
 }

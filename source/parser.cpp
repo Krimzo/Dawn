@@ -654,22 +654,20 @@ void dawn::Parser::expression_complex_array( Vector<Token>& left, Vector<Token>&
     if ( left.empty() )
     {
         auto& nod = tree.emplace<ArrayNod>();
+        nod.init_type = ArrayNod::InitType::LIST;
 
         for ( auto it = right.begin(); it != right.end(); )
             parse_expression( ExtractType::SPLITTER, it, right.end(), nod.LIST_list.emplace_back() );
-
-        nod.init_type = ArrayNod::InitType::LIST;
     }
     else if ( left.size() == 1 && left.front().type == TokenType::TYPE )
     {
         auto& node = tree.emplace<ArrayNod>();
-        node.SIZE_value_expr = node_pool().new_register();
-        node.SIZE_value_expr.value() = make_default_val( left.front().value );
+        node.init_type = ArrayNod::InitType::SIZE;
 
         auto right_it = right.begin();
-        node.SIZE_size_expr = node_pool().new_register();
-        parse_expression( ExtractType::DEFAULT, right_it, right.end(), node.SIZE_size_expr.value() );
-        node.init_type = ArrayNod::InitType::SIZE;
+        node.SIZE_typeid = IDSystem::get( left.front().value );
+        node.SIZE_expr = node_pool().new_register();
+        parse_expression( ExtractType::DEFAULT, right_it, right.end(), node.SIZE_expr.value() );
     }
     else
     {
@@ -1194,32 +1192,4 @@ void dawn::create_assign_node( Token const& token, Node& node )
 
     else
         PARSER_PANIC( token, "unknown assign operator" );
-}
-
-dawn::Node dawn::make_default_val( StringRef const& type )
-{
-    if ( type == tp_bool )
-        return make_bool_node( {} );
-
-    else if ( type == tp_int )
-        return make_int_node( {} );
-
-    else if ( type == tp_float )
-        return make_float_node( {} );
-
-    else if ( type == tp_char )
-        return make_char_node( {} );
-
-    else if ( type == tp_string )
-        return make_string_node( {} );
-
-    else if ( is_custom_type( type ) )
-    {
-        Node result;
-        result.emplace<StructNod>().type_id = IDSystem::get( (String) type );
-        return result;
-    }
-
-    else
-        PARSER_PANIC( {}, "[", type, "] doesn't have a default value" );
 }
