@@ -40,7 +40,7 @@ void dawn::Engine::load_function( Function const& entry )
 
 void dawn::Engine::load_enum( Enum const& entry )
 {
-    auto& enu = (enums[entry.id] = entry);
+    auto& enu = ( enums[entry.id] = entry );
     for ( auto& [key, expr] : enu.keys_expr )
         enu.keys_value[key] = handle_expr( expr ).clone();
 }
@@ -111,7 +111,7 @@ dawn::Value dawn::Engine::handle_func( Function const& func, Value* args, Int ar
     }
     else
     {
-        return std::get<Function::CppFunc>( func.body )(args, arg_count);
+        return std::get<Function::CppFunc>( func.body )( args, arg_count );
     }
 }
 
@@ -119,7 +119,7 @@ void dawn::Engine::handle_scope( Scope const& scope, Opt<Value>& retval, Bool* d
 {
     for ( auto& instr : scope.instr )
     {
-        if ( retval || (didbrk && *didbrk) || (didcon && *didcon) )
+        if ( retval || ( didbrk && *didbrk ) || ( didcon && *didcon ) )
             break;
 
         handle_instr( instr, retval, didbrk, didcon );
@@ -256,7 +256,7 @@ dawn::Value dawn::Engine::handle_call_node( CallNod const& node )
         ENGINE_PANIC( "can't call [", left_val.type(), "]" );
 
     auto& func = left_val.as<Function>();
-    Int arg_count = func.is_method() ? (1 + node.args.size()) : node.args.size();
+    Int arg_count = func.is_method() ? ( 1 + node.args.size() ) : node.args.size();
 
     Value* args_ptr = SALLOC( Value, arg_count );
     SAllocManager alloc_manager{ args_ptr, arg_count };
@@ -547,7 +547,7 @@ dawn::Value dawn::Engine::handle_un_node( UnaryNod const& node )
         return Value{ handle_expr( node.right.value() ).un_not( *this ) };
 
     default:
-        ENGINE_PANIC( "unknown unary node type: ", typeid(node).name() );
+        ENGINE_PANIC( "unknown unary node type: ", typeid( node ).name() );
     }
 }
 
@@ -607,7 +607,7 @@ dawn::Value dawn::Engine::handle_op_node( OperatorNod const& node )
         return handle_expr( node.sides[0] ).op_range( *this, handle_expr( node.sides[1] ) );
 
     default:
-        ENGINE_PANIC( "unknown operator node type: ", typeid(node).name() );
+        ENGINE_PANIC( "unknown operator node type: ", typeid( node ).name() );
     }
 }
 
@@ -660,7 +660,7 @@ dawn::Value dawn::Engine::handle_as_node( AssignNod const& node )
         return left_val;
 
     default:
-        ENGINE_PANIC( "unknown assign node type: ", typeid(node).name() );
+        ENGINE_PANIC( "unknown assign node type: ", typeid( node ).name() );
     }
 }
 
@@ -687,7 +687,7 @@ dawn::Value dawn::Engine::handle_ac_type_node( Value const& left, Int right )
     if ( !members.contains( right ) )
         ENGINE_PANIC( "type [", left.type(), "] doesn't have member [", IDSystem::get( right ), "]" );
 
-    Value result = members.at( right )(left);
+    Value result = members.at( right )( left );
     if ( result.type() == ValueType::FUNCTION )
     {
         auto& func = result.as<Function>();

@@ -27,7 +27,7 @@ dawn::Value& dawn::Frame::set( Int id, Value const& value )
     {
         auto& frame = std::get<GlobalFrame>( m_frame );
         if ( (Int) frame.size() <= id )
-            frame.resize( (id + 1) * 2 );
+            frame.resize( ( id + 1 ) * 2 );
         return frame[id].emplace( value );
     }
 }
@@ -82,7 +82,7 @@ dawn::PopHandler dawn::Stack::push()
 {
     m_frames.emplace_back( frame_pool().new_register() )
         .value()
-        .reset( *(++m_frames.rbegin()) );
+        .reset( *( ++m_frames.rbegin() ) );
     return PopHandler{ *this };
 }
 

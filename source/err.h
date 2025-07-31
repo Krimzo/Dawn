@@ -15,7 +15,7 @@ struct LexerError
         StringStream stream;
         stream << "Lexer error at line [" << line_number
             << "] and char [" << from_escaping( c ) << "]: ";
-        (stream << ... << args);
+        ( stream << ... << args );
         msg = stream.str();
     }
 };
@@ -36,7 +36,7 @@ struct ParserError
         {
             stream << "Parser error: ";
         }
-        (stream << ... << args);
+        ( stream << ... << args );
         msg = stream.str();
     }
 };
@@ -50,7 +50,7 @@ struct EngineError
     {
         StringStream stream;
         stream << "Engine error: ";
-        (stream << ... << args);
+        ( stream << ... << args );
         msg = stream.str();
     }
 };

@@ -17,7 +17,7 @@ struct SAllocManager
         : ptr( ptr ), count( count )
     {
         for ( Int i = 0; i < count; i++ )
-            new (ptr + i) T();
+            new ( ptr + i ) T();
     }
 
     ~SAllocManager() noexcept

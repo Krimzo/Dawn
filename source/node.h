@@ -286,7 +286,7 @@ struct NodeHandler
             return NodeType::SCOPE;
 
         else
-            static_assert(false, "Invalid node type");
+            static_assert( false, "Invalid node type" );
     }
 
     static void copy( NodeType type, void* to, void const* from )
@@ -294,91 +294,91 @@ struct NodeHandler
         switch ( type )
         {
         case NodeType::REF:
-            new (to) RefNod( *static_cast<RefNod const*>(from) );
+            new ( to ) RefNod( *static_cast<RefNod const*>( from ) );
             break;
 
         case NodeType::VARIABLE:
-            new (to) VariableNod( *static_cast<VariableNod const*>(from) );
+            new ( to ) VariableNod( *static_cast<VariableNod const*>( from ) );
             break;
 
         case NodeType::IDENTIFIER:
-            new (to) IdentifierNod( *static_cast<IdentifierNod const*>(from) );
+            new ( to ) IdentifierNod( *static_cast<IdentifierNod const*>( from ) );
             break;
 
         case NodeType::CALL:
-            new (to) CallNod( *static_cast<CallNod const*>(from) );
+            new ( to ) CallNod( *static_cast<CallNod const*>( from ) );
             break;
 
         case NodeType::INDEX:
-            new (to) IndexNod( *static_cast<IndexNod const*>(from) );
+            new ( to ) IndexNod( *static_cast<IndexNod const*>( from ) );
             break;
 
         case NodeType::RETURN:
-            new (to) ReturnNod( *static_cast<ReturnNod const*>(from) );
+            new ( to ) ReturnNod( *static_cast<ReturnNod const*>( from ) );
             break;
 
         case NodeType::BREAK:
-            new (to) BreakNod( *static_cast<BreakNod const*>(from) );
+            new ( to ) BreakNod( *static_cast<BreakNod const*>( from ) );
             break;
 
         case NodeType::CONTINUE:
-            new (to) ContinueNod( *static_cast<ContinueNod const*>(from) );
+            new ( to ) ContinueNod( *static_cast<ContinueNod const*>( from ) );
             break;
 
         case NodeType::THROW:
-            new (to) ThrowNod( *static_cast<ThrowNod const*>(from) );
+            new ( to ) ThrowNod( *static_cast<ThrowNod const*>( from ) );
             break;
 
         case NodeType::TRY:
-            new (to) TryNod( *static_cast<TryNod const*>(from) );
+            new ( to ) TryNod( *static_cast<TryNod const*>( from ) );
             break;
 
         case NodeType::IF:
-            new (to) IfNod( *static_cast<IfNod const*>(from) );
+            new ( to ) IfNod( *static_cast<IfNod const*>( from ) );
             break;
 
         case NodeType::SWITCH:
-            new (to) SwitchNod( *static_cast<SwitchNod const*>(from) );
+            new ( to ) SwitchNod( *static_cast<SwitchNod const*>( from ) );
             break;
 
         case NodeType::LOOP:
-            new (to) LoopNod( *static_cast<LoopNod const*>(from) );
+            new ( to ) LoopNod( *static_cast<LoopNod const*>( from ) );
             break;
 
         case NodeType::WHILE:
-            new (to) WhileNod( *static_cast<WhileNod const*>(from) );
+            new ( to ) WhileNod( *static_cast<WhileNod const*>( from ) );
             break;
 
         case NodeType::FOR:
-            new (to) ForNod( *static_cast<ForNod const*>(from) );
+            new ( to ) ForNod( *static_cast<ForNod const*>( from ) );
             break;
 
         case NodeType::ENUM:
-            new (to) EnumNod( *static_cast<EnumNod const*>(from) );
+            new ( to ) EnumNod( *static_cast<EnumNod const*>( from ) );
             break;
 
         case NodeType::STRUCT:
-            new (to) StructNod( *static_cast<StructNod const*>(from) );
+            new ( to ) StructNod( *static_cast<StructNod const*>( from ) );
             break;
 
         case NodeType::ARRAY:
-            new (to) ArrayNod( *static_cast<ArrayNod const*>(from) );
+            new ( to ) ArrayNod( *static_cast<ArrayNod const*>( from ) );
             break;
 
         case NodeType::UNARY:
-            new (to) UnaryNod( *static_cast<UnaryNod const*>(from) );
+            new ( to ) UnaryNod( *static_cast<UnaryNod const*>( from ) );
             break;
 
         case NodeType::OPERATOR:
-            new (to) OperatorNod( *static_cast<OperatorNod const*>(from) );
+            new ( to ) OperatorNod( *static_cast<OperatorNod const*>( from ) );
             break;
 
         case NodeType::ASSIGN:
-            new (to) AssignNod( *static_cast<AssignNod const*>(from) );
+            new ( to ) AssignNod( *static_cast<AssignNod const*>( from ) );
             break;
 
         case NodeType::SCOPE:
-            new (to) Scope( *static_cast<Scope const*>(from) );
+            new ( to ) Scope( *static_cast<Scope const*>( from ) );
             break;
         }
     }
@@ -388,91 +388,91 @@ struct NodeHandler
         switch ( type )
         {
         case NodeType::REF:
-            static_cast<RefNod*>(ptr)->~RefNod();
+            static_cast<RefNod*>( ptr )->~RefNod();
             break;
 
         case NodeType::VARIABLE:
-            static_cast<VariableNod*>(ptr)->~VariableNod();
+            static_cast<VariableNod*>( ptr )->~VariableNod();
             break;
 
         case NodeType::IDENTIFIER:
-            static_cast<IdentifierNod*>(ptr)->~IdentifierNod();
+            static_cast<IdentifierNod*>( ptr )->~IdentifierNod();
             break;
 
         case NodeType::CALL:
-            static_cast<CallNod*>(ptr)->~CallNod();
+            static_cast<CallNod*>( ptr )->~CallNod();
             break;
 
         case NodeType::INDEX:
-            static_cast<IndexNod*>(ptr)->~IndexNod();
+            static_cast<IndexNod*>( ptr )->~IndexNod();
             break;
 
         case NodeType::RETURN:
-            static_cast<ReturnNod*>(ptr)->~ReturnNod();
+            static_cast<ReturnNod*>( ptr )->~ReturnNod();
             break;
 
         case NodeType::BREAK:
-            static_cast<BreakNod*>(ptr)->~BreakNod();
+            static_cast<BreakNod*>( ptr )->~BreakNod();
             break;
 
         case NodeType::CONTINUE:
-            static_cast<ContinueNod*>(ptr)->~ContinueNod();
+            static_cast<ContinueNod*>( ptr )->~ContinueNod();
             break;
 
         case NodeType::THROW:
-            static_cast<ThrowNod*>(ptr)->~ThrowNod();
+            static_cast<ThrowNod*>( ptr )->~ThrowNod();
             break;
 
         case NodeType::TRY:
-            static_cast<TryNod*>(ptr)->~TryNod();
+            static_cast<TryNod*>( ptr )->~TryNod();
             break;
 
         case NodeType::IF:
-            static_cast<IfNod*>(ptr)->~IfNod();
+            static_cast<IfNod*>( ptr )->~IfNod();
             break;
 
         case NodeType::SWITCH:
-            static_cast<SwitchNod*>(ptr)->~SwitchNod();
+            static_cast<SwitchNod*>( ptr )->~SwitchNod();
             break;
 
         case NodeType::LOOP:
-            static_cast<LoopNod*>(ptr)->~LoopNod();
+            static_cast<LoopNod*>( ptr )->~LoopNod();
             break;
 
         case NodeType::WHILE:
-            static_cast<WhileNod*>(ptr)->~WhileNod();
+            static_cast<WhileNod*>( ptr )->~WhileNod();
             break;
 
         case NodeType::FOR:
-            static_cast<ForNod*>(ptr)->~ForNod();
+            static_cast<ForNod*>( ptr )->~ForNod();
             break;
 
         case NodeType::ENUM:
-            static_cast<EnumNod*>(ptr)->~EnumNod();
+            static_cast<EnumNod*>( ptr )->~EnumNod();
             break;
 
         case NodeType::STRUCT:
-            static_cast<StructNod*>(ptr)->~StructNod();
+            static_cast<StructNod*>( ptr )->~StructNod();
             break;
 
         case NodeType::ARRAY:
-            static_cast<ArrayNod*>(ptr)->~ArrayNod();
+            static_cast<ArrayNod*>( ptr )->~ArrayNod();
             break;
 
         case NodeType::UNARY:
-            static_cast<UnaryNod*>(ptr)->~UnaryNod();
+            static_cast<UnaryNod*>( ptr )->~UnaryNod();
             break;
 
         case NodeType::OPERATOR:
-            static_cast<OperatorNod*>(ptr)->~OperatorNod();
+            static_cast<OperatorNod*>( ptr )->~OperatorNod();
             break;
 
         case NodeType::ASSIGN:
-            static_cast<AssignNod*>(ptr)->~AssignNod();
+            static_cast<AssignNod*>( ptr )->~AssignNod();
             break;
 
         case NodeType::SCOPE:
-            static_cast<Scope*>(ptr)->~Scope();
+            static_cast<Scope*>( ptr )->~Scope();
             break;
         }
     }
@@ -508,28 +508,28 @@ consteval size_t max_nod_size()
 consteval size_t max_nod_align()
 {
     return std::max( {
-        alignof(RefNod),
-        alignof(VariableNod),
-        alignof(IdentifierNod),
-        alignof(CallNod),
-        alignof(IndexNod),
-        alignof(ReturnNod),
-        alignof(BreakNod),
-        alignof(ContinueNod),
-        alignof(ThrowNod),
-        alignof(TryNod),
-        alignof(IfNod),
-        alignof(SwitchNod),
-        alignof(LoopNod),
-        alignof(WhileNod),
-        alignof(ForNod),
-        alignof(EnumNod),
-        alignof(StructNod),
-        alignof(ArrayNod),
-        alignof(UnaryNod),
-        alignof(OperatorNod),
-        alignof(AssignNod),
-        alignof(Scope) } );
+        alignof( RefNod ),
+        alignof( VariableNod ),
+        alignof( IdentifierNod ),
+        alignof( CallNod ),
+        alignof( IndexNod ),
+        alignof( ReturnNod ),
+        alignof( BreakNod ),
+        alignof( ContinueNod ),
+        alignof( ThrowNod ),
+        alignof( TryNod ),
+        alignof( IfNod ),
+        alignof( SwitchNod ),
+        alignof( LoopNod ),
+        alignof( WhileNod ),
+        alignof( ForNod ),
+        alignof( EnumNod ),
+        alignof( StructNod ),
+        alignof( ArrayNod ),
+        alignof( UnaryNod ),
+        alignof( OperatorNod ),
+        alignof( AssignNod ),
+        alignof( Scope ) } );
 }
 
 struct Node : Storage<max_nod_size(), max_nod_align(), NodeType, NodeHandler>

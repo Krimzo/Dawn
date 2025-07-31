@@ -633,7 +633,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::BOOL:
-            return Value{ (Int) (as<Bool>() <=> other.as<Bool>())._Value };
+            return Value{ (Int) ( as<Bool>() <=> other.as<Bool>() )._Value };
 
         default:
             PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
@@ -645,10 +645,10 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ (Int) (as<Int>() <=> other.as<Int>())._Value };
+            return Value{ (Int) ( as<Int>() <=> other.as<Int>() )._Value };
 
         case ValueType::FLOAT:
-            return Value{ (Int) (as<Int>() <=> other.as<Float>())._Value };
+            return Value{ (Int) ( as<Int>() <=> other.as<Float>() )._Value };
 
         default:
             PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
@@ -660,10 +660,10 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ (Int) (as<Float>() <=> other.as<Int>())._Value };
+            return Value{ (Int) ( as<Float>() <=> other.as<Int>() )._Value };
 
         case ValueType::FLOAT:
-            return Value{ (Int) (as<Float>() <=> other.as<Float>())._Value };
+            return Value{ (Int) ( as<Float>() <=> other.as<Float>() )._Value };
 
         default:
             PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
@@ -675,7 +675,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::CHAR:
-            return Value{ (Int) (as<Char>() <=> other.as<Char>())._Value };
+            return Value{ (Int) ( as<Char>() <=> other.as<Char>() )._Value };
 
         default:
             PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
@@ -687,7 +687,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::STRING:
-            return Value{ (Int) (as<String>() <=> other.as<String>())._Value };
+            return Value{ (Int) ( as<String>() <=> other.as<String>() )._Value };
 
         default:
             PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
@@ -705,7 +705,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
             if ( left.parent != right.parent )
                 PANIC( "enum [", IDSystem::get( left.parent->id ), "] <=> enum [", IDSystem::get( right.parent->id ), "] not supported" );
 
-            return Value{ (Int) (left.key_id <=> right.key_id)._Value };
+            return Value{ (Int) ( left.key_id <=> right.key_id )._Value };
         }
 
         default:
@@ -739,7 +739,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
                 if ( cmpr_res != 0 )
                     return Value{ cmpr_res };
             }
-            return Value{ (Int) (left.size() <=> right.size())._Value };
+            return Value{ (Int) ( left.size() <=> right.size() )._Value };
         }
 
         default:

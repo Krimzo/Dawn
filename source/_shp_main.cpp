@@ -28,5 +28,5 @@ int dawn::_shp_main( int argc, char** argv )
     }
 
     Int retcode = retval.to_int( dawn.engine );
-    return static_cast<int>(retcode);
+    return static_cast<int>( retcode );
 }

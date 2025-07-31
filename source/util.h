@@ -20,7 +20,7 @@ struct ColoredText
         : color( color )
     {
         StringStream stream;
-        (stream << ... << args);
+        ( stream << ... << args );
         text = stream.str();
     }
 };
@@ -29,14 +29,14 @@ template<typename... Args>
 String format( Args&&... args )
 {
     StringStream stream;
-    (stream << ... << args);
+    ( stream << ... << args );
     return stream.str();
 }
 
 template<typename... Args>
 void print( Args&&... args )
 {
-    (std::cout << ... << args) << '\n';
+    ( std::cout << ... << args ) << '\n';
 }
 
 Char to_escaping( Char c );

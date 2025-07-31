@@ -72,7 +72,7 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Value* retval
     return call_func( name, nullptr, 0, retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func(String const& name, std::initializer_list<Value> const& args, Value* retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, std::initializer_list<Value> const& args, Value* retval ) noexcept
 {
     return call_func( name, (Value*) args.begin(), (Int) args.size(), retval );
 }

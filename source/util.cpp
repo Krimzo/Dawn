@@ -4,13 +4,13 @@
 #ifdef _WIN32
 #include <windows.h>
 static HANDLE _console_init = []
-{
-    DWORD mode = 0;
-    HANDLE handle = GetStdHandle( STD_OUTPUT_HANDLE );
-    GetConsoleMode( handle, &mode );
-    SetConsoleMode( handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING );
-    return handle;
-}();
+    {
+        DWORD mode = 0;
+        HANDLE handle = GetStdHandle( STD_OUTPUT_HANDLE );
+        GetConsoleMode( handle, &mode );
+        SetConsoleMode( handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING );
+        return handle;
+    }( );
 #endif
 
 dawn::Char dawn::to_escaping( Char c )
@@ -44,7 +44,7 @@ dawn::Opt<dawn::String> dawn::read_file( StringRef const& path )
     IFileStream file{ path.data() };
     if ( !file )
         return std::nullopt;
-    return { (StringStream{} << file.rdbuf()).str() };
+    return { ( StringStream{} << file.rdbuf() ).str() };
 }
 
 dawn::Opt<dawn::Int> dawn::parse_int( StringRef const& data )
@@ -75,8 +75,8 @@ dawn::Opt<dawn::Float> dawn::parse_float( StringRef const& data )
 
 dawn::Float dawn::mymod( Float left, Float right )
 {
-    if ( left < 0.0 ) return (right < 0.0) ? std::fmod( left, right ) : std::remainder( left, right );
-    else              return (right < 0.0) ? std::remainder( left, right ) : std::fmod( left, right );
+    if ( left < 0.0 ) return ( right < 0.0 ) ? std::fmod( left, right ) : std::remainder( left, right );
+    else              return ( right < 0.0 ) ? std::remainder( left, right ) : std::fmod( left, right );
 }
 
 std::ostream& dawn::operator<<( std::ostream& stream, Color const& color )

@@ -64,7 +64,7 @@ struct RegisterRef
 
     Bool valid() const noexcept
     {
-        return static_cast<Bool>(m_regptr);
+        return static_cast<Bool>( m_regptr );
     }
 
     T& value() const noexcept
@@ -75,13 +75,13 @@ struct RegisterRef
     template<typename C>
     RegisterRef<C>& cast()
     {
-        return reinterpret_cast<RegisterRef<C>&>(*this);
+        return reinterpret_cast<RegisterRef<C>&>( *this );
     }
 
     template<typename C>
     RegisterRef<C> const& cast() const
     {
-        return reinterpret_cast<RegisterRef<C> const&>(*this);
+        return reinterpret_cast<RegisterRef<C> const&>( *this );
     }
 
 private:

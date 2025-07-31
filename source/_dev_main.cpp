@@ -20,7 +20,7 @@ int dawn::_dev_main( int argc, char** argv )
     }
 
     auto end_time = ch::high_resolution_clock::now();
-    auto duration = ch::duration_cast<ch::microseconds>(end_time - start_time);
+    auto duration = ch::duration_cast<ch::microseconds>( end_time - start_time );
     print( duration );
 
     return 0;
