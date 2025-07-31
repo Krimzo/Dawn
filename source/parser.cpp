@@ -189,7 +189,6 @@ void dawn::Parser::parse_enum( Vector<Token>::const_iterator& it, Vector<Token>:
         if ( it->type == TokenType::NAME )
         {
             Int name_id = IDSystem::get( it->value );
-
             if ( enu.keys_expr.contains( name_id ) )
                 PARSER_PANIC( *it, "key [", it->value, "] already in use" );
 
@@ -208,6 +207,9 @@ void dawn::Parser::parse_enum( Vector<Token>::const_iterator& it, Vector<Token>:
             PARSER_PANIC( *it, "expected key name" );
     }
     ++it;
+
+    if ( enu.keys_expr.empty() )
+        PARSER_PANIC( {}, "enum [", IDSystem::get( enu.id ), "] cannot be empty" );
 }
 
 void dawn::Parser::parse_function( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& function )

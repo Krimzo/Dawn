@@ -1,20 +1,25 @@
 func main()
 {
-    var v = 12.
-    var a = Person{age=v}
+    var a = Person{age=5}
+    var b = Person{age=7}
     a->who()
-    print(a->age)
+    b->who()
+    var c = a + b
+    print(c)
 
-    //var b = Person{age=7}
-    //a->who()
-    //b->who()
-    //var c = a + b
-    //print(c)
+    var animals = Animal[c->age]
+    print(animals)
+}
+
+enum Animal
+{
+    none
+    dog = "dog"
+    cat = 'c'
 }
 
 struct Person {
-    age_test = 6.1
-    age = self->age_test + 3
+    age = 0
 
     func who() {
         print("age ", self->age)
