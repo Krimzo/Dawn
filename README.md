@@ -9,8 +9,9 @@ func main(ref args) {
 
 # Variables
 ```dawn
-var b = 9 // variable
-ref p = b // reference
+const a = 7 // constant
+var b = 9   // variable
+ref p = b   // reference
 ```
 
 # Primitives
@@ -34,7 +35,7 @@ a1[1] += " stuff"           // access of the second element
 enum Animal {
     dog
     cat = -6 // enums can store values
-    mouse    // but don't have to
+    mouse    // but don't have to (value is set to nothing)
 }
 var animal = Animal{cat}
 var value = animal->value
@@ -43,7 +44,7 @@ var value = animal->value
 # Structs
 ```dawn
 struct Person {
-    name    // fields don't need initializers
+    name    // fields don't need initializers (value is set to nothing and cant be changed)
     age = 0 // but can have them
 
     func who() {
@@ -140,7 +141,7 @@ var a = 5
 try {
     throw a
 }
-catch err {
+catch err { // caught by reference
     err += 7
 }
 print(a)
@@ -148,6 +149,6 @@ print(a)
 
 # Misc
 ```dawn
-import "path..."    // importing modules
-var i = to_int(...) // casting primitive types
+import "path..."    // importing modules (uses relative path from the source file)
+var i = to_int(...) // casting primitive types (use standard.cpp to find more functions)
 ```
