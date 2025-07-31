@@ -1,2 +1,2 @@
-fix value inside a node (serious issue), maybe add const (or let) back again into spec?
-num check assigned function as a value
+enum check assigned function as a value
+add pop to strings/arrays

@@ -306,8 +306,10 @@ void dawn::Engine::load_string_members()
 
     string_members[IDSystem::get( "push" )] = [this]( Value const& self_val ) -> Value
         {
-            static const Int id = IDSystem::get( "push" );
+            if ( self_val.is_const() )
+                ENGINE_PANIC( "can't push a char into a const string" );
 
+            static const Int id = IDSystem::get( "push" );
             Function func;
             func.id = id;
             *func.self = self_val;
@@ -354,8 +356,10 @@ void dawn::Engine::load_array_members()
 
     array_members[IDSystem::get( "push" )] = [this]( Value const& self_val ) -> Value
         {
-            static const Int id = IDSystem::get( "push" );
+            if ( self_val.is_const() )
+                ENGINE_PANIC( "can't push a value into a const array" );
 
+            static const Int id = IDSystem::get( "push" );
             Function func;
             func.id = id;
             *func.self = self_val;
@@ -366,7 +370,8 @@ void dawn::Engine::load_array_members()
                         ENGINE_PANIC( "push expected a value" );
 
                     auto& self = args[0];
-                    self.as<ArrayVal>().data.push_back( args[1].clone() );
+                    self.as<ArrayVal>().data
+                        .push_back( args[1].clone().unlock_const() ); // unlock always because value cant be pushed into a const array anyways
                     return self;
                 };
             return (Value) func;

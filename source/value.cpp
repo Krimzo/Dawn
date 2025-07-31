@@ -157,6 +157,9 @@ dawn::ValueType dawn::Value::type() const
 
 void dawn::Value::assign( Value const& other )
 {
+    if ( m_const )
+        PANIC( "can't assign [", other.m_type, "] to a const value" );
+
     if ( m_type != other.m_type )
         PANIC( "can't assign [", other.m_type, "] to [", m_type, "]" );
 
@@ -247,6 +250,29 @@ dawn::Value dawn::Value::clone() const
     default:
         PANIC( "can't clone type [", Int( m_type ), "]" );
     }
+}
+
+dawn::Bool dawn::Value::is_const() const
+{
+    return m_const;
+}
+
+dawn::Value& dawn::Value::unlock_const()
+{
+    m_const = false;
+    if ( m_type == ValueType::STRUCT )
+    {
+        auto& val = as<StructVal>();
+        for ( auto& field : val.parent->fields )
+            val.members.at( field.id ).unlock_const();
+    }
+    else if ( m_type == ValueType::ARRAY )
+    {
+        auto& val = as<ArrayVal>();
+        for ( auto& entry : val.data )
+            entry.unlock_const();
+    }
+    return *this;
 }
 
 dawn::Value dawn::Value::un_plus( Engine& engine ) const

@@ -75,8 +75,10 @@ dawn::Value dawn::Engine::call_func( Int id, Value* args, Int arg_count )
 
 void dawn::Engine::add_var( VariableKind kind, Int id, Value const& value )
 {
-    if ( kind == VariableKind::VAR )
+    if ( kind == VariableKind::CONST )
         stack.current().set( id, value.clone() );
+    else if ( kind == VariableKind::VAR )
+        stack.current().set( id, value.clone().unlock_const() );
     else
         stack.current().set( id, value );
 }
@@ -500,7 +502,14 @@ dawn::Value dawn::Engine::handle_struct_node( StructNod const& node )
 
     // struct {} init
     for ( auto& [id, arg_node] : node.args )
-        struc_val.members[id].assign( handle_expr( arg_node ).clone() );
+    {
+        auto& member = struc_val.members[id];
+        Value expr = handle_expr( arg_node ).clone();
+        if ( member.type() != expr.type() )
+            ENGINE_PANIC( "can't assign type [", expr.type(), "] to type [", member.type(), "]" );
+        // must use = instead of assign() because member is const at this stage
+        member = expr;
+    }
 
     // methods
     for ( auto& method : struc.methods )

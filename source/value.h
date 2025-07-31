@@ -88,6 +88,9 @@ struct Value
     void assign( Value const& other );
     Value clone() const;
 
+    Bool is_const() const;
+    Value& unlock_const();
+
     Value un_plus( Engine& engine ) const;
     Value un_minus( Engine& engine ) const;
     Value op_add( Engine& engine, Value const& other ) const;
@@ -122,6 +125,7 @@ private:
 
     RegisterRef<Void> m_regref;
     ValueType m_type = ValueType::NOTHING;
+    Bool m_const = true;
 };
 
 std::ostream& operator<<( std::ostream& stream, ValueType type );

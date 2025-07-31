@@ -9,6 +9,7 @@ inline constexpr StringRef kw_import = "import";
 inline constexpr StringRef kw_func = "func";
 inline constexpr StringRef kw_oper = "oper";
 inline constexpr StringRef kw_return = "return";
+inline constexpr StringRef kw_const = "const";
 inline constexpr StringRef kw_var = "var";
 inline constexpr StringRef kw_ref = "ref";
 inline constexpr StringRef kw_if = "if";

@@ -1,39 +1,12 @@
 func main()
 {
-    //var a = Person{age=5}
-    //var b = Person{age=7}
-    //a->who()
-    //b->who()
-    //var c = a + b
-    //print(c)
-    
-    //var animals = Animal[5]
-    //print(animals)
-    //animals[2] =Animal{cat}
-    //print(animals)
-    //animals[2] = Animal{dog}
-    //animals[4] = Animal{cat}
-    //print(animals)
-
-    //var hah = Animal{dog}
-    //print(hah->value)
-    //hah->value = "wasd"
-    //print(hah->value)
-    //print(Animal{dog}->value)
-
-    print(da())
-    da() = "wasdwd"
-    print(da())
-}
-
-func da() {
-    return "nice"
-}
-
-enum What
-{
-    n
-    b
+    const a = Person{age=5}
+    const b = Person{age=7}
+    a->who()
+    b->who()
+    var c = a + b
+    c->age += 4
+    print(c)
 }
 
 enum Animal
