@@ -13,6 +13,8 @@ struct EnumVal
 {
     Enum* parent = nullptr;
     Int key_id = 0;
+
+    Value value( Engine& engine ) const;
 };
 
 struct StructVal

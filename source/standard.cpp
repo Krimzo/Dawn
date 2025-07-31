@@ -338,7 +338,7 @@ void dawn::Engine::load_enum_members()
     enum_members[IDSystem::get( "value" )] = [this]( Value const& self_val ) -> Value
         {
             auto& self = self_val.as<EnumVal>();
-            return self.parent->keys_value.at( self.key_id );
+            return self.value( *this );
         };
 }
 

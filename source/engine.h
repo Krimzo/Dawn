@@ -11,6 +11,7 @@ using TypeMember = Func<Value( Value const& )>;
 struct Engine
 {
     friend struct Value;
+    friend struct EnumVal;
 
     Stack stack;
     OMap<Int, Enum> enums;

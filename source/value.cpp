@@ -23,6 +23,12 @@ ID_HELPER( to_char );
 ID_HELPER( to_string );
 }
 
+dawn::Value dawn::EnumVal::value( Engine& engine ) const
+{
+    auto& expr = parent->get( key_id )->expr;
+    return engine.handle_expr( expr.value() ).clone();
+}
+
 dawn::StructVal::StructVal( StructVal const& other )
 {
     parent = other.parent;
@@ -239,7 +245,7 @@ dawn::Value dawn::Value::clone() const
         return Value{ as<RangeVal>() };
 
     default:
-        PANIC( "Can't clone [", Int( m_type ), "]" );
+        PANIC( "can't clone type [", Int( m_type ), "]" );
     }
 }
 

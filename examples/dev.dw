@@ -1,14 +1,39 @@
 func main()
 {
-    var a = Person{age=5}
-    var b = Person{age=7}
-    a->who()
-    b->who()
-    var c = a + b
-    print(c)
+    //var a = Person{age=5}
+    //var b = Person{age=7}
+    //a->who()
+    //b->who()
+    //var c = a + b
+    //print(c)
+    
+    //var animals = Animal[5]
+    //print(animals)
+    //animals[2] =Animal{cat}
+    //print(animals)
+    //animals[2] = Animal{dog}
+    //animals[4] = Animal{cat}
+    //print(animals)
 
-    var animals = Animal[c->age]
-    print(animals)
+    //var hah = Animal{dog}
+    //print(hah->value)
+    //hah->value = "wasd"
+    //print(hah->value)
+    //print(Animal{dog}->value)
+
+    print(da())
+    da() = "wasdwd"
+    print(da())
+}
+
+func da() {
+    return "nice"
+}
+
+enum What
+{
+    n
+    b
 }
 
 enum Animal
@@ -18,14 +43,17 @@ enum Animal
     cat = 'c'
 }
 
-struct Person {
+struct Person
+{
     age = 0
 
-    func who() {
+    func who()
+    {
         print("age ", self->age)
     }
 
-    oper +(ref other) {
+    oper +(ref other)
+    {
         return Person{age=self->age + other->age}
     }
 }

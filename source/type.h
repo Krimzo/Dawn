@@ -55,9 +55,17 @@ struct Function
 
 struct Enum
 {
+    struct Entry
+    {
+        Int id = 0;
+        NodeRef expr;
+    };
+
     Int id = 0;
-    OMap<Int, Node> keys_expr;
-    OMap<Int, Value> keys_value;
+    Vector<Entry> entries;
+
+    Bool contains( Int id ) const;
+    Entry* get( Int id );
 };
 
 struct Struct

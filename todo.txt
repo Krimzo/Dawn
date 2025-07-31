@@ -1,2 +1,2 @@
-enum check assigned function as a value
-enum use vector instead of map?
+fix value inside a node (serious issue), maybe add const (or let) back again into spec?
+num check assigned function as a value

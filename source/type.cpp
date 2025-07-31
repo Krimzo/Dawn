@@ -13,6 +13,26 @@ dawn::Bool dawn::Function::is_method() const
     return self->type() != ValueType::NOTHING;
 }
 
+dawn::Bool dawn::Enum::contains( Int id ) const
+{
+    for ( auto& entry : entries )
+    {
+        if ( entry.id == id )
+            return true;
+    }
+    return false;
+}
+
+dawn::Enum::Entry* dawn::Enum::get( Int id )
+{
+    for ( auto& entry : entries )
+    {
+        if ( entry.id == id )
+            return &entry;
+    }
+    return nullptr;
+}
+
 dawn::Bool dawn::Struct::contains( Int id ) const
 {
     for ( auto& field : fields )

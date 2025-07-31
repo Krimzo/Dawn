@@ -40,9 +40,7 @@ void dawn::Engine::load_function( Function const& entry )
 
 void dawn::Engine::load_enum( Enum const& entry )
 {
-    auto& enu = ( enums[entry.id] = entry );
-    for ( auto& [key, expr] : enu.keys_expr )
-        enu.keys_value[key] = handle_expr( expr ).clone();
+    enums[entry.id] = entry;
 }
 
 void dawn::Engine::load_struct( Struct const& entry )
@@ -469,7 +467,7 @@ dawn::Value dawn::Engine::handle_enum_node( EnumNod const& node )
     if ( enum_it == enums.end() )
         ENGINE_PANIC( "enum [", IDSystem::get( node.type_id ), "] doesn't exist" );
 
-    if ( !enum_it->second.keys_value.contains( node.key_id ) )
+    if ( !enum_it->second.contains( node.key_id ) )
         ENGINE_PANIC( "enum [", IDSystem::get( node.type_id ), "] doesn't have key [", IDSystem::get( node.key_id ), "]" );
 
     EnumVal result{};
@@ -726,10 +724,10 @@ dawn::Value dawn::Engine::create_default_value( Int typeid_ )
 
     else if ( enums.contains( typeid_ ) )
     {
-        auto& [first_key, _] = *enums.at( typeid_ ).keys_expr.begin();
+        auto& entry = *enums.at( typeid_ ).entries.begin();
         EnumNod node;
         node.type_id = typeid_;
-        node.key_id = first_key;
+        node.key_id = entry.id;
         return handle_enum_node( node );
     }
 
