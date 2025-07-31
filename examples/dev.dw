@@ -1,0 +1,26 @@
+func main()
+{
+    var v = 12.
+    var a = Person{age=v}
+    a->who()
+    print(a->age)
+
+    //var b = Person{age=7}
+    //a->who()
+    //b->who()
+    //var c = a + b
+    //print(c)
+}
+
+struct Person {
+    age_test = 6.1
+    age = self->age_test + 3
+
+    func who() {
+        print("age ", self->age)
+    }
+
+    oper +(ref other) {
+        return Person{age=self->age + other->age}
+    }
+}

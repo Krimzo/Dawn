@@ -124,44 +124,44 @@ void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token
         if ( it->type == TokenType::NAME )
         {
             Int name_id = IDSystem::get( it->value );
-            if ( struc.fields.contains( name_id ) )
-                PARSER_PANIC( *it, "field [", it->value, "] already defined" );
+            if ( struc.contains( name_id ) )
+                PARSER_PANIC( *it, "struct field [", IDSystem::get( name_id ), "] already defined" );
 
-            auto& field = struc.fields[name_id];
-            field.id = name_id;
-            struc.field_order.push_back( field.id );
+            auto& field_exp = struc.fields.emplace_back( name_id, NodeRef{} ).expr;
+            field_exp = node_pool().new_register();
             ++it;
 
-            field.expr = node_pool().new_register();
             if ( it->value == op_assign )
             {
                 ++it;
-                parse_expression( ExtractType::NEW_LINE, it, end, field.expr.value() );
+                parse_expression( ExtractType::NEW_LINE, it, end, field_exp.value() );
             }
             else
-                field.expr.value() = make_nothing_node();
+                field_exp.value() = make_nothing_node();
         }
         else if ( it->value == kw_func )
         {
             Function method;
             parse_function( it, end, method );
+            if ( struc.contains( method.id ) )
+                PARSER_PANIC( *it, "struct method [", IDSystem::get( method.id ), "] already defined" );
 
             auto& self_var = *method.args.emplace( method.args.begin() );
             self_var.kind = VariableKind::REF;
             self_var.id = IDSystem::get( (String) kw_self );
-
-            struc.methods[method.id] = method;
+            struc.methods.push_back( method );
         }
         else if ( it->value == kw_oper )
         {
             Function op;
             parse_operator( it, end, op );
+            if ( struc.contains( op.id ) )
+                PARSER_PANIC( *it, "struct operator [", IDSystem::get( op.id ), "] already defined" );
 
             auto& self_var = *op.args.emplace( op.args.begin() );
             self_var.kind = VariableKind::REF;
             self_var.id = IDSystem::get( (String) kw_self );
-
-            struc.methods[op.id] = op;
+            struc.methods.push_back( op );
         }
         else
             PARSER_PANIC( *it, "expected field name or function" );

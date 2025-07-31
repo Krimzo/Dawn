@@ -69,8 +69,9 @@ struct Struct
     };
 
     Int id = 0;
-    OMap<Int, Field> fields;
-    Vector<Int> field_order;
-    OMap<Int, Function> methods;
+    Vector<Field> fields;
+    Vector<Function> methods;
+
+    Bool contains( Int id ) const;
 };
 }

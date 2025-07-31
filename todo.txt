@@ -1,0 +1,3 @@
+struct nicer printing
+array sized init check if cloning is needed
+enum check assigned function as a value

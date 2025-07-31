@@ -491,20 +491,22 @@ dawn::Value dawn::Engine::handle_struct_node( StructNod const& node )
     auto& struc_val = value.as<StructVal>();
     struc_val.parent = &struc;
 
-    static const Int self_id = IDSystem::get( (String) kw_self );
-    auto pop_handler = stack.push_from( RegisterRef<Frame>{} );
-    stack.current().set( self_id, value );
-
-    for ( Int id : struc.field_order )
+    // struct default init
     {
-        if ( auto node_arg_it = node.args.find( id ); node_arg_it != node.args.end() )
-            struc_val.members[id] = handle_expr( node_arg_it->second ).clone();
-        else
-            struc_val.members[id] = handle_expr( struc.fields[id].expr.value() ).clone();
+        static const Int self_id = IDSystem::get( (String) kw_self );
+        auto pop_handler = stack.push_from( RegisterRef<Frame>{} );
+        stack.current().set( self_id, value );
+        for ( auto& field : struc.fields )
+            struc_val.members[field.id] = handle_expr( field.expr.value() ).clone();
     }
 
-    for ( auto& [id, method] : struc.methods )
-        struc_val.members[id] = Value{ method };
+    // struct {} init
+    for ( auto& [id, arg_node] : node.args )
+        struc_val.members[id].assign( handle_expr( arg_node ).clone() );
+
+    // methods
+    for ( auto& method : struc.methods )
+        struc_val.members[method.id] = Value{ method };
 
     return value;
 }

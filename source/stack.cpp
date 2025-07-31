@@ -1,18 +1,20 @@
 #include "stack.h"
 #include "pool.h"
 
+static constexpr dawn::Int LOCAL_FRAME_RESERVE_SIZE = 16;
+static constexpr dawn::Int GLOBAL_FRAME_SIZE = 1024;
 
 dawn::Frame::Frame( FrameType type )
 {
     if ( type == FrameType::LOCAL )
     {
         auto& frame = m_frame.emplace<LocalFrame>();
-        frame.reserve( 16 );
+        frame.reserve( LOCAL_FRAME_RESERVE_SIZE );
     }
     else
     {
         auto& frame = m_frame.emplace<GlobalFrame>();
-        frame.resize( 1024 );
+        frame.resize( GLOBAL_FRAME_SIZE );
     }
 }
 

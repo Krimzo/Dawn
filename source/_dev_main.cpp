@@ -7,7 +7,7 @@ int dawn::_dev_main( int argc, char** argv )
 
     Dawn dawn;
 
-    if ( auto error = dawn.eval_file( "examples/bench.dw" ) )
+    if ( auto error = dawn.eval_file( "examples/dev.dw" ) )
     {
         print( error.value() );
         return -1;
@@ -21,7 +21,7 @@ int dawn::_dev_main( int argc, char** argv )
 
     auto end_time = ch::high_resolution_clock::now();
     auto duration = ch::duration_cast<ch::microseconds>( end_time - start_time );
-    print( duration );
+    print( "Exec dur: ", duration );
 
     return 0;
 }
