@@ -61,10 +61,10 @@ void dawn::Engine::load_standard_functions()
             }
 
             case ValueType::ENUM:
-                return Value{ args[0].as<EnumVal>().parent->id };
+                return Value{ args[0].as_enum().parent->id };
 
             case ValueType::STRUCT:
-                return Value{ args[0].as<StructVal>().parent->id };
+                return Value{ args[0].as_struct().parent->id };
 
             case ValueType::ARRAY:
             {
@@ -112,10 +112,10 @@ void dawn::Engine::load_standard_functions()
                 return Value{ tp_function };
 
             case ValueType::ENUM:
-                return Value{ IDSystem::get( args[0].as<EnumVal>().parent->id ) };
+                return Value{ IDSystem::get( args[0].as_enum().parent->id ) };
 
             case ValueType::STRUCT:
-                return Value{ IDSystem::get( args[0].as<StructVal>().parent->id ) };
+                return Value{ IDSystem::get( args[0].as_struct().parent->id ) };
 
             case ValueType::ARRAY:
                 return Value{ tp_array };
@@ -269,53 +269,53 @@ void dawn::Engine::load_standard_members()
     // string
     add_type_member( ValueType::STRING, "count", [this]( Value& self ) -> Value
         {
-            return (Value) (Int) self.as<String>().size();
+            return (Value) (Int) self.as_string().size();
         } );
 
     add_type_method( ValueType::STRING, "push", false, 1, [this]( Value& self, Value* args ) -> Value
         {
-            self.as<String>().push_back( args[0].to_char( *this ) );
+            self.as_string().push_back( args[0].to_char( *this ) );
             return self;
         } );
 
     add_type_method( ValueType::STRING, "pop", false, 0, [this]( Value& self, Value* args ) -> Value
         {
-            self.as<String>().pop_back();
+            self.as_string().pop_back();
             return self;
         } );
 
     // enum
     add_type_member( ValueType::ENUM, "value", [this]( Value& self ) -> Value
         {
-            return self.as<EnumVal>().value( *this );
+            return self.as_enum().value( *this );
         } );
 
     // array
     add_type_member( ValueType::ARRAY, "count", [this]( Value& self ) -> Value
         {
-            return (Value) (Int) self.as<ArrayVal>().data.size();
+            return (Value) (Int) self.as_array().data.size();
         } );
 
     add_type_method( ValueType::ARRAY, "push", false, 1, [this]( Value& self, Value* args ) -> Value
         {
-            self.as<ArrayVal>().data.push_back( args[0] );
+            self.as_array().data.push_back( args[0] );
             return self;
         } );
 
     add_type_method( ValueType::ARRAY, "pop", false, 0, [this]( Value& self, Value* args ) -> Value
         {
-            self.as<ArrayVal>().data.pop_back();
+            self.as_array().data.pop_back();
             return self;
         } );
 
     // range
     add_type_member( ValueType::RANGE, "start", [this]( Value& self ) -> Value
         {
-            return (Value) self.as<RangeVal>().start_incl;
+            return (Value) self.as_range().start_incl;
         } );
 
     add_type_member( ValueType::RANGE, "end", [this]( Value& self ) -> Value
         {
-            return (Value) self.as<RangeVal>().end_excl;
+            return (Value) self.as_range().end_excl;
         } );
 }

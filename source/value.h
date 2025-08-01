@@ -77,13 +77,17 @@ struct Value
     explicit Value( ArrayVal const& value );
     explicit Value( RangeVal const& value );
 
-    ValueType type() const;
-
-    template<typename T>
-    T& as() const
-    {
-        return m_regref.cast<T>().value();
-    }
+    inline ValueType type() const { return m_type; }
+    inline Bool& as_bool() const { return m_regref.cast<Bool>().value(); }
+    inline Int& as_int() const { return m_regref.cast<Int>().value(); }
+    inline Float& as_float() const { return m_regref.cast<Float>().value(); }
+    inline Char& as_char() const { return m_regref.cast<Char>().value(); }
+    inline String& as_string() const { return m_regref.cast<String>().value(); }
+    inline Function& as_function() const { return m_regref.cast<Function>().value(); }
+    inline EnumVal& as_enum() const { return m_regref.cast<EnumVal>().value(); }
+    inline StructVal& as_struct() const { return m_regref.cast<StructVal>().value(); }
+    inline ArrayVal& as_array() const { return m_regref.cast<ArrayVal>().value(); }
+    inline RangeVal& as_range() const { return m_regref.cast<RangeVal>().value(); }
 
     void assign( Value const& other );
     Value clone() const;

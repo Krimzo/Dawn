@@ -61,7 +61,7 @@ dawn::Value dawn::Engine::call_func( Int id, Value* args, Int arg_count )
     if ( val->type() != ValueType::FUNCTION )
         ENGINE_PANIC( "object [", IDSystem::get( id ), "] can't be called" );
 
-    return handle_func( val->as<Function>(), args, arg_count );
+    return handle_func( val->as_function(), args, arg_count );
 }
 
 void dawn::Engine::add_var( VariableKind kind, Int id, Value const& value )
@@ -251,7 +251,7 @@ dawn::Value dawn::Engine::handle_ref_node( RefNod const& node )
 {
     if ( node.value_ref.type() == ValueType::FUNCTION )
     {
-        auto& func = node.value_ref.as<Function>();
+        auto& func = node.value_ref.as_function();
         if ( func.type() == FunctionType::LAMBDA )
             func.LAMBDA_frame = stack.peek();
     }
@@ -277,7 +277,7 @@ dawn::Value dawn::Engine::handle_call_node( CallNod const& node )
     if ( left_val.type() != ValueType::FUNCTION )
         ENGINE_PANIC( "can't call [", left_val.type(), "]" );
 
-    auto& func = left_val.as<Function>();
+    auto& func = left_val.as_function();
     Int arg_count = ( func.type() == FunctionType::METHOD ) ? ( 1 + node.args.size() ) : node.args.size();
 
     Value* args_ptr = SALLOC( Value, arg_count );
@@ -306,14 +306,14 @@ dawn::Value dawn::Engine::handle_index_node( IndexNod const& node )
 
     if ( left_val.type() == ValueType::STRING )
     {
-        auto& val = left_val.as<String>();
+        auto& val = left_val.as_string();
         if ( index < 0 || index >= (Int) val.size() )
             ENGINE_PANIC( "string access [", index, "] out of bounds" );
         return Value{ val[index] };
     }
     else if ( left_val.type() == ValueType::ARRAY )
     {
-        auto& val = left_val.as<ArrayVal>();
+        auto& val = left_val.as_array();
         if ( index < 0 || index >= (Int) val.data.size() )
             ENGINE_PANIC( "array access [", index, "] out of bounds" );
         return val.data[index];
@@ -435,7 +435,7 @@ void dawn::Engine::handle_for_node( ForNod const& node, Opt<Value>& retval )
 
     if ( loop_val.type() == ValueType::RANGE )
     {
-        auto& value_rng = loop_val.as<RangeVal>();
+        auto& value_rng = loop_val.as_range();
 
         Bool didbrk = false, didcon = false;
         for ( Int i = value_rng.start_incl; i < value_rng.end_excl; ++i )
@@ -451,7 +451,7 @@ void dawn::Engine::handle_for_node( ForNod const& node, Opt<Value>& retval )
     }
     else if ( loop_val.type() == ValueType::STRING )
     {
-        auto& value_str = loop_val.as<String>();
+        auto& value_str = loop_val.as_string();
 
         Bool didbrk = false, didcon = false;
         for ( Char c : value_str )
@@ -467,7 +467,7 @@ void dawn::Engine::handle_for_node( ForNod const& node, Opt<Value>& retval )
     }
     else if ( loop_val.type() == ValueType::ARRAY )
     {
-        auto& value_arr = loop_val.as<ArrayVal>();
+        auto& value_arr = loop_val.as_array();
 
         Bool didbrk = false, didcon = false;
         for ( auto& value : value_arr.data )
@@ -510,7 +510,7 @@ dawn::Value dawn::Engine::handle_struct_node( StructNod const& node )
 
     Value value{ StructVal{} };
 
-    auto& struc_val = value.as<StructVal>();
+    auto& struc_val = value.as_struct();
     struc_val.parent = &struc;
 
     // struct default init
@@ -536,7 +536,7 @@ dawn::Value dawn::Engine::handle_struct_node( StructNod const& node )
     // methods
     for ( auto& method : struc.methods )
     {
-        auto& func = ( struc_val.members[method.id] = Value{ method } ).as<Function>();
+        auto& func = ( struc_val.members[method.id] = Value{ method } ).as_function();
         *func.METHOD_self = value;
     }
 
@@ -701,7 +701,7 @@ dawn::Value dawn::Engine::handle_as_node( AssignNod const& node )
 
 dawn::Value dawn::Engine::handle_ac_struct_node( Value const& left, Int right )
 {
-    auto& left_val = left.as<StructVal>();
+    auto& left_val = left.as_struct();
     if ( !left_val.members.contains( right ) )
         ENGINE_PANIC( "struct [", IDSystem::get( left_val.parent->id ), "] doesn't have member [", IDSystem::get( right ), "]" );
     return left_val.members.at( right );
