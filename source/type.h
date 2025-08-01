@@ -40,10 +40,10 @@ enum struct FunctionType
     LAMBDA,
 };
 
+using CppFuncBody = Func<Value( Value*, Int )>;
+
 struct Function
 {
-    using CppFunc = Func<Value( Value*, Int )>;
-
     struct Arg
     {
         VariableKind kind;
@@ -52,7 +52,7 @@ struct Function
 
     Int id = 0;
     Vector<Arg> args;
-    Variant<Scope, CppFunc> body;
+    Variant<Scope, CppFuncBody> body;
 
     Holder<Value> METHOD_self;
     RegisterRef<Frame> LAMBDA_frame;

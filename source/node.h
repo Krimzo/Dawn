@@ -112,13 +112,15 @@ struct StructNod
     OMap<Int, Node> args;
 };
 
+enum struct ArrayType
+{
+    LIST = 0,
+    SIZE,
+};
+
 struct ArrayNod
 {
-    enum struct InitType
-    {
-        LIST = 0,
-        SIZE,
-    } init_type = {};
+    ArrayType type;
 
     // list init
     Vector<Node> LIST_list;

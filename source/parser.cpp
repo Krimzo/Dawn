@@ -665,7 +665,7 @@ void dawn::Parser::expression_complex_array( Vector<Token>& left, Vector<Token>&
     if ( left.empty() )
     {
         auto& nod = tree.emplace<ArrayNod>();
-        nod.init_type = ArrayNod::InitType::LIST;
+        nod.type = ArrayType::LIST;
 
         for ( auto it = right.begin(); it != right.end(); )
             parse_expression( ExtractType::SPLITTER, it, right.end(), nod.LIST_list.emplace_back() );
@@ -673,7 +673,7 @@ void dawn::Parser::expression_complex_array( Vector<Token>& left, Vector<Token>&
     else if ( left.size() == 1 && left.front().type == TokenType::TYPE )
     {
         auto& node = tree.emplace<ArrayNod>();
-        node.init_type = ArrayNod::InitType::SIZE;
+        node.type = ArrayType::SIZE;
 
         auto right_it = right.begin();
         node.SIZE_typeid = IDSystem::get( left.front().value );

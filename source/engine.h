@@ -6,7 +6,7 @@
 
 namespace dawn
 {
-using TypeMember = Func<Value( Value const& )>;
+using MemberGenerator = Func<Value( Value const& )>;
 
 struct Engine
 {
@@ -16,7 +16,7 @@ struct Engine
     Stack stack;
     OMap<Int, Enum> enums;
     OMap<Int, Struct> structs;
-    OMap<Int, TypeMember> type_members[(Int) ValueType::_COUNT] = {};
+    OMap<Int, MemberGenerator> member_generators[(Int) ValueType::_COUNT] = {};
 
     Engine();
 
@@ -26,7 +26,7 @@ struct Engine
     void load_struct( Struct const& entry );
     void load_variable( Variable const& entry );
 
-    void bind_func( Int id, Function::CppFunc cpp_func );
+    void bind_func( Int id, CppFuncBody cpp_func );
     Value call_func( Int id, Value* args, Int arg_count );
 
     void add_var( VariableKind kind, Int id, Value const& value );

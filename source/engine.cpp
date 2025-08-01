@@ -44,11 +44,11 @@ void dawn::Engine::load_variable( Variable const& entry )
     add_var( entry.kind, entry.id, handle_expr( entry.expr.value() ) );
 }
 
-void dawn::Engine::bind_func( Int id, Function::CppFunc cpp_func )
+void dawn::Engine::bind_func( Int id, CppFuncBody cpp_func )
 {
     Function func;
     func.id = id;
-    func.body.emplace<Function::CppFunc>( std::move( cpp_func ) );
+    func.body.emplace<CppFuncBody>( std::move( cpp_func ) );
     load_function( func );
 }
 
@@ -81,7 +81,7 @@ dawn::Value* dawn::Engine::get_var( Int id )
 
 void dawn::Engine::add_type_member( ValueType type, String const& name, Func<Value( Value& )> const& func )
 {
-    type_members[(Int) type][IDSystem::get( name )] = [=]( Value const& self ) -> Value
+    member_generators[(Int) type][IDSystem::get( name )] = [=]( Value const& self ) -> Value
         {
             return func( const_cast<Value&>( self ) );
         };
@@ -90,7 +90,7 @@ void dawn::Engine::add_type_member( ValueType type, String const& name, Func<Val
 void dawn::Engine::add_type_method( ValueType type, String const& name, Bool is_const, Int expected_args, Func<Value( Value&, Value* )> const& body )
 {
     const Int id = IDSystem::get( name );
-    type_members[(Int) type][id] = [=]( Value const& self_val ) -> Value
+    member_generators[(Int) type][id] = [=]( Value const& self_val ) -> Value
         {
             Function func;
             func.id = id;
@@ -133,7 +133,7 @@ dawn::Value dawn::Engine::handle_func( Function const& func, Value* args, Int ar
     }
     else
     {
-        return std::get<Function::CppFunc>( func.body )( args, arg_count );
+        return std::get<CppFuncBody>( func.body )( args, arg_count );
     }
 }
 
@@ -547,7 +547,7 @@ dawn::Value dawn::Engine::handle_array_node( ArrayNod const& node )
 {
     ArrayVal result{};
 
-    if ( node.init_type == ArrayNod::InitType::SIZE )
+    if ( node.type == ArrayType::SIZE )
     {
         Int size = handle_expr( node.SIZE_expr.value() ).to_int( *this );
         if ( size < 0 )
@@ -709,10 +709,10 @@ dawn::Value dawn::Engine::handle_ac_struct_node( Value const& left, Int right )
 
 dawn::Value dawn::Engine::handle_ac_type_node( Value const& left, Int right )
 {
-    auto& members = type_members[(Int) left.type()];
-    if ( !members.contains( right ) )
+    auto& generators = member_generators[(Int) left.type()];
+    if ( !generators.contains( right ) )
         ENGINE_PANIC( "type [", left.type(), "] doesn't have member [", IDSystem::get( right ), "]" );
-    return members.at( right )( left );
+    return generators.at( right )( left );
 }
 
 dawn::Value dawn::Engine::create_default_value( Int typeid_ )
