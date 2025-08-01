@@ -160,47 +160,47 @@ void dawn::Engine::handle_instr( Node const& node, Opt<Value>& retval, Bool* did
     break;
 
     case NodeType::VARIABLE:
-        handle_var_node( node.as<VariableNod>() );
+        handle_var_node( node.as<VariableNode>() );
         break;
 
     case NodeType::RETURN:
-        handle_return_node( node.as<ReturnNod>(), retval );
+        handle_return_node( node.as<ReturnNode>(), retval );
         break;
 
     case NodeType::BREAK:
-        handle_break_node( node.as<BreakNod>(), didbrk );
+        handle_break_node( node.as<BreakNode>(), didbrk );
         break;
 
     case NodeType::CONTINUE:
-        handle_continue_node( node.as<ContinueNod>(), didcon );
+        handle_continue_node( node.as<ContinueNode>(), didcon );
         break;
 
     case NodeType::THROW:
-        handle_throw_node( node.as<ThrowNod>() );
+        handle_throw_node( node.as<ThrowNode>() );
         break;
 
     case NodeType::TRY:
-        handle_try_node( node.as<TryNod>(), retval, didbrk, didcon );
+        handle_try_node( node.as<TryNode>(), retval, didbrk, didcon );
         break;
 
     case NodeType::IF:
-        handle_if_node( node.as<IfNod>(), retval, didbrk, didcon );
+        handle_if_node( node.as<IfNode>(), retval, didbrk, didcon );
         break;
 
     case NodeType::SWITCH:
-        handle_switch_node( node.as<SwitchNod>(), retval, didbrk, didcon );
+        handle_switch_node( node.as<SwitchNode>(), retval, didbrk, didcon );
         break;
 
     case NodeType::LOOP:
-        handle_loop_node( node.as<LoopNod>(), retval );
+        handle_loop_node( node.as<LoopNode>(), retval );
         break;
 
     case NodeType::WHILE:
-        handle_while_node( node.as<WhileNod>(), retval );
+        handle_while_node( node.as<WhileNode>(), retval );
         break;
 
     case NodeType::FOR:
-        handle_for_node( node.as<ForNod>(), retval );
+        handle_for_node( node.as<ForNode>(), retval );
         break;
 
     default:
@@ -213,41 +213,41 @@ dawn::Value dawn::Engine::handle_expr( Node const& node )
     switch ( node.type() )
     {
     case NodeType::REF:
-        return handle_ref_node( node.as<RefNod>() );
+        return handle_ref_node( node.as<RefNode>() );
 
     case NodeType::IDENTIFIER:
-        return handle_id_node( node.as<IdentifierNod>() );
+        return handle_id_node( node.as<IdentifierNode>() );
 
     case NodeType::CALL:
-        return handle_call_node( node.as<CallNod>() );
+        return handle_call_node( node.as<CallNode>() );
 
     case NodeType::INDEX:
-        return handle_index_node( node.as<IndexNod>() );
+        return handle_index_node( node.as<IndexNode>() );
 
     case NodeType::ENUM:
-        return handle_enum_node( node.as<EnumNod>() );
+        return handle_enum_node( node.as<EnumNode>() );
 
     case NodeType::STRUCT:
-        return handle_struct_node( node.as<StructNod>() );
+        return handle_struct_node( node.as<StructNode>() );
 
     case NodeType::ARRAY:
-        return handle_array_node( node.as<ArrayNod>() );
+        return handle_array_node( node.as<ArrayNode>() );
 
     case NodeType::UNARY:
-        return handle_un_node( node.as<UnaryNod>() );
+        return handle_un_node( node.as<UnaryNode>() );
 
     case NodeType::OPERATOR:
-        return handle_op_node( node.as<OperatorNod>() );
+        return handle_op_node( node.as<OperatorNode>() );
 
     case NodeType::ASSIGN:
-        return handle_as_node( node.as<AssignNod>() );
+        return handle_as_node( node.as<AssignNode>() );
 
     default:
         ENGINE_PANIC( "unknown expr node type: ", (Int) node.type() );
     }
 }
 
-dawn::Value dawn::Engine::handle_ref_node( RefNod const& node )
+dawn::Value dawn::Engine::handle_ref_node( RefNode const& node )
 {
     if ( node.value_ref.type() == ValueType::FUNCTION )
     {
@@ -258,12 +258,12 @@ dawn::Value dawn::Engine::handle_ref_node( RefNod const& node )
     return node.value_ref;
 }
 
-void dawn::Engine::handle_var_node( VariableNod const& node )
+void dawn::Engine::handle_var_node( VariableNode const& node )
 {
     add_var( node.var.kind, node.var.id, handle_expr( node.var.expr.value() ) );
 }
 
-dawn::Value dawn::Engine::handle_id_node( IdentifierNod const& node )
+dawn::Value dawn::Engine::handle_id_node( IdentifierNode const& node )
 {
     auto* ptr = get_var( node.id );
     if ( !ptr )
@@ -271,7 +271,7 @@ dawn::Value dawn::Engine::handle_id_node( IdentifierNod const& node )
     return *ptr;
 }
 
-dawn::Value dawn::Engine::handle_call_node( CallNod const& node )
+dawn::Value dawn::Engine::handle_call_node( CallNode const& node )
 {
     Value left_val = handle_expr( node.left_expr.value() );
     if ( left_val.type() != ValueType::FUNCTION )
@@ -298,7 +298,7 @@ dawn::Value dawn::Engine::handle_call_node( CallNod const& node )
     return handle_func( func, args_ptr, arg_count );
 }
 
-dawn::Value dawn::Engine::handle_index_node( IndexNod const& node )
+dawn::Value dawn::Engine::handle_index_node( IndexNode const& node )
 {
     Value left_val = handle_expr( node.left_expr.value() );
     Value expr_val = handle_expr( node.expr.value() );
@@ -322,31 +322,31 @@ dawn::Value dawn::Engine::handle_index_node( IndexNod const& node )
         ENGINE_PANIC( "can't index type [", left_val.type(), "]" );
 }
 
-void dawn::Engine::handle_return_node( ReturnNod const& node, Opt<Value>& retval )
+void dawn::Engine::handle_return_node( ReturnNode const& node, Opt<Value>& retval )
 {
     retval = handle_expr( node.expr.value() );
 }
 
-void dawn::Engine::handle_break_node( BreakNod const& node, Bool* didbrk )
+void dawn::Engine::handle_break_node( BreakNode const& node, Bool* didbrk )
 {
     if ( !didbrk )
         ENGINE_PANIC( "break statement outside of loop" );
     *didbrk = true;
 }
 
-void dawn::Engine::handle_continue_node( ContinueNod const& node, Bool* didcon )
+void dawn::Engine::handle_continue_node( ContinueNode const& node, Bool* didcon )
 {
     if ( !didcon )
         ENGINE_PANIC( "continue statement outside of loop" );
     *didcon = true;
 }
 
-void dawn::Engine::handle_throw_node( ThrowNod const& node )
+void dawn::Engine::handle_throw_node( ThrowNode const& node )
 {
     throw handle_expr( node.expr.value() );
 }
 
-void dawn::Engine::handle_try_node( TryNod const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
+void dawn::Engine::handle_try_node( TryNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
 {
     try
     {
@@ -361,7 +361,7 @@ void dawn::Engine::handle_try_node( TryNod const& node, Opt<Value>& retval, Bool
     }
 }
 
-void dawn::Engine::handle_if_node( IfNod const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
+void dawn::Engine::handle_if_node( IfNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
 {
     for ( auto& part : node.parts )
     {
@@ -374,7 +374,7 @@ void dawn::Engine::handle_if_node( IfNod const& node, Opt<Value>& retval, Bool* 
     }
 }
 
-void dawn::Engine::handle_switch_node( SwitchNod const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
+void dawn::Engine::handle_switch_node( SwitchNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
 {
     Value check_val = handle_expr( node.main_expr.value() );
 
@@ -398,7 +398,7 @@ void dawn::Engine::handle_switch_node( SwitchNod const& node, Opt<Value>& retval
     }
 }
 
-void dawn::Engine::handle_loop_node( LoopNod const& node, Opt<Value>& retval )
+void dawn::Engine::handle_loop_node( LoopNode const& node, Opt<Value>& retval )
 {
     Bool didbrk = false, didcon = false;
     while ( true )
@@ -412,7 +412,7 @@ void dawn::Engine::handle_loop_node( LoopNod const& node, Opt<Value>& retval )
     }
 }
 
-void dawn::Engine::handle_while_node( WhileNod const& node, Opt<Value>& retval )
+void dawn::Engine::handle_while_node( WhileNode const& node, Opt<Value>& retval )
 {
     Bool didbrk = false, didcon = false;
     while ( true )
@@ -429,7 +429,7 @@ void dawn::Engine::handle_while_node( WhileNod const& node, Opt<Value>& retval )
     }
 }
 
-void dawn::Engine::handle_for_node( ForNod const& node, Opt<Value>& retval )
+void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
 {
     Value loop_val = handle_expr( node.expr.value() );
 
@@ -485,7 +485,7 @@ void dawn::Engine::handle_for_node( ForNod const& node, Opt<Value>& retval )
         ENGINE_PANIC( "can't for loop [", loop_val.type(), "]" );
 }
 
-dawn::Value dawn::Engine::handle_enum_node( EnumNod const& node )
+dawn::Value dawn::Engine::handle_enum_node( EnumNode const& node )
 {
     auto enum_it = enums.find( node.type_id );
     if ( enum_it == enums.end() )
@@ -501,7 +501,7 @@ dawn::Value dawn::Engine::handle_enum_node( EnumNod const& node )
     return Value{ result };
 }
 
-dawn::Value dawn::Engine::handle_struct_node( StructNod const& node )
+dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
 {
     auto struct_it = structs.find( node.type_id );
     if ( struct_it == structs.end() )
@@ -543,7 +543,7 @@ dawn::Value dawn::Engine::handle_struct_node( StructNod const& node )
     return value;
 }
 
-dawn::Value dawn::Engine::handle_array_node( ArrayNod const& node )
+dawn::Value dawn::Engine::handle_array_node( ArrayNode const& node )
 {
     ArrayVal result{};
 
@@ -568,7 +568,7 @@ dawn::Value dawn::Engine::handle_array_node( ArrayNod const& node )
     return Value{ result };
 }
 
-dawn::Value dawn::Engine::handle_un_node( UnaryNod const& node )
+dawn::Value dawn::Engine::handle_un_node( UnaryNode const& node )
 {
     switch ( node.type )
     {
@@ -586,7 +586,7 @@ dawn::Value dawn::Engine::handle_un_node( UnaryNod const& node )
     }
 }
 
-dawn::Value dawn::Engine::handle_op_node( OperatorNod const& node )
+dawn::Value dawn::Engine::handle_op_node( OperatorNode const& node )
 {
     switch ( node.type )
     {
@@ -646,21 +646,21 @@ dawn::Value dawn::Engine::handle_op_node( OperatorNod const& node )
     }
 }
 
-dawn::Value dawn::Engine::handle_ac_node( OperatorNod const& node )
+dawn::Value dawn::Engine::handle_ac_node( OperatorNode const& node )
 {
     Value left_val = handle_expr( node.sides[0] );
 
     if ( node.sides[1].type() != NodeType::IDENTIFIER )
         ENGINE_PANIC( "access must be an identifier" );
 
-    Int right_id = node.sides[1].as<IdentifierNod>().id;
+    Int right_id = node.sides[1].as<IdentifierNode>().id;
     if ( left_val.type() == ValueType::STRUCT )
         return handle_ac_struct_node( left_val, right_id );
     else
         return handle_ac_type_node( left_val, right_id );
 }
 
-dawn::Value dawn::Engine::handle_as_node( AssignNod const& node )
+dawn::Value dawn::Engine::handle_as_node( AssignNode const& node )
 {
     Value left_val = handle_expr( node.sides[0] );
 
@@ -741,7 +741,7 @@ dawn::Value dawn::Engine::create_default_value( Int typeid_ )
     else if ( enums.contains( typeid_ ) )
     {
         auto& entry = *enums.at( typeid_ ).entries.begin();
-        EnumNod node;
+        EnumNode node;
         node.type_id = typeid_;
         node.key_id = entry.id;
         return handle_enum_node( node );
@@ -749,7 +749,7 @@ dawn::Value dawn::Engine::create_default_value( Int typeid_ )
 
     else if ( structs.contains( typeid_ ) )
     {
-        StructNod node;
+        StructNode node;
         node.type_id = typeid_;
         return handle_struct_node( node );
     }
