@@ -32,17 +32,12 @@ struct Engine
     void add_var( VariableKind kind, Int id, Value const& value );
     Value* get_var( Int id );
 
+    void add_type_member( ValueType type, String const& name, Func<Value( Value& )> const& func );
+    void add_type_method( ValueType type, String const& name, Bool is_const, Int expected_args, Func<Value( Value&, Value* )> const& body );
+
 private:
     void load_standard_functions();
-    void load_bool_members();
-    void load_int_members();
-    void load_float_members();
-    void load_char_members();
-    void load_string_members();
-    void load_function_members();
-    void load_enum_members();
-    void load_array_members();
-    void load_range_members();
+    void load_standard_members();
 
     Value handle_func( Function const& func, Value* args, Int arg_count );
     void handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon );

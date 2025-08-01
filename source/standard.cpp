@@ -264,127 +264,58 @@ void dawn::Engine::load_standard_functions()
         } );
 }
 
-void dawn::Engine::load_bool_members()
+void dawn::Engine::load_standard_members()
 {
-    auto& bool_members = type_members[(Int) ValueType::BOOL];
-
-}
-
-void dawn::Engine::load_int_members()
-{
-    auto& int_members = type_members[(Int) ValueType::INT];
-
-}
-
-void dawn::Engine::load_float_members()
-{
-    auto& float_members = type_members[(Int) ValueType::FLOAT];
-
-}
-
-void dawn::Engine::load_char_members()
-{
-    auto& char_members = type_members[(Int) ValueType::CHAR];
-
-}
-
-void dawn::Engine::load_string_members()
-{
-    auto& string_members = type_members[(Int) ValueType::STRING];
-
-    string_members[IDSystem::get( "count" )] = [this]( Value const& self_val ) -> Value
+    // string
+    add_type_member( ValueType::STRING, "count", [this]( Value& self ) -> Value
         {
-            auto& self = self_val.as<String>();
-            return (Value) (Int) self.size();
-        };
+            return (Value) (Int) self.as<String>().size();
+        } );
 
-    string_members[IDSystem::get( "push" )] = [this]( Value const& self_val ) -> Value
+    add_type_method( ValueType::STRING, "push", false, 1, [this]( Value& self, Value* args ) -> Value
         {
-            if ( self_val.is_const() )
-                ENGINE_PANIC( "can't push a char into a const string" );
+            self.as<String>().push_back( args[0].to_char( *this ) );
+            return self;
+        } );
 
-            static const Int id = IDSystem::get( "push" );
-            Function func;
-            func.id = id;
-            *func.METHOD_self = self_val;
-
-            func.body = [this]( Value* args, Int arg_count ) -> Value
-                {
-                    if ( arg_count != 2 )
-                        ENGINE_PANIC( "push expected a value" );
-
-                    auto& self = args[0];
-                    self.as<String>().push_back( args[1].to_char( *this ) );
-                    return self;
-                };
-            return (Value) func;
-        };
-}
-
-void dawn::Engine::load_function_members()
-{
-    auto& function_members = type_members[(Int) ValueType::FUNCTION];
-
-}
-
-void dawn::Engine::load_enum_members()
-{
-    auto& enum_members = type_members[(Int) ValueType::ENUM];
-
-    enum_members[IDSystem::get( "value" )] = [this]( Value const& self_val ) -> Value
+    add_type_method( ValueType::STRING, "pop", false, 0, [this]( Value& self, Value* args ) -> Value
         {
-            auto& self = self_val.as<EnumVal>();
-            return self.value( *this );
-        };
-}
+            self.as<String>().pop_back();
+            return self;
+        } );
 
-void dawn::Engine::load_array_members()
-{
-    auto& array_members = type_members[(Int) ValueType::ARRAY];
-
-    array_members[IDSystem::get( "count" )] = [this]( Value const& self_val ) -> Value
+    // enum
+    add_type_member( ValueType::ENUM, "value", [this]( Value& self ) -> Value
         {
-            auto& self = self_val.as<ArrayVal>().data;
-            return (Value) (Int) self.size();
-        };
+            return self.as<EnumVal>().value( *this );
+        } );
 
-    array_members[IDSystem::get( "push" )] = [this]( Value const& self_val ) -> Value
+    // array
+    add_type_member( ValueType::ARRAY, "count", [this]( Value& self ) -> Value
         {
-            if ( self_val.is_const() )
-                ENGINE_PANIC( "can't push a value into a const array" );
+            return (Value) (Int) self.as<ArrayVal>().data.size();
+        } );
 
-            static const Int id = IDSystem::get( "push" );
-            Function func;
-            func.id = id;
-            *func.METHOD_self = self_val;
-
-            func.body = [this]( Value* args, Int arg_count ) -> Value
-                {
-                    if ( arg_count != 2 )
-                        ENGINE_PANIC( "push expected a value" );
-
-                    auto& self = args[0];
-                    self.as<ArrayVal>().data
-                        .push_back( args[1].clone().unlock_const() ); // unlock always because value cant be pushed into a const array anyways
-                    return self;
-                };
-            return (Value) func;
-        };
-}
-
-void dawn::Engine::load_range_members()
-{
-    auto& range_members = type_members[(Int) ValueType::RANGE];
-
-    range_members[IDSystem::get( "start" )] = [this]( Value const& self_val ) -> Value
+    add_type_method( ValueType::ARRAY, "push", false, 1, [this]( Value& self, Value* args ) -> Value
         {
-            auto& self = self_val.as<RangeVal>();
-            return (Value) self.start_incl;
-        };
+            self.as<ArrayVal>().data.push_back( args[0] );
+            return self;
+        } );
 
-    range_members[IDSystem::get( "end" )] = [this]( Value const& self_val ) -> Value
+    add_type_method( ValueType::ARRAY, "pop", false, 0, [this]( Value& self, Value* args ) -> Value
         {
-            auto& self = self_val.as<RangeVal>();
-            return (Value) self.end_excl;
-        };
+            self.as<ArrayVal>().data.pop_back();
+            return self;
+        } );
+
+    // range
+    add_type_member( ValueType::RANGE, "start", [this]( Value& self ) -> Value
+        {
+            return (Value) self.as<RangeVal>().start_incl;
+        } );
+
+    add_type_member( ValueType::RANGE, "end", [this]( Value& self ) -> Value
+        {
+            return (Value) self.as<RangeVal>().end_excl;
+        } );
 }

@@ -1,32 +1,3 @@
 func main()
 {
-    const a = Person{age=5}
-    const b = Person{age=7}
-    a->who()
-    b->who()
-    var c = a + b
-    c->age += 4
-    print(c)
-}
-
-enum Animal
-{
-    none
-    dog = "dog"
-    cat = 'c'
-}
-
-struct Person
-{
-    age = 0
-
-    func who()
-    {
-        print("age ", self->age)
-    }
-
-    oper +(ref other)
-    {
-        return Person{age=self->age + other->age}
-    }
 }

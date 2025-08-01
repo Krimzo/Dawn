@@ -4,15 +4,7 @@
 dawn::Engine::Engine()
 {
     load_standard_functions();
-    load_bool_members();
-    load_int_members();
-    load_float_members();
-    load_char_members();
-    load_string_members();
-    load_function_members();
-    load_enum_members();
-    load_array_members();
-    load_range_members();
+    load_standard_members();
 }
 
 void dawn::Engine::load_mod( Module const& module )
@@ -85,6 +77,34 @@ void dawn::Engine::add_var( VariableKind kind, Int id, Value const& value )
 dawn::Value* dawn::Engine::get_var( Int id )
 {
     return stack.current().get( id );
+}
+
+void dawn::Engine::add_type_member( ValueType type, String const& name, Func<Value( Value& )> const& func )
+{
+    type_members[(Int) type][IDSystem::get( name )] = [=]( Value const& self ) -> Value
+        {
+            return func( const_cast<Value&>( self ) );
+        };
+}
+
+void dawn::Engine::add_type_method( ValueType type, String const& name, Bool is_const, Int expected_args, Func<Value( Value&, Value* )> const& body )
+{
+    const Int id = IDSystem::get( name );
+    type_members[(Int) type][id] = [=]( Value const& self_val ) -> Value
+        {
+            Function func;
+            func.id = id;
+            *func.METHOD_self = self_val;
+            func.body = [=]( Value* args, Int arg_count ) -> Value
+                {
+                    if ( !is_const && self_val.is_const() )
+                        ENGINE_PANIC( "can't call [", name, "] on a const value" );
+                    if ( ( 1 + expected_args ) != arg_count )
+                        ENGINE_PANIC( "method [", name, "] expects self + ", expected_args, " arguments" );
+                    return body( args[0], args + 1 );
+                };
+            return (Value) func;
+        };
 }
 
 dawn::Value dawn::Engine::handle_func( Function const& func, Value* args, Int arg_count )
