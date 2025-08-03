@@ -5,9 +5,9 @@
 
 namespace dawn
 {
-struct RefNode
+struct ValueNode
 {
-    Value value_ref;
+    Value value;
 };
 
 struct VariableNode
@@ -147,8 +147,8 @@ struct NodeHandler
     template<typename T>
     static consteval NodeType type()
     {
-        if constexpr ( std::is_same_v<T, RefNode> )
-            return NodeType::REF;
+        if constexpr ( std::is_same_v<T, ValueNode> )
+            return NodeType::VALUE;
 
         else if constexpr ( std::is_same_v<T, VariableNode> )
             return NodeType::VARIABLE;
@@ -221,8 +221,8 @@ struct NodeHandler
     {
         switch ( type )
         {
-        case NodeType::REF:
-            new ( to ) RefNode( *static_cast<RefNode const*>( from ) );
+        case NodeType::VALUE:
+            new ( to ) ValueNode( *static_cast<ValueNode const*>( from ) );
             break;
 
         case NodeType::VARIABLE:
@@ -315,8 +315,8 @@ struct NodeHandler
     {
         switch ( type )
         {
-        case NodeType::REF:
-            static_cast<RefNode*>( ptr )->~RefNode();
+        case NodeType::VALUE:
+            static_cast<ValueNode*>( ptr )->~ValueNode();
             break;
 
         case NodeType::VARIABLE:
@@ -409,7 +409,7 @@ struct NodeHandler
 consteval size_t max_node_size()
 {
     return std::max( {
-        sizeof( RefNode ),
+        sizeof( ValueNode ),
         sizeof( VariableNode ),
         sizeof( IdentifierNode ),
         sizeof( CallNode ),
@@ -436,7 +436,7 @@ consteval size_t max_node_size()
 consteval size_t max_node_align()
 {
     return std::max( {
-        alignof( RefNode ),
+        alignof( ValueNode ),
         alignof( VariableNode ),
         alignof( IdentifierNode ),
         alignof( CallNode ),
@@ -470,5 +470,5 @@ Node make_int_node( Int value );
 Node make_float_node( Float value );
 Node make_char_node( Char value );
 Node make_string_node( StringRef const& value );
-Node make_ref_node( Value const& value );
+Node make_value_node( Value const& value );
 }

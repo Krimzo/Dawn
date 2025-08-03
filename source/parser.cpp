@@ -597,9 +597,9 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Vector<Token>&
         left.erase( left.begin() );
         left.pop_back();
 
-        auto& node = tree.emplace<RefNode>();
-        node.value_ref = Value{ Function{} };
-        auto& func = node.value_ref.as_function();
+        auto& node = tree.emplace<ValueNode>();
+        node.value = Value{ Function{} };
+        auto& func = node.value.as_function();
 
         Set<Int> args;
         for ( auto it = left.begin(); it != left.end(); )

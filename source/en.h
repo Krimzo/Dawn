@@ -83,7 +83,7 @@ enum struct NodeType
     FOR,
 
     // expr
-    REF,
+    VALUE,
     IDENTIFIER,
     CALL,
     INDEX,

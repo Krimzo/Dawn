@@ -212,8 +212,8 @@ dawn::Value dawn::Engine::handle_expr( Node const& node )
 {
     switch ( node.type() )
     {
-    case NodeType::REF:
-        return handle_ref_node( node.as<RefNode>() );
+    case NodeType::VALUE:
+        return handle_value_node( node.as<ValueNode>() );
 
     case NodeType::IDENTIFIER:
         return handle_id_node( node.as<IdentifierNode>() );
@@ -247,15 +247,15 @@ dawn::Value dawn::Engine::handle_expr( Node const& node )
     }
 }
 
-dawn::Value dawn::Engine::handle_ref_node( RefNode const& node )
+dawn::Value dawn::Engine::handle_value_node( ValueNode const& node )
 {
-    if ( node.value_ref.type() == ValueType::FUNCTION )
+    if ( node.value.type() == ValueType::FUNCTION )
     {
-        auto& func = node.value_ref.as_function();
+        auto& func = node.value.as_function();
         if ( func.type() == FunctionType::LAMBDA )
             func.LAMBDA_frame = stack.peek();
     }
-    return node.value_ref;
+    return node.value;
 }
 
 void dawn::Engine::handle_var_node( VariableNode const& node )
