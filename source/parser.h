@@ -6,14 +6,6 @@
 
 namespace dawn
 {
-enum struct ExtractType
-{
-    DEFAULT,
-    NEW_LINE,
-    SPLITTER,
-    SCOPE_START,
-};
-
 struct Module
 {
     Set<String> imports;
@@ -37,7 +29,7 @@ private:
     void parse_global_variable( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module );
 
     void parse_struct( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Struct& struc );
-    void parse_enum( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Enum& enu );
+    void parse_enum( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Enum& en );
     void parse_function( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& function );
     void parse_operator( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& operat );
     void parse_variable( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Variable& variable );

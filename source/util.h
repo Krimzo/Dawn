@@ -46,7 +46,7 @@ Opt<String> read_file( StringRef const& path );
 Opt<Int> parse_int( StringRef const& data );
 Opt<Float> parse_float( StringRef const& data );
 
-Float mymod( Float left, Float right );
+Float dawn_mod( Float left, Float right );
 
 std::ostream& operator<<( std::ostream& stream, Color const& color );
 std::ostream& operator<<( std::ostream& stream, ColoredText const& colored_text );

@@ -10,7 +10,7 @@ dawn::Bool dawn::Module::contains_id( Int id ) const
     if ( std::find_if( functions.begin(), functions.end(), [&]( Function const& func ) { return func.id == id; } ) != functions.end() )
         return true;
 
-    if ( std::find_if( enums.begin(), enums.end(), [&]( Enum const& enu ) { return enu.id == id; } ) != enums.end() )
+    if ( std::find_if( enums.begin(), enums.end(), [&]( Enum const& en ) { return en.id == id; } ) != enums.end() )
         return true;
 
     if ( std::find_if( structs.begin(), structs.end(), [&]( Struct const& struc ) { return struc.id == id; } ) != structs.end() )
@@ -73,13 +73,13 @@ void dawn::Parser::parse_global_struct( Vector<Token>::const_iterator& it, Vecto
 
 void dawn::Parser::parse_global_enum( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module )
 {
-    Enum enu;
-    parse_enum( it, end, enu );
+    Enum en;
+    parse_enum( it, end, en );
 
-    if ( module.contains_id( enu.id ) )
-        PARSER_PANIC( {}, "name [", IDSystem::get( enu.id ), "] already in use" );
+    if ( module.contains_id( en.id ) )
+        PARSER_PANIC( {}, "name [", IDSystem::get( en.id ), "] already in use" );
 
-    module.enums.push_back( enu );
+    module.enums.push_back( en );
 }
 
 void dawn::Parser::parse_global_function( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module )
@@ -169,7 +169,7 @@ void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token
     ++it;
 }
 
-void dawn::Parser::parse_enum( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Enum& enu )
+void dawn::Parser::parse_enum( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Enum& en )
 {
     if ( it->value != kw_enum )
         PARSER_PANIC( *it, "expected enum" );
@@ -177,7 +177,7 @@ void dawn::Parser::parse_enum( Vector<Token>::const_iterator& it, Vector<Token>:
 
     if ( !is_custom_type( it->value ) )
         PARSER_PANIC( *it, "expected enum name" );
-    enu.id = IDSystem::get( it->value );
+    en.id = IDSystem::get( it->value );
     ++it;
 
     if ( it->value != op_scope_opn )
@@ -189,10 +189,10 @@ void dawn::Parser::parse_enum( Vector<Token>::const_iterator& it, Vector<Token>:
         if ( it->type == TokenType::NAME )
         {
             Int name_id = IDSystem::get( it->value );
-            if ( enu.contains( name_id ) )
+            if ( en.contains( name_id ) )
                 PARSER_PANIC( *it, "key [", it->value, "] already in use" );
 
-            auto& entry = enu.entries.emplace_back();
+            auto& entry = en.entries.emplace_back();
             entry.id = name_id;
             entry.expr = node_pool().new_register();
             auto& expr = entry.expr.value();
@@ -211,8 +211,8 @@ void dawn::Parser::parse_enum( Vector<Token>::const_iterator& it, Vector<Token>:
     }
     ++it;
 
-    if ( enu.entries.empty() )
-        PARSER_PANIC( {}, "enum [", IDSystem::get( enu.id ), "] cannot be empty" );
+    if ( en.entries.empty() )
+        PARSER_PANIC( {}, "enum [", IDSystem::get( en.id ), "] cannot be empty" );
 }
 
 void dawn::Parser::parse_function( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& function )

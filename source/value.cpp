@@ -618,7 +618,7 @@ dawn::Value dawn::Value::op_mod( Engine& engine, Value const& other ) const
             return Value{ as_int() % other.as_int() };
 
         case ValueType::FLOAT:
-            return Value{ mymod( (Float) as_int(), other.as_float() ) };
+            return Value{ dawn_mod( (Float) as_int(), other.as_float() ) };
 
         default:
             PANIC( "[", type(), "] % [", other.type(), "] not supported" );
@@ -630,10 +630,10 @@ dawn::Value dawn::Value::op_mod( Engine& engine, Value const& other ) const
         switch ( other.type() )
         {
         case ValueType::INT:
-            return Value{ mymod( as_float(), (Float) other.as_int() ) };
+            return Value{ dawn_mod( as_float(), (Float) other.as_int() ) };
 
         case ValueType::FLOAT:
-            return Value{ mymod( as_float(), other.as_float() ) };
+            return Value{ dawn_mod( as_float(), other.as_float() ) };
 
         default:
             PANIC( "[", type(), "] % [", other.type(), "] not supported" );
@@ -1109,23 +1109,4 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
     default:
         PANIC( "can't convert [", type(), "] to string" );
     }
-}
-
-std::ostream& dawn::operator<<( std::ostream& stream, ValueType type )
-{
-    switch ( type )
-    {
-    case ValueType::NOTHING: stream << tp_nothing; break;
-    case ValueType::BOOL: stream << tp_bool; break;
-    case ValueType::INT: stream << tp_int; break;
-    case ValueType::FLOAT: stream << tp_float; break;
-    case ValueType::CHAR: stream << tp_char; break;
-    case ValueType::STRING: stream << tp_string; break;
-    case ValueType::FUNCTION: stream << tp_function; break;
-    case ValueType::ENUM: stream << tp_enum; break;
-    case ValueType::STRUCT: stream << tp_struct; break;
-    case ValueType::ARRAY: stream << tp_array; break;
-    case ValueType::RANGE: stream << tp_range; break;
-    }
-    return stream;
 }

@@ -15,6 +15,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\en.cpp" />
     <ClCompile Include="source\engine.cpp" />
     <ClCompile Include="source\pool.cpp" />
     <ClCompile Include="source\stack.cpp" />
@@ -36,6 +37,7 @@
   <ItemGroup>
     <ClInclude Include="source\dawn.h" />
     <ClInclude Include="source\decl.h" />
+    <ClInclude Include="source\en.h" />
     <ClInclude Include="source\engine.h" />
     <ClInclude Include="source\err.h" />
     <ClInclude Include="source\holder.h" />

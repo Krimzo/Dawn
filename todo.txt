@@ -1,2 +1,3 @@
-enums to a single header
+refnode to valuenode
+array type to variant
 better error description

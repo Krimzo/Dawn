@@ -112,12 +112,6 @@ struct StructNode
     OMap<Int, Node> args;
 };
 
-enum struct ArrayType
-{
-    LIST = 0,
-    SIZE,
-};
-
 struct ArrayNode
 {
     ArrayType type;
@@ -130,38 +124,10 @@ struct ArrayNode
     NodeRef SIZE_expr;
 };
 
-enum struct UnaryType
-{
-    PLUS = 0,
-    MINUS,
-    NOT,
-};
-
 struct UnaryNode
 {
     UnaryType type;
     NodeRef right;
-};
-
-enum struct OperatorType
-{
-    ACCESS = 0,
-    POW,
-    MOD,
-    MUL,
-    DIV,
-    ADD,
-    SUB,
-    COMPARE,
-    LESS,
-    GREAT,
-    LESS_EQ,
-    GREAT_EQ,
-    EQ,
-    NOT_EQ,
-    AND,
-    OR,
-    RANGE,
 };
 
 struct OperatorNode
@@ -170,52 +136,10 @@ struct OperatorNode
     Vector<Node> sides;
 };
 
-enum struct AssignType
-{
-    ASSIGN = 0,
-    ADD,
-    SUB,
-    MUL,
-    DIV,
-    POW,
-    MOD,
-};
-
 struct AssignNode
 {
     AssignType type;
     Vector<Node> sides;
-};
-
-enum struct NodeType
-{
-    EMPTY = 0,
-
-    // instr
-    SCOPE,
-    VARIABLE,
-    RETURN,
-    BREAK,
-    CONTINUE,
-    THROW,
-    TRY,
-    IF,
-    SWITCH,
-    LOOP,
-    WHILE,
-    FOR,
-
-    // expr
-    REF,
-    IDENTIFIER,
-    CALL,
-    INDEX,
-    ENUM,
-    STRUCT,
-    ARRAY,
-    UNARY,
-    OPERATOR,
-    ASSIGN,
 };
 
 struct NodeHandler

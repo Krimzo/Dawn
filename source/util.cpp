@@ -73,7 +73,7 @@ dawn::Opt<dawn::Float> dawn::parse_float( StringRef const& data )
     return { result };
 }
 
-dawn::Float dawn::mymod( Float left, Float right )
+dawn::Float dawn::dawn_mod( Float left, Float right )
 {
     if ( left < 0.0 ) return ( right < 0.0 ) ? std::fmod( left, right ) : std::remainder( left, right );
     else              return ( right < 0.0 ) ? std::remainder( left, right ) : std::fmod( left, right );

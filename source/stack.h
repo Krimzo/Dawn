@@ -5,12 +5,6 @@
 
 namespace dawn
 {
-enum struct FrameType
-{
-    LOCAL = 0,
-    GLOBAL = 1,
-};
-
 struct Frame
 {
     using LocalFrame = Vector<Pair<Int, Value>>;

@@ -8,13 +8,6 @@
 
 namespace dawn
 {
-enum struct VariableKind
-{
-    CONST = 0,
-    VAR,
-    REF,
-};
-
 struct Variable
 {
     VariableKind kind;
@@ -25,13 +18,6 @@ struct Variable
 struct Scope
 {
     Vector<Node> instr;
-};
-
-enum struct FunctionType
-{
-    GLOBAL = 0,
-    METHOD,
-    LAMBDA,
 };
 
 struct Function
@@ -81,6 +67,4 @@ struct Struct
 
     Bool contains( Int id ) const;
 };
-
-std::ostream& operator<<( std::ostream& stream, VariableKind kind );
 }

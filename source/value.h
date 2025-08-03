@@ -45,22 +45,6 @@ struct RangeValue
     Int end_excl = 0;
 };
 
-enum struct ValueType
-{
-    NOTHING = 0,
-    BOOL,
-    INT,
-    FLOAT,
-    CHAR,
-    STRING,
-    FUNCTION,
-    ENUM,
-    STRUCT,
-    ARRAY,
-    RANGE,
-    _COUNT,
-};
-
 struct Value
 {
     Value() = default;
@@ -129,6 +113,4 @@ private:
     ValueType m_type = ValueType::NOTHING;
     Bool m_const = true;
 };
-
-std::ostream& operator<<( std::ostream& stream, ValueType type );
 }
