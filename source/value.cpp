@@ -372,14 +372,14 @@ dawn::Value dawn::Value::un_plus( Engine& engine ) const
         auto& left = as_struct();
         auto* op = left.get_method( __add, true );
         if ( !op )
-            PANIC( "+ struct [", IDSystem::get( left.parent->id ), "] not supported" );
+            PANIC( dawn::op_add, " struct [", IDSystem::get( left.parent->id ), "] not supported" );
 
         Value args[1] = { *this };
         return engine.handle_func( *op, args, (Int) std::size( args ) );
     }
 
     default:
-        PANIC( "+ [", type(), "] not supported" );
+        PANIC( dawn::op_add, " [", type(), "] not supported" );
     }
 }
 
@@ -398,14 +398,14 @@ dawn::Value dawn::Value::un_minus( Engine& engine ) const
         auto& left = as_struct();
         auto* op = left.get_method( __sub, true );
         if ( !op )
-            PANIC( "- struct [", IDSystem::get( left.parent->id ), "] not supported" );
+            PANIC( dawn::op_sub, " struct [", IDSystem::get( left.parent->id ), "] not supported" );
 
         Value args[1] = { *this };
         return engine.handle_func( *op, args, (Int) std::size( args ) );
     }
 
     default:
-        PANIC( "- [", type(), "] not supported" );
+        PANIC( dawn::op_sub, " [", type(), "] not supported" );
     }
 }
 
@@ -424,7 +424,7 @@ dawn::Value dawn::Value::op_add( Engine& engine, Value const& other ) const
             return Value{ as_int() + other.as_float() };
 
         default:
-            PANIC( "[", type(), "] + [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_add, " [", other.type(), "] not supported" );
         }
     }
 
@@ -439,7 +439,7 @@ dawn::Value dawn::Value::op_add( Engine& engine, Value const& other ) const
             return Value{ as_float() + other.as_float() };
 
         default:
-            PANIC( "[", type(), "] + [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_add, " [", other.type(), "] not supported" );
         }
     }
 
@@ -451,7 +451,7 @@ dawn::Value dawn::Value::op_add( Engine& engine, Value const& other ) const
             return Value{ as_string() + other.as_string() };
 
         default:
-            PANIC( "[", type(), "] + [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_add, " [", other.type(), "] not supported" );
         }
     }
 
@@ -468,7 +468,7 @@ dawn::Value dawn::Value::op_add( Engine& engine, Value const& other ) const
         }
 
         default:
-            PANIC( "[", type(), "] + [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_add, " [", other.type(), "] not supported" );
         }
     }
 
@@ -477,14 +477,14 @@ dawn::Value dawn::Value::op_add( Engine& engine, Value const& other ) const
         auto& left = as_struct();
         auto* op = left.get_method( __add, false );
         if ( !op )
-            PANIC( "struct [", IDSystem::get( left.parent->id ), "] + [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] ", dawn::op_add, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
         return engine.handle_func( *op, args, (Int) std::size( args ) );
     }
 
     default:
-        PANIC( "[", type(), "] + [", other.type(), "] not supported" );
+        PANIC( "[", type(), "] ", dawn::op_add, " [", other.type(), "] not supported" );
     }
 }
 
@@ -503,7 +503,7 @@ dawn::Value dawn::Value::op_sub( Engine& engine, Value const& other ) const
             return Value{ as_int() - other.as_float() };
 
         default:
-            PANIC( "[", type(), "] - [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_sub, " [", other.type(), "] not supported" );
         }
     }
 
@@ -518,7 +518,7 @@ dawn::Value dawn::Value::op_sub( Engine& engine, Value const& other ) const
             return Value{ as_float() - other.as_float() };
 
         default:
-            PANIC( "[", type(), "] - [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_sub, " [", other.type(), "] not supported" );
         }
     }
 
@@ -527,14 +527,14 @@ dawn::Value dawn::Value::op_sub( Engine& engine, Value const& other ) const
         auto& left = as_struct();
         auto* op = left.get_method( __sub, false );
         if ( !op )
-            PANIC( "struct [", IDSystem::get( left.parent->id ), "] - [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] ", dawn::op_sub, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
         return engine.handle_func( *op, args, (Int) std::size( args ) );
     }
 
     default:
-        PANIC( "[", type(), "] - [", other.type(), "] not supported" );
+        PANIC( "[", type(), "] ", dawn::op_sub, " [", other.type(), "] not supported" );
     }
 }
 
@@ -553,7 +553,7 @@ dawn::Value dawn::Value::op_mul( Engine& engine, Value const& other ) const
             return Value{ as_int() * other.as_float() };
 
         default:
-            PANIC( "[", type(), "] * [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_mul, " [", other.type(), "] not supported" );
         }
     }
 
@@ -568,7 +568,7 @@ dawn::Value dawn::Value::op_mul( Engine& engine, Value const& other ) const
             return Value{ as_float() * other.as_float() };
 
         default:
-            PANIC( "[", type(), "] * [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_mul, " [", other.type(), "] not supported" );
         }
     }
 
@@ -577,14 +577,14 @@ dawn::Value dawn::Value::op_mul( Engine& engine, Value const& other ) const
         auto& left = as_struct();
         auto* op = left.get_method( __mul, false );
         if ( !op )
-            PANIC( "struct [", IDSystem::get( left.parent->id ), "] * [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] ", dawn::op_mul, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
         return engine.handle_func( *op, args, (Int) std::size( args ) );
     }
 
     default:
-        PANIC( "[", type(), "] * [", other.type(), "] not supported" );
+        PANIC( "[", type(), "] ", dawn::op_mul, " [", other.type(), "] not supported" );
     }
 }
 
@@ -603,7 +603,7 @@ dawn::Value dawn::Value::op_div( Engine& engine, Value const& other ) const
             return Value{ as_int() / other.as_float() };
 
         default:
-            PANIC( "[", type(), "] / [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_div, " [", other.type(), "] not supported" );
         }
     }
 
@@ -618,7 +618,7 @@ dawn::Value dawn::Value::op_div( Engine& engine, Value const& other ) const
             return Value{ as_float() / other.as_float() };
 
         default:
-            PANIC( "[", type(), "] / [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_div, " [", other.type(), "] not supported" );
         }
     }
 
@@ -627,14 +627,14 @@ dawn::Value dawn::Value::op_div( Engine& engine, Value const& other ) const
         auto& left = as_struct();
         auto* op = left.get_method( __div, false );
         if ( !op )
-            PANIC( "struct [", IDSystem::get( left.parent->id ), "] / [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] ", dawn::op_div, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
         return engine.handle_func( *op, args, (Int) std::size( args ) );
     }
 
     default:
-        PANIC( "[", type(), "] / [", other.type(), "] not supported" );
+        PANIC( "[", type(), "] ", dawn::op_div, " [", other.type(), "] not supported" );
     }
 }
 
@@ -653,7 +653,7 @@ dawn::Value dawn::Value::op_pow( Engine& engine, Value const& other ) const
             return Value{ std::pow( as_int(), other.as_float() ) };
 
         default:
-            PANIC( "[", type(), "] ^ [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_pow, " [", other.type(), "] not supported" );
         }
     }
 
@@ -668,7 +668,7 @@ dawn::Value dawn::Value::op_pow( Engine& engine, Value const& other ) const
             return Value{ std::pow( as_float(), other.as_float() ) };
 
         default:
-            PANIC( "[", type(), "] ^ [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_pow, " [", other.type(), "] not supported" );
         }
     }
 
@@ -677,14 +677,14 @@ dawn::Value dawn::Value::op_pow( Engine& engine, Value const& other ) const
         auto& left = as_struct();
         auto* op = left.get_method( __pow, false );
         if ( !op )
-            PANIC( "struct [", IDSystem::get( left.parent->id ), "] ^ [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] ", dawn::op_pow, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
         return engine.handle_func( *op, args, (Int) std::size( args ) );
     }
 
     default:
-        PANIC( "[", type(), "] ^ [", other.type(), "] not supported" );
+        PANIC( "[", type(), "] ", dawn::op_pow, " [", other.type(), "] not supported" );
     }
 }
 
@@ -703,7 +703,7 @@ dawn::Value dawn::Value::op_mod( Engine& engine, Value const& other ) const
             return Value{ dawn_mod( (Float) as_int(), other.as_float() ) };
 
         default:
-            PANIC( "[", type(), "] % [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_mod, " [", other.type(), "] not supported" );
         }
     }
 
@@ -718,7 +718,7 @@ dawn::Value dawn::Value::op_mod( Engine& engine, Value const& other ) const
             return Value{ dawn_mod( as_float(), other.as_float() ) };
 
         default:
-            PANIC( "[", type(), "] % [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_mod, " [", other.type(), "] not supported" );
         }
     }
 
@@ -727,14 +727,14 @@ dawn::Value dawn::Value::op_mod( Engine& engine, Value const& other ) const
         auto& left = as_struct();
         auto* op = left.get_method( __mod, false );
         if ( !op )
-            PANIC( "struct [", IDSystem::get( left.parent->id ), "] % [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] ", dawn::op_mod, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
         return engine.handle_func( *op, args, (Int) std::size( args ) );
     }
 
     default:
-        PANIC( "[", type(), "] % [", other.type(), "] not supported" );
+        PANIC( "[", type(), "] ", dawn::op_mod, " [", other.type(), "] not supported" );
     }
 }
 
@@ -750,7 +750,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
             return Value{ (Int) ( as_bool() <=> other.as_bool() )._Value };
 
         default:
-            PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_cmpr, " [", other.type(), "] not supported" );
         }
     }
 
@@ -765,7 +765,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
             return Value{ (Int) ( as_int() <=> other.as_float() )._Value };
 
         default:
-            PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_cmpr, " [", other.type(), "] not supported" );
         }
     }
 
@@ -780,7 +780,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
             return Value{ (Int) ( as_float() <=> other.as_float() )._Value };
 
         default:
-            PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_cmpr, " [", other.type(), "] not supported" );
         }
     }
 
@@ -792,7 +792,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
             return Value{ (Int) ( as_char() <=> other.as_char() )._Value };
 
         default:
-            PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_cmpr, " [", other.type(), "] not supported" );
         }
     }
 
@@ -804,7 +804,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
             return Value{ (Int) ( as_string() <=> other.as_string() )._Value };
 
         default:
-            PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_cmpr, " [", other.type(), "] not supported" );
         }
     }
 
@@ -823,7 +823,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
         }
 
         default:
-            PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_cmpr, " [", other.type(), "] not supported" );
         }
     }
 
@@ -832,7 +832,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
         auto& left = as_struct();
         auto* op = left.get_method( __cmpr, false );
         if ( !op )
-            PANIC( "struct [", IDSystem::get( left.parent->id ), "] <=> [", other.type(), "] not supported" );
+            PANIC( "struct [", IDSystem::get( left.parent->id ), "] ", dawn::op_cmpr, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
         return engine.handle_func( *op, args, (Int) std::size( args ) );
@@ -857,12 +857,12 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
         }
 
         default:
-            PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
+            PANIC( "[", type(), "] ", dawn::op_cmpr, " [", other.type(), "] not supported" );
         }
     }
 
     default:
-        PANIC( "[", type(), "] <=> [", other.type(), "] not supported" );
+        PANIC( "[", type(), "] ", dawn::op_cmpr, " [", other.type(), "] not supported" );
     }
 }
 
