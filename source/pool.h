@@ -19,10 +19,10 @@ struct MemoryPools
     MemoryPool<String, 1024> string_memory;
 
     MemoryPool<Function, 1024> function_memory;
-    MemoryPool<EnumVal, 1024> enum_memory;
-    MemoryPool<StructVal, 1024> struct_memory;
-    MemoryPool<ArrayVal, 1024> array_memory;
-    MemoryPool<RangeVal, 1024> range_memory;
+    MemoryPool<EnumValue, 1024> enum_memory;
+    MemoryPool<StructValue, 1024> struct_memory;
+    MemoryPool<ArrayValue, 1024> array_memory;
+    MemoryPool<RangeValue, 1024> range_memory;
 
     ~MemoryPools() noexcept;
 };
@@ -37,8 +37,8 @@ MemoryPool<Char, 1024>& char_pool();
 MemoryPool<String, 1024>& string_pool();
 
 MemoryPool<Function, 1024>& function_pool();
-MemoryPool<EnumVal, 1024>& enum_pool();
-MemoryPool<StructVal, 1024>& struct_pool();
-MemoryPool<ArrayVal, 1024>& array_pool();
-MemoryPool<RangeVal, 1024>& range_pool();
+MemoryPool<EnumValue, 1024>& enum_pool();
+MemoryPool<StructValue, 1024>& struct_pool();
+MemoryPool<ArrayValue, 1024>& array_pool();
+MemoryPool<RangeValue, 1024>& range_pool();
 }

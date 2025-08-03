@@ -7,7 +7,7 @@
 
 namespace dawn
 {
-struct EnumVal
+struct EnumValue
 {
     Enum* parent = nullptr;
     Int key_id = 0;
@@ -15,31 +15,31 @@ struct EnumVal
     Value value( Engine& engine ) const;
 };
 
-struct StructVal
+struct StructValue
 {
     Struct* parent = nullptr;
     OMap<Int, Value> members;
 
-    StructVal() = default;
+    StructValue() = default;
 
-    StructVal( StructVal const& other );
-    StructVal& operator=( StructVal const& other );
+    StructValue( StructValue const& other );
+    StructValue& operator=( StructValue const& other );
 
     Value* get_member( Int id );
     Function* get_method( Int id, Bool has_no_args );
 };
 
-struct ArrayVal
+struct ArrayValue
 {
     Vector<Value> data;
 
-    ArrayVal() = default;
+    ArrayValue() = default;
 
-    ArrayVal( ArrayVal const& other );
-    ArrayVal& operator=( ArrayVal const& other );
+    ArrayValue( ArrayValue const& other );
+    ArrayValue& operator=( ArrayValue const& other );
 };
 
-struct RangeVal
+struct RangeValue
 {
     Int start_incl = 0;
     Int end_excl = 0;
@@ -70,10 +70,10 @@ struct Value
     explicit Value( Char value );
     explicit Value( StringRef const& value );
     explicit Value( Function const& value );
-    explicit Value( EnumVal const& value );
-    explicit Value( StructVal const& value );
-    explicit Value( ArrayVal const& value );
-    explicit Value( RangeVal const& value );
+    explicit Value( EnumValue const& value );
+    explicit Value( StructValue const& value );
+    explicit Value( ArrayValue const& value );
+    explicit Value( RangeValue const& value );
 
     inline ValueType type() const { return m_type; }
     inline Bool& as_bool() const { return m_regref.cast<Bool>().value(); }
@@ -82,10 +82,10 @@ struct Value
     inline Char& as_char() const { return m_regref.cast<Char>().value(); }
     inline String& as_string() const { return m_regref.cast<String>().value(); }
     inline Function& as_function() const { return m_regref.cast<Function>().value(); }
-    inline EnumVal& as_enum() const { return m_regref.cast<EnumVal>().value(); }
-    inline StructVal& as_struct() const { return m_regref.cast<StructVal>().value(); }
-    inline ArrayVal& as_array() const { return m_regref.cast<ArrayVal>().value(); }
-    inline RangeVal& as_range() const { return m_regref.cast<RangeVal>().value(); }
+    inline EnumValue& as_enum() const { return m_regref.cast<EnumValue>().value(); }
+    inline StructValue& as_struct() const { return m_regref.cast<StructValue>().value(); }
+    inline ArrayValue& as_array() const { return m_regref.cast<ArrayValue>().value(); }
+    inline RangeValue& as_range() const { return m_regref.cast<RangeValue>().value(); }
 
     void assign( Value const& other );
     Value clone() const;

@@ -16,7 +16,7 @@ int dawn::_shp_main( int argc, char** argv )
         return -2;
     }
 
-    ArrayVal arg;
+    ArrayValue arg;
     for ( int i = 2; i < argc; i++ )
         arg.data.emplace_back( String{ argv[i] } );
 

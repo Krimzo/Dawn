@@ -21,7 +21,7 @@ struct Token
 {
     TokenType type;
     String value;
-    String lit_val;
+    String literal;
     Int line_number = 0;
 };
 

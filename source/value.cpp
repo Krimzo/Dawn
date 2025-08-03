@@ -23,20 +23,20 @@ ID_HELPER( to_char );
 ID_HELPER( to_string );
 }
 
-dawn::Value dawn::EnumVal::value( Engine& engine ) const
+dawn::Value dawn::EnumValue::value( Engine& engine ) const
 {
     auto& expr = parent->get( key_id )->expr;
     return engine.handle_expr( expr.value() ).clone();
 }
 
-dawn::StructVal::StructVal( StructVal const& other )
+dawn::StructValue::StructValue( StructValue const& other )
 {
     parent = other.parent;
     for ( auto& [key, val] : other.members )
         members[key] = val.clone();
 }
 
-dawn::StructVal& dawn::StructVal::operator=( StructVal const& other )
+dawn::StructValue& dawn::StructValue::operator=( StructValue const& other )
 {
     if ( this != &other )
     {
@@ -48,7 +48,7 @@ dawn::StructVal& dawn::StructVal::operator=( StructVal const& other )
     return *this;
 }
 
-dawn::Value* dawn::StructVal::get_member( Int id )
+dawn::Value* dawn::StructValue::get_member( Int id )
 {
     auto it = members.find( id );
     if ( it == members.end() )
@@ -56,7 +56,7 @@ dawn::Value* dawn::StructVal::get_member( Int id )
     return &it->second;
 }
 
-dawn::Function* dawn::StructVal::get_method( Int id, Bool has_no_args )
+dawn::Function* dawn::StructValue::get_method( Int id, Bool has_no_args )
 {
     auto it = members.find( id );
     if ( it == members.end() )
@@ -74,21 +74,21 @@ dawn::Function* dawn::StructVal::get_method( Int id, Bool has_no_args )
     return &func;
 }
 
-dawn::ArrayVal::ArrayVal( ArrayVal const& other )
+dawn::ArrayValue::ArrayValue( ArrayValue const& other )
 {
     data.reserve( other.data.size() );
-    for ( auto& val : other.data )
-        data.push_back( val.clone() );
+    for ( auto& value : other.data )
+        data.push_back( value.clone() );
 }
 
-dawn::ArrayVal& dawn::ArrayVal::operator=( ArrayVal const& other )
+dawn::ArrayValue& dawn::ArrayValue::operator=( ArrayValue const& other )
 {
     if ( this != &other )
     {
         data.clear();
         data.reserve( other.data.size() );
-        for ( auto& val : other.data )
-            data.push_back( val.clone() );
+        for ( auto& value : other.data )
+            data.push_back( value.clone() );
     }
     return *this;
 }
@@ -129,28 +129,28 @@ dawn::Value::Value( Function const& value )
     m_regref.cast<Function>().value() = value;
 }
 
-dawn::Value::Value( EnumVal const& value )
+dawn::Value::Value( EnumValue const& value )
     : m_regref( enum_pool().new_register().cast<Void>() ), m_type( ValueType::ENUM )
 {
-    m_regref.cast<EnumVal>().value() = value;
+    m_regref.cast<EnumValue>().value() = value;
 }
 
-dawn::Value::Value( StructVal const& value )
+dawn::Value::Value( StructValue const& value )
     : m_regref( struct_pool().new_register().cast<Void>() ), m_type( ValueType::STRUCT )
 {
-    m_regref.cast<StructVal>().value() = value;
+    m_regref.cast<StructValue>().value() = value;
 }
 
-dawn::Value::Value( ArrayVal const& value )
+dawn::Value::Value( ArrayValue const& value )
     : m_regref( array_pool().new_register().cast<Void>() ), m_type( ValueType::ARRAY )
 {
-    m_regref.cast<ArrayVal>().value() = value;
+    m_regref.cast<ArrayValue>().value() = value;
 }
 
-dawn::Value::Value( RangeVal const& value )
+dawn::Value::Value( RangeValue const& value )
     : m_regref( range_pool().new_register().cast<Void>() ), m_type( ValueType::RANGE )
 {
-    m_regref.cast<RangeVal>().value() = value;
+    m_regref.cast<RangeValue>().value() = value;
 }
 
 void dawn::Value::assign( Value const& other )
@@ -262,14 +262,14 @@ dawn::Value& dawn::Value::unlock_const()
     m_const = false;
     if ( m_type == ValueType::STRUCT )
     {
-        auto& val = as_struct();
-        for ( auto& field : val.parent->fields )
-            val.members.at( field.id ).unlock_const();
+        auto& value = as_struct();
+        for ( auto& field : value.parent->fields )
+            value.members.at( field.id ).unlock_const();
     }
     else if ( m_type == ValueType::ARRAY )
     {
-        auto& val = as_array();
-        for ( auto& entry : val.data )
+        auto& value = as_array();
+        for ( auto& entry : value.data )
             entry.unlock_const();
     }
     return *this;
@@ -379,7 +379,7 @@ dawn::Value dawn::Value::op_add( Engine& engine, Value const& other ) const
         {
         case ValueType::ARRAY:
         {
-            ArrayVal result;
+            ArrayValue result;
             result.data.insert( result.data.end(), as_array().data.begin(), as_array().data.end() );
             result.data.insert( result.data.end(), other.as_array().data.begin(), other.as_array().data.end() );
             return Value{ result };
@@ -837,7 +837,7 @@ dawn::Value dawn::Value::op_or( Engine& engine, Value const& other ) const
 
 dawn::Value dawn::Value::op_range( Engine& engine, Value const& other ) const
 {
-    RangeVal result;
+    RangeValue result;
     result.start_incl = to_int( engine );
     result.end_excl = other.to_int( engine );
     return Value{ result };
@@ -1055,8 +1055,8 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
 
     case ValueType::ENUM:
     {
-        auto& enumval = as_enum();
-        return format( IDSystem::get( enumval.parent->id ), op_scope_opn, IDSystem::get( enumval.key_id ), op_scope_cls );
+        auto& value = as_enum();
+        return format( IDSystem::get( value.parent->id ), op_scope_opn, IDSystem::get( value.key_id ), op_scope_cls );
     }
 
     case ValueType::STRUCT:
@@ -1088,22 +1088,22 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
 
     case ValueType::ARRAY:
     {
-        auto& val = as_array();
-        if ( val.data.empty() )
+        auto& value = as_array();
+        if ( value.data.empty() )
             return format( op_array_opn, op_array_cls );
 
         StringStream stream;
         stream << op_array_opn;
-        for ( Int i = 0; i < (Int) val.data.size() - 1; i++ )
-            stream << val.data[i].to_string( engine ) << op_split << ' ';
-        stream << val.data.back().to_string( engine ) << op_array_cls;
+        for ( Int i = 0; i < (Int) value.data.size() - 1; i++ )
+            stream << value.data[i].to_string( engine ) << op_split << ' ';
+        stream << value.data.back().to_string( engine ) << op_array_cls;
         return stream.str();
     }
 
     case ValueType::RANGE:
     {
-        auto& val = as_range();
-        return format( op_array_opn, val.start_incl, op_split, ' ', val.end_excl, op_expr_cls );
+        auto& value = as_range();
+        return format( op_array_opn, value.start_incl, op_split, ' ', value.end_excl, op_expr_cls );
     }
 
     default:

@@ -44,7 +44,7 @@ struct Function
 
     Int id = 0;
     Vector<Arg> args;
-    Variant<Scope, CppFuncBody> body;
+    Variant<Scope, CFuncBody> body;
 
     Holder<Value> METHOD_self;
     RegisterRef<Frame> LAMBDA_frame;

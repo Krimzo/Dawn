@@ -43,7 +43,7 @@ std::ostream& dawn::operator<<( std::ostream& stream, Token const& token )
     Color color = to_color( token.type );
     stream << "[(" << ColoredText{ color, token.type } <<
         ") {" << ColoredText{ color, token.value } <<
-        "} {" << ColoredText{ color, token.lit_val } <<
+        "} {" << ColoredText{ color, token.literal } <<
         "} <" << ColoredText{ color, token.line_number } << ">]";
     return stream;
 }

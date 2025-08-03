@@ -9,7 +9,7 @@ namespace dawn
 struct Engine
 {
     friend struct Value;
-    friend struct EnumVal;
+    friend struct EnumValue;
 
     Stack stack;
     OMap<Int, Enum> enums;
@@ -24,7 +24,7 @@ struct Engine
     void load_struct( Struct const& entry );
     void load_variable( Variable const& entry );
 
-    void bind_func( Int id, CppFuncBody cpp_func );
+    void bind_func( Int id, CFuncBody cfunc );
     Value call_func( Int id, Value* args, Int arg_count );
 
     void add_var( VariableKind kind, Int id, Value const& value );
@@ -65,8 +65,8 @@ private:
     Value handle_ac_node( OperatorNode const& node );
     Value handle_as_node( AssignNode const& node );
 
-    Value handle_ac_struct_node( Value const& left, Int right );
-    Value handle_ac_type_node( Value const& left, Int right );
+    Value handle_ac_struct_node( Value const& self, Int right_id );
+    Value handle_ac_type_node( Value const& self, Int right_id );
 
     Value create_default_value( Int typeid_ );
 };

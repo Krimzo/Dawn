@@ -15,6 +15,6 @@ template<typename T>
 struct RegisterRef;
 
 using MemberGenerator = Func<Value( Value const& )>;
-using CppFuncBody = Func<Value( Value*, Int )>;
+using CFuncBody = Func<Value( Value*, Int )>;
 using NodeRef = RegisterRef<Node>;
 }

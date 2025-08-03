@@ -56,7 +56,7 @@ void dawn::Parser::parse_import( Vector<Token>::const_iterator& it, Vector<Token
 
     if ( it->type != TokenType::STRING )
         PARSER_PANIC( *it, "expected import path" );
-    module.imports.insert( it->lit_val );
+    module.imports.insert( it->literal );
     ++it;
 }
 
@@ -766,19 +766,19 @@ void dawn::Parser::expression_single_literal( Token const& token, Node& tree )
 {
     if ( token.type == TokenType::INTEGER )
     {
-        tree = make_int_node( std::stoll( token.lit_val ) );
+        tree = make_int_node( std::stoll( token.literal ) );
     }
     else if ( token.type == TokenType::FLOAT )
     {
-        tree = make_float_node( std::stod( token.lit_val ) );
+        tree = make_float_node( std::stod( token.literal ) );
     }
     else if ( token.type == TokenType::CHAR )
     {
-        tree = make_char_node( token.lit_val[0] );
+        tree = make_char_node( token.literal[0] );
     }
     else if ( token.type == TokenType::STRING )
     {
-        tree = make_string_node( token.lit_val );
+        tree = make_string_node( token.literal );
     }
     else
         PARSER_PANIC( token, "expected literal" );

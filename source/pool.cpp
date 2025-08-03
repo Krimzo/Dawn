@@ -109,22 +109,22 @@ dawn::MemoryPool<dawn::Function, 1024>& dawn::function_pool()
     return pools.function_memory;
 }
 
-dawn::MemoryPool<dawn::EnumVal, 1024>& dawn::enum_pool()
+dawn::MemoryPool<dawn::EnumValue, 1024>& dawn::enum_pool()
 {
     return pools.enum_memory;
 }
 
-dawn::MemoryPool<dawn::StructVal, 1024>& dawn::struct_pool()
+dawn::MemoryPool<dawn::StructValue, 1024>& dawn::struct_pool()
 {
     return pools.struct_memory;
 }
 
-dawn::MemoryPool<dawn::ArrayVal, 1024>& dawn::array_pool()
+dawn::MemoryPool<dawn::ArrayValue, 1024>& dawn::array_pool()
 {
     return pools.array_memory;
 }
 
-dawn::MemoryPool<dawn::RangeVal, 1024>& dawn::range_pool()
+dawn::MemoryPool<dawn::RangeValue, 1024>& dawn::range_pool()
 {
     return pools.range_memory;
 }

@@ -20,7 +20,7 @@ struct Dawn
     Opt<String> eval_file( StringRef const& path ) noexcept;
     Opt<String> eval_file( StringRef const& path, Set<String>& imported ) noexcept;
 
-    void bind_func( String const& name, CppFuncBody cpp_func ) noexcept;
+    void bind_func( String const& name, CFuncBody cfunc ) noexcept;
     Opt<String> call_func( String const& name ) noexcept;
     Opt<String> call_func( String const& name, Value* retval ) noexcept;
     Opt<String> call_func( String const& name, std::initializer_list<Value> const& args, Value* retval = nullptr ) noexcept;

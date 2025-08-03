@@ -252,7 +252,7 @@ void dawn::Lexer::extract_number( StringRef const& source, Vector<Token>& tokens
 
     auto& token = tokens.emplace_back();
     token.type = is_float ? TokenType::FLOAT : TokenType::INTEGER;
-    token.lit_val = buffer;
+    token.literal = buffer;
     token.line_number = line;
 }
 
@@ -291,7 +291,7 @@ void dawn::Lexer::extract_char( StringRef const& source, Vector<Token>& tokens, 
 
     auto& token = tokens.emplace_back();
     token.type = TokenType::CHAR;
-    token.lit_val = buffer;
+    token.literal = buffer;
     token.line_number = line;
 }
 
@@ -333,7 +333,7 @@ void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens
 
     auto& token = tokens.emplace_back();
     token.type = TokenType::STRING;
-    token.lit_val = buffer;
+    token.literal = buffer;
     token.line_number = line;
 }
 

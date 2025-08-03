@@ -1,2 +1,2 @@
-rename val to value
+enums to a single header
 better error description
