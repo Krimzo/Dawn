@@ -7,7 +7,13 @@ int dawn::_dev_main( int argc, char** argv )
 
     Dawn dawn;
 
-    if ( auto error = dawn.eval_file( "examples/dev.dw" ) )
+    if ( auto error = dawn.eval_file(
+#if _DEBUG
+        "examples/dev.dw"
+#else
+        "examples/bench.dw"
+#endif
+    ) )
     {
         print( error.value() );
         return -1;

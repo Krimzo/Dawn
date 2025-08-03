@@ -50,7 +50,6 @@
     <ClInclude Include="source\node.h" />
     <ClInclude Include="source\parser.h" />
     <ClInclude Include="source\stack.h" />
-    <ClInclude Include="source\storage.h" />
     <ClInclude Include="source\syntax.h" />
     <ClInclude Include="source\t.h" />
     <ClInclude Include="source\token.h" />

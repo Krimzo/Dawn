@@ -168,52 +168,52 @@ void dawn::Engine::handle_instr( Node const& node, Opt<Value>& retval, Bool* did
     case NodeType::SCOPE:
     {
         auto pop_handler = stack.push();
-        handle_scope( node.as<Scope>(), retval, didbrk, didcon );
+        handle_scope( std::get<Scope>( node ), retval, didbrk, didcon );
     }
     break;
 
     case NodeType::VARIABLE:
-        handle_var_node( node.as<VariableNode>() );
+        handle_var_node( std::get<VariableNode>( node ) );
         break;
 
     case NodeType::RETURN:
-        handle_return_node( node.as<ReturnNode>(), retval );
+        handle_return_node( std::get<ReturnNode>( node ), retval );
         break;
 
     case NodeType::BREAK:
-        handle_break_node( node.as<BreakNode>(), didbrk );
+        handle_break_node( std::get<BreakNode>( node ), didbrk );
         break;
 
     case NodeType::CONTINUE:
-        handle_continue_node( node.as<ContinueNode>(), didcon );
+        handle_continue_node( std::get<ContinueNode>( node ), didcon );
         break;
 
     case NodeType::THROW:
-        handle_throw_node( node.as<ThrowNode>() );
+        handle_throw_node( std::get<ThrowNode>( node ) );
         break;
 
     case NodeType::TRY:
-        handle_try_node( node.as<TryNode>(), retval, didbrk, didcon );
+        handle_try_node( std::get<TryNode>( node ), retval, didbrk, didcon );
         break;
 
     case NodeType::IF:
-        handle_if_node( node.as<IfNode>(), retval, didbrk, didcon );
+        handle_if_node( std::get<IfNode>( node ), retval, didbrk, didcon );
         break;
 
     case NodeType::SWITCH:
-        handle_switch_node( node.as<SwitchNode>(), retval, didbrk, didcon );
+        handle_switch_node( std::get<SwitchNode>( node ), retval, didbrk, didcon );
         break;
 
     case NodeType::LOOP:
-        handle_loop_node( node.as<LoopNode>(), retval );
+        handle_loop_node( std::get<LoopNode>( node ), retval );
         break;
 
     case NodeType::WHILE:
-        handle_while_node( node.as<WhileNode>(), retval );
+        handle_while_node( std::get<WhileNode>( node ), retval );
         break;
 
     case NodeType::FOR:
-        handle_for_node( node.as<ForNode>(), retval );
+        handle_for_node( std::get<ForNode>( node ), retval );
         break;
 
     default:
@@ -226,34 +226,34 @@ dawn::Value dawn::Engine::handle_expr( Node const& node )
     switch ( node.type() )
     {
     case NodeType::VALUE:
-        return handle_value_node( node.as<ValueNode>() );
+        return handle_value_node( std::get<ValueNode>( node ) );
 
     case NodeType::IDENTIFIER:
-        return handle_id_node( node.as<IdentifierNode>() );
+        return handle_id_node( std::get<IdentifierNode>( node ) );
 
     case NodeType::CALL:
-        return handle_call_node( node.as<CallNode>() );
+        return handle_call_node( std::get<CallNode>( node ) );
 
     case NodeType::INDEX:
-        return handle_index_node( node.as<IndexNode>() );
+        return handle_index_node( std::get<IndexNode>( node ) );
 
     case NodeType::ENUM:
-        return handle_enum_node( node.as<EnumNode>() );
+        return handle_enum_node( std::get<EnumNode>( node ) );
 
     case NodeType::STRUCT:
-        return handle_struct_node( node.as<StructNode>() );
+        return handle_struct_node( std::get<StructNode>( node ) );
 
     case NodeType::ARRAY:
-        return handle_array_node( node.as<ArrayNode>() );
+        return handle_array_node( std::get<ArrayNode>( node ) );
 
     case NodeType::UNARY:
-        return handle_un_node( node.as<UnaryNode>() );
+        return handle_un_node( std::get<UnaryNode>( node ) );
 
     case NodeType::OPERATOR:
-        return handle_op_node( node.as<OperatorNode>() );
+        return handle_op_node( std::get<OperatorNode>( node ) );
 
     case NodeType::ASSIGN:
-        return handle_as_node( node.as<AssignNode>() );
+        return handle_as_node( std::get<AssignNode>( node ) );
 
     default:
         ENGINE_PANIC( "unknown expr node type: ", (Int) node.type() );
@@ -668,7 +668,7 @@ dawn::Value dawn::Engine::handle_ac_node( OperatorNode const& node )
     if ( node.sides[1].type() != NodeType::IDENTIFIER )
         ENGINE_PANIC( "access must be an identifier" );
 
-    Int right_id = node.sides[1].as<IdentifierNode>().id;
+    Int right_id = std::get<IdentifierNode>( node.sides[1] ).id;
     if ( left.type() == ValueType::STRUCT )
         return handle_ac_struct_node( left, right_id );
     else

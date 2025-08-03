@@ -19,7 +19,7 @@ enum struct TokenType
 
 enum struct ExtractType
 {
-    DEFAULT,
+    DEFAULT = 0,
     NEW_LINE,
     SPLITTER,
     SCOPE_START,
@@ -66,7 +66,7 @@ enum struct AssignType
 
 enum struct NodeType
 {
-    EMPTY = 0,
+    NONE = 0,
 
     // instr
     SCOPE,

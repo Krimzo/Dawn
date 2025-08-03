@@ -391,7 +391,7 @@ void dawn::Parser::parse_expression( ExtractType type, Vector<Token>::const_iter
                 PARSER_PANIC( {}, "unary expected expression" );
 
             create_unary_node( expr_tokens[least_prec_op], tree );
-            auto& un_node = tree.as<UnaryNode>();
+            auto& un_node = std::get<UnaryNode>( tree );
 
             auto it = expr_tokens.begin() + 1;
             un_node.right = node_pool().new_register();
@@ -712,7 +712,7 @@ void dawn::Parser::expression_complex_default( Vector<Token>& left, Token op, Ve
     try
     {
         create_operator_node( op, tree );
-        auto& op_node = tree.as<OperatorNode>();
+        auto& op_node = std::get<OperatorNode>( tree );
         op_node.sides.emplace_back( left_expr );
         op_node.sides.emplace_back( right_expr );
     }
@@ -720,7 +720,7 @@ void dawn::Parser::expression_complex_default( Vector<Token>& left, Token op, Ve
     {
         tree = {};
         create_assign_node( op, tree );
-        auto& as_node = tree.as<AssignNode>();
+        auto& as_node = std::get<AssignNode>( tree );
         as_node.sides.emplace_back( left_expr );
         as_node.sides.emplace_back( right_expr );
     }
