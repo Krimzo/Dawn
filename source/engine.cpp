@@ -545,25 +545,24 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
 dawn::Value dawn::Engine::handle_array_node( ArrayNode const& node )
 {
     ArrayValue result{};
-
-    if ( node.type == ArrayType::SIZE )
+    if ( std::holds_alternative<ArrayNode::ListInit>( node.init ) )
     {
-        Int size = handle_expr( node.SIZE_expr.value() ).to_int( *this );
+        auto& init_data = std::get<ArrayNode::ListInit>( node.init );
+        result.data.reserve( init_data.elements.size() );
+        for ( auto& expr : init_data.elements )
+            result.data.push_back( handle_expr( expr ).clone() );
+    }
+    else
+    {
+        auto& init_data = std::get<ArrayNode::SizedInit>( node.init );
+        Int size = handle_expr( init_data.size_expr.value() ).to_int( *this );
         if ( size < 0 )
             ENGINE_PANIC( "array size can't be negative" );
-
-        Value value = create_default_value( node.SIZE_typeid );
+        Value value = create_default_value( init_data.type_id );
         result.data.reserve( size );
         for ( Int i = 0; i < size; i++ )
             result.data.push_back( value.clone() );
     }
-    else
-    {
-        result.data.reserve( node.LIST_list.size() );
-        for ( auto& expr : node.LIST_list )
-            result.data.push_back( handle_expr( expr ).clone() );
-    }
-
     return Value{ result };
 }
 

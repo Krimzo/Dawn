@@ -664,21 +664,24 @@ void dawn::Parser::expression_complex_array( Vector<Token>& left, Vector<Token>&
 
     if ( left.empty() )
     {
-        auto& node = tree.emplace<ArrayNode>();
-        node.type = ArrayType::LIST;
-
+        ArrayNode::ListInit init{};
         for ( auto it = right.begin(); it != right.end(); )
-            parse_expression( ExtractType::SPLITTER, it, right.end(), node.LIST_list.emplace_back() );
+            parse_expression( ExtractType::SPLITTER, it, right.end(), init.elements.emplace_back() );
+
+        auto& node = tree.emplace<ArrayNode>();
+        node.init = init;
     }
     else if ( left.size() == 1 && left.front().type == TokenType::TYPE )
     {
-        auto& node = tree.emplace<ArrayNode>();
-        node.type = ArrayType::SIZE;
+        ArrayNode::SizedInit init{};
+        init.type_id = IDSystem::get( left.front().value );
+        init.size_expr = node_pool().new_register();
 
         auto right_it = right.begin();
-        node.SIZE_typeid = IDSystem::get( left.front().value );
-        node.SIZE_expr = node_pool().new_register();
-        parse_expression( ExtractType::DEFAULT, right_it, right.end(), node.SIZE_expr.value() );
+        parse_expression( ExtractType::DEFAULT, right_it, right.end(), init.size_expr.value() );
+
+        auto& node = tree.emplace<ArrayNode>();
+        node.init = init;
     }
     else
     {

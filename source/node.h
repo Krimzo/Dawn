@@ -114,14 +114,18 @@ struct StructNode
 
 struct ArrayNode
 {
-    ArrayType type;
+    struct ListInit
+    {
+        Vector<Node> elements;
+    };
 
-    // list init
-    Vector<Node> LIST_list;
+    struct SizedInit
+    {
+        Int type_id = 0;
+        NodeRef size_expr;
+    };
 
-    // sized init
-    Int SIZE_typeid = 0;
-    NodeRef SIZE_expr;
+    Variant<ListInit, SizedInit> init;
 };
 
 struct UnaryNode
