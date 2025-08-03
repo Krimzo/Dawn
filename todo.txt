@@ -1,3 +1,2 @@
-convert all variant.index() to std::hold_alternative
 split current Function into Function (parser) and FunctionValue (engine)
 better error description

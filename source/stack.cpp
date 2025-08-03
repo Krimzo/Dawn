@@ -20,7 +20,7 @@ dawn::Frame::Frame( FrameType type )
 
 dawn::Value& dawn::Frame::set( Int id, Value const& value )
 {
-    if ( m_frame.index() == 0 )
+    if ( std::holds_alternative<LocalFrame>( m_frame ) )
     {
         auto& frame = std::get<LocalFrame>( m_frame );
         return frame.emplace_back( id, value ).second;
@@ -36,7 +36,7 @@ dawn::Value& dawn::Frame::set( Int id, Value const& value )
 
 dawn::Value* dawn::Frame::get( Int id )
 {
-    if ( m_frame.index() == 0 )
+    if ( std::holds_alternative<LocalFrame>( m_frame ) )
     {
         auto& frame = std::get<LocalFrame>( m_frame );
         for ( auto& [obj_id, obj] : frame )
@@ -60,7 +60,7 @@ dawn::Value* dawn::Frame::get( Int id )
 
 void dawn::Frame::reset( RegisterRef<Frame> const& parent )
 {
-    if ( m_frame.index() == 0 )
+    if ( std::holds_alternative<LocalFrame>( m_frame ) )
     {
         auto& frame = std::get<LocalFrame>( m_frame );
         frame.clear();

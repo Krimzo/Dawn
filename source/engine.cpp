@@ -109,7 +109,7 @@ void dawn::Engine::add_type_method( ValueType type, String const& name, Bool is_
 
 dawn::Value dawn::Engine::handle_func( Function const& func, Value* args, Int arg_count )
 {
-    if ( func.body.index() == 0 )
+    if ( std::holds_alternative<Scope>( func.body ) )
     {
         if ( func.args.size() != arg_count )
         {
