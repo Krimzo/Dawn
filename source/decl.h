@@ -15,6 +15,5 @@ template<typename T>
 struct RegisterRef;
 
 using NodeRef = RegisterRef<Node>;
-using CFuncBody = Func<Value( Value*, Int )>;
 using MemberGenerator = Func<Value( Value const& )>;
 }

@@ -57,9 +57,9 @@ dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path, Set<String
     return eval( *source, parent_path, imported );
 }
 
-void dawn::Dawn::bind_func( String const& name, CFuncBody cfunc ) noexcept
+void dawn::Dawn::bind_func( String const& name, CFunction cfunc ) noexcept
 {
-    engine.bind_func( IDSystem::get( name ), std::move( cfunc ) );
+    engine.bind_cfunc( IDSystem::get( name ), std::move( cfunc ) );
 }
 
 dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name ) noexcept

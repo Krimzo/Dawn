@@ -26,7 +26,13 @@ void dawn::Engine::load_function( Function const& entry )
 {
     if ( stack.root().get( entry.id ) )
         ENGINE_PANIC( "object [", IDSystem::get( entry.id ), "] already exists" );
-    stack.root().set( entry.id, Value{ entry } );
+
+    FunctionValue fv{};
+    auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
+    global.id = entry.id;
+    global.func = DFunction{ entry.args, entry.body };
+
+    stack.root().set( entry.id, Value{ fv } );
 }
 
 void dawn::Engine::load_enum( Enum const& entry )
@@ -44,12 +50,17 @@ void dawn::Engine::load_variable( Variable const& entry )
     add_var( entry.kind, entry.id, handle_expr( entry.expr.value() ) );
 }
 
-void dawn::Engine::bind_func( Int id, CFuncBody cfunc )
+void dawn::Engine::bind_cfunc( Int id, CFunction cfunc )
 {
-    Function func;
-    func.id = id;
-    func.body.emplace<CFuncBody>( std::move( cfunc ) );
-    load_function( func );
+    if ( stack.root().get( id ) )
+        ENGINE_PANIC( "object [", IDSystem::get( id ), "] already exists" );
+
+    FunctionValue fv{};
+    auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
+    global.id = id;
+    global.func = cfunc;
+
+    stack.root().set( id, Value{ fv } );
 }
 
 dawn::Value dawn::Engine::call_func( Int id, Value* args, Int arg_count )
@@ -92,10 +103,10 @@ void dawn::Engine::add_type_method( ValueType type, String const& name, Bool is_
     const Int id = IDSystem::get( name );
     member_generators[(Int) type][id] = [=]( Value const& self ) -> Value
         {
-            Function func;
-            func.id = id;
-            *func.METHOD_self = self;
-            func.body = [=]( Value* args, Int arg_count ) -> Value
+            FunctionValue fv{};
+            auto& method = fv.data.emplace<FunctionValue::AsMethod>();
+            method.id = id;
+            method.func = [=]( Value* args, Int arg_count ) -> Value
                 {
                     if ( !is_const && self.is_const() )
                         ENGINE_PANIC( "can't call [", name, "] on a const value" );
@@ -103,37 +114,39 @@ void dawn::Engine::add_type_method( ValueType type, String const& name, Bool is_
                         ENGINE_PANIC( "method [", name, "] expects self + ", expected_args, " arguments" );
                     return body( args[0], args + 1 );
                 };
-            return (Value) func;
+            *method.self = self;
+            return (Value) fv;
         };
 }
 
-dawn::Value dawn::Engine::handle_func( Function const& func, Value* args, Int arg_count )
+dawn::Value dawn::Engine::handle_func( FunctionValue const& func, Value* args, Int arg_count )
 {
-    if ( std::holds_alternative<Scope>( func.body ) )
+    if ( auto* dfunc = func.dfunction() )
     {
-        if ( func.args.size() != arg_count )
+        if ( dfunc->args.size() != arg_count )
         {
-            if ( func.type() == FunctionType::LAMBDA )
-                ENGINE_PANIC( "invalid argument count for lambda" );
-            else if ( func.type() == FunctionType::METHOD )
-                ENGINE_PANIC( "invalid argument count for method [", IDSystem::get( func.id ), "]" );
+            if ( func.is_global() )
+                ENGINE_PANIC( "invalid argument count for function [", IDSystem::get( func.as_global().id ), "]" );
+            else if ( func.is_method() )
+                ENGINE_PANIC( "invalid argument count for method [", IDSystem::get( func.as_method().id ), "]" );
             else
-                ENGINE_PANIC( "invalid argument count for function [", IDSystem::get( func.id ), "]" );
+                ENGINE_PANIC( "invalid argument count for lambda" );
         }
 
         auto pop_handler = stack.push_from(
-            func.type() == FunctionType::LAMBDA ? func.LAMBDA_frame : RegisterRef<Frame>{} );
+            func.is_lambda() ? func.as_lambda().frame : RegisterRef<Frame>{} );
 
         for ( Int i = 0; i < arg_count; i++ )
-            add_var( func.args[i].kind, func.args[i].id, args[i] );
+            add_var( dfunc->args[i].kind, dfunc->args[i].id, args[i] );
 
         Opt<Value> retval;
-        handle_scope( std::get<Scope>( func.body ), retval, nullptr, nullptr );
+        handle_scope( dfunc->body, retval, nullptr, nullptr );
         return retval ? *retval : Value{};
     }
     else
     {
-        return std::get<CFuncBody>( func.body )( args, arg_count );
+        auto& cfunc = *func.cfunction();
+        return cfunc( args, arg_count );
     }
 }
 
@@ -252,8 +265,8 @@ dawn::Value dawn::Engine::handle_value_node( ValueNode const& node )
     if ( node.value.type() == ValueType::FUNCTION )
     {
         auto& func = node.value.as_function();
-        if ( func.type() == FunctionType::LAMBDA )
-            func.LAMBDA_frame = stack.peek();
+        if ( func.is_lambda() )
+            func.as_lambda().frame = stack.peek();
     }
     return node.value;
 }
@@ -278,14 +291,14 @@ dawn::Value dawn::Engine::handle_call_node( CallNode const& node )
         ENGINE_PANIC( "can't call [", left.type(), "]" );
 
     auto& func = left.as_function();
-    Int arg_count = ( func.type() == FunctionType::METHOD ) ? ( 1 + node.args.size() ) : node.args.size();
+    Int arg_count = func.is_method() ? ( 1 + node.args.size() ) : node.args.size();
 
     Value* args_ptr = SALLOC( Value, arg_count );
     SAllocManager alloc_manager{ args_ptr, arg_count };
 
-    if ( func.type() == FunctionType::METHOD )
+    if ( func.is_method() )
     {
-        args_ptr[0] = *func.METHOD_self;
+        args_ptr[0] = *func.as_method().self;
         for ( Int i = 0; i < (Int) node.args.size(); i++ )
             args_ptr[1 + i] = handle_expr( node.args[i] );
     }
@@ -535,8 +548,12 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
     // methods
     for ( auto& method : struc.methods )
     {
-        auto& func = ( struc_value.members[method.id] = Value{ method } ).as_function();
-        *func.METHOD_self = value;
+        FunctionValue fv{};
+        auto& f = fv.data.emplace<FunctionValue::AsMethod>();
+        f.id = method.id;
+        f.func = DFunction{ method.args, method.body };
+        *f.self = value;
+        struc_value.members[f.id] = Value{ fv };
     }
 
     return value;

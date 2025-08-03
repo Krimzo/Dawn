@@ -104,7 +104,7 @@ dawn::MemoryPool<dawn::String, 1024>& dawn::string_pool()
     return pools.string_memory;
 }
 
-dawn::MemoryPool<dawn::Function, 1024>& dawn::function_pool()
+dawn::MemoryPool<dawn::FunctionValue, 1024>& dawn::function_pool()
 {
     return pools.function_memory;
 }

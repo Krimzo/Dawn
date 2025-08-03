@@ -1,2 +1,3 @@
-split current Function into Function (parser) and FunctionValue (engine)
+maybe use std::variant instead of storage (storage used to be faster)
+maybe use std::unique_ptr instead of holder
 better error description

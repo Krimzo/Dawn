@@ -102,13 +102,6 @@ enum struct VariableKind
     REF,
 };
 
-enum struct FunctionType
-{
-    GLOBAL = 0,
-    METHOD,
-    LAMBDA,
-};
-
 enum struct ValueType
 {
     NOTHING = 0,

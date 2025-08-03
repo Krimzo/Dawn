@@ -30,12 +30,7 @@ struct Function
 
     Int id = 0;
     Vector<Arg> args;
-    Variant<Scope, CFuncBody> body;
-
-    Holder<Value> METHOD_self;
-    RegisterRef<Frame> LAMBDA_frame;
-
-    FunctionType type() const;
+    Scope body;
 };
 
 struct Enum

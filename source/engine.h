@@ -24,7 +24,7 @@ struct Engine
     void load_struct( Struct const& entry );
     void load_variable( Variable const& entry );
 
-    void bind_func( Int id, CFuncBody cfunc );
+    void bind_cfunc( Int id, CFunction cfunc );
     Value call_func( Int id, Value* args, Int arg_count );
 
     void add_var( VariableKind kind, Int id, Value const& value );
@@ -37,7 +37,7 @@ private:
     void load_standard_functions();
     void load_standard_members();
 
-    Value handle_func( Function const& func, Value* args, Int arg_count );
+    Value handle_func( FunctionValue const& func, Value* args, Int arg_count );
     void handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
     void handle_instr( Node const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
     Value handle_expr( Node const& node );

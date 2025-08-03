@@ -18,7 +18,7 @@ struct MemoryPools
     MemoryPool<Char, 1024> char_memory;
     MemoryPool<String, 1024> string_memory;
 
-    MemoryPool<Function, 1024> function_memory;
+    MemoryPool<FunctionValue, 1024> function_memory;
     MemoryPool<EnumValue, 1024> enum_memory;
     MemoryPool<StructValue, 1024> struct_memory;
     MemoryPool<ArrayValue, 1024> array_memory;
@@ -36,7 +36,7 @@ MemoryPool<Float, 1024>& float_pool();
 MemoryPool<Char, 1024>& char_pool();
 MemoryPool<String, 1024>& string_pool();
 
-MemoryPool<Function, 1024>& function_pool();
+MemoryPool<FunctionValue, 1024>& function_pool();
 MemoryPool<EnumValue, 1024>& enum_pool();
 MemoryPool<StructValue, 1024>& struct_pool();
 MemoryPool<ArrayValue, 1024>& array_pool();

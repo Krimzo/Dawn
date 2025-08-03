@@ -3,16 +3,6 @@
 #include "syntax.h"
 
 
-dawn::FunctionType dawn::Function::type() const
-{
-    if ( id <= 0 )
-        return FunctionType::LAMBDA;
-    else if ( METHOD_self->type() != ValueType::NOTHING )
-        return FunctionType::METHOD;
-    else
-        return FunctionType::GLOBAL;
-}
-
 dawn::Bool dawn::Enum::contains( Int id ) const
 {
     for ( auto& entry : entries )

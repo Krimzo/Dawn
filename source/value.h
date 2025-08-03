@@ -7,6 +7,54 @@
 
 namespace dawn
 {
+struct DFunction
+{
+    Vector<Function::Arg> args;
+    Scope body;
+};
+
+struct CFunction : Func<Value( Value*, Int )>
+{
+    using Func<Value( Value*, Int )>::function;
+};
+
+struct FunctionValue
+{
+    using Fn = Variant<DFunction, CFunction>;
+
+    struct AsGlobal
+    {
+        Int id = 0;
+        Fn func;
+    };
+
+    struct AsMethod
+    {
+        Int id = 0;
+        Fn func;
+        Holder<Value> self;
+    };
+
+    struct AsLambda
+    {
+        Fn func;
+        RegisterRef<Frame> frame;
+    };
+
+    Variant<AsGlobal, AsMethod, AsLambda> data;
+
+    Bool is_global() const;
+    Bool is_method() const;
+    Bool is_lambda() const;
+
+    AsGlobal& as_global() const;
+    AsMethod& as_method() const;
+    AsLambda& as_lambda() const;
+
+    DFunction* dfunction() const;
+    CFunction* cfunction() const;
+};
+
 struct EnumValue
 {
     Enum* parent = nullptr;
@@ -26,7 +74,7 @@ struct StructValue
     StructValue& operator=( StructValue const& other );
 
     Value* get_member( Int id );
-    Function* get_method( Int id, Bool has_no_args );
+    FunctionValue* get_method( Int id, Bool has_no_args );
 };
 
 struct ArrayValue
@@ -53,7 +101,7 @@ struct Value
     explicit Value( Float value );
     explicit Value( Char value );
     explicit Value( StringRef const& value );
-    explicit Value( Function const& value );
+    explicit Value( FunctionValue const& value );
     explicit Value( EnumValue const& value );
     explicit Value( StructValue const& value );
     explicit Value( ArrayValue const& value );
@@ -65,7 +113,7 @@ struct Value
     inline Float& as_float() const { return m_regref.cast<Float>().value(); }
     inline Char& as_char() const { return m_regref.cast<Char>().value(); }
     inline String& as_string() const { return m_regref.cast<String>().value(); }
-    inline Function& as_function() const { return m_regref.cast<Function>().value(); }
+    inline FunctionValue& as_function() const { return m_regref.cast<FunctionValue>().value(); }
     inline EnumValue& as_enum() const { return m_regref.cast<EnumValue>().value(); }
     inline StructValue& as_struct() const { return m_regref.cast<StructValue>().value(); }
     inline ArrayValue& as_array() const { return m_regref.cast<ArrayValue>().value(); }

@@ -23,6 +23,82 @@ ID_HELPER( to_char );
 ID_HELPER( to_string );
 }
 
+dawn::Bool dawn::FunctionValue::is_global() const
+{
+    return std::holds_alternative<AsGlobal>( data );
+}
+
+dawn::Bool dawn::FunctionValue::is_method() const
+{
+    return std::holds_alternative<AsMethod>( data );
+}
+
+dawn::Bool dawn::FunctionValue::is_lambda() const
+{
+    return std::holds_alternative<AsLambda>( data );
+}
+
+dawn::FunctionValue::AsGlobal& dawn::FunctionValue::as_global() const
+{
+    return const_cast<AsGlobal&>( std::get<AsGlobal>( data ) );
+}
+
+dawn::FunctionValue::AsMethod& dawn::FunctionValue::as_method() const
+{
+    return const_cast<AsMethod&>( std::get<AsMethod>( data ) );
+}
+
+dawn::FunctionValue::AsLambda& dawn::FunctionValue::as_lambda() const
+{
+    return const_cast<AsLambda&>( std::get<AsLambda>( data ) );
+}
+
+dawn::DFunction* dawn::FunctionValue::dfunction() const
+{
+    if ( std::holds_alternative<AsGlobal>( data ) )
+    {
+        auto& func = std::get<AsGlobal>( data ).func;
+        if ( std::holds_alternative<DFunction>( func ) )
+            return const_cast<DFunction*>( &std::get<DFunction>( func ) );
+    }
+    else if ( std::holds_alternative<AsMethod>( data ) )
+    {
+        auto& func = std::get<AsMethod>( data ).func;
+        if ( std::holds_alternative<DFunction>( func ) )
+            return const_cast<DFunction*>( &std::get<DFunction>( func ) );
+    }
+    else if ( std::holds_alternative<AsLambda>( data ) )
+    {
+        auto& func = std::get<AsLambda>( data ).func;
+        if ( std::holds_alternative<DFunction>( func ) )
+            return const_cast<DFunction*>( &std::get<DFunction>( func ) );
+    }
+    return nullptr;
+}
+
+dawn::CFunction* dawn::FunctionValue::cfunction() const
+{
+    if ( std::holds_alternative<AsGlobal>( data ) )
+    {
+        auto& func = std::get<AsGlobal>( data ).func;
+        if ( std::holds_alternative<CFunction>( func ) )
+            return const_cast<CFunction*>( &std::get<CFunction>( func ) );
+    }
+    else if ( std::holds_alternative<AsMethod>( data ) )
+    {
+        auto& func = std::get<AsMethod>( data ).func;
+        if ( std::holds_alternative<CFunction>( func ) )
+            return const_cast<CFunction*>( &std::get<CFunction>( func ) );
+    }
+    else if ( std::holds_alternative<AsLambda>( data ) )
+    {
+        auto& func = std::get<AsLambda>( data ).func;
+        if ( std::holds_alternative<CFunction>( func ) )
+            return const_cast<CFunction*>( &std::get<CFunction>( func ) );
+    }
+    return nullptr;
+}
+
 dawn::Value dawn::EnumValue::value( Engine& engine ) const
 {
     auto& expr = parent->get( key_id )->expr;
@@ -56,7 +132,7 @@ dawn::Value* dawn::StructValue::get_member( Int id )
     return &it->second;
 }
 
-dawn::Function* dawn::StructValue::get_method( Int id, Bool has_no_args )
+dawn::FunctionValue* dawn::StructValue::get_method( Int id, Bool has_no_args )
 {
     auto it = members.find( id );
     if ( it == members.end() )
@@ -66,11 +142,17 @@ dawn::Function* dawn::StructValue::get_method( Int id, Bool has_no_args )
         return nullptr;
 
     auto& func = it->second.as_function();
-    if ( func.type() != FunctionType::METHOD )
+    if ( !func.is_method() )
         return nullptr;
 
-    if ( has_no_args && func.args.size() != 1 )
-        return nullptr;
+    if ( has_no_args )
+    {
+        auto* dfunc = func.dfunction();
+        if ( !dfunc )
+            return nullptr;
+        if ( dfunc->args.size() != 1 )
+            return nullptr;
+    }
     return &func;
 }
 
@@ -123,10 +205,10 @@ dawn::Value::Value( StringRef const& value )
     m_regref.cast<String>().value() = value;
 }
 
-dawn::Value::Value( Function const& value )
+dawn::Value::Value( FunctionValue const& value )
     : m_regref( function_pool().new_register().cast<Void>() ), m_type( ValueType::FUNCTION )
 {
-    m_regref.cast<Function>().value() = value;
+    m_regref.cast<FunctionValue>().value() = value;
 }
 
 dawn::Value::Value( EnumValue const& value )
@@ -288,7 +370,7 @@ dawn::Value dawn::Value::un_plus( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        Function* op = left.get_method( __add, true );
+        auto* op = left.get_method( __add, true );
         if ( !op )
             PANIC( "+ struct [", IDSystem::get( left.parent->id ), "] not supported" );
 
@@ -314,7 +396,7 @@ dawn::Value dawn::Value::un_minus( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        Function* op = left.get_method( __sub, true );
+        auto* op = left.get_method( __sub, true );
         if ( !op )
             PANIC( "- struct [", IDSystem::get( left.parent->id ), "] not supported" );
 
@@ -393,7 +475,7 @@ dawn::Value dawn::Value::op_add( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        Function* op = left.get_method( __add, false );
+        auto* op = left.get_method( __add, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] + [", other.type(), "] not supported" );
 
@@ -443,7 +525,7 @@ dawn::Value dawn::Value::op_sub( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        Function* op = left.get_method( __sub, false );
+        auto* op = left.get_method( __sub, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] - [", other.type(), "] not supported" );
 
@@ -493,7 +575,7 @@ dawn::Value dawn::Value::op_mul( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        Function* op = left.get_method( __mul, false );
+        auto* op = left.get_method( __mul, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] * [", other.type(), "] not supported" );
 
@@ -543,7 +625,7 @@ dawn::Value dawn::Value::op_div( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        Function* op = left.get_method( __div, false );
+        auto* op = left.get_method( __div, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] / [", other.type(), "] not supported" );
 
@@ -593,7 +675,7 @@ dawn::Value dawn::Value::op_pow( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        Function* op = left.get_method( __pow, false );
+        auto* op = left.get_method( __pow, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] ^ [", other.type(), "] not supported" );
 
@@ -643,7 +725,7 @@ dawn::Value dawn::Value::op_mod( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        Function* op = left.get_method( __mod, false );
+        auto* op = left.get_method( __mod, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] % [", other.type(), "] not supported" );
 
@@ -748,7 +830,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        Function* op = left.get_method( __cmpr, false );
+        auto* op = left.get_method( __cmpr, false );
         if ( !op )
             PANIC( "struct [", IDSystem::get( left.parent->id ), "] <=> [", other.type(), "] not supported" );
 
@@ -868,7 +950,7 @@ dawn::Bool dawn::Value::to_bool( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        Function* method = left.get_method( _to_bool, true );
+        auto* method = left.get_method( _to_bool, true );
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to bool" );
 
@@ -910,7 +992,7 @@ dawn::Int dawn::Value::to_int( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        Function* method = left.get_method( _to_int, true );
+        auto* method = left.get_method( _to_int, true );
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to int" );
 
@@ -952,7 +1034,7 @@ dawn::Float dawn::Value::to_float( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        Function* method = left.get_method( _to_float, true );
+        auto* method = left.get_method( _to_float, true );
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to float" );
 
@@ -990,7 +1072,7 @@ dawn::Char dawn::Value::to_char( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        Function* method = left.get_method( _to_char, true );
+        auto* method = left.get_method( _to_char, true );
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to char" );
 
@@ -1035,21 +1117,33 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
         StringStream stream;
         auto& func = as_function();
 
-        if ( func.type() == FunctionType::LAMBDA )
-            stream << "lambda" << op_lambda;
-        else if ( func.type() == FunctionType::METHOD )
-            stream << IDSystem::get( func.METHOD_self->as_struct().parent->id )
-            << op_access << IDSystem::get( func.id ) << op_expr_opn;
-        else
-            stream << IDSystem::get( func.id ) << op_expr_opn;
-
-        if ( !func.args.empty() )
+        if ( func.is_global() )
         {
-            for ( Int i = 0; i < (Int) func.args.size() - 1; i++ )
-                stream << func.args[i].kind << ' ' << IDSystem::get( func.args[i].id ) << op_split << ' ';
-            stream << func.args.back().kind << ' ' << IDSystem::get( func.args.back().id );
+            auto& global = func.as_global();
+            stream << IDSystem::get( global.id ) << op_expr_opn;
         }
-        stream << ( func.type() == FunctionType::LAMBDA ? op_lambda : op_expr_cls );
+        else if ( func.is_method() )
+        {
+            auto& method = func.as_method();
+            stream << IDSystem::get( method.self->as_struct().parent->id )
+                << op_access << IDSystem::get( method.id ) << op_expr_opn;
+        }
+        else
+        {
+            stream << "lambda" << op_lambda;
+        }
+
+        if ( auto* dfunc = func.dfunction() )
+        {
+            if ( !dfunc->args.empty() )
+            {
+                for ( Int i = 0; i < (Int) dfunc->args.size() - 1; i++ )
+                    stream << dfunc->args[i].kind << ' ' << IDSystem::get( dfunc->args[i].id ) << op_split << ' ';
+                stream << dfunc->args.back().kind << ' ' << IDSystem::get( dfunc->args.back().id );
+            }
+        }
+
+        stream << ( func.is_lambda() ? op_lambda : op_expr_cls );
         return stream.str();
     }
 
@@ -1062,7 +1156,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        if ( Function* method = left.get_method( _to_string, true ) )
+        if ( auto* method = left.get_method( _to_string, true ) )
         {
             Value args[1] = { *this };
             return engine.handle_func( *method, args, (Int) std::size( args ) ).to_string( engine );
