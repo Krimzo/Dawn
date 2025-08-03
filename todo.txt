@@ -1,1 +1,2 @@
+rename val to value
 better error description

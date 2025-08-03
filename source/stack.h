@@ -5,8 +5,6 @@
 
 namespace dawn
 {
-struct PopHandler;
-
 enum struct FrameType
 {
     LOCAL = 0,

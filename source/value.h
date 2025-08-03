@@ -7,8 +7,6 @@
 
 namespace dawn
 {
-struct Engine;
-
 struct EnumVal
 {
     Enum* parent = nullptr;

@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\dawn.h" />
+    <ClInclude Include="source\decl.h" />
     <ClInclude Include="source\engine.h" />
     <ClInclude Include="source\err.h" />
     <ClInclude Include="source\holder.h" />

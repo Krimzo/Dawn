@@ -6,8 +6,6 @@
 
 namespace dawn
 {
-using MemberGenerator = Func<Value( Value const& )>;
-
 struct Engine
 {
     friend struct Value;

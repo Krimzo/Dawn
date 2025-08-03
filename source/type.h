@@ -8,12 +8,6 @@
 
 namespace dawn
 {
-struct Node;
-using NodeRef = RegisterRef<Node>;
-
-struct Value;
-struct Frame;
-
 enum struct VariableKind
 {
     CONST = 0,
@@ -39,8 +33,6 @@ enum struct FunctionType
     METHOD,
     LAMBDA,
 };
-
-using CppFuncBody = Func<Value( Value*, Int )>;
 
 struct Function
 {
