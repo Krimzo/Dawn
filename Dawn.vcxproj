@@ -101,12 +101,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\out\</OutDir>
     <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\inter\</IntDir>
-    <TargetName>dawn</TargetName>
+    <TargetName>dawn_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\out\</OutDir>
     <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\inter\</IntDir>
-    <TargetName>dawn</TargetName>
+    <TargetName>dawn_r</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Ship|x64'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\out\</OutDir>
