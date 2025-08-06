@@ -405,7 +405,7 @@ void dawn::Parser::parse_expression( ExtractType type, Vector<Token>::const_iter
             Vector<Token> left;
             left.insert( left.end(), expr_tokens.begin(), expr_tokens.begin() + least_prec_op );
             Vector<Token> right;
-            right.insert( right.end(), expr_tokens.begin() + least_prec_op + 1, expr_tokens.end() );
+            right.insert( right.end(), expr_tokens.begin() + ( least_prec_op + 1 ), expr_tokens.end() );
 
             auto& op = expr_tokens[least_prec_op];
             if ( op.value == op_expr_opn )
