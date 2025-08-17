@@ -1,1 +1,2 @@
+expr inside string
 better error description

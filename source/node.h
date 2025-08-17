@@ -175,9 +175,9 @@ struct Node : Variant <
     OperatorNode,
     AssignNode >
 {
-    inline NodeType type() const
+    constexpr NodeType type() const noexcept
     {
-        return (NodeType) index();
+        return static_cast<NodeType>( this->index() );
     }
 };
 
