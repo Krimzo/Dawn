@@ -50,8 +50,7 @@ dawn::Value* dawn::Frame::get( Int id )
         auto& frame = std::get<GlobalFrame>( m_frame );
         if ( (Int) frame.size() > id )
         {
-            auto& obj = frame[id];
-            if ( obj )
+            if ( auto& obj = frame[id] )
                 return &*obj;
         }
     }

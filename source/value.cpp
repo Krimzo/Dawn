@@ -817,7 +817,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
             auto& left = as_enum();
             auto& right = other.as_enum();
             if ( left.parent != right.parent )
-                PANIC( "enum [", IDSystem::get( left.parent->id ), "] <=> enum [", IDSystem::get( right.parent->id ), "] not supported" );
+                PANIC( "enum [", IDSystem::get( left.parent->id ), "] ", dawn::op_cmpr, " enum [", IDSystem::get( right.parent->id ), "] not supported" );
 
             return Value{ (Int) ( left.key_id <=> right.key_id )._Value };
         }
