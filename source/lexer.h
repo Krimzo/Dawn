@@ -17,6 +17,14 @@ struct LanguageDef
     String literal_string;
     String comment_line;
     Pair<String, String> comment_multiline;
+    String cmplx_string_opn;
+    String cmplx_string_cls;
+    String oper_add;
+    String to_string;
+    String call_opn;
+    String call_cls;
+    String expr_opn;
+    String expr_cls;
 
     static LanguageDef dawn();
 };

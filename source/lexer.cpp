@@ -81,6 +81,14 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
     result.literal_string = lit_string;
     result.comment_line = comm_line;
     result.comment_multiline = comm_multiline;
+    result.cmplx_string_opn = op_scope_opn;
+    result.cmplx_string_cls = op_scope_cls;
+    result.oper_add = op_add;
+    result.to_string = "to_string";
+    result.call_opn = op_expr_opn;
+    result.call_cls = op_expr_cls;
+    result.expr_opn = op_expr_opn;
+    result.expr_cls = op_expr_cls;
     return result;
 }
 
@@ -302,6 +310,13 @@ dawn::Bool dawn::Lexer::is_string( StringRef const& source, Int i )
 
 void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
 {
+    {
+        auto& token = tokens.emplace_back();
+        token.type = TokenType::OPERATOR;
+        token.value = lang_def.expr_opn;
+        token.line_number = line;
+    }
+
     String buffer;
     i += lang_def.literal_string.size();
     for ( ; i < (Int) source.size(); i++ )
@@ -325,16 +340,105 @@ void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens
             buffer.push_back( c );
             ++i;
         }
+        else if ( source.substr( i ).starts_with( lang_def.cmplx_string_opn ) )
+        {
+            if ( !buffer.empty() )
+            {
+                {
+                    auto& token = tokens.emplace_back();
+                    token.type = TokenType::STRING;
+                    token.literal = buffer;
+                    token.line_number = line;
+                    buffer.clear();
+                }
+                {
+                    auto& token = tokens.emplace_back();
+                    token.type = TokenType::OPERATOR;
+                    token.value = lang_def.oper_add;
+                    token.line_number = line;
+                }
+            }
+
+            i += lang_def.cmplx_string_opn.size();
+            Int depth = 1;
+            for ( ; i < (Int) source.size(); i++ )
+            {
+                if ( source[i] == '\n' )
+                    ++line;
+                if ( source.substr( i ).starts_with( lang_def.cmplx_string_opn ) )
+                    depth += 1;
+                else if ( source.substr( i ).starts_with( lang_def.cmplx_string_cls ) )
+                {
+                    depth -= 1;
+                    if ( depth == 0 )
+                        break;
+                }
+                buffer.push_back( source[i] );
+            }
+
+            {
+                auto& token = tokens.emplace_back();
+                token.type = TokenType::NAME;
+                token.value = lang_def.to_string;
+                token.line_number = line;
+            }
+            {
+                auto& token = tokens.emplace_back();
+                token.type = TokenType::OPERATOR;
+                token.value = lang_def.call_opn;
+                token.line_number = line;
+            }
+
+            const size_t old_token_count = tokens.size();
+            tokenize( buffer, tokens );
+            buffer.clear();
+            if ( tokens.size() == old_token_count ) // empty expr
+            {
+                {
+                    auto& token = tokens.emplace_back();
+                    token.type = TokenType::OPERATOR;
+                    token.value = lang_def.expr_opn;
+                    token.line_number = line;
+                }
+                {
+                    auto& token = tokens.emplace_back();
+                    token.type = TokenType::OPERATOR;
+                    token.value = lang_def.expr_cls;
+                    token.line_number = line;
+                }
+            }
+
+            {
+                auto& token = tokens.emplace_back();
+                token.type = TokenType::OPERATOR;
+                token.value = lang_def.call_cls;
+                token.line_number = line;
+            }
+            {
+                auto& token = tokens.emplace_back();
+                token.type = TokenType::OPERATOR;
+                token.value = lang_def.oper_add;
+                token.line_number = line;
+            }
+        }
         else
         {
             buffer.push_back( source[i] );
         }
     }
 
-    auto& token = tokens.emplace_back();
-    token.type = TokenType::STRING;
-    token.literal = buffer;
-    token.line_number = line;
+    {
+        auto& token = tokens.emplace_back();
+        token.type = TokenType::STRING;
+        token.literal = buffer;
+        token.line_number = line;
+    }
+    {
+        auto& token = tokens.emplace_back();
+        token.type = TokenType::OPERATOR;
+        token.value = lang_def.expr_cls;
+        token.line_number = line;
+    }
 }
 
 dawn::Bool dawn::Lexer::is_operator( StringRef const& source, Int i )

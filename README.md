@@ -23,6 +23,12 @@ var c = 'd'    // char (1 byte)
 var s = "nice" // string (32 bytes)
 ```
 
+# Strings
+```dawn
+const normal_string = "some string"
+const complex_string = "some value = {2 + 3}"
+```
+
 # Arrays
 ```dawn
 var a0 = int[10]            // array of 10 int elements
