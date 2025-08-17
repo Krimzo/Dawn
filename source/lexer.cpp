@@ -361,17 +361,23 @@ void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens
 
             i += lang_def.cmplx_string_opn.size();
             Int depth = 1;
+            Bool in_string = false;
             for ( ; i < (Int) source.size(); i++ )
             {
                 if ( source[i] == '\n' )
                     ++line;
-                if ( source.substr( i ).starts_with( lang_def.cmplx_string_opn ) )
-                    depth += 1;
-                else if ( source.substr( i ).starts_with( lang_def.cmplx_string_cls ) )
+                if ( source[i - 1] != '\\' && source.substr( i ).starts_with( lang_def.literal_string ) )
+                    in_string = !in_string;
+                else if ( !in_string )
                 {
-                    depth -= 1;
-                    if ( depth == 0 )
-                        break;
+                    if ( source.substr( i ).starts_with( lang_def.cmplx_string_opn ) )
+                        depth += 1;
+                    else if ( source.substr( i ).starts_with( lang_def.cmplx_string_cls ) )
+                    {
+                        depth -= 1;
+                        if ( depth == 0 )
+                            break;
+                    }
                 }
                 buffer.push_back( source[i] );
             }
