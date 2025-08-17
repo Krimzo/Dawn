@@ -13,8 +13,7 @@ struct IDSystem
     static String const& get( Int int_id );
 
 private:
+    static Vector<String> m_int_str;
     static HMap<String, Int> m_str_int;
-    static OMap<Int, String> m_int_str;
-    static Int m_current;
 };
 }
