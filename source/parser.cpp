@@ -1092,6 +1092,9 @@ dawn::Bool dawn::is_unary( Token const& token )
 
 dawn::Int dawn::token_depth( Token const& token, Bool& in_lambda )
 {
+    if ( token.type != TokenType::OPERATOR )
+        return 0;
+
     if ( token.value == op_lambda )
     {
         in_lambda = !in_lambda;
