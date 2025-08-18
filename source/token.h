@@ -9,6 +9,7 @@ struct Token
 {
     TokenType type;
     String value;
+    String literal;
     Int line_number = 0;
 };
 
