@@ -25,7 +25,6 @@ dawn::Bool dawn::is_custom_type( StringRef const& value )
 std::ostream& dawn::operator<<( std::ostream& stream, Token const& token )
 {
     const Color color = to_color( token.type );
-    stream << ColoredText{ color, token.type, "<", token.line_number, ">" } <<
-        "[" << ColoredText{ color, !token.literal.empty() ? token.literal : token.value } << "]";
+    stream << ColoredText{ color, token.type, "<", token.line_number, ">" } << "[" << ColoredText{ color, token.value } << "]";
     return stream;
 }

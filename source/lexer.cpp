@@ -260,7 +260,7 @@ void dawn::Lexer::extract_number( StringRef const& source, Vector<Token>& tokens
 
     auto& token = tokens.emplace_back();
     token.type = is_float ? TokenType::FLOAT : TokenType::INTEGER;
-    token.literal = buffer;
+    token.value = buffer;
     token.line_number = line;
 }
 
@@ -299,7 +299,7 @@ void dawn::Lexer::extract_char( StringRef const& source, Vector<Token>& tokens, 
 
     auto& token = tokens.emplace_back();
     token.type = TokenType::CHAR;
-    token.literal = buffer;
+    token.value = buffer;
     token.line_number = line;
 }
 
@@ -310,22 +310,15 @@ dawn::Bool dawn::Lexer::is_string( StringRef const& source, Int i )
 
 void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
 {
-    const auto add_value_token = [&]( TokenType type, StringRef const& str )
+    const auto add_token = [&]( TokenType type, StringRef const& str )
         {
             auto& token = tokens.emplace_back();
             token.type = type;
             token.value = str;
             token.line_number = line;
         };
-    const auto add_literal_token = [&]( TokenType type, StringRef const& str )
-        {
-            auto& token = tokens.emplace_back();
-            token.type = type;
-            token.literal = str;
-            token.line_number = line;
-        };
 
-    add_value_token( TokenType::OPERATOR, lang_def.expr_opn );
+    add_token( TokenType::OPERATOR, lang_def.expr_opn );
     const Int open_expr_indx = (Int) tokens.size() - 1;
 
     String buffer;
@@ -356,9 +349,9 @@ void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens
         {
             if ( !buffer.empty() )
             {
-                add_literal_token( TokenType::STRING, buffer );
+                add_token( TokenType::STRING, buffer );
                 buffer.clear();
-                add_value_token( TokenType::OPERATOR, lang_def.oper_add );
+                add_token( TokenType::OPERATOR, lang_def.oper_add );
                 cmplx_part_count += 1;
             }
 
@@ -385,12 +378,12 @@ void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens
                 buffer.push_back( source[i] );
             }
 
-            add_value_token( TokenType::NAME, lang_def.to_string );
-            add_value_token( TokenType::OPERATOR, lang_def.call_opn );
+            add_token( TokenType::NAME, lang_def.to_string );
+            add_token( TokenType::OPERATOR, lang_def.call_opn );
             tokenize( buffer, tokens );
             buffer.clear();
-            add_value_token( TokenType::OPERATOR, lang_def.call_cls );
-            add_value_token( TokenType::OPERATOR, lang_def.oper_add );
+            add_token( TokenType::OPERATOR, lang_def.call_cls );
+            add_token( TokenType::OPERATOR, lang_def.oper_add );
             cmplx_part_count += 1;
         }
         else
@@ -403,19 +396,19 @@ void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens
             tokens.pop_back(); // remove oper_add
         else
         {
-            add_literal_token( TokenType::STRING, buffer );
+            add_token( TokenType::STRING, buffer );
             cmplx_part_count += 1;
         }
 
         if ( cmplx_part_count > 1 )
-            add_value_token( TokenType::OPERATOR, lang_def.expr_cls );
+            add_token( TokenType::OPERATOR, lang_def.expr_cls );
         else
             tokens.erase( tokens.begin() + open_expr_indx ); // remove expr_opn
     }
     else
     {
         tokens.erase( tokens.begin() + open_expr_indx ); // remove expr_opn
-        add_literal_token( TokenType::STRING, buffer );
+        add_token( TokenType::STRING, buffer );
     }
 }
 
