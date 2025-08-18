@@ -159,9 +159,11 @@ void dawn::Engine::load_standard_functions()
 
     bind_cfunc( IDSystem::get( "to_string" ), [this]( Value* args, Int arg_count ) -> Value
         {
-            if ( arg_count != 1 )
-                PANIC( "to_string expected 1 argument, but got ", arg_count );
-            return (Value) args[0].to_string( *this );
+            if ( arg_count == 1 )
+                return (Value) args[0].to_string( *this );
+            else if ( arg_count == 0 )
+                return Value{ StringRef{} };
+            PANIC( "to_string expects 1 or 0 arguments, but got ", arg_count );
         } );
 
     /* UTIL */

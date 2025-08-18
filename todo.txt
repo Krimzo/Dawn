@@ -1,1 +1,2 @@
+check why token has both value and literal
 better error description
