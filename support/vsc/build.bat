@@ -1,0 +1,1 @@
+vsce package && code --install-extension dawn-1.0.0.vsix

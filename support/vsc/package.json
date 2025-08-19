@@ -1,7 +1,7 @@
 {
   "name": "dawn",
   "displayName": "Dawn",
-  "description": "Dawn lang support.",
+  "description": "Dawn language support.",
   "publisher": "Krimzo",
   "repository": "https://github.com/Krimzo/Dawn",
   "icon": "icon.png",
@@ -9,20 +9,29 @@
   "engines": {
     "vscode": "^1.96.0"
   },
-  "categories": [
-    "Programming Languages"
-  ],
+  "categories": ["Programming Languages"],
+  "main": "./dawn.js",
+  "activationEvents": [],
   "contributes": {
     "languages": [{
       "id": "dawn",
       "aliases": ["dawn"],
       "extensions": [".dw"],
-      "configuration": "./language-configuration.json"
+      "configuration": "./langconf.json"
     }],
     "grammars": [{
       "language": "dawn",
       "scopeName": "source.dawn",
-      "path": "./syntaxes/dawn.tmLanguage.json"
+      "path": "./grammar.json"
+    }],
+    "commands": [{
+      "command": "dawn.runFile",
+      "title": "Run Dawn File"
+    }],
+    "keybindings": [{
+      "key": "f5",
+      "command": "dawn.runFile",
+      "when": "editorLangId == dawn"
     }]
   }
 }
