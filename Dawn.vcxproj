@@ -37,6 +37,7 @@
   <ItemGroup>
     <ClInclude Include="source\dawn.h" />
     <ClInclude Include="source\decl.h" />
+    <ClInclude Include="source\storage.h" />
     <ClInclude Include="source\en.h" />
     <ClInclude Include="source\engine.h" />
     <ClInclude Include="source\err.h" />

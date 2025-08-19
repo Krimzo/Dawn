@@ -1,14 +1,15 @@
 #pragma once
 
 #include "value.h"
+#include "storage.h"
 
 
 namespace dawn
 {
 struct Frame
 {
-    using LocalFrame = Vector<Pair<Int, Value>>;
-    using GlobalFrame = Vector<Opt<Value>>;
+    using LocalFrame = LocalStorage<Value>;
+    using GlobalFrame = GlobalStorage<Value>;
 
     Frame( FrameType type = FrameType::LOCAL );
 

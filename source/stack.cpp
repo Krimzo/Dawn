@@ -7,52 +7,30 @@ static constexpr dawn::Int GLOBAL_FRAME_SIZE = 1024;
 dawn::Frame::Frame( FrameType type )
 {
     if ( type == FrameType::LOCAL )
-    {
-        auto& frame = m_frame.emplace<LocalFrame>();
-        frame.reserve( LOCAL_FRAME_RESERVE_SIZE );
-    }
+        m_frame.emplace<LocalFrame>( LOCAL_FRAME_RESERVE_SIZE );
     else
-    {
-        auto& frame = m_frame.emplace<GlobalFrame>();
-        frame.resize( GLOBAL_FRAME_SIZE );
-    }
+        m_frame.emplace<GlobalFrame>( GLOBAL_FRAME_SIZE );
 }
 
 dawn::Value& dawn::Frame::set( Int id, Value const& value )
 {
     if ( std::holds_alternative<LocalFrame>( m_frame ) )
-    {
-        auto& frame = std::get<LocalFrame>( m_frame );
-        return frame.emplace_back( id, value ).second;
-    }
+        return std::get<LocalFrame>( m_frame ).set( id, value );
     else
-    {
-        auto& frame = std::get<GlobalFrame>( m_frame );
-        if ( (Int) frame.size() <= id )
-            frame.resize( ( id + 1 ) * 2 );
-        return frame[id].emplace( value );
-    }
+        return std::get<GlobalFrame>( m_frame ).set( id, value );
 }
 
 dawn::Value* dawn::Frame::get( Int id )
 {
     if ( std::holds_alternative<LocalFrame>( m_frame ) )
     {
-        auto& frame = std::get<LocalFrame>( m_frame );
-        for ( auto& [obj_id, obj] : frame )
-        {
-            if ( obj_id == id )
-                return &obj;
-        }
+        if ( auto ptr = std::get<LocalFrame>( m_frame ).get( id ) )
+            return ptr;
     }
     else
     {
-        auto& frame = std::get<GlobalFrame>( m_frame );
-        if ( (Int) frame.size() > id )
-        {
-            if ( auto& obj = frame[id] )
-                return &*obj;
-        }
+        if ( auto ptr = std::get<GlobalFrame>( m_frame ).get( id ) )
+            return ptr;
     }
     return m_parent.valid() ? m_parent.value().get( id ) : nullptr;
 }
@@ -60,15 +38,9 @@ dawn::Value* dawn::Frame::get( Int id )
 void dawn::Frame::reset( RegisterRef<Frame> const& parent )
 {
     if ( std::holds_alternative<LocalFrame>( m_frame ) )
-    {
-        auto& frame = std::get<LocalFrame>( m_frame );
-        frame.clear();
-    }
+        std::get<LocalFrame>( m_frame ).clear();
     else
-    {
-        auto& frame = std::get<GlobalFrame>( m_frame );
-        frame.clear();
-    }
+        std::get<GlobalFrame>( m_frame ).clear();
     m_parent = parent;
 }
 
