@@ -651,7 +651,7 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Vector<Token>&
         parse_scope( right_it, right.end(), func.body );
     }
     else
-        PARSER_PANIC( left.front(), "unknown scope expression" );
+        PARSER_PANIC( right.front(), "scope is not an expression" );
 }
 
 void dawn::Parser::expression_complex_array( Vector<Token>& left, Vector<Token>& right, Node& tree )
@@ -756,7 +756,8 @@ void dawn::Parser::expression_single( Token const& token, Node& tree )
         break;
 
     case TokenType::TYPE:
-        PARSER_PANIC( token, "single type is not an expression" );
+        expression_single_type( token, tree );
+        break;
 
     case TokenType::NAME:
         expression_single_identifier( token, tree );
@@ -805,6 +806,14 @@ void dawn::Parser::expression_single_keyword( Token const& token, Node& tree )
     }
     else
         PARSER_PANIC( token, "keyword [", token.value, "] is not an expression" );
+}
+
+void dawn::Parser::expression_single_type( Token const& token, Node& tree )
+{
+    if ( token.value == tp_bool || token.value == tp_int || token.value == tp_float || token.value == tp_char || token.value == tp_string )
+        tree.emplace<IdentifierNode>().id = IDSystem::get( token.value );
+    else
+        PARSER_PANIC( token, "type [", token.value, "] is not an expression" );
 }
 
 void dawn::Parser::expression_single_identifier( Token const& token, Node& tree )

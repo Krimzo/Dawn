@@ -84,7 +84,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
     result.cmplx_string_opn = op_scope_opn;
     result.cmplx_string_cls = op_scope_cls;
     result.oper_add = op_add;
-    result.to_string = "to_string";
+    result.to_string = tp_string;
     result.call_opn = op_expr_opn;
     result.call_cls = op_expr_cls;
     result.expr_opn = op_expr_opn;

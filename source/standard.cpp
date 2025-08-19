@@ -129,41 +129,49 @@ void dawn::Engine::load_standard_functions()
         } );
 
     /* CAST */
-    bind_cfunc( IDSystem::get( "to_bool" ), [this]( Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "bool" ), [this]( Value* args, Int arg_count ) -> Value
         {
-            if ( arg_count != 1 )
-                PANIC( "to_bool expected 1 argument, but got ", arg_count );
-            return (Value) args[0].to_bool( *this );
+            if ( arg_count == 1 )
+                return (Value) args[0].to_bool( *this );
+            else if ( arg_count == 0 )
+                return Value{ Bool{} };
+            PANIC( "bool() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( "to_int" ), [this]( Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "int" ), [this]( Value* args, Int arg_count ) -> Value
         {
-            if ( arg_count != 1 )
-                PANIC( "to_int expected 1 argument, but got ", arg_count );
-            return (Value) args[0].to_int( *this );
+            if ( arg_count == 1 )
+                return (Value) args[0].to_int( *this );
+            else if ( arg_count == 0 )
+                return Value{ Int{} };
+            PANIC( "int() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( "to_float" ), [this]( Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "float" ), [this]( Value* args, Int arg_count ) -> Value
         {
-            if ( arg_count != 1 )
-                PANIC( "to_float expected 1 argument, but got ", arg_count );
-            return (Value) args[0].to_float( *this );
+            if ( arg_count == 1 )
+                return (Value) args[0].to_float( *this );
+            else if ( arg_count == 0 )
+                return Value{ Float{} };
+            PANIC( "float() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( "to_char" ), [this]( Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "char" ), [this]( Value* args, Int arg_count ) -> Value
         {
-            if ( arg_count != 1 )
-                PANIC( "to_char expected 1 argument, but got ", arg_count );
-            return (Value) args[0].to_char( *this );
+            if ( arg_count == 1 )
+                return (Value) args[0].to_char( *this );
+            else if ( arg_count == 0 )
+                return Value{ Char{} };
+            PANIC( "char() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( "to_string" ), [this]( Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "string" ), [this]( Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return (Value) args[0].to_string( *this );
             else if ( arg_count == 0 )
                 return Value{ StringRef{} };
-            PANIC( "to_string expects 1 or 0 arguments, but got ", arg_count );
+            PANIC( "string() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
     /* UTIL */

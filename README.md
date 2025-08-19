@@ -50,18 +50,19 @@ var value = animal->value
 # Structs
 ```dawn
 struct Person {
-    name    // fields don't need initializers (value is set to nothing and cant be changed)
-    age = 0 // but can have them
+    not_important // fields don't need initializers (value is set to nothing and can't be changed)
+    name = ""     // but should have them
+    age = 0
 
     func who() {
-        print(self->name, " is ", self->age, " years old")
+        print("{self->name} is {self->age} years old")
     }
 
     oper +(ref age) {
         return Person{ name = self->name, age = self->age + age }
     }
 }
-var person = Person{ age=23, name="Krim" }
+var person = Person{ name="Krim", age=23 }
 person->who()
 ```
 
@@ -155,6 +156,10 @@ print(a)
 
 # Misc
 ```dawn
-import "path..."    // importing modules (uses relative path from the source file)
-var i = to_int(...) // casting primitive types (use standard.cpp to find more functions)
+import "path..." // importing modules (uses relative path from the source file)
+var i = int(...) // casting basic types [bool, int, float, char, string] (use standard.cpp for more functions)
 ```
+
+# C++
+Syntax is stored inside syntax.h and can be changed.<br/>
+Binding C++ functions is also possible. Look at standard.cpp.<br/>

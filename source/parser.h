@@ -45,6 +45,7 @@ private:
     void expression_single( Token const& token, Node& tree );
     void expression_single_literal( Token const& token, Node& tree );
     void expression_single_keyword( Token const& token, Node& tree );
+    void expression_single_type( Token const& token, Node& tree );
     void expression_single_identifier( Token const& token, Node& tree );
 
     void parse_scope( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Scope& scope );
