@@ -37,12 +37,12 @@ void dawn::Engine::load_function( Function const& entry )
 
 void dawn::Engine::load_enum( Enum const& entry )
 {
-    enums[entry.id] = entry;
+    enums.set( entry.id, entry );
 }
 
 void dawn::Engine::load_struct( Struct const& entry )
 {
-    structs[entry.id] = entry;
+    structs.set( entry.id, entry );
 }
 
 void dawn::Engine::load_variable( Variable const& entry )
@@ -92,16 +92,16 @@ dawn::Value* dawn::Engine::get_var( Int id )
 
 void dawn::Engine::bind_member( ValueType type, String const& name, Func<Value( Value& )> const& func )
 {
-    member_generators[(Int) type][IDSystem::get( name )] = [=]( Value const& self ) -> Value
+    member_generators[(Int) type].set( IDSystem::get( name ), [=]( Value const& self ) -> Value
         {
             return func( const_cast<Value&>( self ) );
-        };
+        } );
 }
 
 void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, Func<Value( Value&, Value* )> const& body )
 {
     const Int id = IDSystem::get( name );
-    member_generators[(Int) type][id] = [=]( Value const& self ) -> Value
+    member_generators[(Int) type].set( id, [=]( Value const& self ) -> Value
         {
             FunctionValue fv{};
             auto& method = fv.data.emplace<FunctionValue::AsMethod>();
@@ -116,7 +116,7 @@ void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_cons
                 };
             *method.self = self;
             return (Value) fv;
-        };
+        } );
 }
 
 dawn::Value dawn::Engine::handle_func( FunctionValue const& func, Value* args, Int arg_count )
@@ -499,15 +499,15 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
 
 dawn::Value dawn::Engine::handle_enum_node( EnumNode const& node )
 {
-    auto enum_it = enums.find( node.type_id );
-    if ( enum_it == enums.end() )
+    auto* enum_ptr = enums.get( node.type_id );
+    if ( !enum_ptr )
         ENGINE_PANIC( "enum [", IDSystem::get( node.type_id ), "] doesn't exist" );
 
-    if ( !enum_it->second.contains( node.key_id ) )
+    if ( !enum_ptr->contains( node.key_id ) )
         ENGINE_PANIC( "enum [", IDSystem::get( node.type_id ), "] doesn't have key [", IDSystem::get( node.key_id ), "]" );
 
     EnumValue result{};
-    result.parent = &enum_it->second;
+    result.parent = enum_ptr;
     result.key_id = node.key_id;
 
     return Value{ result };
@@ -515,10 +515,10 @@ dawn::Value dawn::Engine::handle_enum_node( EnumNode const& node )
 
 dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
 {
-    auto struct_it = structs.find( node.type_id );
-    if ( struct_it == structs.end() )
+    auto* struct_ptr = structs.get( node.type_id );
+    if ( !struct_ptr )
         ENGINE_PANIC( "struct [", IDSystem::get( node.type_id ), "] doesn't exist" );
-    auto& struc = struct_it->second;
+    auto& struc = *struct_ptr;
 
     Value value{ StructValue{} };
 
@@ -724,10 +724,10 @@ dawn::Value dawn::Engine::handle_ac_struct_node( Value const& self, Int right_id
 
 dawn::Value dawn::Engine::handle_ac_type_node( Value const& self, Int right_id )
 {
-    auto& generators = member_generators[(Int) self.type()];
-    if ( !generators.contains( right_id ) )
+    auto* generator_ptr = member_generators[(Int) self.type()].get( right_id );
+    if ( !generator_ptr )
         ENGINE_PANIC( "type [", self.type(), "] doesn't have member [", IDSystem::get( right_id ), "]" );
-    return generators.at( right_id )( self );
+    return ( *generator_ptr )( self );
 }
 
 dawn::Value dawn::Engine::create_default_value( Int typeid_ )
@@ -753,16 +753,16 @@ dawn::Value dawn::Engine::create_default_value( Int typeid_ )
     else if ( typeid_ == _stringid )
         return Value{ String{} };
 
-    else if ( enums.contains( typeid_ ) )
+    else if ( auto* enum_ptr = enums.get( typeid_ ) )
     {
-        auto& entry = *enums.at( typeid_ ).entries.begin();
+        auto& entry = *enum_ptr->entries.begin();
         EnumNode node;
         node.type_id = typeid_;
         node.key_id = entry.id;
         return handle_enum_node( node );
     }
 
-    else if ( structs.contains( typeid_ ) )
+    else if ( auto* struct_ptr = structs.get( typeid_ ) )
     {
         StructNode node;
         node.type_id = typeid_;

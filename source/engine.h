@@ -12,9 +12,9 @@ struct Engine
     friend struct EnumValue;
 
     Stack stack;
-    Map<Int, Enum> enums;
-    Map<Int, Struct> structs;
-    Map<Int, MemberGenerator> member_generators[(Int) ValueType::_COUNT] = {};
+    GlobalStorage<Enum> enums;
+    GlobalStorage<Struct> structs;
+    GlobalStorage<MemberGenerator> member_generators[(Int) ValueType::_COUNT] = {};
 
     Engine();
 
