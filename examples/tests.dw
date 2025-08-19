@@ -145,7 +145,7 @@ struct SomeStruct
 		return self
 	}
 
-	func to_string()
+	cast string
 	{
 		return format("SomeStruct: ", self->name, " is ", self->age, " years old")
 	}

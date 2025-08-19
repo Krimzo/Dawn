@@ -61,8 +61,12 @@ struct Person {
     oper +(ref age) {
         return Person{ name = self->name, age = self->age + age }
     }
+
+    cast string {
+        return "Person({self->name}, {self->age})"
+    }
 }
-var person = Person{ name="Krim", age=23 }
+const person = Person{ name="Krim", age=24 }
 person->who()
 ```
 

@@ -3,11 +3,17 @@
 #include "engine.h"
 
 
-#define OP_HELPER(op) static const Int __##op = IDSystem::get( (String) op_##op )
 #define ID_HELPER(id) static const Int _##id = IDSystem::get( #id )
+#define OP_HELPER(op) static const Int __##op = IDSystem::get( (String) op_##op )
 
 namespace dawn
 {
+ID_HELPER( bool );
+ID_HELPER( int );
+ID_HELPER( float );
+ID_HELPER( char );
+ID_HELPER( string );
+
 OP_HELPER( add );
 OP_HELPER( sub );
 OP_HELPER( mul );
@@ -15,12 +21,6 @@ OP_HELPER( div );
 OP_HELPER( pow );
 OP_HELPER( mod );
 OP_HELPER( cmpr );
-
-ID_HELPER( to_bool );
-ID_HELPER( to_int );
-ID_HELPER( to_float );
-ID_HELPER( to_char );
-ID_HELPER( to_string );
 }
 
 dawn::Bool dawn::FunctionValue::is_global() const
@@ -950,7 +950,7 @@ dawn::Bool dawn::Value::to_bool( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _to_bool, true );
+        auto* method = left.get_method( _bool, true );
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to bool" );
 
@@ -992,7 +992,7 @@ dawn::Int dawn::Value::to_int( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _to_int, true );
+        auto* method = left.get_method( _int, true );
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to int" );
 
@@ -1034,7 +1034,7 @@ dawn::Float dawn::Value::to_float( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _to_float, true );
+        auto* method = left.get_method( _float, true );
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to float" );
 
@@ -1072,7 +1072,7 @@ dawn::Char dawn::Value::to_char( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _to_char, true );
+        auto* method = left.get_method( _char, true );
         if ( !method )
             PANIC( "can't convert struct [", IDSystem::get( left.parent->id ), "] to char" );
 
@@ -1156,7 +1156,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        if ( auto* method = left.get_method( _to_string, true ) )
+        if ( auto* method = left.get_method( _string, true ) )
         {
             Value args[1] = { *this };
             return engine.handle_func( *method, args, (Int) std::size( args ) ).to_string( engine );

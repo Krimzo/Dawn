@@ -151,6 +151,18 @@ void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token
             self_var.id = IDSystem::get( (String) kw_self );
             struc.methods.push_back( method );
         }
+        else if ( it->value == kw_cast )
+        {
+            Function method;
+            parse_cast( it, end, method );
+            if ( struc.contains( method.id ) )
+                PARSER_PANIC( *it, "struct cast [", IDSystem::get( method.id ), "] already defined" );
+
+            auto& self_var = *method.args.emplace( method.args.begin() );
+            self_var.kind = VariableKind::REF;
+            self_var.id = IDSystem::get( (String) kw_self );
+            struc.methods.push_back( method );
+        }
         else if ( it->value == kw_oper )
         {
             Function op;
@@ -164,7 +176,7 @@ void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token
             struc.methods.push_back( op );
         }
         else
-            PARSER_PANIC( *it, "expected field name or function" );
+            PARSER_PANIC( *it, "expected field name, func, cast or oper" );
     }
     ++it;
 }
@@ -266,10 +278,28 @@ void dawn::Parser::parse_function( Vector<Token>::const_iterator& it, Vector<Tok
     parse_scope( it, end, function.body );
 }
 
+void dawn::Parser::parse_cast( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& function )
+{
+    if ( it->value != kw_cast )
+        PARSER_PANIC( *it, "expected cast" );
+    ++it;
+
+    if ( it->value != tp_bool &&
+        it->value != tp_int &&
+        it->value != tp_float &&
+        it->value != tp_char &&
+        it->value != tp_string )
+        PARSER_PANIC( *it, "expected cast type" );
+    function.id = IDSystem::get( it->value );
+    ++it;
+
+    parse_scope( it, end, function.body );
+}
+
 void dawn::Parser::parse_operator( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& operat )
 {
     if ( it->value != kw_oper )
-        PARSER_PANIC( *it, "expected opert" );
+        PARSER_PANIC( *it, "expected oper" );
     ++it;
 
     if ( it->type != TokenType::OPERATOR )

@@ -7,6 +7,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
     result.keywords = {
         (String) kw_import,
         (String) kw_func,
+        (String) kw_cast,
         (String) kw_oper,
         (String) kw_return,
         (String) kw_const,
