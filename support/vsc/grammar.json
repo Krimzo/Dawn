@@ -1,22 +1,19 @@
 {
     "name": "dawn",
     "scopeName": "source.dawn",
-    "patterns": [ { "include": "#all" } ],
+    "patterns": [
+        { "include": "#comments" },
+        { "include": "#operators" },
+        { "include": "#keywords" },
+        { "include": "#keywords_special" },
+        { "include": "#types" },
+        { "include": "#functions" },
+        { "include": "#names" },
+        { "include": "#numbers" },
+        { "include": "#chars" },
+        { "include": "#strings" }
+    ],
     "repository": {
-        "all": {
-             "patterns": [
-                { "include": "#comments" },
-                { "include": "#operators" },
-                { "include": "#keywords" },
-                { "include": "#keywords_special" },
-                { "include": "#types" },
-                { "include": "#functions" },
-                { "include": "#names" },
-                { "include": "#numbers" },
-                { "include": "#chars" },
-                { "include": "#strings" }
-            ]
-        },
         "comments": {
             "patterns": [
                 {
@@ -116,7 +113,7 @@
                     "name": "meta.interpolation.dawn",
                     "begin": "\\{",
                     "end": "\\}",
-                    "patterns": [ { "include": "#all" } ]
+                    "patterns": [ { "include": "$self" } ]
                 }
             ]
         }
