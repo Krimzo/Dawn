@@ -12,9 +12,9 @@ struct Engine
     friend struct EnumValue;
 
     Stack stack;
-    OMap<Int, Enum> enums;
-    OMap<Int, Struct> structs;
-    OMap<Int, MemberGenerator> member_generators[(Int) ValueType::_COUNT] = {};
+    Map<Int, Enum> enums;
+    Map<Int, Struct> structs;
+    Map<Int, MemberGenerator> member_generators[(Int) ValueType::_COUNT] = {};
 
     Engine();
 
@@ -30,8 +30,8 @@ struct Engine
     void add_var( VariableKind kind, Int id, Value const& value );
     Value* get_var( Int id );
 
-    void add_type_member( ValueType type, String const& name, Func<Value( Value& )> const& func );
-    void add_type_method( ValueType type, String const& name, Bool is_const, Int expected_args, Func<Value( Value&, Value* )> const& body );
+    void bind_member( ValueType type, String const& name, Func<Value( Value& )> const& func );
+    void bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, Func<Value( Value&, Value* )> const& body );
 
 private:
     void load_standard_functions();

@@ -553,7 +553,7 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Vector<Token>&
 
     if ( left.size() == 1 && left.front().type == TokenType::TYPE )
     {
-        OMap<Int, Node> args;
+        Map<Int, Node> args;
         Opt<Int> key;
         for ( auto it = right.begin(); it != right.end(); )
         {

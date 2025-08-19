@@ -2,7 +2,7 @@
 
 
 dawn::Vector<dawn::String> dawn::IDSystem::m_int_str = {};
-dawn::HMap<dawn::String, dawn::Int> dawn::IDSystem::m_str_int = {};
+dawn::Map<dawn::String, dawn::Int> dawn::IDSystem::m_str_int = {};
 
 dawn::Int dawn::IDSystem::get( String const& str_id )
 {

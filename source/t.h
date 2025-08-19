@@ -61,8 +61,5 @@ template<typename K>
 using Set = std::unordered_set<K>;
 
 template<typename K, typename V>
-using OMap = std::map<K, V>;
-
-template<typename K, typename V>
-using HMap = std::unordered_map<K, V>;
+using Map = std::unordered_map<K, V>;
 }

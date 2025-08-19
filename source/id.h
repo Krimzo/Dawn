@@ -14,6 +14,6 @@ struct IDSystem
 
 private:
     static Vector<String> m_int_str;
-    static HMap<String, Int> m_str_int;
+    static Map<String, Int> m_str_int;
 };
 }

@@ -113,7 +113,7 @@ struct EnumNode
 struct StructNode
 {
     Int type_id = 0;
-    OMap<Int, Node> args;
+    Map<Int, Node> args;
 };
 
 struct ArrayNode

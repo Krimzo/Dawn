@@ -66,7 +66,7 @@ struct EnumValue
 struct StructValue
 {
     Struct* parent = nullptr;
-    OMap<Int, Value> members;
+    Map<Int, Value> members;
 
     StructValue() = default;
 

@@ -90,7 +90,7 @@ dawn::Value* dawn::Engine::get_var( Int id )
     return stack.current().get( id );
 }
 
-void dawn::Engine::add_type_member( ValueType type, String const& name, Func<Value( Value& )> const& func )
+void dawn::Engine::bind_member( ValueType type, String const& name, Func<Value( Value& )> const& func )
 {
     member_generators[(Int) type][IDSystem::get( name )] = [=]( Value const& self ) -> Value
         {
@@ -98,7 +98,7 @@ void dawn::Engine::add_type_member( ValueType type, String const& name, Func<Val
         };
 }
 
-void dawn::Engine::add_type_method( ValueType type, String const& name, Bool is_const, Int expected_args, Func<Value( Value&, Value* )> const& body )
+void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, Func<Value( Value&, Value* )> const& body )
 {
     const Int id = IDSystem::get( name );
     member_generators[(Int) type][id] = [=]( Value const& self ) -> Value

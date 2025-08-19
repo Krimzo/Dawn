@@ -277,54 +277,54 @@ void dawn::Engine::load_standard_functions()
 void dawn::Engine::load_standard_members()
 {
     // string
-    add_type_member( ValueType::STRING, "count", [this]( Value& self ) -> Value
+    bind_member( ValueType::STRING, "count", [this]( Value& self ) -> Value
         {
             return (Value) (Int) self.as_string().size();
         } );
 
-    add_type_method( ValueType::STRING, "push", false, 1, [this]( Value& self, Value* args ) -> Value
+    bind_method( ValueType::STRING, "push", false, 1, [this]( Value& self, Value* args ) -> Value
         {
             self.as_string().push_back( args[0].to_char( *this ) );
             return self;
         } );
 
-    add_type_method( ValueType::STRING, "pop", false, 0, [this]( Value& self, Value* args ) -> Value
+    bind_method( ValueType::STRING, "pop", false, 0, [this]( Value& self, Value* args ) -> Value
         {
             self.as_string().pop_back();
             return self;
         } );
 
     // enum
-    add_type_member( ValueType::ENUM, "value", [this]( Value& self ) -> Value
+    bind_member( ValueType::ENUM, "value", [this]( Value& self ) -> Value
         {
             return self.as_enum().value( *this );
         } );
 
     // array
-    add_type_member( ValueType::ARRAY, "count", [this]( Value& self ) -> Value
+    bind_member( ValueType::ARRAY, "count", [this]( Value& self ) -> Value
         {
             return (Value) (Int) self.as_array().data.size();
         } );
 
-    add_type_method( ValueType::ARRAY, "push", false, 1, [this]( Value& self, Value* args ) -> Value
+    bind_method( ValueType::ARRAY, "push", false, 1, [this]( Value& self, Value* args ) -> Value
         {
             self.as_array().data.push_back( args[0] );
             return self;
         } );
 
-    add_type_method( ValueType::ARRAY, "pop", false, 0, [this]( Value& self, Value* args ) -> Value
+    bind_method( ValueType::ARRAY, "pop", false, 0, [this]( Value& self, Value* args ) -> Value
         {
             self.as_array().data.pop_back();
             return self;
         } );
 
     // range
-    add_type_member( ValueType::RANGE, "start", [this]( Value& self ) -> Value
+    bind_member( ValueType::RANGE, "start", [this]( Value& self ) -> Value
         {
             return (Value) self.as_range().start_incl;
         } );
 
-    add_type_member( ValueType::RANGE, "end", [this]( Value& self ) -> Value
+    bind_member( ValueType::RANGE, "end", [this]( Value& self ) -> Value
         {
             return (Value) self.as_range().end_excl;
         } );
