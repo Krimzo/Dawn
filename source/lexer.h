@@ -36,6 +36,8 @@ struct Lexer
     void tokenize( StringRef const& source, Vector<Token>& tokens );
 
 private:
+    void tokenize_cmplx( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i );
+
     Bool is_space( StringRef const& source, Int i );
     void extract_space( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i );
 

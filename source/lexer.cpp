@@ -135,6 +135,56 @@ void dawn::Lexer::tokenize( StringRef const& source, Vector<Token>& tokens )
     }
 }
 
+void dawn::Lexer::tokenize_cmplx( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
+{
+    Int depth = 1;
+    for ( ; i < (Int) source.size(); i++ )
+    {
+        if ( is_space( source, i ) )
+        {
+            extract_space( source, tokens, line, i );
+        }
+        else if ( is_comment( source, i ) )
+        {
+            extract_comment( source, tokens, line, i );
+        }
+        else if ( is_mlcomment( source, i ) )
+        {
+            extract_mlcomment( source, tokens, line, i );
+        }
+        else if ( is_word( source, i ) )
+        {
+            extract_word( source, tokens, line, i );
+        }
+        else if ( is_number( source, i ) )
+        {
+            extract_number( source, tokens, line, i );
+        }
+        else if ( is_char( source, i ) )
+        {
+            extract_char( source, tokens, line, i );
+        }
+        else if ( is_string( source, i ) )
+        {
+            extract_string( source, tokens, line, i );
+        }
+        else if ( is_operator( source, i ) )
+        {
+            if ( source.substr( i ).starts_with( lang_def.cmplx_string_opn ) )
+                depth += 1;
+            else if ( source.substr( i ).starts_with( lang_def.cmplx_string_cls ) )
+            {
+                depth -= 1;
+                if ( depth == 0 )
+                    break;
+            }
+            extract_operator( source, tokens, line, i );
+        }
+        else
+            LEXER_PANIC( line, source[i], "unexpected character" );
+    }
+}
+
 dawn::Bool dawn::Lexer::is_space( StringRef const& source, Int i )
 {
     return isspace( source[i] );
@@ -363,33 +413,12 @@ void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens
                 cmplx_part_count += 1;
             }
 
-            i += lang_def.cmplx_string_opn.size();
-            Int depth = 1;
-            Bool in_string = false;
-            for ( ; i < (Int) source.size(); i++ )
-            {
-                if ( source[i] == '\n' )
-                    ++line;
-                if ( source[i - 1] != '\\' && source.substr( i ).starts_with( lang_def.literal_string ) )
-                    in_string = !in_string;
-                else if ( !in_string )
-                {
-                    if ( source.substr( i ).starts_with( lang_def.cmplx_string_opn ) )
-                        depth += 1;
-                    else if ( source.substr( i ).starts_with( lang_def.cmplx_string_cls ) )
-                    {
-                        depth -= 1;
-                        if ( depth == 0 )
-                            break;
-                    }
-                }
-                buffer.push_back( source[i] );
-            }
-
             add_value_token( TokenType::NAME, lang_def.to_string );
             add_value_token( TokenType::OPERATOR, lang_def.call_opn );
-            tokenize( buffer, tokens );
-            buffer.clear();
+
+            i += lang_def.cmplx_string_opn.size();
+            tokenize_cmplx( source, tokens, line, i );
+
             add_value_token( TokenType::OPERATOR, lang_def.call_cls );
             add_value_token( TokenType::OPERATOR, lang_def.oper_add );
             cmplx_part_count += 1;

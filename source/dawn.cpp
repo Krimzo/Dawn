@@ -14,6 +14,12 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source, Opt<String> c
         Vector<Token> tokens;
         lexer.tokenize( source, tokens );
 
+#if 0
+        for ( auto& token : tokens )
+            print( token );
+        exit( 17 );
+#endif
+
         Module module;
         parser.parse( tokens, module );
 
