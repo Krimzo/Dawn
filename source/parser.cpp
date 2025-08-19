@@ -553,21 +553,21 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Vector<Token>&
 
     if ( left.size() == 1 && left.front().type == TokenType::TYPE )
     {
-        Map<Int, Node> args;
-        Opt<Int> key;
+        Map<Int, Node> struct_args;
+        Opt<Int> enum_key;
         for ( auto it = right.begin(); it != right.end(); )
         {
             if ( it->type != TokenType::NAME )
                 PARSER_PANIC( *it, "expected field init name" );
 
             Int name_id = IDSystem::get( it->value );
-            if ( args.contains( name_id ) )
+            if ( struct_args.contains( name_id ) )
                 PARSER_PANIC( *it, "argument [", it->value, "] already passed" );
             ++it;
 
-            if ( it == right.end() && args.empty() )
+            if ( it == right.end() && struct_args.empty() )
             {
-                key = name_id;
+                enum_key = name_id;
                 break;
             }
 
@@ -575,21 +575,21 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Vector<Token>&
                 PARSER_PANIC( *it, "expected assign operator" );
             ++it;
 
-            auto& arg = args[name_id];
+            auto& arg = struct_args[name_id];
             parse_expression( ExtractType::SPLITTER, it, right.end(), arg );
         }
 
-        if ( key )
+        if ( enum_key )
         {
             auto& node = tree.emplace<EnumNode>();
             node.type_id = IDSystem::get( left.front().value );
-            node.key_id = *key;
+            node.key_id = *enum_key;
         }
         else
         {
             auto& node = tree.emplace<StructNode>();
             node.type_id = IDSystem::get( left.front().value );
-            node.args = args;
+            node.args = struct_args;
         }
     }
     else if ( left.size() >= 2 && left.front().value == op_lambda && left.back().value == op_lambda )
