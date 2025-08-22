@@ -38,9 +38,9 @@ private:
     void parse_expression( ExtractType type, Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree );
     void expression_extract( ExtractType type, Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Vector<Token>& tokens );
     void expression_precedence( Vector<Token>& tokens, Int& index, Bool& unary );
-    void expression_complex_expr( Vector<Token>& left, Vector<Token>& right, Node& tree );
-    void expression_complex_scope( Vector<Token>& left, Vector<Token>& right, Node& tree );
-    void expression_complex_array( Vector<Token>& left, Vector<Token>& right, Node& tree );
+    void expression_complex_expr( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree );
+    void expression_complex_scope( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree );
+    void expression_complex_array( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree );
     void expression_complex_default( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree );
     void expression_pure( Vector<Token>& tokens, Node& tree );
     void expression_single( Token const& token, Node& tree );

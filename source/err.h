@@ -25,17 +25,10 @@ struct ParserError
     String msg;
 
     template<typename... Args>
-    explicit ParserError( Opt<Token> const& token, Args&&... args )
+    explicit ParserError( Token const& token, Args&&... args )
     {
         StringStream stream;
-        if ( token )
-        {
-            stream << "Parser error at token " << *token << ": ";
-        }
-        else
-        {
-            stream << "Parser error: ";
-        }
+        stream << "Parser error at token " << token << ": ";
         ( stream << ... << args );
         msg = stream.str();
     }
