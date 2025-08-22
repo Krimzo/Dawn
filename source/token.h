@@ -5,6 +5,10 @@
 
 namespace dawn
 {
+struct Bad
+{
+};
+
 struct Index
 {
     Index() = default;
@@ -34,6 +38,11 @@ struct Location
 
     constexpr Location( Index const& index )
         : line( index.line() ), col( index.col() )
+    {
+    }
+
+    constexpr Location( Bad bad )
+        : line( -1 ), col( -1 )
     {
     }
 };

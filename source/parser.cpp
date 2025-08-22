@@ -161,15 +161,15 @@ void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token
         }
         else if ( it->value == kw_cast )
         {
-            Function method;
-            parse_cast( it, end, method );
-            if ( struc.contains( method.id ) )
-                PARSER_PANIC( *it, "struct cast [", IDSystem::get( method.id ), "] already defined" );
+            Function cast;
+            parse_cast( it, end, cast );
+            if ( struc.contains( cast.id ) )
+                PARSER_PANIC( *it, "struct cast [", IDSystem::get( cast.id ), "] already defined" );
 
-            auto& self_var = *method.args.emplace( method.args.begin() );
+            auto& self_var = *cast.args.emplace( cast.args.begin() );
             self_var.kind = VariableKind::REF;
             self_var.id = IDSystem::get( (String) kw_self );
-            struc.methods.push_back( method );
+            struc.methods.push_back( cast );
         }
         else if ( it->value == kw_oper )
         {
@@ -677,13 +677,13 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
         Token left_scope;
         left_scope.value = op_scope_opn;
         left_scope.type = TokenType::OPERATOR;
-        left_scope.location.line = -1;
+        left_scope.location = Location{ Bad{} };
         right.insert( right.begin(), left_scope );
 
         Token right_scope;
         right_scope.value = op_scope_cls;
         right_scope.type = TokenType::OPERATOR;
-        right_scope.location.line = -1;
+        right_scope.location = Location{ Bad{} };
         right.push_back( right_scope );
 
         auto right_it = right.begin();
