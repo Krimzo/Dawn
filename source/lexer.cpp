@@ -95,93 +95,93 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
 
 void dawn::Lexer::tokenize( StringRef const& source, Vector<Token>& tokens )
 {
-    Int line = 1;
-    for ( Int i = 0; i < (Int) source.size(); i++ )
+    Index index;
+    for ( ; index.index() < (Int) source.size(); index.incr() )
     {
-        if ( is_space( source, i ) )
+        if ( is_space( source, index.index() ) )
         {
-            extract_space( source, tokens, line, i );
+            extract_space( source, tokens, index );
         }
-        else if ( is_comment( source, i ) )
+        else if ( is_comment( source, index.index() ) )
         {
-            extract_comment( source, tokens, line, i );
+            extract_comment( source, tokens, index );
         }
-        else if ( is_mlcomment( source, i ) )
+        else if ( is_mlcomment( source, index.index() ) )
         {
-            extract_mlcomment( source, tokens, line, i );
+            extract_mlcomment( source, tokens, index );
         }
-        else if ( is_word( source, i ) )
+        else if ( is_word( source, index.index() ) )
         {
-            extract_word( source, tokens, line, i );
+            extract_word( source, tokens, index );
         }
-        else if ( is_number( source, i ) )
+        else if ( is_number( source, index.index() ) )
         {
-            extract_number( source, tokens, line, i );
+            extract_number( source, tokens, index );
         }
-        else if ( is_char( source, i ) )
+        else if ( is_char( source, index.index() ) )
         {
-            extract_char( source, tokens, line, i );
+            extract_char( source, tokens, index );
         }
-        else if ( is_string( source, i ) )
+        else if ( is_string( source, index.index() ) )
         {
-            extract_string( source, tokens, line, i );
+            extract_string( source, tokens, index );
         }
-        else if ( is_operator( source, i ) )
+        else if ( is_operator( source, index.index() ) )
         {
-            extract_operator( source, tokens, line, i );
+            extract_operator( source, tokens, index );
         }
         else
-            LEXER_PANIC( line, source[i], "unexpected character" );
+            LEXER_PANIC( index, source[index.index()], "unexpected character" );
     }
 }
 
-void dawn::Lexer::tokenize_cmplx( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::tokenize_cmplx( StringRef const& source, Vector<Token>& tokens, Index& index )
 {
     Int depth = 1;
-    for ( ; i < (Int) source.size(); i++ )
+    for ( ; index.index() < (Int) source.size(); index.incr() )
     {
-        if ( is_space( source, i ) )
+        if ( is_space( source, index.index() ) )
         {
-            extract_space( source, tokens, line, i );
+            extract_space( source, tokens, index );
         }
-        else if ( is_comment( source, i ) )
+        else if ( is_comment( source, index.index() ) )
         {
-            extract_comment( source, tokens, line, i );
+            extract_comment( source, tokens, index );
         }
-        else if ( is_mlcomment( source, i ) )
+        else if ( is_mlcomment( source, index.index() ) )
         {
-            extract_mlcomment( source, tokens, line, i );
+            extract_mlcomment( source, tokens, index );
         }
-        else if ( is_word( source, i ) )
+        else if ( is_word( source, index.index() ) )
         {
-            extract_word( source, tokens, line, i );
+            extract_word( source, tokens, index );
         }
-        else if ( is_number( source, i ) )
+        else if ( is_number( source, index.index() ) )
         {
-            extract_number( source, tokens, line, i );
+            extract_number( source, tokens, index );
         }
-        else if ( is_char( source, i ) )
+        else if ( is_char( source, index.index() ) )
         {
-            extract_char( source, tokens, line, i );
+            extract_char( source, tokens, index );
         }
-        else if ( is_string( source, i ) )
+        else if ( is_string( source, index.index() ) )
         {
-            extract_string( source, tokens, line, i );
+            extract_string( source, tokens, index );
         }
-        else if ( is_operator( source, i ) )
+        else if ( is_operator( source, index.index() ) )
         {
-            if ( source.substr( i ).starts_with( lang_def.cmplx_string_opn ) )
+            if ( source.substr( index.index() ).starts_with( lang_def.cmplx_string_opn ) )
                 depth += 1;
-            else if ( source.substr( i ).starts_with( lang_def.cmplx_string_cls ) )
+            else if ( source.substr( index.index() ).starts_with( lang_def.cmplx_string_cls ) )
             {
                 depth -= 1;
                 if ( depth == 0 )
                     break;
             }
-            extract_operator( source, tokens, line, i );
+            extract_operator( source, tokens, index );
         }
         else
-            LEXER_PANIC( line, source[i], "unexpected character" );
+            LEXER_PANIC( index, source[index.index()], "unexpected character" );
     }
 }
 
@@ -190,16 +190,16 @@ dawn::Bool dawn::Lexer::is_space( StringRef const& source, Int i )
     return isspace( source[i] );
 }
 
-void dawn::Lexer::extract_space( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_space( StringRef const& source, Vector<Token>& tokens, Index& index )
 {
-    for ( ; i < (Int) source.size(); i++ )
+    for ( ; index.index() < (Int) source.size(); index.incr() )
     {
-        if ( source[i] == '\n' )
-            ++line;
+        if ( source[index.index()] == '\n' )
+            index.new_line();
 
-        if ( !is_space( source, i ) )
+        if ( !is_space( source, index.index() ) )
         {
-            --i;
+            index.decr();
             break;
         }
     }
@@ -210,13 +210,13 @@ dawn::Bool dawn::Lexer::is_comment( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.comment_line );
 }
 
-void dawn::Lexer::extract_comment( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_comment( StringRef const& source, Vector<Token>& tokens, Index& index )
 {
-    for ( ; i < (Int) source.size(); i++ )
+    for ( ; index.index() < (Int) source.size(); index.incr() )
     {
-        if ( source[i] == '\n' )
+        if ( source[index.index()] == '\n' )
         {
-            ++line;
+            index.new_line();
             break;
         }
     }
@@ -227,16 +227,16 @@ dawn::Bool dawn::Lexer::is_mlcomment( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.comment_multiline.first );
 }
 
-void dawn::Lexer::extract_mlcomment( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_mlcomment( StringRef const& source, Vector<Token>& tokens, Index& index )
 {
-    for ( ; i < (Int) source.size(); i++ )
+    for ( ; index.index() < (Int) source.size(); index.incr() )
     {
-        if ( source[i] == '\n' )
-            ++line;
+        if ( source[index.index()] == '\n' )
+            index.new_line();
 
-        if ( source.substr( i ).starts_with( lang_def.comment_multiline.second ) )
+        if ( source.substr( index.index() ).starts_with( lang_def.comment_multiline.second ) )
         {
-            i += lang_def.comment_multiline.second.size() - 1;
+            index.incr( lang_def.comment_multiline.second.size() - 1 );
             break;
         }
     }
@@ -247,17 +247,17 @@ dawn::Bool dawn::Lexer::is_word( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.separator_identifier ) || isalpha( source[i] );
 }
 
-void dawn::Lexer::extract_word( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_word( StringRef const& source, Vector<Token>& tokens, Index& index )
 {
     String buffer;
-    for ( ; i < (Int) source.size(); i++ )
+    for ( ; index.index() < (Int) source.size(); index.incr() )
     {
-        if ( !isdigit( source[i] ) && !is_word( source, i ) )
+        if ( !isdigit( source[index.index()] ) && !is_word( source, index.index() ) )
         {
-            --i;
+            index.decr();
             break;
         }
-        buffer.push_back( source[i] );
+        buffer.push_back( source[index.index()] );
     }
 
     TokenType type;
@@ -277,7 +277,7 @@ void dawn::Lexer::extract_word( StringRef const& source, Vector<Token>& tokens, 
     auto& token = tokens.emplace_back();
     token.type = type;
     token.value = buffer;
-    token.line_number = line;
+    token.location = index;
 }
 
 dawn::Bool dawn::Lexer::is_number( StringRef const& source, Int i )
@@ -285,34 +285,34 @@ dawn::Bool dawn::Lexer::is_number( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.separator_number ) || isdigit( source[i] );
 }
 
-void dawn::Lexer::extract_number( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_number( StringRef const& source, Vector<Token>& tokens, Index& index )
 {
     String buffer;
     Bool is_float = false;
-    for ( ; i < (Int) source.size(); i++ )
+    for ( ; index.index() < (Int) source.size(); index.incr() )
     {
-        if ( source.substr( i ).starts_with( lang_def.separator_number ) )
+        if ( source.substr( index.index() ).starts_with( lang_def.separator_number ) )
         {
             if ( is_float )
-                LEXER_PANIC( line, source[i], "invalid float number" );
+                LEXER_PANIC( index, source[index.index()], "invalid float number" );
 
             is_float = true;
         }
-        else if ( !is_number( source, i ) )
+        else if ( !is_number( source, index.index() ) )
         {
-            --i;
+            index.decr();
             break;
         }
-        buffer.push_back( source[i] );
+        buffer.push_back( source[index.index()] );
     }
 
     if ( buffer == lang_def.separator_number )
-        LEXER_PANIC( line, source[i], "invalid number" );
+        LEXER_PANIC( index, source[index.index()], "invalid number" );
 
     auto& token = tokens.emplace_back();
     token.type = is_float ? TokenType::FLOAT : TokenType::INTEGER;
     token.literal = buffer;
-    token.line_number = line;
+    token.location = index;
 }
 
 dawn::Bool dawn::Lexer::is_char( StringRef const& source, Int i )
@@ -320,38 +320,38 @@ dawn::Bool dawn::Lexer::is_char( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.literal_char );
 }
 
-void dawn::Lexer::extract_char( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_char( StringRef const& source, Vector<Token>& tokens, Index& index )
 {
-    if ( source.substr( i ).size() < 3 )
-        LEXER_PANIC( line, source[i], "char literal too short" );
+    if ( source.substr( index.index() ).size() < 3 )
+        LEXER_PANIC( index, source[index.index()], "char literal too short" );
 
     String buffer;
-    if ( source[i + 1] == '\\' )
+    if ( source[index.index() + 1] == '\\' )
     {
-        if ( source.substr( i ).size() < 4 )
-            LEXER_PANIC( line, source[i], "escaping char too short" );
+        if ( source.substr( index.index() ).size() < 4 )
+            LEXER_PANIC( index, source[index.index()], "escaping char too short" );
 
-        if ( !is_char( source, i + 3 ) )
-            LEXER_PANIC( line, source[i], "invalid escaping char literal" );
+        if ( !is_char( source, index.index() + 3 ) )
+            LEXER_PANIC( index, source[index.index()], "invalid escaping char literal" );
 
-        Char c = to_escaping( source[i + 2] );
+        Char c = to_escaping( source[index.index() + 2] );
         buffer = String( 1, c );
-        i += 3;
+        index.incr( 3 );
     }
     else
     {
-        if ( !is_char( source, i + 2 ) )
-            LEXER_PANIC( line, source[i], "invalid char literal" );
+        if ( !is_char( source, index.index() + 2 ) )
+            LEXER_PANIC( index, source[index.index()], "invalid char literal" );
 
-        Char c = source[i + 1];
+        Char c = source[index.index() + 1];
         buffer = String( 1, c );
-        i += 2;
+        index.incr( 2 );
     }
 
     auto& token = tokens.emplace_back();
     token.type = TokenType::CHAR;
     token.literal = buffer;
-    token.line_number = line;
+    token.location = index;
 }
 
 dawn::Bool dawn::Lexer::is_string( StringRef const& source, Int i )
@@ -359,51 +359,51 @@ dawn::Bool dawn::Lexer::is_string( StringRef const& source, Int i )
     return source.substr( i ).starts_with( lang_def.literal_string );
 }
 
-void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens, Index& index )
 {
     const auto add_value_token = [&]( TokenType type, StringRef const& str )
         {
             auto& token = tokens.emplace_back();
             token.type = type;
             token.value = str;
-            token.line_number = line;
+            token.location = index;
         };
     const auto add_literal_token = [&]( TokenType type, StringRef const& str )
         {
             auto& token = tokens.emplace_back();
             token.type = type;
             token.literal = str;
-            token.line_number = line;
+            token.location = index;
         };
 
     add_value_token( TokenType::OPERATOR, lang_def.expr_opn );
     const Int open_expr_indx = (Int) tokens.size() - 1;
 
     String buffer;
-    i += lang_def.literal_string.size();
+    index.incr( lang_def.literal_string.size() );
     Int cmplx_part_count = 0;
-    for ( ; i < (Int) source.size(); i++ )
+    for ( ; index.index() < (Int) source.size(); index.incr() )
     {
-        if ( source[i] == '\n' )
-            ++line;
+        if ( source[index.index()] == '\n' )
+            index.new_line();
 
-        if ( source.substr( i ).starts_with( lang_def.literal_string ) )
+        if ( source.substr( index.index() ).starts_with( lang_def.literal_string ) )
         {
-            i += lang_def.literal_string.size() - 1;
+            index.incr( lang_def.literal_string.size() - 1 );
             break;
         }
 
-        if ( source[i] == '\\' )
+        if ( source[index.index()] == '\\' )
         {
-            auto view = source.substr( i );
+            auto view = source.substr( index.index() );
             if ( view.size() < 2 )
-                LEXER_PANIC( line, source[i], "string escaping char too short" );
+                LEXER_PANIC( index, source[index.index()], "string escaping char too short" );
 
             Char c = to_escaping( view[1] );
             buffer.push_back( c );
-            ++i;
+            index.incr();
         }
-        else if ( source.substr( i ).starts_with( lang_def.cmplx_string_opn ) )
+        else if ( source.substr( index.index() ).starts_with( lang_def.cmplx_string_opn ) )
         {
             if ( !buffer.empty() )
             {
@@ -416,15 +416,15 @@ void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens
             add_value_token( TokenType::NAME, lang_def.to_string );
             add_value_token( TokenType::OPERATOR, lang_def.call_opn );
 
-            i += lang_def.cmplx_string_opn.size();
-            tokenize_cmplx( source, tokens, line, i );
+            index.incr( lang_def.cmplx_string_opn.size() );
+            tokenize_cmplx( source, tokens, index );
 
             add_value_token( TokenType::OPERATOR, lang_def.call_cls );
             add_value_token( TokenType::OPERATOR, lang_def.oper_add );
             cmplx_part_count += 1;
         }
         else
-            buffer.push_back( source[i] );
+            buffer.push_back( source[index.index()] );
     }
 
     if ( cmplx_part_count > 0 )
@@ -459,25 +459,25 @@ dawn::Bool dawn::Lexer::is_operator( StringRef const& source, Int i )
     return false;
 }
 
-void dawn::Lexer::extract_operator( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i )
+void dawn::Lexer::extract_operator( StringRef const& source, Vector<Token>& tokens, Index& index )
 {
     Int op_size = 0;
     Opt<String> closest_op;
     for ( auto& op : lang_def.operators )
     {
-        if ( source.substr( i ).starts_with( op ) && (Int) op.size() > op_size )
+        if ( source.substr( index.index() ).starts_with( op ) && (Int) op.size() > op_size )
         {
             op_size = op.size();
             closest_op.emplace( op );
         }
     }
-    i += op_size - 1;
+    index.incr( op_size - 1 );
 
     if ( !closest_op )
-        LEXER_PANIC( line, source[i], "unknown operator" );
+        LEXER_PANIC( index, source[index.index()], "unknown operator" );
 
     auto& token = tokens.emplace_back();
     token.type = TokenType::OPERATOR;
     token.value = *closest_op;
-    token.line_number = line;
+    token.location = index;
 }

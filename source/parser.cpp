@@ -385,7 +385,6 @@ void dawn::Parser::parse_variable( Vector<Token>::const_iterator& it, Vector<Tok
     if ( it->type != TokenType::NAME )
         PARSER_PANIC( *it, "expected variable name" );
     variable.id = IDSystem::get( it->value );
-    Int name_line = it->line_number;
     ++it;
 
     variable.expr = node_pool().new_register();
@@ -458,7 +457,7 @@ void dawn::Parser::parse_expression( ExtractType type, Vector<Token>::const_iter
 void dawn::Parser::expression_extract( ExtractType type, Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Vector<Token>& tokens )
 {
     Vector<Token>::const_iterator first_it = it;
-    Int last_line = it->line_number;
+    Int last_line = it->location.line;
     Int expr_depth = 0;
     Bool in_lambda = false;
 
@@ -468,7 +467,7 @@ void dawn::Parser::expression_extract( ExtractType type, Vector<Token>::const_it
         {
             if ( type == ExtractType::NEW_LINE )
             {
-                if ( it->line_number != last_line )
+                if ( it->location.line != last_line )
                     break;
             }
             else if ( type == ExtractType::SPLITTER )
@@ -498,7 +497,7 @@ void dawn::Parser::expression_extract( ExtractType type, Vector<Token>::const_it
             PARSER_PANIC( *it, "unexpected expression end" );
 
         tokens.push_back( *it );
-        last_line = it->line_number;
+        last_line = it->location.line;
     }
 
     if ( expr_depth > 0 )
@@ -668,20 +667,20 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Vector<Token>&
         Token left_scope;
         left_scope.value = op_scope_opn;
         left_scope.type = TokenType::OPERATOR;
-        left_scope.line_number = -1;
+        left_scope.location.line = -1;
         right.insert( right.begin(), left_scope );
 
         Token right_scope;
         right_scope.value = op_scope_cls;
         right_scope.type = TokenType::OPERATOR;
-        right_scope.line_number = -1;
+        right_scope.location.line = -1;
         right.push_back( right_scope );
 
         auto right_it = right.begin();
         parse_scope( right_it, right.end(), func.body );
     }
     else
-        PARSER_PANIC( right.front(), "scope is not an expression" );
+        PARSER_PANIC( !right.empty() ? ( Opt<Token> ) right.front() : std::nullopt, "scope is not an expression" );
 }
 
 void dawn::Parser::expression_complex_array( Vector<Token>& left, Vector<Token>& right, Node& tree )
@@ -937,12 +936,12 @@ void dawn::Parser::scope_return( Vector<Token>::const_iterator& it, Vector<Token
 {
     if ( it->value != kw_return )
         PARSER_PANIC( *it, "expected return" );
-    Int return_line = it->line_number;
+    Int return_line = it->location.line;
     ++it;
 
     auto& node = tree.emplace<ReturnNode>();
     node.expr = node_pool().new_register();
-    if ( it->line_number == return_line )
+    if ( it->location.line == return_line )
         parse_expression( ExtractType::NEW_LINE, it, end, node.expr.value() );
     else
         node.expr.value() = make_nothing_node();

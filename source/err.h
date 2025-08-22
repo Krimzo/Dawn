@@ -10,11 +10,11 @@ struct LexerError
     String msg;
 
     template<typename... Args>
-    explicit LexerError( Int line_number, Char c, Args&&... args )
+    explicit LexerError( Location const& location, Char c, Args&&... args )
     {
         StringStream stream;
-        stream << "Lexer error at line [" << line_number
-            << "] and char [" << from_escaping( c ) << "]: ";
+        stream << "Lexer error at location " << location
+            << " and char [" << from_escaping( c ) << "]: ";
         ( stream << ... << args );
         msg = stream.str();
     }

@@ -1,6 +1,24 @@
 #include "token.h"
 
 
+void dawn::Index::incr( Int n )
+{
+    m_index += n;
+    m_col += n;
+}
+
+void dawn::Index::decr( Int n )
+{
+    m_index -= n;
+    m_col -= n;
+}
+
+void dawn::Index::new_line()
+{
+    m_line += 1;
+    m_col = 1;
+}
+
 dawn::Color dawn::to_color( TokenType type )
 {
     switch ( type )
@@ -22,10 +40,16 @@ dawn::Bool dawn::is_custom_type( StringRef const& value )
     return !value.empty() ? isupper( value.front() ) : false;
 }
 
+std::ostream& dawn::operator<<( std::ostream& stream, Location const& location )
+{
+    stream << "<" << location.line << ", " << location.col << ">";
+    return stream;
+}
+
 std::ostream& dawn::operator<<( std::ostream& stream, Token const& token )
 {
     const Color color = to_color( token.type );
-    stream << ColoredText{ color, token.type, "<", token.line_number, ">" } <<
+    stream << ColoredText{ color, token.type, token.location } <<
         "[" << ColoredText{ color, !token.literal.empty() ? token.literal : token.value } << "]";
     return stream;
 }

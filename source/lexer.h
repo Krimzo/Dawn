@@ -36,30 +36,30 @@ struct Lexer
     void tokenize( StringRef const& source, Vector<Token>& tokens );
 
 private:
-    void tokenize_cmplx( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i );
+    void tokenize_cmplx( StringRef const& source, Vector<Token>& tokens, Index& index );
 
     Bool is_space( StringRef const& source, Int i );
-    void extract_space( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i );
+    void extract_space( StringRef const& source, Vector<Token>& tokens, Index& index );
 
     Bool is_comment( StringRef const& source, Int i );
-    void extract_comment( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i );
+    void extract_comment( StringRef const& source, Vector<Token>& tokens, Index& index );
 
     Bool is_mlcomment( StringRef const& source, Int i );
-    void extract_mlcomment( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i );
+    void extract_mlcomment( StringRef const& source, Vector<Token>& tokens, Index& index );
 
     Bool is_word( StringRef const& source, Int i );
-    void extract_word( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i );
+    void extract_word( StringRef const& source, Vector<Token>& tokens, Index& index );
 
     Bool is_number( StringRef const& source, Int i );
-    void extract_number( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i );
+    void extract_number( StringRef const& source, Vector<Token>& tokens, Index& index );
 
     Bool is_char( StringRef const& source, Int i );
-    void extract_char( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i );
+    void extract_char( StringRef const& source, Vector<Token>& tokens, Index& index );
 
     Bool is_string( StringRef const& source, Int i );
-    void extract_string( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i );
+    void extract_string( StringRef const& source, Vector<Token>& tokens, Index& index );
 
     Bool is_operator( StringRef const& source, Int i );
-    void extract_operator( StringRef const& source, Vector<Token>& tokens, Int& line, Int& i );
+    void extract_operator( StringRef const& source, Vector<Token>& tokens, Index& index );
 };
 }
