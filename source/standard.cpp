@@ -308,7 +308,7 @@ void dawn::Engine::load_standard_members()
 
     bind_method( ValueType::ARRAY, "push", false, 1, [this]( Value& self, Value* args ) -> Value
         {
-            self.as_array().data.push_back( args[0] );
+            self.as_array().data.emplace_back( args[0] ).unlock_const();
             return self;
         } );
 
