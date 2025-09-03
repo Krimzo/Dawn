@@ -942,7 +942,7 @@ dawn::Bool dawn::Value::to_bool( Engine& engine ) const
         return (Bool) as_float();
 
     case ValueType::CHAR:
-        return (Bool) as_char();
+        return as_char() == kw_true.front();
 
     case ValueType::STRING:
         return as_string() == kw_true;
@@ -1055,7 +1055,7 @@ dawn::Char dawn::Value::to_char( Engine& engine ) const
         return Char{};
 
     case ValueType::BOOL:
-        return as_bool() ? kw_true[0] : kw_false[0];
+        return as_bool() ? kw_true.front() : kw_false.front();
 
     case ValueType::INT:
         return (Char) as_int();
@@ -1067,7 +1067,12 @@ dawn::Char dawn::Value::to_char( Engine& engine ) const
         return as_char();
 
     case ValueType::STRING:
-        return as_string()[0];
+    {
+        auto& str = as_string();
+        if ( str.empty() )
+            return Char{};
+        return str.front();
+    }
 
     case ValueType::STRUCT:
     {
@@ -1107,7 +1112,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
     }
 
     case ValueType::CHAR:
-        return String( 1, as_char() );
+        return String{ 1, as_char() };
 
     case ValueType::STRING:
         return as_string();
