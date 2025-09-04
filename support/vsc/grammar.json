@@ -113,6 +113,12 @@
                     "name": "meta.interpolation.dawn",
                     "begin": "\\{",
                     "end": "\\}",
+                    "beginCaptures": {
+                        "0": { "name": "keyword.operator.dawn" }
+                    },
+                    "endCaptures": {
+                        "0": { "name": "keyword.operator.dawn" }
+                    },
                     "patterns": [ { "include": "$self" } ]
                 }
             ]
