@@ -17,26 +17,46 @@ struct Module
     Bool contains_id( Int id ) const;
 };
 
+struct TokenIterator
+{
+    constexpr TokenIterator( Token* ptr, Token* end )
+        : m_ptr( ptr ), m_start( ptr ), m_end( end )
+    {
+    }
+
+    Bool valid() const;
+    Token& operator*() const;
+    Token* operator->() const;
+    Bool operator==( TokenIterator const& other ) const;
+    void operator++();
+    void operator--();
+
+private:
+    Token* m_ptr = nullptr;
+    Token* const m_start;
+    Token* const m_end;
+};
+
 struct Parser
 {
     void parse( Vector<Token>& tokens, Module& module );
 
 private:
-    void parse_import( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module );
-    void parse_global_struct( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module );
-    void parse_global_enum( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module );
-    void parse_global_function( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module );
-    void parse_global_variable( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module );
+    void parse_import( TokenIterator& it, Module& module );
+    void parse_global_struct( TokenIterator& it, Module& module );
+    void parse_global_enum( TokenIterator& it, Module& module );
+    void parse_global_function( TokenIterator& it, Module& module );
+    void parse_global_variable( TokenIterator& it, Module& module );
 
-    void parse_struct( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Struct& struc );
-    void parse_enum( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Enum& en );
-    void parse_function( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& function );
-    void parse_cast( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& function );
-    void parse_operator( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& operat );
-    void parse_variable( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Variable& variable );
+    void parse_struct( TokenIterator& it, Struct& struc );
+    void parse_enum( TokenIterator& it, Enum& en );
+    void parse_function( TokenIterator& it, Function& function );
+    void parse_cast( TokenIterator& it, Function& function );
+    void parse_operator( TokenIterator& it, Function& operat );
+    void parse_variable( TokenIterator& it, Variable& variable );
 
-    void parse_expression( ExtractType type, Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree );
-    void expression_extract( ExtractType type, Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Vector<Token>& tokens );
+    void parse_expression( ExtractType type, TokenIterator& it, Node& tree );
+    void expression_extract( ExtractType type, TokenIterator& it, Vector<Token>& tokens );
     void expression_precedence( Vector<Token>& tokens, Int& index, Bool& unary );
     void expression_complex_expr( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree );
     void expression_complex_scope( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree );
@@ -49,17 +69,17 @@ private:
     void expression_single_type( Token const& token, Node& tree );
     void expression_single_identifier( Token const& token, Node& tree );
 
-    void parse_scope( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Scope& scope );
-    void scope_return( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree );
-    void scope_break( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree );
-    void scope_continue( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree );
-    void scope_throw( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree );
-    void scope_try( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree );
-    void scope_if( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree );
-    void scope_switch( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree );
-    void scope_loop( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree );
-    void scope_while( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree );
-    void scope_for( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree );
+    void parse_scope( TokenIterator& it, Scope& scope );
+    void scope_return( TokenIterator& it, Node& tree );
+    void scope_break( TokenIterator& it, Node& tree );
+    void scope_continue( TokenIterator& it, Node& tree );
+    void scope_throw( TokenIterator& it, Node& tree );
+    void scope_try( TokenIterator& it, Node& tree );
+    void scope_if( TokenIterator& it, Node& tree );
+    void scope_switch( TokenIterator& it, Node& tree );
+    void scope_loop( TokenIterator& it, Node& tree );
+    void scope_while( TokenIterator& it, Node& tree );
+    void scope_for( TokenIterator& it, Node& tree );
 };
 
 Bool is_unary( Token const& token );

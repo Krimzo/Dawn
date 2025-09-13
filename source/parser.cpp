@@ -19,36 +19,81 @@ dawn::Bool dawn::Module::contains_id( Int id ) const
     return false;
 }
 
+dawn::Bool dawn::TokenIterator::valid() const
+{
+    return m_ptr >= m_start && m_ptr < m_end;
+}
+
+dawn::Token& dawn::TokenIterator::operator*() const
+{
+    if ( !valid() )
+    {
+        TokenIterator it_before = *this;
+        --it_before;
+        const Token token_before = it_before.valid() ? *it_before : Token{};
+        PARSER_PANIC( token_before, "Dereferencing non-existent token after" );
+    }
+    return *m_ptr;
+}
+
+dawn::Token* dawn::TokenIterator::operator->() const
+{
+    if ( !valid() )
+    {
+        TokenIterator it_before = *this;
+        --it_before;
+        const Token token_before = it_before.valid() ? *it_before : Token{};
+        PARSER_PANIC( token_before, "Accessing non-existent token after" );
+    }
+    return m_ptr;
+}
+
+dawn::Bool dawn::TokenIterator::operator==( TokenIterator const& other ) const
+{
+    return m_ptr == other.m_ptr;
+}
+
+void dawn::TokenIterator::operator++()
+{
+    ++m_ptr;
+}
+
+void dawn::TokenIterator::operator--()
+{
+    --m_ptr;
+}
+
 void dawn::Parser::parse( Vector<Token>& tokens, Module& module )
 {
-    for ( auto it = tokens.begin(); it != tokens.end(); )
+    TokenIterator it{ tokens.begin()._Ptr, tokens.end()._Ptr };
+    while ( it.valid() )
     {
         if ( it->value == kw_import )
         {
-            parse_import( it, tokens.end(), module );
+            parse_import( it, module );
         }
         else if ( it->value == kw_struct )
         {
-            parse_global_struct( it, tokens.end(), module );
+            parse_global_struct( it, module );
         }
         else if ( it->value == kw_enum )
         {
-            parse_global_enum( it, tokens.end(), module );
+            parse_global_enum( it, module );
         }
         else if ( it->value == kw_func )
         {
-            parse_global_function( it, tokens.end(), module );
+            parse_global_function( it, module );
         }
         else if ( it->value == kw_const || it->value == kw_var || it->value == kw_ref )
         {
-            parse_global_variable( it, tokens.end(), module );
+            parse_global_variable( it, module );
         }
         else
             PARSER_PANIC( *it, "not allowed in global scope or allowed only 1 instance of" );
     }
 }
 
-void dawn::Parser::parse_import( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module )
+void dawn::Parser::parse_import( TokenIterator& it, Module& module )
 {
     if ( it->value != kw_import )
         PARSER_PANIC( *it, "expected import keyword" );
@@ -60,12 +105,12 @@ void dawn::Parser::parse_import( Vector<Token>::const_iterator& it, Vector<Token
     ++it;
 }
 
-void dawn::Parser::parse_global_struct( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module )
+void dawn::Parser::parse_global_struct( TokenIterator& it, Module& module )
 {
     const auto first_it = it;
 
     Struct struc;
-    parse_struct( it, end, struc );
+    parse_struct( it, struc );
 
     if ( module.contains_id( struc.id ) )
         PARSER_PANIC( *first_it, "name [", IDSystem::get( struc.id ), "] already in use" );
@@ -73,12 +118,12 @@ void dawn::Parser::parse_global_struct( Vector<Token>::const_iterator& it, Vecto
     module.structs.push_back( struc );
 }
 
-void dawn::Parser::parse_global_enum( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module )
+void dawn::Parser::parse_global_enum( TokenIterator& it, Module& module )
 {
     const auto first_it = it;
 
     Enum en;
-    parse_enum( it, end, en );
+    parse_enum( it, en );
 
     if ( module.contains_id( en.id ) )
         PARSER_PANIC( *first_it, "name [", IDSystem::get( en.id ), "] already in use" );
@@ -86,12 +131,12 @@ void dawn::Parser::parse_global_enum( Vector<Token>::const_iterator& it, Vector<
     module.enums.push_back( en );
 }
 
-void dawn::Parser::parse_global_function( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module )
+void dawn::Parser::parse_global_function( TokenIterator& it, Module& module )
 {
     const auto first_it = it;
 
     Function function;
-    parse_function( it, end, function );
+    parse_function( it, function );
 
     if ( module.contains_id( function.id ) )
         PARSER_PANIC( *first_it, "name [", IDSystem::get( function.id ), "] already in use" );
@@ -99,12 +144,12 @@ void dawn::Parser::parse_global_function( Vector<Token>::const_iterator& it, Vec
     module.functions.push_back( function );
 }
 
-void dawn::Parser::parse_global_variable( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Module& module )
+void dawn::Parser::parse_global_variable( TokenIterator& it, Module& module )
 {
     const auto first_it = it;
 
     Variable variable;
-    parse_variable( it, end, variable );
+    parse_variable( it, variable );
 
     if ( module.contains_id( variable.id ) )
         PARSER_PANIC( *first_it, "name [", IDSystem::get( variable.id ), "] already in use" );
@@ -112,7 +157,7 @@ void dawn::Parser::parse_global_variable( Vector<Token>::const_iterator& it, Vec
     module.variables.push_back( variable );
 }
 
-void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Struct& struc )
+void dawn::Parser::parse_struct( TokenIterator& it, Struct& struc )
 {
     if ( it->value != kw_struct )
         PARSER_PANIC( *it, "expected struct" );
@@ -142,7 +187,7 @@ void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token
             if ( it->value == op_assign )
             {
                 ++it;
-                parse_expression( ExtractType::NEW_LINE, it, end, field_exp.value() );
+                parse_expression( ExtractType::NEW_LINE, it, field_exp.value() );
             }
             else
                 field_exp.value() = make_nothing_node();
@@ -150,7 +195,7 @@ void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token
         else if ( it->value == kw_func )
         {
             Function method;
-            parse_function( it, end, method );
+            parse_function( it, method );
             if ( struc.contains( method.id ) )
                 PARSER_PANIC( *it, "struct method [", IDSystem::get( method.id ), "] already defined" );
 
@@ -162,7 +207,7 @@ void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token
         else if ( it->value == kw_cast )
         {
             Function cast;
-            parse_cast( it, end, cast );
+            parse_cast( it, cast );
             if ( struc.contains( cast.id ) )
                 PARSER_PANIC( *it, "struct cast [", IDSystem::get( cast.id ), "] already defined" );
 
@@ -174,7 +219,7 @@ void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token
         else if ( it->value == kw_oper )
         {
             Function op;
-            parse_operator( it, end, op );
+            parse_operator( it, op );
             if ( struc.contains( op.id ) )
                 PARSER_PANIC( *it, "struct operator [", IDSystem::get( op.id ), "] already defined" );
 
@@ -189,7 +234,7 @@ void dawn::Parser::parse_struct( Vector<Token>::const_iterator& it, Vector<Token
     ++it;
 }
 
-void dawn::Parser::parse_enum( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Enum& en )
+void dawn::Parser::parse_enum( TokenIterator& it, Enum& en )
 {
     const auto first_it = it;
 
@@ -223,7 +268,7 @@ void dawn::Parser::parse_enum( Vector<Token>::const_iterator& it, Vector<Token>:
             if ( it->value == op_assign )
             {
                 ++it;
-                parse_expression( ExtractType::NEW_LINE, it, end, expr );
+                parse_expression( ExtractType::NEW_LINE, it, expr );
             }
             else
                 expr = make_nothing_node();
@@ -237,7 +282,7 @@ void dawn::Parser::parse_enum( Vector<Token>::const_iterator& it, Vector<Token>:
         PARSER_PANIC( *first_it, "enum [", IDSystem::get( en.id ), "] cannot be empty" );
 }
 
-void dawn::Parser::parse_function( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& function )
+void dawn::Parser::parse_function( TokenIterator& it, Function& function )
 {
     if ( it->value != kw_func )
         PARSER_PANIC( *it, "expected function" );
@@ -285,10 +330,10 @@ void dawn::Parser::parse_function( Vector<Token>::const_iterator& it, Vector<Tok
     }
     ++it;
 
-    parse_scope( it, end, function.body );
+    parse_scope( it, function.body );
 }
 
-void dawn::Parser::parse_cast( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& function )
+void dawn::Parser::parse_cast( TokenIterator& it, Function& function )
 {
     if ( it->value != kw_cast )
         PARSER_PANIC( *it, "expected cast" );
@@ -303,10 +348,10 @@ void dawn::Parser::parse_cast( Vector<Token>::const_iterator& it, Vector<Token>:
     function.id = IDSystem::get( it->value );
     ++it;
 
-    parse_scope( it, end, function.body );
+    parse_scope( it, function.body );
 }
 
-void dawn::Parser::parse_operator( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Function& operat )
+void dawn::Parser::parse_operator( TokenIterator& it, Function& operat )
 {
     if ( it->value != kw_oper )
         PARSER_PANIC( *it, "expected oper" );
@@ -377,10 +422,10 @@ void dawn::Parser::parse_operator( Vector<Token>::const_iterator& it, Vector<Tok
         PARSER_PANIC( *it, "operator can have at most 1 argument" );
     }
 
-    parse_scope( it, end, operat.body );
+    parse_scope( it, operat.body );
 }
 
-void dawn::Parser::parse_variable( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Variable& variable )
+void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable )
 {
     if ( it->value == kw_const )
         variable.kind = VariableKind::CONST;
@@ -401,22 +446,22 @@ void dawn::Parser::parse_variable( Vector<Token>::const_iterator& it, Vector<Tok
     if ( it->value == op_assign )
     {
         ++it;
-        parse_expression( ExtractType::NEW_LINE, it, end, variable.expr.value() );
+        parse_expression( ExtractType::NEW_LINE, it, variable.expr.value() );
     }
     else
         variable.expr.value() = make_nothing_node();
 }
 
-void dawn::Parser::parse_expression( ExtractType type, Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::parse_expression( ExtractType type, TokenIterator& it, Node& tree )
 {
-    if ( it == end )
+    if ( !it.valid() )
     {
         tree = make_nothing_node();
         return;
     }
 
     Vector<Token> expr_tokens;
-    expression_extract( type, it, end, expr_tokens );
+    expression_extract( type, it, expr_tokens );
 
     Int least_prec_op = -1;
     Bool op_is_unary = false;
@@ -432,9 +477,9 @@ void dawn::Parser::parse_expression( ExtractType type, Vector<Token>::const_iter
             create_unary_node( expr_tokens[least_prec_op], tree );
             auto& un_node = std::get<UnaryNode>( tree );
 
-            auto it = expr_tokens.begin() + 1;
+            TokenIterator expr_it{ expr_tokens.begin()._Ptr + 1, expr_tokens.end()._Ptr };
             un_node.right = node_pool().new_register();
-            parse_expression( ExtractType::DEFAULT, it, expr_tokens.end(), un_node.right.value() );
+            parse_expression( ExtractType::DEFAULT, expr_it, un_node.right.value() );
         }
         else
         {
@@ -464,14 +509,14 @@ void dawn::Parser::parse_expression( ExtractType type, Vector<Token>::const_iter
         expression_pure( expr_tokens, tree );
 }
 
-void dawn::Parser::expression_extract( ExtractType type, Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Vector<Token>& tokens )
+void dawn::Parser::expression_extract( ExtractType type, TokenIterator& it, Vector<Token>& tokens )
 {
-    Vector<Token>::const_iterator first_it = it;
+    const TokenIterator first_it = it;
     Int last_line = it->location.line;
     Int expr_depth = 0;
     Bool in_lambda = false;
 
-    for ( ; it != end; ++it )
+    for ( ; it.valid(); ++it )
     {
         if ( expr_depth == 0 )
         {
@@ -494,7 +539,9 @@ void dawn::Parser::expression_extract( ExtractType type, Vector<Token>::const_it
                 {
                     if ( it == first_it )
                         break;
-                    auto it_before = it - 1;
+
+                    TokenIterator it_before = it;
+                    --it_before;
                     if ( it_before->value != op_lambda &&
                         it_before->type != TokenType::TYPE )
                         break;
@@ -566,17 +613,18 @@ void dawn::Parser::expression_complex_expr( Vector<Token>& left, Token op, Vecto
     {
         auto& node = tree.emplace<CallNode>();
 
-        auto left_it = left.begin();
+        TokenIterator left_it{ left.begin()._Ptr, left.end()._Ptr };
         node.left_expr = node_pool().new_register();
-        parse_expression( ExtractType::DEFAULT, left_it, left.end(), node.left_expr.value() );
+        parse_expression( ExtractType::DEFAULT, left_it, node.left_expr.value() );
 
-        for ( auto it = right.begin(); it != right.end(); )
-            parse_expression( ExtractType::SPLITTER, it, right.end(), node.args.emplace_back() );
+        TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
+        while ( right_it.valid() )
+            parse_expression( ExtractType::SPLITTER, right_it, node.args.emplace_back() );
     }
     else
     {
-        auto it = right.begin();
-        parse_expression( ExtractType::DEFAULT, it, right.end(), tree );
+        TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
+        parse_expression( ExtractType::DEFAULT, right_it, tree );
     }
 }
 
@@ -594,28 +642,29 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
     {
         Map<Int, Node> struct_args;
         Opt<Int> enum_key;
-        for ( auto it = right.begin(); it != right.end(); )
+        TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
+        while ( right_it.valid() )
         {
-            if ( it->type != TokenType::NAME )
-                PARSER_PANIC( *it, "expected field init name" );
+            if ( right_it->type != TokenType::NAME )
+                PARSER_PANIC( *right_it, "expected field init name" );
 
-            Int name_id = IDSystem::get( it->value );
+            Int name_id = IDSystem::get( right_it->value );
             if ( struct_args.contains( name_id ) )
-                PARSER_PANIC( *it, "argument [", it->value, "] already passed" );
-            ++it;
+                PARSER_PANIC( *right_it, "argument [", right_it->value, "] already passed" );
+            ++right_it;
 
-            if ( it == right.end() && struct_args.empty() )
+            if ( !right_it.valid() && struct_args.empty() )
             {
                 enum_key = name_id;
                 break;
             }
 
-            if ( it->value != op_assign )
-                PARSER_PANIC( *it, "expected assign operator" );
-            ++it;
+            if ( right_it->value != op_assign )
+                PARSER_PANIC( *right_it, "expected assign operator" );
+            ++right_it;
 
             auto& arg = struct_args[name_id];
-            parse_expression( ExtractType::SPLITTER, it, right.end(), arg );
+            parse_expression( ExtractType::SPLITTER, right_it, arg );
         }
 
         if ( enum_key )
@@ -643,34 +692,35 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
             .func.emplace<DFunction>();
 
         Set<Int> args;
-        for ( auto it = left.begin(); it != left.end(); )
+        TokenIterator left_it{ left.begin()._Ptr, left.end()._Ptr };
+        while ( left_it.valid() )
         {
             auto& arg = func.args.emplace_back();
 
-            if ( it->value == kw_const )
+            if ( left_it->value == kw_const )
                 arg.kind = VariableKind::CONST;
-            else if ( it->value == kw_var )
+            else if ( left_it->value == kw_var )
                 arg.kind = VariableKind::VAR;
-            else if ( it->value == kw_ref )
+            else if ( left_it->value == kw_ref )
                 arg.kind = VariableKind::REF;
             else
-                PARSER_PANIC( *it, "expected const, var or ref keyword" );
-            ++it;
+                PARSER_PANIC( *left_it, "expected const, var or ref keyword" );
+            ++left_it;
 
-            if ( it->type != TokenType::NAME )
-                PARSER_PANIC( *it, "expected arg name" );
-            arg.id = IDSystem::get( it->value );
+            if ( left_it->type != TokenType::NAME )
+                PARSER_PANIC( *left_it, "expected arg name" );
+            arg.id = IDSystem::get( left_it->value );
 
             if ( args.contains( arg.id ) )
-                PARSER_PANIC( *it, "argument [", it->value, "] already defined" );
+                PARSER_PANIC( *left_it, "argument [", left_it->value, "] already defined" );
             args.insert( arg.id );
-            ++it;
+            ++left_it;
 
-            if ( it != left.end() )
+            if ( left_it.valid() )
             {
-                if ( it->value != op_split )
-                    PARSER_PANIC( *it, "expected split or lambda close" );
-                ++it;
+                if ( left_it->value != op_split )
+                    PARSER_PANIC( *left_it, "expected split or lambda close" );
+                ++left_it;
             }
         }
 
@@ -686,8 +736,8 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
         right_scope.location = Location{ Bad{} };
         right.push_back( right_scope );
 
-        auto right_it = right.begin();
-        parse_scope( right_it, right.end(), func.body );
+        TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
+        parse_scope( right_it, func.body );
     }
     else
         PARSER_PANIC( op, "scope is not an expression" );
@@ -706,8 +756,9 @@ void dawn::Parser::expression_complex_array( Vector<Token>& left, Token op, Vect
     if ( left.empty() )
     {
         ArrayNode::ListInit init{};
-        for ( auto it = right.begin(); it != right.end(); )
-            parse_expression( ExtractType::SPLITTER, it, right.end(), init.elements.emplace_back() );
+        TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
+        while ( right_it.valid() )
+            parse_expression( ExtractType::SPLITTER, right_it, init.elements.emplace_back() );
 
         auto& node = tree.emplace<ArrayNode>();
         node.init = init;
@@ -718,8 +769,8 @@ void dawn::Parser::expression_complex_array( Vector<Token>& left, Token op, Vect
         init.type_id = IDSystem::get( left.front().value );
         init.size_expr = node_pool().new_register();
 
-        auto right_it = right.begin();
-        parse_expression( ExtractType::DEFAULT, right_it, right.end(), init.size_expr.value() );
+        TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
+        parse_expression( ExtractType::DEFAULT, right_it, init.size_expr.value() );
 
         auto& node = tree.emplace<ArrayNode>();
         node.init = init;
@@ -728,25 +779,25 @@ void dawn::Parser::expression_complex_array( Vector<Token>& left, Token op, Vect
     {
         auto& node = tree.emplace<IndexNode>();
 
-        auto left_it = left.begin();
+        TokenIterator left_it{ left.begin()._Ptr, left.end()._Ptr };
         node.left_expr = node_pool().new_register();
-        parse_expression( ExtractType::DEFAULT, left_it, left.end(), node.left_expr.value() );
+        parse_expression( ExtractType::DEFAULT, left_it, node.left_expr.value() );
 
-        auto right_it = right.begin();
+        TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
         node.expr = node_pool().new_register();
-        parse_expression( ExtractType::DEFAULT, right_it, right.end(), node.expr.value() );
+        parse_expression( ExtractType::DEFAULT, right_it, node.expr.value() );
     }
 }
 
 void dawn::Parser::expression_complex_default( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree )
 {
-    auto it = left.begin();
+    TokenIterator left_it{ left.begin()._Ptr, left.end()._Ptr };
     Node left_expr;
-    parse_expression( ExtractType::DEFAULT, it, left.end(), left_expr );
+    parse_expression( ExtractType::DEFAULT, left_it, left_expr );
 
-    it = right.begin();
+    TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
     Node right_expr;
-    parse_expression( ExtractType::DEFAULT, it, right.end(), right_expr );
+    parse_expression( ExtractType::DEFAULT, right_it, right_expr );
 
     try
     {
@@ -860,7 +911,7 @@ void dawn::Parser::expression_single_identifier( Token const& token, Node& tree 
     tree.emplace<IdentifierNode>().id = IDSystem::get( token.value );
 }
 
-void dawn::Parser::parse_scope( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Scope& scope )
+void dawn::Parser::parse_scope( TokenIterator& it, Scope& scope )
 {
     if ( it->value != op_scope_opn )
         PARSER_PANIC( *it, "expected scope open" );
@@ -872,7 +923,7 @@ void dawn::Parser::parse_scope( Vector<Token>::const_iterator& it, Vector<Token>
         if ( it->value == kw_const || it->value == kw_var || it->value == kw_ref )
         {
             auto& node = scope.instr.emplace_back().emplace<VariableNode>();
-            parse_variable( it, end, node.var );
+            parse_variable( it, node.var );
 
             if ( vars.contains( node.var.id ) )
                 PARSER_PANIC( *it, "variable [", IDSystem::get( node.var.id ), "] already defined" );
@@ -881,68 +932,68 @@ void dawn::Parser::parse_scope( Vector<Token>::const_iterator& it, Vector<Token>
         else if ( it->value == kw_if )
         {
             auto& instr = scope.instr.emplace_back();
-            scope_if( it, end, instr );
+            scope_if( it, instr );
         }
         else if ( it->value == kw_switch )
         {
             auto& instr = scope.instr.emplace_back();
-            scope_switch( it, end, instr );
+            scope_switch( it, instr );
         }
         else if ( it->value == kw_for )
         {
             auto& instr = scope.instr.emplace_back();
-            scope_for( it, end, instr );
+            scope_for( it, instr );
         }
         else if ( it->value == kw_while )
         {
             auto& instr = scope.instr.emplace_back();
-            scope_while( it, end, instr );
+            scope_while( it, instr );
         }
         else if ( it->value == kw_loop )
         {
             auto& instr = scope.instr.emplace_back();
-            scope_loop( it, end, instr );
+            scope_loop( it, instr );
         }
         else if ( it->value == kw_return )
         {
             auto& instr = scope.instr.emplace_back();
-            scope_return( it, end, instr );
+            scope_return( it, instr );
         }
         else if ( it->value == kw_break )
         {
             auto& instr = scope.instr.emplace_back();
-            scope_break( it, end, instr );
+            scope_break( it, instr );
         }
         else if ( it->value == kw_continue )
         {
             auto& instr = scope.instr.emplace_back();
-            scope_continue( it, end, instr );
+            scope_continue( it, instr );
         }
         else if ( it->value == kw_throw )
         {
             auto& instr = scope.instr.emplace_back();
-            scope_throw( it, end, instr );
+            scope_throw( it, instr );
         }
         else if ( it->value == kw_try )
         {
             auto& instr = scope.instr.emplace_back();
-            scope_try( it, end, instr );
+            scope_try( it, instr );
         }
         else if ( it->value == op_scope_opn )
         {
             auto& chld_scp = scope.instr.emplace_back().emplace<Scope>();
-            parse_scope( it, end, chld_scp );
+            parse_scope( it, chld_scp );
         }
         else
         {
             auto& expr = scope.instr.emplace_back();
-            parse_expression( ExtractType::NEW_LINE, it, end, expr );
+            parse_expression( ExtractType::NEW_LINE, it, expr );
         }
     }
     ++it;
 }
 
-void dawn::Parser::scope_return( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_return( TokenIterator& it, Node& tree )
 {
     if ( it->value != kw_return )
         PARSER_PANIC( *it, "expected return" );
@@ -952,12 +1003,12 @@ void dawn::Parser::scope_return( Vector<Token>::const_iterator& it, Vector<Token
     auto& node = tree.emplace<ReturnNode>();
     node.expr = node_pool().new_register();
     if ( it->location.line == return_line )
-        parse_expression( ExtractType::NEW_LINE, it, end, node.expr.value() );
+        parse_expression( ExtractType::NEW_LINE, it, node.expr.value() );
     else
         node.expr.value() = make_nothing_node();
 }
 
-void dawn::Parser::scope_break( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_break( TokenIterator& it, Node& tree )
 {
     if ( it->value != kw_break )
         PARSER_PANIC( *it, "expected break" );
@@ -966,7 +1017,7 @@ void dawn::Parser::scope_break( Vector<Token>::const_iterator& it, Vector<Token>
     tree.emplace<BreakNode>();
 }
 
-void dawn::Parser::scope_continue( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_continue( TokenIterator& it, Node& tree )
 {
     if ( it->value != kw_continue )
         PARSER_PANIC( *it, "expected continue" );
@@ -975,7 +1026,7 @@ void dawn::Parser::scope_continue( Vector<Token>::const_iterator& it, Vector<Tok
     tree.emplace<ContinueNode>();
 }
 
-void dawn::Parser::scope_throw( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_throw( TokenIterator& it, Node& tree )
 {
     if ( it->value != kw_throw )
         PARSER_PANIC( *it, "expected throw" );
@@ -983,10 +1034,10 @@ void dawn::Parser::scope_throw( Vector<Token>::const_iterator& it, Vector<Token>
 
     auto& node = tree.emplace<ThrowNode>();
     node.expr = node_pool().new_register();
-    parse_expression( ExtractType::NEW_LINE, it, end, node.expr.value() );
+    parse_expression( ExtractType::NEW_LINE, it, node.expr.value() );
 }
 
-void dawn::Parser::scope_try( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_try( TokenIterator& it, Node& tree )
 {
     if ( it->value != kw_try )
         PARSER_PANIC( *it, "expected try" );
@@ -994,7 +1045,7 @@ void dawn::Parser::scope_try( Vector<Token>::const_iterator& it, Vector<Token>::
 
     auto& node = tree.emplace<TryNode>();
 
-    parse_scope( it, end, node.try_scope );
+    parse_scope( it, node.try_scope );
 
     if ( it->value != kw_catch )
         PARSER_PANIC( *it, "expected catch" );
@@ -1005,10 +1056,10 @@ void dawn::Parser::scope_try( Vector<Token>::const_iterator& it, Vector<Token>::
     node.catch_id = IDSystem::get( it->value );
     ++it;
 
-    parse_scope( it, end, node.catch_scope );
+    parse_scope( it, node.catch_scope );
 }
 
-void dawn::Parser::scope_if( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_if( TokenIterator& it, Node& tree )
 {
     if ( it->value != kw_if )
         PARSER_PANIC( *it, "expected if keyword" );
@@ -1016,8 +1067,8 @@ void dawn::Parser::scope_if( Vector<Token>::const_iterator& it, Vector<Token>::c
 
     auto& node = tree.emplace<IfNode>();
 
-    parse_expression( ExtractType::SCOPE_START, it, end, node.parts.emplace_back().expr );
-    parse_scope( it, end, node.parts.back().scope );
+    parse_expression( ExtractType::SCOPE_START, it, node.parts.emplace_back().expr );
+    parse_scope( it, node.parts.back().scope );
 
     while ( true )
     {
@@ -1025,15 +1076,15 @@ void dawn::Parser::scope_if( Vector<Token>::const_iterator& it, Vector<Token>::c
         {
             ++it;
             auto& part = node.parts.emplace_back();
-            parse_expression( ExtractType::SCOPE_START, it, end, part.expr );
-            parse_scope( it, end, part.scope );
+            parse_expression( ExtractType::SCOPE_START, it, part.expr );
+            parse_scope( it, part.scope );
         }
         else if ( it->value == kw_else )
         {
             ++it;
             auto& part = node.parts.emplace_back();
             part.expr = make_bool_node( true );
-            parse_scope( it, end, part.scope );
+            parse_scope( it, part.scope );
             break;
         }
         else
@@ -1041,7 +1092,7 @@ void dawn::Parser::scope_if( Vector<Token>::const_iterator& it, Vector<Token>::c
     }
 }
 
-void dawn::Parser::scope_switch( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_switch( TokenIterator& it, Node& tree )
 {
     if ( it->value != kw_switch )
         PARSER_PANIC( *it, "expected switch keyword" );
@@ -1050,7 +1101,7 @@ void dawn::Parser::scope_switch( Vector<Token>::const_iterator& it, Vector<Token
     auto& node = tree.emplace<SwitchNode>();
 
     node.main_expr = node_pool().new_register();
-    parse_expression( ExtractType::SCOPE_START, it, end, node.main_expr.value() );
+    parse_expression( ExtractType::SCOPE_START, it, node.main_expr.value() );
 
     if ( it->value != op_scope_opn )
         PARSER_PANIC( *it, "expected scope open" );
@@ -1061,26 +1112,25 @@ void dawn::Parser::scope_switch( Vector<Token>::const_iterator& it, Vector<Token
         if ( it->value == kw_case )
         {
             ++it;
-
             auto& casee = node.cases.emplace_back();
 
             Vector<Token> case_tokens;
-            expression_extract( ExtractType::SCOPE_START, it, end, case_tokens );
+            expression_extract( ExtractType::SCOPE_START, it, case_tokens );
 
-            for ( auto it = case_tokens.begin(); it != case_tokens.end(); )
-                parse_expression( ExtractType::SPLITTER, it, case_tokens.end(), casee.exprs.emplace_back() );
+            TokenIterator case_it{ case_tokens.begin()._Ptr, case_tokens.end()._Ptr };
+            while ( case_it.valid() )
+                parse_expression( ExtractType::SPLITTER, case_it, casee.exprs.emplace_back() );
 
-            parse_scope( it, end, casee.scope );
+            parse_scope( it, casee.scope );
         }
         else if ( it->value == kw_default )
         {
             ++it;
-
             if ( node.def_scope )
                 PARSER_PANIC( *it, "default already defined" );
 
             auto& scope = node.def_scope.emplace();
-            parse_scope( it, end, scope );
+            parse_scope( it, scope );
         }
         else
             PARSER_PANIC( *it, "expected case or default" );
@@ -1088,17 +1138,17 @@ void dawn::Parser::scope_switch( Vector<Token>::const_iterator& it, Vector<Token
     ++it;
 }
 
-void dawn::Parser::scope_loop( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_loop( TokenIterator& it, Node& tree )
 {
     if ( it->value != kw_loop )
         PARSER_PANIC( *it, "expected loop keyword" );
     ++it;
 
     auto& node = tree.emplace<LoopNode>();
-    parse_scope( it, end, node.scope );
+    parse_scope( it, node.scope );
 }
 
-void dawn::Parser::scope_while( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_while( TokenIterator& it, Node& tree )
 {
     if ( it->value != kw_while )
         PARSER_PANIC( *it, "expected while keyword" );
@@ -1106,11 +1156,11 @@ void dawn::Parser::scope_while( Vector<Token>::const_iterator& it, Vector<Token>
 
     auto& node = tree.emplace<WhileNode>();
     node.expr = node_pool().new_register();
-    parse_expression( ExtractType::SCOPE_START, it, end, node.expr.value() );
-    parse_scope( it, end, node.scope );
+    parse_expression( ExtractType::SCOPE_START, it, node.expr.value() );
+    parse_scope( it, node.scope );
 }
 
-void dawn::Parser::scope_for( Vector<Token>::const_iterator& it, Vector<Token>::const_iterator const& end, Node& tree )
+void dawn::Parser::scope_for( TokenIterator& it, Node& tree )
 {
     if ( it->value != kw_for )
         PARSER_PANIC( *it, "expected for keyword" );
@@ -1129,8 +1179,8 @@ void dawn::Parser::scope_for( Vector<Token>::const_iterator& it, Vector<Token>::
     ++it;
 
     node.expr = node_pool().new_register();
-    parse_expression( ExtractType::SCOPE_START, it, end, node.expr.value() );
-    parse_scope( it, end, node.scope );
+    parse_expression( ExtractType::SCOPE_START, it, node.expr.value() );
+    parse_scope( it, node.scope );
 }
 
 dawn::Bool dawn::is_unary( Token const& token )
