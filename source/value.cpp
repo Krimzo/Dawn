@@ -1112,7 +1112,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
     }
 
     case ValueType::CHAR:
-        return String{ 1, as_char() };
+        return String{ as_char() };
 
     case ValueType::STRING:
         return as_string();

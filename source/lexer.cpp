@@ -335,7 +335,7 @@ void dawn::Lexer::extract_char( StringRef const& source, Vector<Token>& tokens, 
             LEXER_PANIC( index, source[index.index()], "invalid escaping char literal" );
 
         Char c = to_escaping( source[index.index() + 2] );
-        buffer = String( 1, c );
+        buffer = String{ c };
         index.incr( 3 );
     }
     else
@@ -344,7 +344,7 @@ void dawn::Lexer::extract_char( StringRef const& source, Vector<Token>& tokens, 
             LEXER_PANIC( index, source[index.index()], "invalid char literal" );
 
         Char c = source[index.index() + 1];
-        buffer = String( 1, c );
+        buffer = String{ c };
         index.incr( 2 );
     }
 

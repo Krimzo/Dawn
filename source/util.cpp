@@ -36,7 +36,7 @@ dawn::String dawn::from_escaping( Char c )
     case '\r': return "\\r";
     case '\t': return "\\t";
     }
-    return String( 1, c );
+    return String{ c };
 }
 
 dawn::Opt<dawn::String> dawn::read_file( StringRef const& path )
