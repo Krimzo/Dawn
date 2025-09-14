@@ -84,7 +84,7 @@ void dawn::Parser::parse( Vector<Token>& tokens, Module& module )
         {
             parse_global_function( it, module );
         }
-        else if ( it->value == kw_const || it->value == kw_var || it->value == kw_ref )
+        else if ( it->value == kw_let || it->value == kw_var || it->value == kw_ref )
         {
             parse_global_variable( it, module );
         }
@@ -302,14 +302,14 @@ void dawn::Parser::parse_function( TokenIterator& it, Function& function )
     {
         auto& arg = function.args.emplace_back();
 
-        if ( it->value == kw_const )
-            arg.kind = VariableKind::CONST;
+        if ( it->value == kw_let )
+            arg.kind = VariableKind::LET;
         else if ( it->value == kw_var )
             arg.kind = VariableKind::VAR;
         else if ( it->value == kw_ref )
             arg.kind = VariableKind::REF;
         else
-            PARSER_PANIC( *it, "expected const, var or ref keyword" );
+            PARSER_PANIC( *it, "expected let, var or ref keyword" );
         ++it;
 
         if ( it->type != TokenType::NAME )
@@ -371,14 +371,14 @@ void dawn::Parser::parse_operator( TokenIterator& it, Function& operat )
     {
         auto& arg = operat.args.emplace_back();
 
-        if ( it->value == kw_const )
-            arg.kind = VariableKind::CONST;
+        if ( it->value == kw_let )
+            arg.kind = VariableKind::LET;
         else if ( it->value == kw_var )
             arg.kind = VariableKind::VAR;
         else if ( it->value == kw_ref )
             arg.kind = VariableKind::REF;
         else
-            PARSER_PANIC( *it, "expected const, var or ref keyword" );
+            PARSER_PANIC( *it, "expected let, var or ref keyword" );
         ++it;
 
         if ( it->type != TokenType::NAME )
@@ -427,14 +427,14 @@ void dawn::Parser::parse_operator( TokenIterator& it, Function& operat )
 
 void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable )
 {
-    if ( it->value == kw_const )
-        variable.kind = VariableKind::CONST;
+    if ( it->value == kw_let )
+        variable.kind = VariableKind::LET;
     else if ( it->value == kw_var )
         variable.kind = VariableKind::VAR;
     else if ( it->value == kw_ref )
         variable.kind = VariableKind::REF;
     else
-        PARSER_PANIC( *it, "expected const, var or ref keyword" );
+        PARSER_PANIC( *it, "expected let, var or ref keyword" );
     ++it;
 
     if ( it->type != TokenType::NAME )
@@ -697,14 +697,14 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
         {
             auto& arg = func.args.emplace_back();
 
-            if ( left_it->value == kw_const )
-                arg.kind = VariableKind::CONST;
+            if ( left_it->value == kw_let )
+                arg.kind = VariableKind::LET;
             else if ( left_it->value == kw_var )
                 arg.kind = VariableKind::VAR;
             else if ( left_it->value == kw_ref )
                 arg.kind = VariableKind::REF;
             else
-                PARSER_PANIC( *left_it, "expected const, var or ref keyword" );
+                PARSER_PANIC( *left_it, "expected let, var or ref keyword" );
             ++left_it;
 
             if ( left_it->type != TokenType::NAME )
@@ -920,7 +920,7 @@ void dawn::Parser::parse_scope( TokenIterator& it, Scope& scope )
     Set<Int> vars;
     while ( it->value != op_scope_cls )
     {
-        if ( it->value == kw_const || it->value == kw_var || it->value == kw_ref )
+        if ( it->value == kw_let || it->value == kw_var || it->value == kw_ref )
         {
             auto& node = scope.instr.emplace_back().emplace<VariableNode>();
             parse_variable( it, node.var );

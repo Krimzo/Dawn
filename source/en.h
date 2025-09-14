@@ -97,7 +97,7 @@ enum struct NodeType
 
 enum struct VariableKind
 {
-    CONST = 0,
+    LET = 0,
     VAR,
     REF,
 };

@@ -10,7 +10,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) kw_cast,
         (String) kw_oper,
         (String) kw_return,
-        (String) kw_const,
+        (String) kw_let,
         (String) kw_var,
         (String) kw_ref,
         (String) kw_if,

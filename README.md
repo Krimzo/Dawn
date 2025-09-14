@@ -9,9 +9,9 @@ func main(ref args) {
 
 # Variables
 ```dawn
-const a = 7 // constant
-var b = 9   // variable
-ref p = b   // reference
+let a = 7 // constant
+var b = 9 // variable
+ref p = b // reference
 ```
 
 # Primitives
@@ -25,8 +25,8 @@ var s = "nice" // string (32 bytes)
 
 # Strings
 ```dawn
-const normal_string = "some string"
-const complex_string = "some value = {2 + 3}"
+let normal_string = "some string"
+let complex_string = "some value = {2 + 3}"
 ```
 
 # Arrays
@@ -66,7 +66,7 @@ struct Person {
         return "Person({self->name}, {self->age})"
     }
 }
-const person = Person{ name="Krim", age=24 }
+let person = Person{ name="Krim", age=24 }
 person->who()
 ```
 

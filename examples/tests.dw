@@ -181,7 +181,7 @@ func array_test()
 
 func cmplx_str_test()
 {
-	const a = 2
-	const b = 15
+	let a = 2
+	let b = 15
 	assert("{a} + {b} = {a + b}" == "2 + 15 = 17", "bad complex strings")
 }

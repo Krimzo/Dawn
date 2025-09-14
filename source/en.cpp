@@ -22,7 +22,7 @@ std::ostream& dawn::operator<<( std::ostream& stream, VariableKind kind )
 {
     switch ( kind )
     {
-    case VariableKind::CONST: stream << kw_const; break;
+    case VariableKind::LET: stream << kw_let; break;
     case VariableKind::VAR: stream << kw_var; break;
     case VariableKind::REF: stream << kw_ref; break;
     }

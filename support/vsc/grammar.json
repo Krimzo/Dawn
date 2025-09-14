@@ -49,7 +49,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.dawn",
-                    "match": "\\b(import|func|cast|oper|return|const|var|ref|if|else|elif|switch|case|default|for|while|loop|break|continue|throw|try|catch|enum|struct)\\b"
+                    "match": "\\b(import|func|cast|oper|return|let|var|ref|if|else|elif|switch|case|default|for|while|loop|break|continue|throw|try|catch|enum|struct)\\b"
                 }
             ]
         },
