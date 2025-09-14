@@ -58,7 +58,7 @@ void dawn::Engine::bind_cfunc( Int id, CFunction cfunc )
     FunctionValue fv{};
     auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
     global.id = id;
-    global.func = cfunc;
+    global.func = std::move( cfunc );
 
     stack.root().set( id, Value{ fv } );
 }
