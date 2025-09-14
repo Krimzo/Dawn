@@ -95,94 +95,46 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
 
 void dawn::Lexer::tokenize( StringRef const& source, Vector<Token>& tokens )
 {
-    Index index;
-    for ( ; index.index() < (Int) source.size(); index.incr() )
-    {
-        if ( is_space( source, index.index() ) )
-        {
-            extract_space( source, tokens, index );
-        }
-        else if ( is_comment( source, index.index() ) )
-        {
-            extract_comment( source, tokens, index );
-        }
-        else if ( is_mlcomment( source, index.index() ) )
-        {
-            extract_mlcomment( source, tokens, index );
-        }
-        else if ( is_word( source, index.index() ) )
-        {
-            extract_word( source, tokens, index );
-        }
-        else if ( is_number( source, index.index() ) )
-        {
-            extract_number( source, tokens, index );
-        }
-        else if ( is_char( source, index.index() ) )
-        {
-            extract_char( source, tokens, index );
-        }
-        else if ( is_string( source, index.index() ) )
-        {
-            extract_string( source, tokens, index );
-        }
-        else if ( is_operator( source, index.index() ) )
-        {
-            extract_operator( source, tokens, index );
-        }
-        else
-            LEXER_PANIC( index, source[index.index()], "unexpected character" );
-    }
+    for ( Index index; index.index() < (Int) source.size(); index.incr() )
+        tokenize_at( source, tokens, index );
 }
 
-void dawn::Lexer::tokenize_cmplx( StringRef const& source, Vector<Token>& tokens, Index& index )
+void dawn::Lexer::tokenize_at( StringRef const& source, Vector<Token>& tokens, Index& index )
 {
-    Int depth = 1;
-    for ( ; index.index() < (Int) source.size(); index.incr() )
+    if ( is_space( source, index.index() ) )
     {
-        if ( is_space( source, index.index() ) )
-        {
-            extract_space( source, tokens, index );
-        }
-        else if ( is_comment( source, index.index() ) )
-        {
-            extract_comment( source, tokens, index );
-        }
-        else if ( is_mlcomment( source, index.index() ) )
-        {
-            extract_mlcomment( source, tokens, index );
-        }
-        else if ( is_word( source, index.index() ) )
-        {
-            extract_word( source, tokens, index );
-        }
-        else if ( is_number( source, index.index() ) )
-        {
-            extract_number( source, tokens, index );
-        }
-        else if ( is_char( source, index.index() ) )
-        {
-            extract_char( source, tokens, index );
-        }
-        else if ( is_string( source, index.index() ) )
-        {
-            extract_string( source, tokens, index );
-        }
-        else if ( is_operator( source, index.index() ) )
-        {
-            if ( source.substr( index.index() ).starts_with( lang_def.cmplx_string_opn ) )
-                depth += 1;
-            else if ( source.substr( index.index() ).starts_with( lang_def.cmplx_string_cls ) )
-            {
-                depth -= 1;
-                if ( depth == 0 )
-                    break;
-            }
-            extract_operator( source, tokens, index );
-        }
-        else
-            LEXER_PANIC( index, source[index.index()], "unexpected character" );
+        extract_space( source, tokens, index );
     }
+    else if ( is_comment( source, index.index() ) )
+    {
+        extract_comment( source, tokens, index );
+    }
+    else if ( is_mlcomment( source, index.index() ) )
+    {
+        extract_mlcomment( source, tokens, index );
+    }
+    else if ( is_word( source, index.index() ) )
+    {
+        extract_word( source, tokens, index );
+    }
+    else if ( is_number( source, index.index() ) )
+    {
+        extract_number( source, tokens, index );
+    }
+    else if ( is_char( source, index.index() ) )
+    {
+        extract_char( source, tokens, index );
+    }
+    else if ( is_string( source, index.index() ) )
+    {
+        extract_string( source, tokens, index );
+    }
+    else if ( is_operator( source, index.index() ) )
+    {
+        extract_operator( source, tokens, index );
+    }
+    else
+        LEXER_PANIC( index, source[index.index()], "unexpected character" );
 }
 
 dawn::Bool dawn::Lexer::is_space( StringRef const& source, Int i )
@@ -417,7 +369,19 @@ void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens
             add_value_token( TokenType::OPERATOR, lang_def.call_opn );
 
             index.incr( lang_def.cmplx_string_opn.size() );
-            tokenize_cmplx( source, tokens, index );
+            Int cmplx_str_depth = 1;
+            for ( ; index.index() < (Int) source.size(); index.incr() )
+            {
+                if ( source.substr( index.index() ).starts_with( lang_def.cmplx_string_opn ) )
+                    cmplx_str_depth += 1;
+                else if ( source.substr( index.index() ).starts_with( lang_def.cmplx_string_cls ) )
+                {
+                    cmplx_str_depth -= 1;
+                    if ( cmplx_str_depth == 0 )
+                        break;
+                }
+                tokenize_at( source, tokens, index );
+            }
 
             add_value_token( TokenType::OPERATOR, lang_def.call_cls );
             add_value_token( TokenType::OPERATOR, lang_def.oper_add );

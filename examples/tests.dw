@@ -8,13 +8,14 @@ func main()
 	enum_test()
 	struct_test()
 	array_test()
+	cmplx_str_test()
 	print("Done.")
 }
 
 func assert(ref check, ref msg)
 {
 	if !check {
-		print(msg)
+		throw msg
 	}
 }
 
@@ -176,4 +177,11 @@ func array_test()
 
 	var str_val = string( data[data->count - 1][1] )
 	print( str_val )
+}
+
+func cmplx_str_test()
+{
+	const a = 2
+	const b = 15
+	assert("{a} + {b} = {a + b}" == "2 + 15 = 17", "bad complex strings")
 }

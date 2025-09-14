@@ -34,10 +34,9 @@ struct Lexer
     LanguageDef lang_def = LanguageDef::dawn();
 
     void tokenize( StringRef const& source, Vector<Token>& tokens );
+    void tokenize_at( StringRef const& source, Vector<Token>& tokens, Index& index );
 
 private:
-    void tokenize_cmplx( StringRef const& source, Vector<Token>& tokens, Index& index );
-
     Bool is_space( StringRef const& source, Int i );
     void extract_space( StringRef const& source, Vector<Token>& tokens, Index& index );
 
