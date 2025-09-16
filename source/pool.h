@@ -9,8 +9,8 @@ namespace dawn
 {
 struct MemoryPools
 {
-    MemoryPool<Frame, 256> frame_memory;
     MemoryPool<Node, 1024> node_memory;
+    MemoryPool<Frame, 256> frame_memory;
 
     MemoryPool<Bool, 1024> bool_memory;
     MemoryPool<Int, 1024> int_memory;
@@ -27,8 +27,8 @@ struct MemoryPools
     ~MemoryPools() noexcept;
 };
 
-MemoryPool<Frame, 256>& frame_pool();
 MemoryPool<Node, 1024>& node_pool();
+MemoryPool<Frame, 256>& frame_pool();
 
 MemoryPool<Bool, 1024>& bool_pool();
 MemoryPool<Int, 1024>& int_pool();

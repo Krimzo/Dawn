@@ -5,78 +5,39 @@ static dawn::MemoryPools pools;
 
 dawn::MemoryPools::~MemoryPools() noexcept
 {
-    for ( auto& chunk : node_memory.m_chunks )
-    {
-        for ( auto& regist : chunk.m_space )
-            regist.value = {};
-    }
-    for ( auto& chunk : frame_memory.m_chunks )
-    {
-        for ( auto& regist : chunk.m_space )
-            regist.value = {};
-    }
+    constexpr auto clear_chunks = []( auto& pool )
+        {
+            for ( auto& chunk : pool.m_chunks )
+            {
+                for ( auto& regist : chunk.m_space )
+                    regist.value = {};
+            }
+        };
 
-    for ( auto& chunk : bool_memory.m_chunks )
-    {
-        for ( auto& regist : chunk.m_space )
-            regist.value = {};
-    }
-    for ( auto& chunk : int_memory.m_chunks )
-    {
-        for ( auto& regist : chunk.m_space )
-            regist.value = {};
-    }
-    for ( auto& chunk : float_memory.m_chunks )
-    {
-        for ( auto& regist : chunk.m_space )
-            regist.value = {};
-    }
-    for ( auto& chunk : char_memory.m_chunks )
-    {
-        for ( auto& regist : chunk.m_space )
-            regist.value = {};
-    }
-    for ( auto& chunk : string_memory.m_chunks )
-    {
-        for ( auto& regist : chunk.m_space )
-            regist.value = {};
-    }
+    clear_chunks( node_memory );
+    clear_chunks( frame_memory );
 
-    for ( auto& chunk : function_memory.m_chunks )
-    {
-        for ( auto& regist : chunk.m_space )
-            regist.value = {};
-    }
-    for ( auto& chunk : enum_memory.m_chunks )
-    {
-        for ( auto& regist : chunk.m_space )
-            regist.value = {};
-    }
-    for ( auto& chunk : struct_memory.m_chunks )
-    {
-        for ( auto& regist : chunk.m_space )
-            regist.value = {};
-    }
-    for ( auto& chunk : array_memory.m_chunks )
-    {
-        for ( auto& regist : chunk.m_space )
-            regist.value = {};
-    }
-    for ( auto& chunk : range_memory.m_chunks )
-    {
-        for ( auto& regist : chunk.m_space )
-            regist.value = {};
-    }
-}
+    clear_chunks( bool_memory );
+    clear_chunks( int_memory );
+    clear_chunks( float_memory );
+    clear_chunks( char_memory );
+    clear_chunks( string_memory );
 
-dawn::MemoryPool<dawn::Frame, 256>& dawn::frame_pool()
-{
-    return pools.frame_memory;
+    clear_chunks( function_memory );
+    clear_chunks( enum_memory );
+    clear_chunks( struct_memory );
+    clear_chunks( array_memory );
+    clear_chunks( range_memory );
 }
 
 dawn::MemoryPool<dawn::Node, 1024>& dawn::node_pool()
 {
     return pools.node_memory;
+}
+
+dawn::MemoryPool<dawn::Frame, 256>& dawn::frame_pool()
+{
+    return pools.frame_memory;
 }
 
 dawn::MemoryPool<dawn::Bool, 1024>& dawn::bool_pool()
