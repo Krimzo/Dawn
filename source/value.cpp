@@ -321,7 +321,23 @@ dawn::Value dawn::Value::clone() const
         return Value{ as_enum() };
 
     case ValueType::STRUCT:
-        return Value{ as_struct() };
+    {
+        Value result{ as_struct() };
+        auto& struc = result.as_struct();
+        auto& parent_methods = struc.parent->methods;
+        for ( auto& [id, member] : struc.members )
+        {
+            if ( member.type() != ValueType::FUNCTION )
+                continue;
+            const auto it = std::find_if( parent_methods.begin(), parent_methods.end(), [&]( Function const& func )
+                {
+                    return func.id == id;
+                } );
+            if ( it != parent_methods.end() )
+                *member.as_function().as_method().self = result;
+        }
+        return result;
+    }
 
     case ValueType::ARRAY:
         return Value{ as_array() };
