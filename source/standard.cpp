@@ -314,7 +314,7 @@ void dawn::Engine::load_standard_members()
             return self;
         } );
 
-    bind_method( ValueType::STRING, "find", true, 1, [this]( Value& self, Value* args )->Value
+    bind_method( ValueType::STRING, "find", true, 1, [this]( Value& self, Value* args ) -> Value
         {
             auto& self_str = self.as_string();
             size_t index = self_str.find( args[0].to_string( *this ) );

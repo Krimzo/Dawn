@@ -63,27 +63,27 @@ dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path, Set<String
     return eval( *source, parent_path, imported );
 }
 
-void dawn::Dawn::bind_func( String const& name, CFunction cfunc ) noexcept
+void dawn::Dawn::bind_func( StringRef const& name, CFunction cfunc ) noexcept
 {
     engine.bind_cfunc( IDSystem::get( name ), std::move( cfunc ) );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name ) noexcept
 {
     return call_func( name, nullptr, 0, nullptr );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Value* retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* retval ) noexcept
 {
     return call_func( name, nullptr, 0, retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, std::initializer_list<Value> const& args, Value* retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, std::initializer_list<Value> const& args, Value* retval ) noexcept
 {
     return call_func( name, (Value*) args.begin(), (Int) args.size(), retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Value* args, Int arg_count, Value* retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* args, Int arg_count, Value* retval ) noexcept
 {
     try
     {
@@ -103,12 +103,12 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( String const& name, Value* args, 
     return std::nullopt;
 }
 
-void dawn::Dawn::add_var( VariableKind kind, String const& name, Value const& value ) noexcept
+void dawn::Dawn::add_var( VariableKind kind, StringRef const& name, Value const& value ) noexcept
 {
     engine.add_var( kind, IDSystem::get( name ), value );
 }
 
-dawn::Value* dawn::Dawn::get_var( String const& name ) noexcept
+dawn::Value* dawn::Dawn::get_var( StringRef const& name ) noexcept
 {
     return engine.get_var( IDSystem::get( name ) );
 }

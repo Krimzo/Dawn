@@ -21,12 +21,16 @@
 #include <chrono>
 #include <filesystem>
 
-
+// namespace
 namespace dawn
 {
 namespace ch = std::chrono;
 namespace fs = std::filesystem;
+}
 
+// basic
+namespace dawn
+{
 using Bool = bool;
 using Int = int64_t;
 using Float = double;
@@ -62,4 +66,32 @@ using Set = std::unordered_set<K>;
 
 template<typename K, typename V>
 using Map = std::unordered_map<K, V>;
+}
+
+// hash
+namespace dawn
+{
+struct StringHash
+{
+    using hash_type = std::hash<StringRef>;
+    using is_transparent = void;
+
+    std::size_t operator()( Char const* str ) const
+    {
+        return hash_type{}( str );
+    }
+
+    std::size_t operator()( StringRef const& str ) const
+    {
+        return hash_type{}( str );
+    }
+
+    std::size_t operator()( String const& str ) const
+    {
+        return hash_type{}( str );
+    }
+};
+
+template<typename T>
+using StringMap = std::unordered_map<String, T, StringHash, std::equal_to<>>;
 }

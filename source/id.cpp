@@ -1,18 +1,21 @@
 #include "id.h"
 
 
-dawn::Vector<dawn::String> dawn::IDSystem::m_int_str = {};
-dawn::Map<dawn::String, dawn::Int> dawn::IDSystem::m_str_int = {};
+static constexpr auto RESERVE_SIZE = 256;
 
-dawn::Int dawn::IDSystem::get( String const& str_id )
+dawn::Vector<dawn::String> dawn::IDSystem::m_int_str = {};
+dawn::StringMap<dawn::Int> dawn::IDSystem::m_str_int = {};
+
+dawn::Int dawn::IDSystem::get( StringRef const& str_id )
 {
     static const auto _ = [] {
-        m_int_str.reserve( 250 );
+        m_int_str.reserve( RESERVE_SIZE );
+        m_str_int.reserve( RESERVE_SIZE );
         m_int_str.resize( 1 ); // because id=0 is not valid
         return nullptr;
         }( );
 
-    auto it = m_str_int.find( str_id );
+    const auto it = m_str_int.find( str_id );
     if ( it != m_str_int.end() )
         return it->second;
 
