@@ -527,7 +527,7 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
 
     // struct default init
     {
-        static const Int self_id = IDSystem::get( (String) kw_self );
+        static const Int self_id = IDSystem::get( kw_self );
         auto pop_handler = stack.push_from( RegisterRef<Frame>{} );
         stack.current().set( self_id, value );
         for ( auto& field : struc.fields )
@@ -732,11 +732,11 @@ dawn::Value dawn::Engine::handle_ac_type_node( Value const& self, Int right_id )
 
 dawn::Value dawn::Engine::create_default_value( Int typeid_ )
 {
-    static const Int _boolid = IDSystem::get( (String) tp_bool );
-    static const Int _intid = IDSystem::get( (String) tp_int );
-    static const Int _floatid = IDSystem::get( (String) tp_float );
-    static const Int _charid = IDSystem::get( (String) tp_char );
-    static const Int _stringid = IDSystem::get( (String) tp_string );
+    static const Int _boolid = IDSystem::get( tp_bool );
+    static const Int _intid = IDSystem::get( tp_int );
+    static const Int _floatid = IDSystem::get( tp_float );
+    static const Int _charid = IDSystem::get( tp_char );
+    static const Int _stringid = IDSystem::get( tp_string );
 
     if ( typeid_ == _boolid )
         return Value{ Bool{} };

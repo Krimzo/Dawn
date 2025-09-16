@@ -201,7 +201,7 @@ void dawn::Parser::parse_struct( TokenIterator& it, Struct& struc )
 
             auto& self_var = *method.args.emplace( method.args.begin() );
             self_var.kind = VariableKind::REF;
-            self_var.id = IDSystem::get( (String) kw_self );
+            self_var.id = IDSystem::get( kw_self );
             struc.methods.push_back( method );
         }
         else if ( it->value == kw_cast )
@@ -213,7 +213,7 @@ void dawn::Parser::parse_struct( TokenIterator& it, Struct& struc )
 
             auto& self_var = *cast.args.emplace( cast.args.begin() );
             self_var.kind = VariableKind::REF;
-            self_var.id = IDSystem::get( (String) kw_self );
+            self_var.id = IDSystem::get( kw_self );
             struc.methods.push_back( cast );
         }
         else if ( it->value == kw_oper )
@@ -225,7 +225,7 @@ void dawn::Parser::parse_struct( TokenIterator& it, Struct& struc )
 
             auto& self_var = *op.args.emplace( op.args.begin() );
             self_var.kind = VariableKind::REF;
-            self_var.id = IDSystem::get( (String) kw_self );
+            self_var.id = IDSystem::get( kw_self );
             struc.methods.push_back( op );
         }
         else
@@ -402,19 +402,19 @@ void dawn::Parser::parse_operator( TokenIterator& it, Function& operat )
     switch ( args.size() )
     {
     case 0:
-        if ( operat.id != IDSystem::get( (String) op_add )
-            && operat.id != IDSystem::get( (String) op_sub ) )
+        if ( operat.id != IDSystem::get( op_add )
+            && operat.id != IDSystem::get( op_sub ) )
             PARSER_PANIC( *it, "operator [", IDSystem::get( operat.id ), "] can't be overloaded as unary" );
         break;
 
     case 1:
-        if ( operat.id != IDSystem::get( (String) op_add )
-            && operat.id != IDSystem::get( (String) op_sub )
-            && operat.id != IDSystem::get( (String) op_mul )
-            && operat.id != IDSystem::get( (String) op_div )
-            && operat.id != IDSystem::get( (String) op_pow )
-            && operat.id != IDSystem::get( (String) op_mod )
-            && operat.id != IDSystem::get( (String) op_cmpr ) )
+        if ( operat.id != IDSystem::get( op_add )
+            && operat.id != IDSystem::get( op_sub )
+            && operat.id != IDSystem::get( op_mul )
+            && operat.id != IDSystem::get( op_div )
+            && operat.id != IDSystem::get( op_pow )
+            && operat.id != IDSystem::get( op_mod )
+            && operat.id != IDSystem::get( op_cmpr ) )
             PARSER_PANIC( *it, "operator [", IDSystem::get( operat.id ), "] can't be overloaded" );
         break;
 
@@ -892,7 +892,7 @@ void dawn::Parser::expression_single_keyword( Token const& token, Node& tree )
     }
     else if ( token.value == kw_self )
     {
-        tree.emplace<IdentifierNode>().id = IDSystem::get( (String) kw_self );
+        tree.emplace<IdentifierNode>().id = IDSystem::get( kw_self );
     }
     else
         PARSER_PANIC( token, "keyword [", token.value, "] is not an expression" );

@@ -234,7 +234,8 @@ void dawn::Lexer::extract_word( StringRef const& source, Vector<Token>& tokens, 
 
 dawn::Bool dawn::Lexer::is_number( StringRef const& source, Int i )
 {
-    return source.substr( i ).starts_with( lang_def.separator_number ) || isdigit( source[i] );
+    return isdigit( source[i] ) ||
+        ( source.substr( i ).starts_with( lang_def.separator_number ) && (Int) source.size() > ( i + 1 ) && isdigit( source[i + 1] ) );
 }
 
 void dawn::Lexer::extract_number( StringRef const& source, Vector<Token>& tokens, Index& index )
@@ -246,8 +247,7 @@ void dawn::Lexer::extract_number( StringRef const& source, Vector<Token>& tokens
         if ( source.substr( index.index() ).starts_with( lang_def.separator_number ) )
         {
             if ( is_float )
-                LEXER_PANIC( index, source[index.index()], "invalid float number" );
-
+                LEXER_PANIC( index, source[index.index()], "float number can contain only a single number separator" );
             is_float = true;
         }
         else if ( !is_number( source, index.index() ) )

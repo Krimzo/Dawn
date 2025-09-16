@@ -4,7 +4,7 @@
 
 
 #define ID_HELPER(id) static const Int _##id = IDSystem::get( #id )
-#define OP_HELPER(op) static const Int __##op = IDSystem::get( (String) op_##op )
+#define OP_HELPER(op) static const Int __##op = IDSystem::get( op_##op )
 
 namespace dawn
 {
@@ -1131,7 +1131,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
         {
             auto& method = func.as_method();
             stream << IDSystem::get( method.self->as_struct().parent->id )
-                << op_access << IDSystem::get( method.id ) << op_expr_opn;
+                << op_link << IDSystem::get( method.id ) << op_expr_opn;
         }
         else
         {

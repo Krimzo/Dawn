@@ -20,43 +20,43 @@ void dawn::Engine::load_standard_functions()
             {
             case ValueType::NOTHING:
             {
-                static const Value id = Value{ IDSystem::get( (String) tp_nothing ) };
+                static const Value id = Value{ IDSystem::get( tp_nothing ) };
                 return id;
             }
 
             case ValueType::BOOL:
             {
-                static const Value id = Value{ IDSystem::get( (String) tp_bool ) };
+                static const Value id = Value{ IDSystem::get( tp_bool ) };
                 return id;
             }
 
             case ValueType::INT:
             {
-                static const Value id = Value{ IDSystem::get( (String) tp_int ) };
+                static const Value id = Value{ IDSystem::get( tp_int ) };
                 return id;
             }
 
             case ValueType::FLOAT:
             {
-                static const Value id = Value{ IDSystem::get( (String) tp_float ) };
+                static const Value id = Value{ IDSystem::get( tp_float ) };
                 return id;
             }
 
             case ValueType::CHAR:
             {
-                static const Value id = Value{ IDSystem::get( (String) tp_char ) };
+                static const Value id = Value{ IDSystem::get( tp_char ) };
                 return id;
             }
 
             case ValueType::STRING:
             {
-                static const Value id = Value{ IDSystem::get( (String) tp_string ) };
+                static const Value id = Value{ IDSystem::get( tp_string ) };
                 return id;
             }
 
             case ValueType::FUNCTION:
             {
-                static const Value id = Value{ IDSystem::get( (String) tp_function ) };
+                static const Value id = Value{ IDSystem::get( tp_function ) };
                 return id;
             }
 
@@ -68,13 +68,13 @@ void dawn::Engine::load_standard_functions()
 
             case ValueType::ARRAY:
             {
-                static const Value id = Value{ IDSystem::get( (String) tp_array ) };
+                static const Value id = Value{ IDSystem::get( tp_array ) };
                 return id;
             }
 
             case ValueType::RANGE:
             {
-                static const Value id = Value{ IDSystem::get( (String) tp_range ) };
+                static const Value id = Value{ IDSystem::get( tp_range ) };
                 return id;
             }
 

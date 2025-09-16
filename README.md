@@ -44,7 +44,7 @@ enum Animal {
     mouse    // but don't have to (value is set to nothing)
 }
 var animal = Animal{cat}
-var value = animal->value
+var value = animal.value
 ```
 
 # Structs
@@ -55,19 +55,19 @@ struct Person {
     age = 0
 
     func who() {
-        print("{self->name} is {self->age} years old")
+        print("{self.name} is {self.age} years old")
     }
 
     oper +(ref age) {
-        return Person{ name = self->name, age = self->age + age }
+        return Person{ name = self.name, age = self.age + age }
     }
 
     cast string {
-        return "Person({self->name}, {self->age})"
+        return "Person({self.name}, {self.age})"
     }
 }
 let person = Person{ name="Krim", age=24 }
-person->who()
+person.who()
 ```
 
 # Branching

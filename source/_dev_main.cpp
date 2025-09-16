@@ -9,7 +9,7 @@ int dawn::_dev_main( int argc, char** argv )
 
     if ( auto error = dawn.eval_file(
 #if _DEBUG
-#if 1
+#if 0
         "examples/tests.dw"
 #else
         "examples/dev.dw"
