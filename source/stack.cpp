@@ -24,12 +24,12 @@ dawn::Value* dawn::Frame::get( Int id )
 {
     if ( std::holds_alternative<LocalFrame>( m_frame ) )
     {
-        if ( auto ptr = std::get<LocalFrame>( m_frame ).get( id ) )
+        if ( Value* ptr = std::get<LocalFrame>( m_frame ).get( id ) )
             return ptr;
     }
     else
     {
-        if ( auto ptr = std::get<GlobalFrame>( m_frame ).get( id ) )
+        if ( Value* ptr = std::get<GlobalFrame>( m_frame ).get( id ) )
             return ptr;
     }
     return m_parent.valid() ? m_parent.value().get( id ) : nullptr;
@@ -47,23 +47,21 @@ void dawn::Frame::reset( RegisterRef<Frame> const& parent )
 dawn::Stack::Stack()
 {
     m_frames.reserve( 128 );
-    auto& global_frame = m_frames.emplace_back( frame_pool().new_register() );
-    global_frame.value() = Frame{ FrameType::GLOBAL };
+    m_frames.emplace_back( frame_pool().new_register() )
+        .value() = Frame{ FrameType::GLOBAL };
 }
 
 dawn::PopHandler dawn::Stack::push()
 {
     m_frames.emplace_back( frame_pool().new_register() )
-        .value()
-        .reset( *( ++m_frames.rbegin() ) );
+        .value().reset( *( ++m_frames.rbegin() ) );
     return PopHandler{ *this };
 }
 
 dawn::PopHandler dawn::Stack::push_from( RegisterRef<Frame> const& frame )
 {
     m_frames.emplace_back( frame_pool().new_register() )
-        .value()
-        .reset( frame.valid() ? frame : m_frames.front() );
+        .value().reset( frame.valid() ? frame : m_frames.front() );
     return PopHandler{ *this };
 }
 

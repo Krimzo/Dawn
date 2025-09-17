@@ -107,7 +107,7 @@ struct Value
     explicit Value( ArrayValue const& value );
     explicit Value( RangeValue const& value );
 
-    inline ValueType type() const { return m_type; }
+    constexpr ValueType type() const { return m_type; }
     inline Bool& as_bool() const { return m_regref.cast<Bool>().value(); }
     inline Int& as_int() const { return m_regref.cast<Int>().value(); }
     inline Float& as_float() const { return m_regref.cast<Float>().value(); }
