@@ -18,7 +18,8 @@ struct Register
 
     void decr()
     {
-        --count;
+        if ( --count == 0 )
+            value = T{};
     }
 };
 
