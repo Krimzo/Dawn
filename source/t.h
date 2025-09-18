@@ -21,14 +21,14 @@
 #include <chrono>
 #include <filesystem>
 
-// namespace
+// Namespace.
 namespace dawn
 {
 namespace ch = std::chrono;
 namespace fs = std::filesystem;
 }
 
-// basic
+// Basic.
 namespace dawn
 {
 using Bool = bool;
@@ -68,7 +68,7 @@ template<typename K, typename V>
 using Map = std::unordered_map<K, V>;
 }
 
-// hash
+// Hash.
 namespace dawn
 {
 struct StringHash

@@ -296,7 +296,7 @@ void dawn::Engine::load_standard_functions()
 
 void dawn::Engine::load_standard_members()
 {
-    // string
+    // Strings.
     bind_member( ValueType::STRING, "count", [this]( Value& self ) -> Value
         {
             return (Value) (Int) self.as_string().size();
@@ -333,13 +333,13 @@ void dawn::Engine::load_standard_members()
             return self;
         } );
 
-    // enum
+    // Enums.
     bind_member( ValueType::ENUM, "value", [this]( Value& self ) -> Value
         {
             return self.as_enum().value( *this );
         } );
 
-    // array
+    // Arrays.
     bind_member( ValueType::ARRAY, "count", [this]( Value& self ) -> Value
         {
             return (Value) (Int) self.as_array().data.size();
@@ -370,7 +370,7 @@ void dawn::Engine::load_standard_members()
             return Value{ Int( -1 ) };
         } );
 
-    // range
+    // Ranges.
     bind_member( ValueType::RANGE, "start", [this]( Value& self ) -> Value
         {
             return (Value) self.as_range().start_incl;

@@ -63,8 +63,8 @@ struct TryNode
 
 struct IfNode
 {
-    template<typename T>
-    struct Part // had to cheat the compiler with a template :)
+    template<typename T> // Template is required because Node doesn't exist at this stage.
+    struct Part
     {
         T expr;
         Scope scope;

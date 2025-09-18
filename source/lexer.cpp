@@ -394,7 +394,7 @@ void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens
     if ( cmplx_part_count > 0 )
     {
         if ( buffer.empty() )
-            tokens.pop_back(); // remove oper_add
+            tokens.pop_back(); // Remove oper_add.
         else
         {
             add_literal_token( TokenType::STRING, buffer );
@@ -404,11 +404,11 @@ void dawn::Lexer::extract_string( StringRef const& source, Vector<Token>& tokens
         if ( cmplx_part_count > 1 )
             add_value_token( TokenType::OPERATOR, lang_def.expr_cls );
         else
-            tokens.erase( tokens.begin() + open_expr_indx ); // remove expr_opn
+            tokens.erase( tokens.begin() + open_expr_indx ); // Remove expr_opn.
     }
     else
     {
-        tokens.erase( tokens.begin() + open_expr_indx ); // remove expr_opn
+        tokens.erase( tokens.begin() + open_expr_indx ); // Remove expr_opn.
         add_literal_token( TokenType::STRING, buffer );
     }
 }

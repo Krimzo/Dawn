@@ -68,7 +68,7 @@ enum struct NodeType
 {
     NONE = 0,
 
-    // instr
+    // Instruction.
     SCOPE,
     VARIABLE,
     RETURN,
@@ -82,7 +82,7 @@ enum struct NodeType
     WHILE,
     FOR,
 
-    // expr
+    // Expression.
     VALUE,
     IDENTIFIER,
     CALL,

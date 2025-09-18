@@ -525,7 +525,7 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
     auto& struc_value = value.as_struct();
     struc_value.parent = &struc;
 
-    // struct default init
+    // Default strcuture initialization.
     {
         static const Int self_id = IDSystem::get( kw_self );
         auto pop_handler = stack.push_from( RegisterRef<Frame>{} );
@@ -534,18 +534,17 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
             struc_value.members[field.id] = handle_expr( field.expr.value() ).clone();
     }
 
-    // struct {} init
+    // Structure argument initialization.
     for ( auto& [id, arg_node] : node.args )
     {
         auto& member = struc_value.members[id];
         Value expr = handle_expr( arg_node ).clone();
         if ( member.type() != expr.type() )
             ENGINE_PANIC( "can't assign type [", expr.type(), "] to type [", member.type(), "]" );
-        // must use = instead of assign() because member is const at this stage
-        member = expr;
+        member = expr; // Must use = instead of assign() because member is const at this stage.
     }
 
-    // methods
+    // Structure methods.
     for ( auto& method : struc.methods )
     {
         FunctionValue fv{};

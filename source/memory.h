@@ -16,10 +16,10 @@ struct Register
         ++count;
     }
 
+    // Does not reset value. Caller should reset after obtaining a new register.
     void decr()
     {
-        if ( --count == 0 )
-            value = T{};
+        --count;
     }
 };
 
@@ -95,6 +95,7 @@ struct MemoryChunk
     Int m_current = 0;
     Register<T> m_space[S] = {};
 
+    // Does not reset value. Caller should reset after obtaining a new register.
     Register<T>* move_to_unused()
     {
         Int start_index = m_current;
@@ -124,6 +125,7 @@ struct MemoryPool
         allocate_chunk();
     }
 
+    // Does not reset value. Caller should reset after obtaining a new register.
     RegisterRef<T> new_register()
     {
         return { move_to_unused() };

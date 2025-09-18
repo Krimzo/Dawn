@@ -11,7 +11,7 @@ dawn::Int dawn::IDSystem::get( StringRef const& str_id )
     static const auto _ = [] {
         m_int_str.reserve( RESERVE_SIZE );
         m_str_int.reserve( RESERVE_SIZE );
-        m_int_str.resize( 1 ); // because id=0 is not valid
+        m_int_str.resize( 1 ); // Because id=0 is not valid.
         return nullptr;
         }( );
 
