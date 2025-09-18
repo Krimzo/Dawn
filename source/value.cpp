@@ -1147,7 +1147,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
         {
             auto& method = func.as_method();
             stream << IDSystem::get( method.self->as_struct().parent->id )
-                << op_link << IDSystem::get( method.id ) << op_expr_opn;
+                << op_access << IDSystem::get( method.id ) << op_expr_opn;
         }
         else
         {
@@ -1170,8 +1170,8 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
 
     case ValueType::ENUM:
     {
-        auto& value = as_enum();
-        return format( IDSystem::get( value.parent->id ), op_scope_opn, IDSystem::get( value.key_id ), op_scope_cls );
+        auto const& value = as_enum();
+        return format( IDSystem::get( value.parent->id ), op_link, IDSystem::get( value.key_id ) );
     }
 
     case ValueType::STRUCT:

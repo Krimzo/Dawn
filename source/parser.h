@@ -61,6 +61,7 @@ private:
     void expression_complex_expr( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree );
     void expression_complex_scope( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree );
     void expression_complex_array( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree );
+    void expression_complex_link( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree );
     void expression_complex_default( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree );
     void expression_pure( Vector<Token>& tokens, Node& tree );
     void expression_single( Token const& token, Node& tree );

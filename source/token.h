@@ -53,6 +53,11 @@ struct Token
     String value;
     String literal;
     Location location;
+
+    constexpr String const& any_value() const
+    {
+        return value.empty() ? literal : value;
+    }
 };
 
 Color to_color( TokenType type );

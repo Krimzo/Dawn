@@ -501,6 +501,9 @@ void dawn::Parser::parse_expression( ExtractType type, TokenIterator& it, Node& 
             else if ( op.value == op_array_opn )
                 expression_complex_array( left, op, right, tree );
 
+            else if ( op.value == op_link )
+                expression_complex_link( left, op, right, tree );
+
             else
                 expression_complex_default( left, op, right, tree );
         }
@@ -641,7 +644,6 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
     if ( left.size() == 1 && left.front().type == TokenType::TYPE )
     {
         Map<Int, Node> struct_args;
-        Opt<Int> enum_key;
         TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
         while ( right_it.valid() )
         {
@@ -653,12 +655,6 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
                 PARSER_PANIC( *right_it, "argument [", right_it->value, "] already passed" );
             ++right_it;
 
-            if ( !right_it.valid() && struct_args.empty() )
-            {
-                enum_key = name_id;
-                break;
-            }
-
             if ( right_it->value != op_assign )
                 PARSER_PANIC( *right_it, "expected assign operator" );
             ++right_it;
@@ -667,18 +663,9 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
             parse_expression( ExtractType::SPLITTER, right_it, arg );
         }
 
-        if ( enum_key )
-        {
-            auto& node = tree.emplace<EnumNode>();
-            node.type_id = IDSystem::get( left.front().value );
-            node.key_id = *enum_key;
-        }
-        else
-        {
-            auto& node = tree.emplace<StructNode>();
-            node.type_id = IDSystem::get( left.front().value );
-            node.args = struct_args;
-        }
+        auto& node = tree.emplace<StructNode>();
+        node.type_id = IDSystem::get( left.front().value );
+        node.args = struct_args;
     }
     else if ( left.size() >= 2 && left.front().value == op_lambda && left.back().value == op_lambda )
     {
@@ -787,6 +774,27 @@ void dawn::Parser::expression_complex_array( Vector<Token>& left, Token op, Vect
         node.expr = node_pool().new_register();
         parse_expression( ExtractType::DEFAULT, right_it, node.expr.value() );
     }
+}
+
+void dawn::Parser::expression_complex_link( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree )
+{
+    if ( left.size() != 1 )
+        PARSER_PANIC( !left.empty() ? left.back() : Token{}, "enum name expected" );
+
+    auto& enum_token = left.back();
+    if ( enum_token.type != TokenType::TYPE )
+        PARSER_PANIC( enum_token, "enum name expected but got [", enum_token.any_value(), "]" );
+
+    if ( right.size() != 1 )
+        PARSER_PANIC( !right.empty() ? right.back() : Token{}, "enum field name expected" );
+
+    auto& enum_field = right.back();
+    if ( enum_field.type != TokenType::NAME )
+        PARSER_PANIC( enum_field, "enum field name expected but got [", enum_field.any_value(), "]" );
+
+    auto& node = tree.emplace<EnumNode>();
+    node.type_id = IDSystem::get( enum_token.value );
+    node.key_id = IDSystem::get( enum_field.value );
 }
 
 void dawn::Parser::expression_complex_default( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree )
@@ -1174,8 +1182,8 @@ void dawn::Parser::scope_for( TokenIterator& it, Node& tree )
     node.var.id = IDSystem::get( it->value );
     ++it;
 
-    if ( it->value != op_link )
-        PARSER_PANIC( *it, "expected link operator" );
+    if ( it->value != op_iter )
+        PARSER_PANIC( *it, "expected iterator operator" );
     ++it;
 
     node.expr = node_pool().new_register();

@@ -124,10 +124,10 @@ enum SomeEnum
 
 func enum_test()
 {
-	var first_val = SomeEnum{ two }	
+	var first_val = SomeEnum::two
 	print(first_val.value[2][1])
-	assert(SomeEnum{ two } == SomeEnum{ two }, "bad enum comparsion 1")
-	assert(SomeEnum{ one } != SomeEnum{ two }, "bad enum comparsion 2")
+	assert(SomeEnum::two == SomeEnum::two, "bad enum comparsion 1")
+	assert(SomeEnum::one != SomeEnum::two, "bad enum comparsion 2")
 }
 
 struct SomeStruct

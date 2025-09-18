@@ -43,7 +43,7 @@ enum Animal {
     cat = -6 // enums can store values
     mouse    // but don't have to (value is set to nothing)
 }
-var animal = Animal{cat}
+var animal = Animal::cat
 var value = animal.value
 ```
 
