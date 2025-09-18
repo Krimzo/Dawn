@@ -32,7 +32,7 @@ int _dev_main( int argc, char** argv )
     Stopwatch stopwatch;
     Dawn dawn;
 
-    if ( Opt error = dawn.eval_file(
+    if ( auto error = dawn.eval_file(
 #if _DEBUG
 #if 0
         "examples/tests.dw"
@@ -48,7 +48,7 @@ int _dev_main( int argc, char** argv )
         return -1;
     }
 
-    if ( Opt error = dawn.call_func( "main" ) )
+    if ( auto error = dawn.call_func( "main" ) )
     {
         print( error.value() );
         return -2;
@@ -65,7 +65,7 @@ int _shp_main( int argc, char** argv )
     }
 
     Dawn dawn;
-    if ( Opt error = dawn.eval_file( argv[1] ) )
+    if ( auto error = dawn.eval_file( argv[1] ) )
     {
         print( error.value() );
         return -2;
@@ -76,7 +76,7 @@ int _shp_main( int argc, char** argv )
         arg.data.emplace_back( String{ argv[i] } );
 
     Value retval{ Int() };
-    if ( Opt error = dawn.call_func( "main", { Value{ arg } }, &retval ) )
+    if ( auto error = dawn.call_func( "main", { Value{ arg } }, &retval ) )
     {
         print( error.value() );
         return -3;
