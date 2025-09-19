@@ -525,7 +525,7 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
     auto& struc_value = value.as_struct();
     struc_value.parent = &struc;
 
-    // Default strcuture initialization.
+    // Default structure initialization.
     {
         static const Int self_id = IDSystem::get( kw_self );
         auto pop_handler = stack.push_from( RegisterRef<Frame>{} );
@@ -537,7 +537,10 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
     // Structure argument initialization.
     for ( auto& [id, arg_node] : node.args )
     {
-        auto& member = struc_value.members[id];
+        auto member_it = struc_value.members.find( id );
+        if ( member_it == struc_value.members.end() )
+            ENGINE_PANIC( "struct [", IDSystem::get( struc.id ), "] does not contain member [", IDSystem::get( id ), "]" );
+        auto& member = member_it->second;
         Value expr = handle_expr( arg_node ).clone();
         if ( member.type() != expr.type() )
             ENGINE_PANIC( "can't assign type [", expr.type(), "] to type [", member.type(), "]" );
