@@ -52,7 +52,7 @@ var value = animal.value
 struct Person {
     not_important // fields don't need initializers (value is set to nothing and can't be changed)
     name = ""     // but should have them
-    age = 0
+    age = int()
 
     func who() {
         print("{self.name} is {self.age} years old")
@@ -66,8 +66,11 @@ struct Person {
         return "Person({self.name}, {self.age})"
     }
 }
-let person = Person{ name="Krim", age=24 }
-person.who()
+let person1 = Person{ name="Krim", age=24 }
+var person2 = Person((), "Krim", 22)
+person2.age += 2
+person1.who()
+person2.who()
 ```
 
 # Branching

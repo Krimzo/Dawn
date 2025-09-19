@@ -521,11 +521,10 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
     auto& struc = *struct_ptr;
 
     Value value{ StructValue{} };
-
     auto& struc_value = value.as_struct();
     struc_value.parent = &struc;
 
-    // Default structure initialization.
+    // Structure default initialization.
     {
         static const Int self_id = IDSystem::get( kw_self );
         auto pop_handler = stack.push_from( RegisterRef<Frame>{} );
@@ -535,16 +534,38 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
     }
 
     // Structure argument initialization.
-    for ( auto& [id, arg_node] : node.args )
+    if ( std::holds_alternative<StructNode::NamedInit>( node.init ) )
     {
-        auto member_it = struc_value.members.find( id );
-        if ( member_it == struc_value.members.end() )
-            ENGINE_PANIC( "struct [", IDSystem::get( struc.id ), "] does not contain member [", IDSystem::get( id ), "]" );
-        auto& member = member_it->second;
-        Value expr = handle_expr( arg_node ).clone();
-        if ( member.type() != expr.type() )
-            ENGINE_PANIC( "can't assign type [", expr.type(), "] to type [", member.type(), "]" );
-        member = expr; // Must use = instead of assign() because member is const at this stage.
+        auto& args = std::get<StructNode::NamedInit>( node.init ).args;
+        for ( auto& [id, arg_node] : args )
+        {
+            auto member_it = struc_value.members.find( id );
+            if ( member_it == struc_value.members.end() )
+                ENGINE_PANIC( "struct [", IDSystem::get( struc.id ), "] does not contain member [", IDSystem::get( id ), "]" );
+
+            auto& member = member_it->second;
+            Value expr = handle_expr( arg_node ).clone();
+            if ( member.type() != expr.type() )
+                ENGINE_PANIC( "can't assign type [", expr.type(), "] to type [", member.type(), "]" );
+
+            member = expr; // Must use = instead of assign() because member is const at this stage.
+        }
+    }
+    else
+    {
+        auto& args = std::get<StructNode::ListInit>( node.init ).args;
+        if ( args.size() > struc.fields.size() )
+            ENGINE_PANIC( "struct [", IDSystem::get( struc.id ), "] contains [", struc.fields.size(), "] fields but [", args.size(), "] were passed" );
+
+        for ( Int i = 0; i < (Int) args.size(); i++ )
+        {
+            auto& member = struc_value.members[struc.fields[i].id];
+            Value expr = handle_expr( args[i] ).clone();
+            if ( member.type() != expr.type() )
+                ENGINE_PANIC( "can't assign type [", expr.type(), "] to type [", member.type(), "]" );
+
+            member = expr; // Must use = instead of assign() because member is const at this stage.
+        }
     }
 
     // Structure methods.

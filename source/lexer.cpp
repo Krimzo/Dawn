@@ -218,7 +218,7 @@ void dawn::Lexer::extract_word( StringRef const& source, Vector<Token>& tokens, 
     {
         type = TokenType::KEYWORD;
     }
-    else if ( isupper( buffer.front() ) || lang_def.types.contains( buffer ) )
+    else if ( is_custom_type( buffer ) || lang_def.types.contains( buffer ) )
     {
         type = TokenType::TYPE;
     }

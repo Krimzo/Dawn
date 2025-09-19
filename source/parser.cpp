@@ -612,7 +612,17 @@ void dawn::Parser::expression_complex_expr( Vector<Token>& left, Token op, Vecto
 
     right.pop_back();
 
-    if ( !left.empty() )
+    if ( left.size() == 1 && is_custom_type( left.front().value ) )
+    {
+        auto& node = tree.emplace<StructNode>();
+        node.type_id = IDSystem::get( left.front().value );
+        auto& args = node.init.emplace<StructNode::ListInit>().args;
+
+        TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
+        while ( right_it.valid() )
+            parse_expression( ExtractType::SPLITTER, right_it, args.emplace_back() );
+    }
+    else if ( !left.empty() )
     {
         auto& node = tree.emplace<CallNode>();
 
@@ -665,7 +675,7 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
 
         auto& node = tree.emplace<StructNode>();
         node.type_id = IDSystem::get( left.front().value );
-        node.args = struct_args;
+        node.init.emplace<StructNode::NamedInit>().args = struct_args;
     }
     else if ( left.size() >= 2 && left.front().value == op_lambda && left.back().value == op_lambda )
     {

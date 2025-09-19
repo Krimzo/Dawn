@@ -37,7 +37,7 @@ dawn::Color dawn::to_color( TokenType type )
 
 dawn::Bool dawn::is_custom_type( StringRef const& value )
 {
-    return !value.empty() ? isupper( value.front() ) : false;
+    return !value.empty() ? std::isupper( value.front() ) : false;
 }
 
 std::ostream& dawn::operator<<( std::ostream& stream, Location const& location )

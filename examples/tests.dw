@@ -154,7 +154,7 @@ struct SomeStruct
 
 func struct_test()
 {
-	var some_val1 = SomeStruct{ age = 4 }
+	let some_val1 = SomeStruct("nobody", 7)
 	var some_val2 = SomeStruct{ name =
 		"really "
 		+
@@ -162,8 +162,7 @@ func struct_test()
 		2 }
 
 	some_val1.who()
-	print(some_val2 + some_val2.age)
-	print(some_val2)
+	assert(string(some_val2 + some_val1.age) == string(some_val2), "structs are bad")
 }
 
 func array_test()

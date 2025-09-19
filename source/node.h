@@ -112,8 +112,18 @@ struct EnumNode
 
 struct StructNode
 {
+    struct NamedInit
+    {
+        Map<Int, Node> args;
+    };
+
+    struct ListInit
+    {
+        Vector<Node> args;
+    };
+
     Int type_id = 0;
-    Map<Int, Node> args;
+    Variant<NamedInit, ListInit> init;
 };
 
 struct ArrayNode
