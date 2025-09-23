@@ -1,13 +1,13 @@
 #include "dawn.h"
 
 
-dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source ) noexcept
 {
     Set<String> imports;
-    return eval( source, std::nullopt, imports );
+    return eval( source, imports );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source, Opt<String> const& parent_path, Set<String>& imported ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, Set<String>& imported ) noexcept
 {
     try
     {
@@ -26,10 +26,13 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source, Opt<String> c
         for ( auto& import_path : module.imports )
         {
             String path = import_path;
-            if ( !fs::path( path ).is_absolute() && parent_path )
-                path = *parent_path + "/" + path;
-
-            if ( auto error = eval_file( path, imported ) )
+            if ( !fs::path( path ).is_absolute() )
+            {
+                if ( source.path.empty() )
+                    throw String( "import can only be used inside dawn files" );
+                path = fs::path{ source.path }.parent_path().string() + "/" + path;
+            }
+            if ( auto error = eval( Source::from_file( path ), imported ) )
                 return error;
         }
         engine.load_mod( module );
@@ -39,28 +42,6 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( StringRef const& source, Opt<String> c
         return msg;
     }
     return std::nullopt;
-}
-
-dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path ) noexcept
-{
-    Set<String> imports;
-    return eval_file( path, imports );
-}
-
-dawn::Opt<dawn::String> dawn::Dawn::eval_file( StringRef const& path, Set<String>& imported ) noexcept
-{
-    String abs_path = fs::absolute( path ).string();
-    if ( imported.contains( abs_path ) )
-        return std::nullopt;
-
-    imported.insert( abs_path );
-    String parent_path = fs::path( abs_path ).parent_path().string();
-
-    auto source = read_file( abs_path );
-    if ( !source )
-        return dawn::format( "file [", abs_path, "] could not be opened" );
-
-    return eval( *source, parent_path, imported );
 }
 
 void dawn::Dawn::bind_func( StringRef const& name, CFunction cfunc ) noexcept
@@ -98,7 +79,7 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* arg
     }
     catch ( Value const& err )
     {
-        return dawn::format( "Uncaught error: ", err.to_string( engine ) );
+        return dawn::format( "Uncaught error: ", err.to_string( engine, Location{ Bad{} } ) );
     }
     return std::nullopt;
 }

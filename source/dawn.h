@@ -14,11 +14,8 @@ struct Dawn
     Parser parser;
     Engine engine;
 
-    Opt<String> eval( StringRef const& source ) noexcept;
-    Opt<String> eval( StringRef const& source, Opt<String> const& parent_path, Set<String>& imported ) noexcept;
-
-    Opt<String> eval_file( StringRef const& path ) noexcept;
-    Opt<String> eval_file( StringRef const& path, Set<String>& imported ) noexcept;
+    Opt<String> eval( Source const& source ) noexcept;
+    Opt<String> eval( Source const& source, Set<String>& imported ) noexcept;
 
     void bind_func( StringRef const& name, CFunction cfunc ) noexcept;
     Opt<String> call_func( StringRef const& name ) noexcept;

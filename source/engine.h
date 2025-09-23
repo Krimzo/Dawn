@@ -8,6 +8,9 @@ namespace dawn
 {
 struct Engine
 {
+    using CustomMemberFunc = Func<Value( Location const&, Value& )>;
+    using CustomMethodFunc = Func<Value( Location const&, Value&, Value* )>;
+
     friend struct Value;
     friend struct EnumValue;
 
@@ -30,14 +33,14 @@ struct Engine
     void add_var( VariableKind kind, Int id, Value const& value );
     Value* get_var( Int id );
 
-    void bind_member( ValueType type, StringRef const& name, Func<Value( Value& )> const& func );
-    void bind_method( ValueType type, StringRef const& name, Bool is_const, Int expected_args, Func<Value( Value&, Value* )> const& body );
+    void bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func );
+    void bind_method( ValueType type, StringRef const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body );
 
 private:
     void load_standard_functions();
     void load_standard_members();
 
-    Value handle_func( FunctionValue const& func, Value* args, Int arg_count );
+    Value handle_func( Location const& location, FunctionValue const& func, Value* args, Int arg_count );
     void handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
     void handle_instr( Node const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
     Value handle_expr( Node const& node );
@@ -65,9 +68,9 @@ private:
     Value handle_ac_node( OperatorNode const& node );
     Value handle_as_node( AssignNode const& node );
 
-    Value handle_ac_struct_node( Value const& self, Int right_id );
-    Value handle_ac_type_node( Value const& self, Int right_id );
+    Value handle_ac_struct_node( Location const& location, Value const& self, Int right_id );
+    Value handle_ac_type_node( Location const& location, Value const& self, Int right_id );
 
-    Value create_default_value( Int typeid_ );
+    Value create_default_value( Location const& location, Int typeid_ );
 };
 }

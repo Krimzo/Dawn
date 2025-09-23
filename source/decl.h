@@ -5,6 +5,7 @@
 
 namespace dawn
 {
+struct Location;
 struct Value;
 struct Node;
 struct Frame;
@@ -15,5 +16,5 @@ template<typename T>
 struct RegisterRef;
 
 using NodeRef = RegisterRef<Node>;
-using MemberGenerator = Func<Value( Value const& )>;
+using MemberGenerator = Func<Value( Location const&, Value const& )>;
 }

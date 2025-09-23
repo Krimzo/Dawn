@@ -42,7 +42,7 @@ dawn::Bool dawn::is_custom_type( StringRef const& value )
 
 std::ostream& dawn::operator<<( std::ostream& stream, Location const& location )
 {
-    stream << "<" << location.line << ", " << location.col << ">";
+    stream << "(" << location.file_path << ")<" << location.line << ", " << location.col << ">";
     return stream;
 }
 

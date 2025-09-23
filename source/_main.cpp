@@ -1,6 +1,6 @@
 #include "dawn.h"
 
-using namespace dawn; // Only in this case since it's not a header file.
+using namespace dawn; // Only in this case since it is not a header file.
 
 struct Stopwatch
 {
@@ -32,7 +32,7 @@ int _dev_main( int argc, char** argv )
     Stopwatch stopwatch;
     Dawn dawn;
 
-    if ( auto error = dawn.eval_file(
+    if ( auto error = dawn.eval( Source::from_file(
 #if _DEBUG
 #if 0
         "examples/tests.dw"
@@ -42,7 +42,7 @@ int _dev_main( int argc, char** argv )
 #else
         "examples/bench.dw"
 #endif
-    ) )
+    ) ) )
     {
         print( error.value() );
         return -1;
@@ -65,7 +65,7 @@ int _shp_main( int argc, char** argv )
     }
 
     Dawn dawn;
-    if ( auto error = dawn.eval_file( argv[1] ) )
+    if ( auto error = dawn.eval( Source::from_file( argv[1] ) ) )
     {
         print( error.value() );
         return -2;
@@ -82,6 +82,6 @@ int _shp_main( int argc, char** argv )
         return -3;
     }
 
-    Int retcode = retval.to_int( dawn.engine );
+    Int retcode = retval.to_int( dawn.engine, Location{ Bad{} } );
     return static_cast<int>( retcode );
 }

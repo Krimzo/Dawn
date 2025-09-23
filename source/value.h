@@ -13,9 +13,9 @@ struct DFunction
     Scope body;
 };
 
-struct CFunction : Func<Value( Value*, Int )>
+struct CFunction : Func<Value( Location const&, Value*, Int )>
 {
-    using Func<Value( Value*, Int )>::function;
+    using Func<Value( Location const&, Value*, Int )>::function;
 };
 
 struct FunctionValue
@@ -119,40 +119,40 @@ struct Value
     inline ArrayValue& as_array() const { return m_regref.cast<ArrayValue>().value(); }
     inline RangeValue& as_range() const { return m_regref.cast<RangeValue>().value(); }
 
-    void assign( Value const& other );
+    void assign( Location const& location, Value const& other );
     Value clone() const;
 
     Bool is_const() const;
     Value& unlock_const();
 
-    Value un_plus( Engine& engine ) const;
-    Value un_minus( Engine& engine ) const;
-    Value op_add( Engine& engine, Value const& other ) const;
-    Value op_sub( Engine& engine, Value const& other ) const;
-    Value op_mul( Engine& engine, Value const& other ) const;
-    Value op_div( Engine& engine, Value const& other ) const;
-    Value op_pow( Engine& engine, Value const& other ) const;
-    Value op_mod( Engine& engine, Value const& other ) const;
+    Value un_plus( Engine& engine, Location const& location ) const;
+    Value un_minus( Engine& engine, Location const& location ) const;
+    Value op_add( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_sub( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_mul( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_div( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_pow( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_mod( Engine& engine, Location const& location, Value const& other ) const;
 
-    Value op_cmpr( Engine& engine, Value const& other ) const;
-    Value op_eq( Engine& engine, Value const& other ) const;
-    Value op_neq( Engine& engine, Value const& other ) const;
-    Value op_less( Engine& engine, Value const& other ) const;
-    Value op_great( Engine& engine, Value const& other ) const;
-    Value op_lesseq( Engine& engine, Value const& other ) const;
-    Value op_greateq( Engine& engine, Value const& other ) const;
+    Value op_cmpr( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_eq( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_neq( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_less( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_great( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_lesseq( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_greateq( Engine& engine, Location const& location, Value const& other ) const;
 
-    Value un_not( Engine& engine ) const;
-    Value op_and( Engine& engine, Value const& other ) const;
-    Value op_or( Engine& engine, Value const& other ) const;
+    Value un_not( Engine& engine, Location const& location ) const;
+    Value op_and( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_or( Engine& engine, Location const& location, Value const& other ) const;
 
-    Value op_range( Engine& engine, Value const& other ) const;
+    Value op_range( Engine& engine, Location const& location, Value const& other ) const;
 
-    Bool to_bool( Engine& engine ) const;
-    Int to_int( Engine& engine ) const;
-    Float to_float( Engine& engine ) const;
-    Char to_char( Engine& engine ) const;
-    String to_string( Engine& engine ) const;
+    Bool to_bool( Engine& engine, Location const& location ) const;
+    Int to_int( Engine& engine, Location const& location ) const;
+    Float to_float( Engine& engine, Location const& location ) const;
+    Char to_char( Engine& engine, Location const& location ) const;
+    String to_string( Engine& engine, Location const& location ) const;
 
 private:
     struct Void {};

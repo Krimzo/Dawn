@@ -29,36 +29,76 @@ struct LanguageDef
     static LanguageDef dawn();
 };
 
+struct Source
+{
+    const String path;
+    const String source;
+
+    static Source from_text( StringRef const& str )
+    {
+        return Source{ String{}, String{ str } };
+    }
+
+    static Source from_file( StringRef const& path )
+    {
+        const String abs_path = fs::absolute( path ).string();
+        if ( const auto opt_str = read_file( abs_path ) )
+            return Source{ abs_path, *opt_str };
+        LEXER_PANIC( Location{}, Char{}, "failed to read file ", abs_path );
+    }
+
+    constexpr Char operator[]( Int i ) const
+    {
+        return source[i];
+    }
+
+    constexpr StringRef substr( Int i ) const
+    {
+        return StringRef{ source }.substr( i );
+    }
+
+    constexpr Int size() const
+    {
+        return (Int) source.size();
+    }
+
+private:
+    explicit Source( String path, String source )
+        : path( std::move( path ) ), source( std::move( source ) )
+    {
+    }
+};
+
 struct Lexer
 {
     LanguageDef lang_def = LanguageDef::dawn();
 
-    void tokenize( StringRef const& source, Vector<Token>& tokens );
-    void tokenize_at( StringRef const& source, Vector<Token>& tokens, Index& index );
+    void tokenize( Source const& source, Vector<Token>& tokens );
+    void tokenize_at( Source const& source, Vector<Token>& tokens, Index& index );
 
 private:
-    Bool is_space( StringRef const& source, Int i );
-    void extract_space( StringRef const& source, Vector<Token>& tokens, Index& index );
+    Bool is_space( Source const& source, Int i );
+    void extract_space( Source const& source, Vector<Token>& tokens, Index& index );
 
-    Bool is_comment( StringRef const& source, Int i );
-    void extract_comment( StringRef const& source, Vector<Token>& tokens, Index& index );
+    Bool is_comment( Source const& source, Int i );
+    void extract_comment( Source const& source, Vector<Token>& tokens, Index& index );
 
-    Bool is_mlcomment( StringRef const& source, Int i );
-    void extract_mlcomment( StringRef const& source, Vector<Token>& tokens, Index& index );
+    Bool is_mlcomment( Source const& source, Int i );
+    void extract_mlcomment( Source const& source, Vector<Token>& tokens, Index& index );
 
-    Bool is_word( StringRef const& source, Int i );
-    void extract_word( StringRef const& source, Vector<Token>& tokens, Index& index );
+    Bool is_word( Source const& source, Int i );
+    void extract_word( Source const& source, Vector<Token>& tokens, Index& index );
 
-    Bool is_number( StringRef const& source, Int i );
-    void extract_number( StringRef const& source, Vector<Token>& tokens, Index& index );
+    Bool is_number( Source const& source, Int i );
+    void extract_number( Source const& source, Vector<Token>& tokens, Index& index );
 
-    Bool is_char( StringRef const& source, Int i );
-    void extract_char( StringRef const& source, Vector<Token>& tokens, Index& index );
+    Bool is_char( Source const& source, Int i );
+    void extract_char( Source const& source, Vector<Token>& tokens, Index& index );
 
-    Bool is_string( StringRef const& source, Int i );
-    void extract_string( StringRef const& source, Vector<Token>& tokens, Index& index );
+    Bool is_string( Source const& source, Int i );
+    void extract_string( Source const& source, Vector<Token>& tokens, Index& index );
 
-    Bool is_operator( StringRef const& source, Int i );
-    void extract_operator( StringRef const& source, Vector<Token>& tokens, Index& index );
+    Bool is_operator( Source const& source, Int i );
+    void extract_operator( Source const& source, Vector<Token>& tokens, Index& index );
 };
 }

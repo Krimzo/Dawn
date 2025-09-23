@@ -29,19 +29,22 @@ private:
 
 struct Location
 {
-    Int line = 1;
-    Int col = 1;
+    using IntType = int32_t;
 
-    constexpr Location()
+    String file_path;
+    IntType line = 1;
+    IntType col = 1;
+
+    explicit constexpr Location()
     {
     }
 
-    constexpr Location( Index const& index )
-        : line( index.line() ), col( index.col() )
+    explicit constexpr Location( String path, Index const& index )
+        : file_path( std::move( path ) ), line( (IntType) index.line() ), col( (IntType) index.col() )
     {
     }
 
-    constexpr Location( Bad bad )
+    explicit constexpr Location( Bad bad )
         : line( -1 ), col( -1 )
     {
     }
@@ -52,7 +55,7 @@ struct Token
     TokenType type;
     String value;
     String literal;
-    Location location;
+    Location location{};
 
     constexpr String const& any_value() const
     {

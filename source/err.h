@@ -39,10 +39,10 @@ struct EngineError
     String msg;
 
     template<typename... Args>
-    explicit EngineError( Args&&... args )
+    explicit EngineError( Location const& location, Args&&... args )
     {
         StringStream stream;
-        stream << "Engine error: ";
+        stream << "Engine error at location " << location << ": ";
         ( stream << ... << args );
         msg = stream.str();
     }
@@ -52,7 +52,6 @@ std::ostream& operator<<( std::ostream& stream, LexerError const& error );
 std::ostream& operator<<( std::ostream& stream, ParserError const& error );
 std::ostream& operator<<( std::ostream& stream, EngineError const& error );
 
-#define PANIC(...) throw format( "Error: ", __VA_ARGS__ )
 #define LEXER_PANIC(...) throw format( LexerError{ __VA_ARGS__ } )
 #define PARSER_PANIC(...) throw format( ParserError{ __VA_ARGS__ } )
 #define ENGINE_PANIC(...) throw format( EngineError{ __VA_ARGS__ } )
