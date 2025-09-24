@@ -11,11 +11,11 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, Set<String>& imp
 {
     try
     {
-        if ( !source.path.empty() )
+        if ( source.path )
         {
-            if ( imported.contains( source.path ) )
+            if ( imported.contains( *source.path ) )
                 return std::nullopt;
-            imported.insert( source.path );
+            imported.insert( *source.path );
         }
 
         Vector<Token> tokens;
@@ -29,9 +29,9 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, Set<String>& imp
             String path = import_path;
             if ( !fs::path{ path }.is_absolute() )
             {
-                if ( source.path.empty() )
+                if ( !source.path )
                     throw String( "import can only be used inside dawn files" );
-                path = fs::path{ source.path }.parent_path().string() + "/" + path;
+                path = fs::path{ *source.path }.parent_path().string() + "/" + path;
             }
             if ( auto error = eval( Source::from_file( path ), imported ) )
                 return error;

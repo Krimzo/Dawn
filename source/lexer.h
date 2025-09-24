@@ -31,12 +31,12 @@ struct LanguageDef
 
 struct Source
 {
-    const String path;
+    const Opt<String> path;
     const String source;
 
     static Source from_text( StringRef const& str )
     {
-        return Source{ String{}, String{ str } };
+        return Source{ std::nullopt, String{ str } };
     }
 
     static Source from_file( StringRef const& path )
@@ -63,7 +63,7 @@ struct Source
     }
 
 private:
-    explicit Source( String path, String source )
+    explicit Source( Opt<String> path, String source )
         : path( std::move( path ) ), source( std::move( source ) )
     {
     }

@@ -135,7 +135,7 @@ void dawn::Lexer::tokenize_at( Source const& source, Vector<Token>& tokens, Inde
         extract_operator( source, tokens, index );
     }
     else
-        LEXER_PANIC( Location{ source.path, index }, source[index.index()], "unexpected character" );
+        LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "unexpected character" );
 }
 
 dawn::Bool dawn::Lexer::is_space( Source const& source, Int i )
@@ -224,7 +224,7 @@ void dawn::Lexer::extract_word( Source const& source, Vector<Token>& tokens, Ind
     auto& token = tokens.emplace_back();
     token.type = type;
     token.value = buffer;
-    token.location = Location{ source.path, index };
+    token.location = Location{ source.path.value_or( {} ), index };
 }
 
 dawn::Bool dawn::Lexer::is_number( Source const& source, Int i )
@@ -242,7 +242,7 @@ void dawn::Lexer::extract_number( Source const& source, Vector<Token>& tokens, I
         if ( source.substr( index.index() ).starts_with( lang_def.separator_number ) )
         {
             if ( is_float )
-                LEXER_PANIC( Location{ source.path, index }, source[index.index()], "float number can contain only a single number separator" );
+                LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "float number can contain only a single number separator" );
             is_float = true;
         }
         else if ( !is_number( source, index.index() ) )
@@ -254,12 +254,12 @@ void dawn::Lexer::extract_number( Source const& source, Vector<Token>& tokens, I
     }
 
     if ( buffer == lang_def.separator_number )
-        LEXER_PANIC( Location{ source.path, index }, source[index.index()], "invalid number" );
+        LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "invalid number" );
 
     auto& token = tokens.emplace_back();
     token.type = is_float ? TokenType::FLOAT : TokenType::INTEGER;
     token.literal = buffer;
-    token.location = Location{ source.path, index };
+    token.location = Location{ source.path.value_or( {} ), index };
 }
 
 dawn::Bool dawn::Lexer::is_char( Source const& source, Int i )
@@ -270,16 +270,16 @@ dawn::Bool dawn::Lexer::is_char( Source const& source, Int i )
 void dawn::Lexer::extract_char( Source const& source, Vector<Token>& tokens, Index& index )
 {
     if ( source.substr( index.index() ).size() < 3 )
-        LEXER_PANIC( Location{ source.path, index }, source[index.index()], "char literal too short" );
+        LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "char literal too short" );
 
     String buffer;
     if ( source[index.index() + 1] == '\\' )
     {
         if ( source.substr( index.index() ).size() < 4 )
-            LEXER_PANIC( Location{ source.path, index }, source[index.index()], "escaping char too short" );
+            LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "escaping char too short" );
 
         if ( !is_char( source, index.index() + 3 ) )
-            LEXER_PANIC( Location{ source.path, index }, source[index.index()], "invalid escaping char literal" );
+            LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "invalid escaping char literal" );
 
         Char c = to_escaping( source[index.index() + 2] );
         buffer = String{ c };
@@ -288,7 +288,7 @@ void dawn::Lexer::extract_char( Source const& source, Vector<Token>& tokens, Ind
     else
     {
         if ( !is_char( source, index.index() + 2 ) )
-            LEXER_PANIC( Location{ source.path, index }, source[index.index()], "invalid char literal" );
+            LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "invalid char literal" );
 
         Char c = source[index.index() + 1];
         buffer = String{ c };
@@ -298,7 +298,7 @@ void dawn::Lexer::extract_char( Source const& source, Vector<Token>& tokens, Ind
     auto& token = tokens.emplace_back();
     token.type = TokenType::CHAR;
     token.literal = buffer;
-    token.location = Location{ source.path, index };
+    token.location = Location{ source.path.value_or( {} ), index };
 }
 
 dawn::Bool dawn::Lexer::is_string( Source const& source, Int i )
@@ -313,14 +313,14 @@ void dawn::Lexer::extract_string( Source const& source, Vector<Token>& tokens, I
             auto& token = tokens.emplace_back();
             token.type = type;
             token.value = str;
-            token.location = Location{ source.path, index };
+            token.location = Location{ source.path.value_or( {} ), index };
         };
     const auto add_literal_token = [&]( TokenType type, StringRef const& str )
         {
             auto& token = tokens.emplace_back();
             token.type = type;
             token.literal = str;
-            token.location = Location{ source.path, index };
+            token.location = Location{ source.path.value_or( {} ), index };
         };
 
     add_value_token( TokenType::OPERATOR, lang_def.expr_opn );
@@ -344,7 +344,7 @@ void dawn::Lexer::extract_string( Source const& source, Vector<Token>& tokens, I
         {
             auto view = source.substr( index.index() );
             if ( view.size() < 2 )
-                LEXER_PANIC( Location{ source.path, index }, source[index.index()], "string escaping char too short" );
+                LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "string escaping char too short" );
 
             Char c = to_escaping( view[1] );
             buffer.push_back( c );
@@ -433,10 +433,10 @@ void dawn::Lexer::extract_operator( Source const& source, Vector<Token>& tokens,
     index.incr( op_size - 1 );
 
     if ( !closest_op )
-        LEXER_PANIC( Location{ source.path, index }, source[index.index()], "unknown operator" );
+        LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "unknown operator" );
 
     auto& token = tokens.emplace_back();
     token.type = TokenType::OPERATOR;
     token.value = *closest_op;
-    token.location = Location{ source.path, index };
+    token.location = Location{ source.path.value_or( {} ), index };
 }
