@@ -41,7 +41,7 @@ struct Source
 
     static Source from_file( StringRef const& path )
     {
-        const String abs_path = fs::absolute( path ).string();
+        const String abs_path = fs::canonical( path ).generic_string();
         if ( const auto opt_str = read_file( abs_path ) )
             return Source{ abs_path, *opt_str };
         LEXER_PANIC( Location{}, Char{}, "failed to read file ", abs_path );

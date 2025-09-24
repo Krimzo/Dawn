@@ -27,7 +27,7 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, Set<String>& imp
         for ( auto& import_path : module.imports )
         {
             String path = import_path;
-            if ( !fs::path{ path }.is_absolute() )
+            if ( fs::path{ path }.is_relative() )
             {
                 if ( !source.path )
                     throw String( "import can only be used inside dawn files" );
