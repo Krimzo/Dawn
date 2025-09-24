@@ -40,16 +40,10 @@ dawn::Bool dawn::is_custom_type( StringRef const& value )
     return !value.empty() ? std::isupper( value.front() ) : false;
 }
 
-std::ostream& dawn::operator<<( std::ostream& stream, Location const& location )
-{
-    stream << "(" << location.file_path << ")<" << location.line << ", " << location.col << ">";
-    return stream;
-}
-
 std::ostream& dawn::operator<<( std::ostream& stream, Token const& token )
 {
     const Color color = to_color( token.type );
-    stream << ColoredText{ color, token.type, token.location } <<
+    stream << ColoredText{ color, token.type } << token.location.to_string( color ) <<
         "[" << ColoredText{ color, !token.literal.empty() ? token.literal : token.value } << "]";
     return stream;
 }

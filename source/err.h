@@ -7,43 +7,48 @@ namespace dawn
 {
 struct LexerError
 {
+    static constexpr Color COLOR = { 250, 102, 102 };
+
     String msg;
 
     template<typename... Args>
     explicit LexerError( Location const& location, Char c, Args&&... args )
     {
         StringStream stream;
-        stream << "Lexer error at location " << location
-            << " and char [" << from_escaping( c ) << "]: ";
-        ( stream << ... << args );
+        stream << ColoredText{ COLOR, "Lexer" } << " error at char " << location.to_string( COLOR ) << "[" << ColoredText{ COLOR, from_escaping( c ) } << "]: ";
+        stream << ColoredText{ COLOR, args... };
         msg = stream.str();
     }
 };
 
 struct ParserError
 {
+    static constexpr Color COLOR = { 255, 207, 116 };
+
     String msg;
 
     template<typename... Args>
     explicit ParserError( Token const& token, Args&&... args )
     {
         StringStream stream;
-        stream << "Parser error at token " << token << ": ";
-        ( stream << ... << args );
+        stream << ColoredText{ COLOR, "Parser" } << " error at token " << token << ": ";
+        stream << ColoredText{ COLOR, args... };
         msg = stream.str();
     }
 };
 
 struct EngineError
 {
+    static constexpr Color COLOR = { 107, 217, 199 };
+
     String msg;
 
     template<typename... Args>
     explicit EngineError( Location const& location, Args&&... args )
     {
         StringStream stream;
-        stream << "Engine error at location " << location << ": ";
-        ( stream << ... << args );
+        stream << ColoredText{ COLOR, "Engine" } << " error at " << location.to_string( COLOR ) << ": ";
+        stream << ColoredText{ COLOR, args... };
         msg = stream.str();
     }
 };

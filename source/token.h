@@ -48,6 +48,16 @@ struct Location
         : line( -1 ), col( -1 )
     {
     }
+
+    inline String to_string( Opt<Color> const& color ) const
+    {
+        StringStream stream;
+        if ( color )
+            stream << "(" << ColoredText{ *color, file_path } << ")<" << ColoredText{ *color, line } << ", " << ColoredText{ *color, col } << ">";
+        else
+            stream << "(" << file_path << ")<" << line << ", " << col << ">";
+        return stream.str();
+    }
 };
 
 struct Token
@@ -66,6 +76,5 @@ struct Token
 Color to_color( TokenType type );
 Bool is_custom_type( StringRef const& value );
 
-std::ostream& operator<<( std::ostream& stream, Location const& location );
 std::ostream& operator<<( std::ostream& stream, Token const& token );
 }
