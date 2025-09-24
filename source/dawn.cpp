@@ -11,14 +11,15 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, Set<String>& imp
 {
     try
     {
+        if ( !source.path.empty() )
+        {
+            if ( imported.contains( source.path ) )
+                return std::nullopt;
+            imported.insert( source.path );
+        }
+
         Vector<Token> tokens;
         lexer.tokenize( source, tokens );
-
-#if 0
-        for ( auto& token : tokens )
-            print( token );
-        exit( 17 );
-#endif
 
         Module module;
         parser.parse( tokens, module );
@@ -26,7 +27,7 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, Set<String>& imp
         for ( auto& import_path : module.imports )
         {
             String path = import_path;
-            if ( !fs::path( path ).is_absolute() )
+            if ( !fs::path{ path }.is_absolute() )
             {
                 if ( source.path.empty() )
                     throw String( "import can only be used inside dawn files" );
