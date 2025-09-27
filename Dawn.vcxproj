@@ -17,6 +17,7 @@
   <ItemGroup>
     <ClCompile Include="source\en.cpp" />
     <ClCompile Include="source\engine.cpp" />
+    <ClCompile Include="source\optimizer.cpp" />
     <ClCompile Include="source\pool.cpp" />
     <ClCompile Include="source\stack.cpp" />
     <ClCompile Include="source\standard.cpp" />
@@ -35,6 +36,7 @@
   <ItemGroup>
     <ClInclude Include="source\dawn.h" />
     <ClInclude Include="source\decl.h" />
+    <ClInclude Include="source\optimizer.h" />
     <ClInclude Include="source\storage.h" />
     <ClInclude Include="source\en.h" />
     <ClInclude Include="source\engine.h" />

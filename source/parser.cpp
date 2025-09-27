@@ -1185,11 +1185,9 @@ void dawn::Parser::scope_for( TokenIterator& it, Node& tree )
     ++it;
 
     auto& node = tree.emplace<ForNode>( it->location );
-    node.var.kind = VariableKind::REF;
-
     if ( it->type != TokenType::NAME )
         PARSER_PANIC( *it, "expected name" );
-    node.var.id = IDSystem::get( it->value );
+    node.var_id = IDSystem::get( it->value );
     ++it;
 
     if ( it->value != op_iter )

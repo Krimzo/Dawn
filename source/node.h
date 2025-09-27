@@ -177,7 +177,7 @@ struct WhileNode : LocationHolder
 
 struct ForNode : LocationHolder
 {
-    Variable var;
+    Int var_id = 0;
     NodeRef expr;
     Scope scope;
 

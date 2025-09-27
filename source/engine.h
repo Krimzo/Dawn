@@ -13,6 +13,7 @@ struct Engine
 
     friend struct Value;
     friend struct EnumValue;
+    friend struct Optimizer;
 
     Stack stack;
     GlobalStorage<Enum> enums;

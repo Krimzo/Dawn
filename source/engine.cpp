@@ -457,7 +457,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            add_var( node.var.kind, node.var.id, Value{ i } );
+            add_var( VariableKind::REF, node.var_id, Value{ i } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -473,7 +473,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            add_var( node.var.kind, node.var.id, Value{ c } );
+            add_var( VariableKind::REF, node.var_id, Value{ c } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -489,7 +489,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            add_var( node.var.kind, node.var.id, value );
+            add_var( VariableKind::REF, node.var_id, value );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }

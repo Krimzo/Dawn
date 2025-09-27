@@ -3,6 +3,7 @@
 #include "util.h"
 #include "lexer.h"
 #include "parser.h"
+#include "optimizer.h"
 #include "engine.h"
 
 
@@ -12,6 +13,7 @@ struct Dawn
 {
     Lexer lexer;
     Parser parser;
+    Optimizer optimizer;
     Engine engine;
 
     Opt<String> eval( Source const& source ) noexcept;

@@ -23,6 +23,7 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, Set<String>& imp
 
         Module module;
         parser.parse( tokens, module );
+        optimizer.optimize( module );
 
         for ( auto& import_path : module.imports )
         {

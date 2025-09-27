@@ -1,1 +1,3 @@
-add optimizer
+add compilation of a .dw into a .cdw file (optimize module and serialize)
+enums should evaulate values once and store instead of evaluating on each access
+add flag support to dawn, example: disable optimizations
