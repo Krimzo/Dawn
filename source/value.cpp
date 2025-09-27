@@ -1120,12 +1120,7 @@ dawn::String dawn::Value::to_string( Engine& engine, Location const& location ) 
         return std::to_string( as_int() );
 
     case ValueType::FLOAT:
-    {
-        String result = format( as_float() );
-        if ( std::to_string( (Int) as_float() ) == result )
-            result += sep_number;
-        return result;
-    }
+        return format( std::showpoint, as_float() );
 
     case ValueType::CHAR:
         return String{ as_char() };

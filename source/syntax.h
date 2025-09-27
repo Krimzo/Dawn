@@ -82,6 +82,7 @@ inline constexpr StringRef op_scope_cls = "}";
 inline constexpr StringRef op_array_opn = "[";
 inline constexpr StringRef op_array_cls = "]";
 
+inline constexpr StringRef exp_number = "e";
 inline constexpr StringRef sep_number = ".";
 inline constexpr StringRef sep_identifier = "_";
 inline constexpr StringRef lit_char = "'";

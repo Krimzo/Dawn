@@ -86,6 +86,8 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
     result.cmplx_string_opn = op_scope_opn;
     result.cmplx_string_cls = op_scope_cls;
     result.oper_add = op_add;
+    result.oper_sub = op_sub;
+    result.expo_number = exp_number;
     result.to_string = tp_string;
     result.call_opn = op_expr_opn;
     result.call_cls = op_expr_cls;
@@ -236,14 +238,27 @@ dawn::Bool dawn::Lexer::is_number( Source const& source, Int i )
 void dawn::Lexer::extract_number( Source const& source, Vector<Token>& tokens, Index& index )
 {
     String buffer;
-    Bool is_float = false;
+    Bool is_float = false, is_scientific = false;
     for ( ; index.index() < source.size(); index.incr() )
     {
         if ( source.substr( index.index() ).starts_with( lang_def.separator_number ) )
         {
+            if ( is_scientific )
+                LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "exponent value must be an integer" );
             if ( is_float )
-                LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "float number can contain only a single number separator" );
+                LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "float number can only contain a single number separator" );
             is_float = true;
+        }
+        else if ( source.substr( index.index() ).starts_with( lang_def.expo_number ) )
+        {
+            if ( is_scientific )
+                LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "scientific form number can only contain a single exponent" );
+            is_scientific = true;
+        }
+        else if ( is_scientific && ( source.substr( index.index() ).starts_with( lang_def.oper_add ) || source.substr( index.index() ).starts_with( lang_def.oper_sub ) ) )
+        {
+            if ( &buffer.back() != lang_def.expo_number )
+                LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "sign can only be applied to the exponent" );
         }
         else if ( !is_number( source, index.index() ) )
         {
@@ -253,11 +268,13 @@ void dawn::Lexer::extract_number( Source const& source, Vector<Token>& tokens, I
         buffer.push_back( source[index.index()] );
     }
 
-    if ( buffer == lang_def.separator_number )
-        LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "invalid number" );
+    if ( &buffer.back() == lang_def.expo_number
+        || &buffer.back() == lang_def.oper_add
+        || &buffer.back() == lang_def.oper_sub )
+        LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "expected an exponent" );
 
     auto& token = tokens.emplace_back();
-    token.type = is_float ? TokenType::FLOAT : TokenType::INTEGER;
+    token.type = ( is_float || is_scientific ) ? TokenType::FLOAT : TokenType::INTEGER;
     token.literal = buffer;
     token.location = Location{ source.path.value_or( {} ), index };
 }

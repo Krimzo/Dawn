@@ -87,7 +87,7 @@
         },
         "numbers": {
             "name": "constant.numeric.dawn",
-            "match": "\\b\\d+\\.\\d+|\\b\\d+\\.|\\.\\d+|\\b\\d+"
+            "match": "(\\d+\\.?\\d*|\\.\\d+)([e][-+]?\\d+)?"
         },
         "chars": {
             "name": "string.quoted.single.dawn",

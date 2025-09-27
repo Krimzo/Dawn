@@ -20,6 +20,8 @@ struct LanguageDef
     String cmplx_string_opn;
     String cmplx_string_cls;
     String oper_add;
+    String oper_sub;
+    String expo_number;
     String to_string;
     String call_opn;
     String call_cls;
