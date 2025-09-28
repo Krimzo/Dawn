@@ -10,7 +10,15 @@ struct Optimizer
     void optimize( Module& module );
 
 private:
+    struct Inlineable
+    {
+        Int id = 0;
+        Value value{};
+        Bool can_inline = false;
+    };
+
     Engine m_engine;
+    Vector<Inlineable> m_inline;
 
     void optimize_imports( Set<String>& imports );
     void optimize_variables( Vector<Variable>& vars );

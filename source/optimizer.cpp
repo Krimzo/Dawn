@@ -73,8 +73,40 @@ void dawn::Optimizer::optimize_struct( Struct& struc )
 
 void dawn::Optimizer::optimize_instr( Vector<Node>& body )
 {
-    for ( auto& instr : body )
+    const auto m_inline_size = m_inline.size();
+    for ( Int i = 0; i < (Int) body.size(); i++ )
+    {
+        auto& instr = body[i];
         optimize_expr( instr );
+        if ( instr.type() != NodeType::VARIABLE )
+            continue;
+
+        auto& var = std::get<VariableNode>( instr ).var;
+        if ( var.kind != VariableKind::LET && var.kind != VariableKind::REF )
+        {
+            m_inline.emplace_back( var.id );
+            continue;
+        }
+
+        auto& expr = var.expr.value();
+        if ( expr.type() != NodeType::VALUE )
+        {
+            m_inline.emplace_back( var.id );
+            continue;
+        }
+
+        auto& value = std::get<ValueNode>( expr ).value;
+        if ( !value.is_const() )
+        {
+            m_inline.emplace_back( var.id );
+            continue;
+        }
+
+        m_inline.emplace_back( var.id, value, true );
+        body.erase( body.begin() + i );
+        --i;
+    }
+    m_inline.resize( m_inline_size );
 }
 
 void dawn::Optimizer::optimize_expr( Node& node )
@@ -196,7 +228,18 @@ void dawn::Optimizer::optimize_expr_value( ValueNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_id( IdentifierNode& node, Node& out_node )
 {
-    // 1. find coresponding var and inline it if its const aka let
+    for ( auto it = m_inline.rbegin(); it != m_inline.rend(); ++it )
+    {
+        auto const& [id, value, can_inline] = *it;
+        if ( id != node.id )
+            continue;
+        if ( !can_inline )
+            return;
+        ValueNode valnod{ node.location };
+        valnod.value = it->value;
+        out_node.emplace<ValueNode>( std::move( valnod ) );
+        break;
+    }
 }
 
 void dawn::Optimizer::optimize_expr_call( CallNode& node, Node& out_node )
@@ -265,13 +308,10 @@ void dawn::Optimizer::optimize_expr_unary( UnaryNode& node, Node& out_node )
 void dawn::Optimizer::optimize_expr_op( OperatorNode& node, Node& out_node )
 {
     auto& left_node = node.sides[0];
-    optimize_expr( left_node );
-    if ( left_node.type() != NodeType::VALUE )
-        return;
-
     auto& right_node = node.sides[1];
+    optimize_expr( left_node );
     optimize_expr( right_node );
-    if ( right_node.type() != NodeType::VALUE )
+    if ( left_node.type() != NodeType::VALUE || right_node.type() != NodeType::VALUE )
         return;
 
     auto& left_val_node = std::get<ValueNode>( left_node );
