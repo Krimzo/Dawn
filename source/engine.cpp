@@ -237,6 +237,9 @@ dawn::Value dawn::Engine::handle_expr( Node const& node )
     case NodeType::INDEX:
         return handle_index_node( std::get<IndexNode>( node ) );
 
+    case NodeType::LAMBDA:
+        return handle_lambda_node( std::get<LambdaNode>( node ) );
+
     case NodeType::ENUM:
         return handle_enum_node( std::get<EnumNode>( node ) );
 
@@ -262,12 +265,6 @@ dawn::Value dawn::Engine::handle_expr( Node const& node )
 
 dawn::Value dawn::Engine::handle_value_node( ValueNode const& node )
 {
-    if ( node.value.type() == ValueType::FUNCTION )
-    {
-        auto& func = node.value.as_function();
-        if ( func.is_lambda() )
-            func.as_lambda().frame = stack.peek();
-    }
     return node.value;
 }
 
@@ -495,6 +492,12 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
     }
     else
         ENGINE_PANIC( node.location, "can not for loop [", loop_value.type(), "]" );
+}
+
+dawn::Value dawn::Engine::handle_lambda_node( LambdaNode const& node )
+{
+    node.func_value.as_function().as_lambda().frame = stack.peek();
+    return node.func_value;
 }
 
 dawn::Value dawn::Engine::handle_enum_node( EnumNode const& node )

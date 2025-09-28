@@ -187,6 +187,16 @@ struct ForNode : LocationHolder
     }
 };
 
+struct LambdaNode : LocationHolder
+{
+    Value func_value;
+
+    constexpr LambdaNode( Location const& location )
+        : LocationHolder( location )
+    {
+    }
+};
+
 struct EnumNode : LocationHolder
 {
     Int type_id = 0;
@@ -291,6 +301,7 @@ struct Node : Variant <
     IdentifierNode,
     CallNode,
     IndexNode,
+    LambdaNode,
     EnumNode,
     StructNode,
     ArrayNode,
@@ -327,6 +338,7 @@ struct Node : Variant <
         case NodeType::IDENTIFIER:
         case NodeType::CALL:
         case NodeType::INDEX:
+        case NodeType::LAMBDA:
         case NodeType::ENUM:
         case NodeType::STRUCT:
         case NodeType::ARRAY:

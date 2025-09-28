@@ -61,6 +61,7 @@ private:
     void handle_loop_node( LoopNode const& node, Opt<Value>& retval );
     void handle_while_node( WhileNode const& node, Opt<Value>& retval );
     void handle_for_node( ForNode const& node, Opt<Value>& retval );
+    Value handle_lambda_node( LambdaNode const& node );
     Value handle_enum_node( EnumNode const& node );
     Value handle_struct_node( StructNode const& node );
     Value handle_array_node( ArrayNode const& node );

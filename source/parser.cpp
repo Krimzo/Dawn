@@ -682,9 +682,8 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
         left.erase( left.begin() );
         left.pop_back();
 
-        auto& node = tree.emplace<ValueNode>( op.location );
-        node.value = Value{ FunctionValue{} };
-        auto& func = node.value.as_function()
+        auto& node = tree.emplace<LambdaNode>( op.location );
+        auto& func = ( node.func_value = Value{ FunctionValue{} } ).as_function()
             .data.emplace<FunctionValue::AsLambda>()
             .func.emplace<DFunction>();
 

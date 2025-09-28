@@ -17,6 +17,22 @@ private:
         Bool can_inline = false;
     };
 
+    struct InlineDropper
+    {
+        Vector<Inlineable>& inline_storage;
+        const size_t initial_size;
+
+        constexpr InlineDropper( Vector<Inlineable>& inline_storage )
+            : inline_storage( inline_storage ), initial_size( inline_storage.size() )
+        {
+        }
+
+        constexpr ~InlineDropper()
+        {
+            inline_storage.resize( initial_size );
+        }
+    };
+
     Engine m_engine;
     Vector<Inlineable> m_inline;
 
@@ -32,7 +48,7 @@ private:
     void optimize_enum( Enum& enu );
     void optimize_struct( Struct& struc );
 
-    void optimize_instr( Vector<Node>& body );
+    void optimize_instr( Vector<Node>& scope );
     void optimize_expr( Node& node );
 
     void optimize_expr_none( None& node, Node& out_node );
@@ -52,6 +68,7 @@ private:
     void optimize_expr_id( IdentifierNode& node, Node& out_node );
     void optimize_expr_call( CallNode& node, Node& out_node );
     void optimize_expr_index( IndexNode& node, Node& out_node );
+    void optimize_expr_lambda( LambdaNode& node, Node& out_node );
     void optimize_expr_enum( EnumNode& node, Node& out_node );
     void optimize_expr_struct( StructNode& node, Node& out_node );
     void optimize_expr_array( ArrayNode& node, Node& out_node );

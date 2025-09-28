@@ -54,6 +54,9 @@ void dawn::Optimizer::optimize_variable( Variable& var )
 
 void dawn::Optimizer::optimize_function( Function& func )
 {
+    const InlineDropper inline_dropper{ m_inline };
+    for ( auto& arg : func.args )
+        m_inline.emplace_back( arg.id );
     optimize_instr( func.body.instr );
 }
 
@@ -68,15 +71,20 @@ void dawn::Optimizer::optimize_struct( Struct& struc )
     for ( auto& field : struc.fields )
         optimize_expr( field.expr.value() );
     for ( auto& method : struc.methods )
+    {
+        const InlineDropper inline_dropper{ m_inline };
+        for ( auto& arg : method.args )
+            m_inline.emplace_back( arg.id );
         optimize_instr( method.body.instr );
+    }
 }
 
-void dawn::Optimizer::optimize_instr( Vector<Node>& body )
+void dawn::Optimizer::optimize_instr( Vector<Node>& scope )
 {
-    const auto m_inline_size = m_inline.size();
-    for ( Int i = 0; i < (Int) body.size(); i++ )
+    const InlineDropper inline_dropper{ m_inline };
+    for ( Int i = 0; i < (Int) scope.size(); i++ )
     {
-        auto& instr = body[i];
+        auto& instr = scope[i];
         optimize_expr( instr );
         if ( instr.type() != NodeType::VARIABLE )
             continue;
@@ -103,10 +111,9 @@ void dawn::Optimizer::optimize_instr( Vector<Node>& body )
         }
 
         m_inline.emplace_back( var.id, value, true );
-        body.erase( body.begin() + i );
+        scope.erase( scope.begin() + i );
         --i;
     }
-    m_inline.resize( m_inline_size );
 }
 
 void dawn::Optimizer::optimize_expr( Node& node )
@@ -130,6 +137,7 @@ void dawn::Optimizer::optimize_expr( Node& node )
     case NodeType::IDENTIFIER: optimize_expr_id( std::get<IdentifierNode>( node ), node ); break;
     case NodeType::CALL: optimize_expr_call( std::get<CallNode>( node ), node ); break;
     case NodeType::INDEX: optimize_expr_index( std::get<IndexNode>( node ), node ); break;
+    case NodeType::LAMBDA: optimize_expr_lambda( std::get<LambdaNode>( node ), node ); break;
     case NodeType::ENUM: optimize_expr_enum( std::get<EnumNode>( node ), node ); break;
     case NodeType::STRUCT: optimize_expr_struct( std::get<StructNode>( node ), node ); break;
     case NodeType::ARRAY: optimize_expr_array( std::get<ArrayNode>( node ), node ); break;
@@ -253,6 +261,15 @@ void dawn::Optimizer::optimize_expr_index( IndexNode& node, Node& out_node )
 {
     optimize_expr( node.left_expr.value() );
     optimize_expr( node.expr.value() );
+}
+
+void dawn::Optimizer::optimize_expr_lambda( LambdaNode& node, Node& out_node )
+{
+    auto& func = *node.func_value.as_function().dfunction();
+    const InlineDropper inline_dropper{ m_inline };
+    for ( auto& arg : func.args )
+        m_inline.emplace_back( arg.id );
+    optimize_instr( func.body.instr );
 }
 
 void dawn::Optimizer::optimize_expr_enum( EnumNode& node, Node& out_node )
