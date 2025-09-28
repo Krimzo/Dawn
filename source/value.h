@@ -64,14 +64,19 @@ struct EnumValue
 
 struct StructValue
 {
-    Struct* parent = nullptr;
+    Engine* engine;
+    Int parent_id = 0;
     Map<Int, Value> members;
 
-    StructValue() = default;
+    inline StructValue( Engine* engine = nullptr )
+        : engine( engine )
+    {
+    }
 
     StructValue( StructValue const& other );
     StructValue& operator=( StructValue const& other );
 
+    Struct& parent() const;
     Value* get_member( Int id );
     FunctionValue* get_method( Int id, Bool has_no_args );
 };
@@ -124,34 +129,34 @@ struct Value
     Bool is_const() const;
     Value& unlock_const();
 
-    Value un_plus( Engine& engine, Location const& location ) const;
-    Value un_minus( Engine& engine, Location const& location ) const;
-    Value op_add( Engine& engine, Location const& location, Value const& other ) const;
-    Value op_sub( Engine& engine, Location const& location, Value const& other ) const;
-    Value op_mul( Engine& engine, Location const& location, Value const& other ) const;
-    Value op_div( Engine& engine, Location const& location, Value const& other ) const;
-    Value op_pow( Engine& engine, Location const& location, Value const& other ) const;
-    Value op_mod( Engine& engine, Location const& location, Value const& other ) const;
+    Value un_plus( Location const& location ) const;
+    Value un_minus( Location const& location ) const;
+    Value op_add( Location const& location, Value const& other ) const;
+    Value op_sub( Location const& location, Value const& other ) const;
+    Value op_mul( Location const& location, Value const& other ) const;
+    Value op_div( Location const& location, Value const& other ) const;
+    Value op_pow( Location const& location, Value const& other ) const;
+    Value op_mod( Location const& location, Value const& other ) const;
 
-    Value op_cmpr( Engine& engine, Location const& location, Value const& other ) const;
-    Value op_eq( Engine& engine, Location const& location, Value const& other ) const;
-    Value op_neq( Engine& engine, Location const& location, Value const& other ) const;
-    Value op_less( Engine& engine, Location const& location, Value const& other ) const;
-    Value op_great( Engine& engine, Location const& location, Value const& other ) const;
-    Value op_lesseq( Engine& engine, Location const& location, Value const& other ) const;
-    Value op_greateq( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_cmpr( Location const& location, Value const& other ) const;
+    Value op_eq( Location const& location, Value const& other ) const;
+    Value op_neq( Location const& location, Value const& other ) const;
+    Value op_less( Location const& location, Value const& other ) const;
+    Value op_great( Location const& location, Value const& other ) const;
+    Value op_lesseq( Location const& location, Value const& other ) const;
+    Value op_greateq( Location const& location, Value const& other ) const;
 
-    Value un_not( Engine& engine, Location const& location ) const;
-    Value op_and( Engine& engine, Location const& location, Value const& other ) const;
-    Value op_or( Engine& engine, Location const& location, Value const& other ) const;
+    Value un_not( Location const& location ) const;
+    Value op_and( Location const& location, Value const& other ) const;
+    Value op_or( Location const& location, Value const& other ) const;
 
-    Value op_range( Engine& engine, Location const& location, Value const& other ) const;
+    Value op_range( Location const& location, Value const& other ) const;
 
-    Bool to_bool( Engine& engine, Location const& location ) const;
-    Int to_int( Engine& engine, Location const& location ) const;
-    Float to_float( Engine& engine, Location const& location ) const;
-    Char to_char( Engine& engine, Location const& location ) const;
-    String to_string( Engine& engine, Location const& location ) const;
+    Bool to_bool( Location const& location ) const;
+    Int to_int( Location const& location ) const;
+    Float to_float( Location const& location ) const;
+    Char to_char( Location const& location ) const;
+    String to_string( Location const& location ) const;
 
 private:
     struct Void {};

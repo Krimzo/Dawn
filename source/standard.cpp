@@ -64,7 +64,7 @@ void dawn::Engine::load_standard_functions()
                 return Value{ args[0].as_enum().parent_id };
 
             case ValueType::STRUCT:
-                return Value{ args[0].as_struct().parent->id };
+                return Value{ args[0].as_struct().parent_id };
 
             case ValueType::ARRAY:
             {
@@ -115,7 +115,7 @@ void dawn::Engine::load_standard_functions()
                 return Value{ IDSystem::get( args[0].as_enum().parent_id ) };
 
             case ValueType::STRUCT:
-                return Value{ IDSystem::get( args[0].as_struct().parent->id ) };
+                return Value{ IDSystem::get( args[0].as_struct().parent_id ) };
 
             case ValueType::ARRAY:
                 return Value{ tp_array };
@@ -132,7 +132,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "bool" ), [this]( Location const& location, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_bool( *this, location );
+                return (Value) args[0].to_bool( location );
             else if ( arg_count == 0 )
                 return Value{ Bool{} };
             else
@@ -142,7 +142,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "int" ), [this]( Location const& location, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_int( *this, location );
+                return (Value) args[0].to_int( location );
             else if ( arg_count == 0 )
                 return Value{ Int{} };
             else
@@ -152,7 +152,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "float" ), [this]( Location const& location, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_float( *this, location );
+                return (Value) args[0].to_float( location );
             else if ( arg_count == 0 )
                 return Value{ Float{} };
             else
@@ -162,7 +162,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "char" ), [this]( Location const& location, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_char( *this, location );
+                return (Value) args[0].to_char( location );
             else if ( arg_count == 0 )
                 return Value{ Char{} };
             else
@@ -172,7 +172,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "string" ), [this]( Location const& location, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_string( *this, location );
+                return (Value) args[0].to_string( location );
             else if ( arg_count == 0 )
                 return Value{ StringRef{} };
             else
@@ -183,7 +183,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "exit" ), [this]( Location const& location, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                std::exit( (int) args[0].to_int( *this, location ) );
+                std::exit( (int) args[0].to_int( location ) );
             else
                 ENGINE_PANIC( location, "exit() expects 1 argument, but got ", arg_count );
             return {};
@@ -194,7 +194,7 @@ void dawn::Engine::load_standard_functions()
         {
             StringStream stream;
             for ( Int i = 0; i < arg_count; i++ )
-                stream << args[i].to_string( *this, location );
+                stream << args[i].to_string( location );
             return (Value) stream.str();
         } );
 
@@ -202,7 +202,7 @@ void dawn::Engine::load_standard_functions()
         {
             StringStream stream;
             for ( Int i = 0; i < arg_count; i++ )
-                stream << args[i].to_string( *this, location );
+                stream << args[i].to_string( location );
             print( stream.str() );
             return Value{};
         } );
@@ -210,7 +210,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "rand_int" ), [this]( Location const& location, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) Int( RAND_ENGINE() % args[0].to_int( *this, location ) );
+                return (Value) Int( RAND_ENGINE() % args[0].to_int( location ) );
             else
                 ENGINE_PANIC( location, "rand_int() expects 1 argument, but got ", arg_count );
         } );
@@ -229,9 +229,9 @@ void dawn::Engine::load_standard_functions()
             if ( arg_count == 2 )
             {
                 if ( args[0].type() == ValueType::INT )
-                    return (Value) std::min( args[0].to_int( *this, location ), args[1].to_int( *this, location ) );
+                    return (Value) std::min( args[0].to_int( location ), args[1].to_int( location ) );
                 else if ( args[0].type() == ValueType::FLOAT )
-                    return (Value) std::min( args[0].to_float( *this, location ), args[1].to_float( *this, location ) );
+                    return (Value) std::min( args[0].to_float( location ), args[1].to_float( location ) );
                 else
                     ENGINE_PANIC( location, "min() expects an int or float" );
             }
@@ -244,9 +244,9 @@ void dawn::Engine::load_standard_functions()
             if ( arg_count == 2 )
             {
                 if ( args[0].type() == ValueType::INT )
-                    return (Value) std::max( args[0].to_int( *this, location ), args[1].to_int( *this, location ) );
+                    return (Value) std::max( args[0].to_int( location ), args[1].to_int( location ) );
                 else if ( args[0].type() == ValueType::FLOAT )
-                    return (Value) std::max( args[0].to_float( *this, location ), args[1].to_float( *this, location ) );
+                    return (Value) std::max( args[0].to_float( location ), args[1].to_float( location ) );
                 else
                     ENGINE_PANIC( location, "max() expects an int or float" );
             }
@@ -259,9 +259,9 @@ void dawn::Engine::load_standard_functions()
             if ( arg_count == 1 )
             {
                 if ( args[0].type() == ValueType::INT )
-                    return (Value) std::abs( args[0].to_int( *this, location ) );
+                    return (Value) std::abs( args[0].to_int( location ) );
                 else if ( args[0].type() == ValueType::FLOAT )
-                    return (Value) std::abs( args[0].to_float( *this, location ) );
+                    return (Value) std::abs( args[0].to_float( location ) );
                 else
                     ENGINE_PANIC( location, "abs() expects an int or float" );
             }
@@ -272,7 +272,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "sqrt" ), [this]( Location const& location, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) std::sqrt( args[0].to_float( *this, location ) );
+                return (Value) std::sqrt( args[0].to_float( location ) );
             else
                 ENGINE_PANIC( location, "sqrt() expects 1 argument, but got ", arg_count );
         } );
@@ -280,7 +280,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "sin" ), [this]( Location const& location, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) std::sin( args[0].to_float( *this, location ) );
+                return (Value) std::sin( args[0].to_float( location ) );
             else
                 ENGINE_PANIC( location, "sin() expects 1 argument, but got ", arg_count );
         } );
@@ -288,7 +288,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "cos" ), [this]( Location const& location, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) std::cos( args[0].to_float( *this, location ) );
+                return (Value) std::cos( args[0].to_float( location ) );
             else
                 ENGINE_PANIC( location, "cos() expects 1 argument, but got ", arg_count );
         } );
@@ -304,7 +304,7 @@ void dawn::Engine::load_standard_members()
 
     bind_method( ValueType::STRING, "push", false, 1, [this]( Location const& location, Value& self, Value* args ) -> Value
         {
-            self.as_string().push_back( args[0].to_char( *this, location ) );
+            self.as_string().push_back( args[0].to_char( location ) );
             return self;
         } );
 
@@ -317,16 +317,16 @@ void dawn::Engine::load_standard_members()
     bind_method( ValueType::STRING, "find", true, 1, [this]( Location const& location, Value& self, Value* args ) -> Value
         {
             auto& self_str = self.as_string();
-            size_t index = self_str.find( args[0].to_string( *this, location ) );
+            size_t index = self_str.find( args[0].to_string( location ) );
             return Value{ Int( index ) };
         } );
 
     bind_method( ValueType::STRING, "set", false, 2, [this]( Location const& location, Value& self, Value* args ) -> Value
         {
-            const Int index = args[0].to_int( *this, location );
+            const Int index = args[0].to_int( location );
             if ( index < 0 )
                 ENGINE_PANIC( location, "string->set() index must be positive" );
-            const String str = args[1].to_string( *this, location );
+            const String str = args[1].to_string( location );
             auto& self_str = self.as_string();
             self_str.resize( std::max( index + str.size(), self_str.size() ) );
             std::memcpy( &self_str[index], str.c_str(), str.size() * sizeof( Char ) );
@@ -364,7 +364,7 @@ void dawn::Engine::load_standard_members()
             for ( Int i = 0; i < (Int) self_arr.size(); i++ )
             {
                 auto& element = self_arr[i];
-                if ( element.type() == to_find.type() && element.op_eq( *this, location, to_find ).as_bool() )
+                if ( element.type() == to_find.type() && element.op_eq( location, to_find ).as_bool() )
                     return Value{ i };
             }
             return Value{ Int( -1 ) };

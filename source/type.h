@@ -45,7 +45,6 @@ struct Enum
     Int id = 0;
     Vector<Entry> entries;
 
-    Bool contains( Int id ) const;
     Entry* get( Int id );
 };
 

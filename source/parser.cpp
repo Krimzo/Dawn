@@ -256,7 +256,7 @@ void dawn::Parser::parse_enum( TokenIterator& it, Enum& en )
         if ( it->type == TokenType::NAME )
         {
             Int name_id = IDSystem::get( it->value );
-            if ( en.contains( name_id ) )
+            if ( en.get( name_id ) )
                 PARSER_PANIC( *it, "key [", it->value, "] already in use" );
 
             auto& entry = en.entries.emplace_back();

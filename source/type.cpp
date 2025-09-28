@@ -3,16 +3,6 @@
 #include "syntax.h"
 
 
-dawn::Bool dawn::Enum::contains( Int id ) const
-{
-    for ( auto& entry : entries )
-    {
-        if ( entry.id == id )
-            return true;
-    }
-    return false;
-}
-
 dawn::Enum::Entry* dawn::Enum::get( Int id )
 {
     for ( auto& entry : entries )
