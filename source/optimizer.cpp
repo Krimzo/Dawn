@@ -298,12 +298,23 @@ void dawn::Optimizer::optimize_expr_array( ArrayNode& node, Node& out_node )
 {
     if ( std::holds_alternative<ArrayNode::ListInit>( node.init ) )
     {
+        Bool is_constexpr = true;
         for ( auto& element : std::get<ArrayNode::ListInit>( node.init ).elements )
+        {
             optimize_expr( element );
+            if ( element.type() != NodeType::VALUE )
+                is_constexpr = false;
+        }
+        if ( is_constexpr )
+            out_node.emplace<ValueNode>( node.location ).value = m_engine.handle_array_node( node );
     }
     else
     {
-        optimize_expr( std::get<ArrayNode::SizedInit>( node.init ).size_expr.value() );
+        auto& init = std::get<ArrayNode::SizedInit>( node.init );
+        auto& size_expr = init.size_expr.value();
+        optimize_expr( size_expr );
+        if ( size_expr.type() == NodeType::VALUE && !is_custom_type( IDSystem::get( init.type_id ) ) )
+            out_node.emplace<ValueNode>( node.location ).value = m_engine.handle_array_node( node );
     }
 }
 

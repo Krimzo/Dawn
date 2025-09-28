@@ -613,10 +613,9 @@ dawn::Value dawn::Engine::handle_array_node( ArrayNode const& node )
         Int size = handle_expr( init_data.size_expr.value() ).to_int( node.location );
         if ( size < 0 )
             ENGINE_PANIC( node.location, "array size can not be negative" );
-        Value value = create_default_value( node.location, init_data.type_id );
         result.data.reserve( size );
         for ( Int i = 0; i < size; i++ )
-            result.data.push_back( value.clone() );
+            result.data.push_back( create_default_value( node.location, init_data.type_id ) );
     }
     return Value{ result };
 }
