@@ -57,10 +57,9 @@ struct FunctionValue
 
 struct EnumValue
 {
-    Enum* parent = nullptr;
+    Int parent_id = 0;
     Int key_id = 0;
-
-    Value value( Engine& engine ) const;
+    Holder<Value> value;
 };
 
 struct StructValue

@@ -262,7 +262,7 @@ void dawn::Parser::parse_enum( TokenIterator& it, Enum& en )
             auto& entry = en.entries.emplace_back();
             entry.id = name_id;
             entry.expr = node_pool().new_register();
-            auto& expr = entry.expr.value();
+            auto& expr = std::get<NodeRef>( entry.expr ).value();
             ++it;
 
             if ( it->value == op_assign )

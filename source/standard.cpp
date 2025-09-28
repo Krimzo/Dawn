@@ -61,7 +61,7 @@ void dawn::Engine::load_standard_functions()
             }
 
             case ValueType::ENUM:
-                return Value{ args[0].as_enum().parent->id };
+                return Value{ args[0].as_enum().parent_id };
 
             case ValueType::STRUCT:
                 return Value{ args[0].as_struct().parent->id };
@@ -112,7 +112,7 @@ void dawn::Engine::load_standard_functions()
                 return Value{ tp_function };
 
             case ValueType::ENUM:
-                return Value{ IDSystem::get( args[0].as_enum().parent->id ) };
+                return Value{ IDSystem::get( args[0].as_enum().parent_id ) };
 
             case ValueType::STRUCT:
                 return Value{ IDSystem::get( args[0].as_struct().parent->id ) };
@@ -336,7 +336,7 @@ void dawn::Engine::load_standard_members()
     // Enums.
     bind_member( ValueType::ENUM, "value", [this]( Location const& location, Value& self ) -> Value
         {
-            return self.as_enum().value( *this );
+            return *self.as_enum().value;
         } );
 
     // Arrays.

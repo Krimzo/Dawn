@@ -37,7 +37,15 @@ void dawn::Engine::load_function( Function const& entry )
 
 void dawn::Engine::load_enum( Enum const& entry )
 {
-    enums.set( entry.id, entry );
+    Enum enu = entry;
+    for ( auto& entry : enu.entries )
+    {
+        if ( !std::holds_alternative<NodeRef>( entry.expr ) )
+            continue;
+        auto const& expr = std::get<NodeRef>( entry.expr ).value();
+        *entry.expr.emplace<Holder<Value>>() = handle_expr( expr );
+    }
+    enums.set( enu.id, enu );
 }
 
 void dawn::Engine::load_struct( Struct const& entry )
@@ -506,12 +514,16 @@ dawn::Value dawn::Engine::handle_enum_node( EnumNode const& node )
     if ( !enum_ptr )
         ENGINE_PANIC( node.location, "enum [", IDSystem::get( node.type_id ), "] does not exist" );
 
-    if ( !enum_ptr->contains( node.key_id ) )
+    auto* entry_ptr = enum_ptr->get( node.key_id );
+    if ( !entry_ptr )
         ENGINE_PANIC( node.location, "enum [", IDSystem::get( node.type_id ), "] does not have key [", IDSystem::get( node.key_id ), "]" );
+    if ( !std::holds_alternative<Holder<Value>>( entry_ptr->expr ) )
+        ENGINE_PANIC( node.location, "value expected at enum [", IDSystem::get( node.type_id ), "] and key [", IDSystem::get( node.key_id ), "] but found node" );
 
     EnumValue result{};
-    result.parent = enum_ptr;
+    result.parent_id = node.type_id;
     result.key_id = node.key_id;
+    result.value = std::get<Holder<Value>>( entry_ptr->expr );
 
     return Value{ result };
 }

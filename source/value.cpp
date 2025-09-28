@@ -99,12 +99,6 @@ dawn::CFunction* dawn::FunctionValue::cfunction() const
     return nullptr;
 }
 
-dawn::Value dawn::EnumValue::value( Engine& engine ) const
-{
-    auto& expr = parent->get( key_id )->expr;
-    return engine.handle_expr( expr.value() ).clone();
-}
-
 dawn::StructValue::StructValue( StructValue const& other )
 {
     parent = other.parent;
@@ -832,8 +826,8 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Location const& location, Valu
         {
             auto& left = as_enum();
             auto& right = other.as_enum();
-            if ( left.parent != right.parent )
-                ENGINE_PANIC( location, "enum [", IDSystem::get( left.parent->id ), "] ", dawn::op_cmpr, " enum [", IDSystem::get( right.parent->id ), "] not supported" );
+            if ( left.parent_id != right.parent_id )
+                ENGINE_PANIC( location, "enum [", IDSystem::get( left.parent_id ), "] ", dawn::op_cmpr, " enum [", IDSystem::get( right.parent_id ), "] not supported" );
 
             return Value{ (Int) ( left.key_id <=> right.key_id )._Value };
         }
@@ -1166,7 +1160,7 @@ dawn::String dawn::Value::to_string( Engine& engine, Location const& location ) 
     case ValueType::ENUM:
     {
         auto const& value = as_enum();
-        return format( IDSystem::get( value.parent->id ), op_link, IDSystem::get( value.key_id ) );
+        return format( IDSystem::get( value.parent_id ), op_link, IDSystem::get( value.key_id ) );
     }
 
     case ValueType::STRUCT:

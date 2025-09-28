@@ -4,6 +4,7 @@
 #include "memory.h"
 #include "holder.h"
 #include "token.h"
+#include "decl.h"
 
 
 namespace dawn
@@ -38,7 +39,7 @@ struct Enum
     struct Entry
     {
         Int id = 0;
-        NodeRef expr;
+        Variant<NodeRef, Holder<Value>> expr;
     };
 
     Int id = 0;
