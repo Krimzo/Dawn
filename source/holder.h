@@ -22,6 +22,18 @@ struct Holder
         return *this;
     }
 
+    Holder( Holder&& other ) noexcept
+        : ptr( std::move( other.ptr ) )
+    {
+    }
+
+    Holder& operator=( Holder&& other ) noexcept
+    {
+        if ( this != &other )
+            ptr = std::move( other.ptr );
+        return *this;
+    }
+
     T& operator*() const
     {
         return *ptr;

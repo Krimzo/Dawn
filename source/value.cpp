@@ -119,6 +119,24 @@ dawn::StructValue& dawn::StructValue::operator=( StructValue const& other )
     return *this;
 }
 
+dawn::StructValue::StructValue( StructValue&& other ) noexcept
+    : engine( std::move( other.engine ) )
+    , parent_id( std::move( other.parent_id ) )
+    , members( std::move( other.members ) )
+{
+}
+
+dawn::StructValue& dawn::StructValue::operator=( StructValue&& other ) noexcept
+{
+    if ( this != &other )
+    {
+        engine = std::move( other.engine );
+        parent_id = std::move( other.parent_id );
+        members = std::move( other.members );
+    }
+    return *this;
+}
+
 dawn::Struct& dawn::StructValue::parent() const
 {
     return *engine->structs.get( parent_id );
@@ -172,6 +190,18 @@ dawn::ArrayValue& dawn::ArrayValue::operator=( ArrayValue const& other )
         for ( auto& value : other.data )
             data.push_back( value.clone() );
     }
+    return *this;
+}
+
+dawn::ArrayValue::ArrayValue( ArrayValue&& other ) noexcept
+    : data( std::move( other.data ) )
+{
+}
+
+dawn::ArrayValue& dawn::ArrayValue::operator=( ArrayValue&& other ) noexcept
+{
+    if ( this != &other )
+        data = std::move( other.data );
     return *this;
 }
 

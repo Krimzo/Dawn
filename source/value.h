@@ -76,6 +76,9 @@ struct StructValue
     StructValue( StructValue const& other );
     StructValue& operator=( StructValue const& other );
 
+    StructValue( StructValue&& other ) noexcept;
+    StructValue& operator=( StructValue&& other ) noexcept;
+
     Struct& parent() const;
     Value* get_member( Int id );
     FunctionValue* get_method( Int id, Bool has_no_args );
@@ -89,6 +92,9 @@ struct ArrayValue
 
     ArrayValue( ArrayValue const& other );
     ArrayValue& operator=( ArrayValue const& other );
+
+    ArrayValue( ArrayValue&& other ) noexcept;
+    ArrayValue& operator=( ArrayValue&& other ) noexcept;
 };
 
 struct RangeValue

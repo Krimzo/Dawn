@@ -63,6 +63,25 @@ struct RegisterRef
         return *this;
     }
 
+    RegisterRef( RegisterRef&& other ) noexcept
+        : m_regptr( std::move( other.m_regptr ) )
+    {
+        other.m_regptr = nullptr;
+    }
+
+    RegisterRef& operator=( RegisterRef&& other ) noexcept
+    {
+        if ( this != &other )
+        {
+            if ( m_regptr )
+                m_regptr->decr();
+
+            m_regptr = std::move( other.m_regptr );
+            other.m_regptr = nullptr;
+        }
+        return *this;
+    }
+
     Bool valid() const noexcept
     {
         return static_cast<Bool>( m_regptr );
