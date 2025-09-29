@@ -138,14 +138,14 @@ struct IfNode : LocationHolder
 
 struct SwitchNode : LocationHolder
 {
-    struct Part
+    struct Case
     {
         Vector<Node> exprs;
         Scope scope;
     };
 
     NodeRef main_expr;
-    Vector<Part> cases;
+    Vector<Case> cases;
     Opt<Scope> def_scope;
 
     constexpr SwitchNode( Location const& location )
@@ -177,11 +177,21 @@ struct WhileNode : LocationHolder
 
 struct ForNode : LocationHolder
 {
-    Variable var;
+    Int var_id = 0;
     NodeRef expr;
     Scope scope;
 
     constexpr ForNode( Location const& location )
+        : LocationHolder( location )
+    {
+    }
+};
+
+struct LambdaNode : LocationHolder
+{
+    Value func_value;
+
+    constexpr LambdaNode( Location const& location )
         : LocationHolder( location )
     {
     }
@@ -242,7 +252,7 @@ struct ArrayNode : LocationHolder
 
 struct UnaryNode : LocationHolder
 {
-    UnaryType type;
+    UnaryType type{};
     NodeRef right;
 
     constexpr UnaryNode( Location const& location )
@@ -253,7 +263,7 @@ struct UnaryNode : LocationHolder
 
 struct OperatorNode : LocationHolder
 {
-    OperatorType type;
+    OperatorType type{};
     Vector<Node> sides;
 
     constexpr OperatorNode( Location const& location )
@@ -264,7 +274,7 @@ struct OperatorNode : LocationHolder
 
 struct AssignNode : LocationHolder
 {
-    AssignType type;
+    AssignType type{};
     Vector<Node> sides;
 
     constexpr AssignNode( Location const& location )
@@ -291,6 +301,7 @@ struct Node : Variant <
     IdentifierNode,
     CallNode,
     IndexNode,
+    LambdaNode,
     EnumNode,
     StructNode,
     ArrayNode,
@@ -303,14 +314,14 @@ struct Node : Variant <
         return static_cast<NodeType>( this->index() );
     }
 
-    constexpr Location location() const
+    constexpr Location const& location() const
     {
         switch ( type() )
         {
         case NodeType::NONE:
         case NodeType::SCOPE:
         default:
-            return Location{ Bad{} };
+            return Location::none;
 
         case NodeType::VARIABLE:
         case NodeType::RETURN:
@@ -327,6 +338,7 @@ struct Node : Variant <
         case NodeType::IDENTIFIER:
         case NodeType::CALL:
         case NodeType::INDEX:
+        case NodeType::LAMBDA:
         case NodeType::ENUM:
         case NodeType::STRUCT:
         case NodeType::ARRAY:

@@ -1,1 +1,2 @@
-add optimizer
+add compilation of a .dw into a .cdw file (optimize module and serialize)
+add flag support to dawn, example: disable optimizations

@@ -1,6 +1,6 @@
 func main()
 {
-    var result = fib(30)
+    let result = fib(30)
     print(result)
 }
 

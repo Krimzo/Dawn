@@ -87,6 +87,7 @@ enum struct NodeType
     IDENTIFIER,
     CALL,
     INDEX,
+    LAMBDA,
     ENUM,
     STRUCT,
     ARRAY,

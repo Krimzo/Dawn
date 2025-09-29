@@ -256,13 +256,13 @@ void dawn::Parser::parse_enum( TokenIterator& it, Enum& en )
         if ( it->type == TokenType::NAME )
         {
             Int name_id = IDSystem::get( it->value );
-            if ( en.contains( name_id ) )
+            if ( en.get( name_id ) )
                 PARSER_PANIC( *it, "key [", it->value, "] already in use" );
 
             auto& entry = en.entries.emplace_back();
             entry.id = name_id;
             entry.expr = node_pool().new_register();
-            auto& expr = entry.expr.value();
+            auto& expr = std::get<NodeRef>( entry.expr ).value();
             ++it;
 
             if ( it->value == op_assign )
@@ -456,7 +456,7 @@ void dawn::Parser::parse_expression( ExtractType type, TokenIterator& it, Node& 
 {
     if ( !it.valid() )
     {
-        tree = make_nothing_node( Location{ Bad{} } );
+        tree = make_nothing_node( Location::none );
         return;
     }
 
@@ -682,9 +682,8 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
         left.erase( left.begin() );
         left.pop_back();
 
-        auto& node = tree.emplace<ValueNode>( op.location );
-        node.value = Value{ FunctionValue{} };
-        auto& func = node.value.as_function()
+        auto& node = tree.emplace<LambdaNode>( op.location );
+        auto& func = ( node.func_value = Value{ FunctionValue{} } ).as_function()
             .data.emplace<FunctionValue::AsLambda>()
             .func.emplace<DFunction>();
 
@@ -724,13 +723,13 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
         Token left_scope;
         left_scope.value = op_scope_opn;
         left_scope.type = TokenType::OPERATOR;
-        left_scope.location = Location{ Bad{} };
+        left_scope.location = Location::none;
         right.insert( right.begin(), left_scope );
 
         Token right_scope;
         right_scope.value = op_scope_cls;
         right_scope.type = TokenType::OPERATOR;
-        right_scope.location = Location{ Bad{} };
+        right_scope.location = Location::none;
         right.push_back( right_scope );
 
         TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
@@ -838,7 +837,7 @@ void dawn::Parser::expression_pure( Vector<Token>& tokens, Node& tree )
 {
     if ( tokens.empty() )
     {
-        tree = make_nothing_node( Location{ Bad{} } );
+        tree = make_nothing_node( Location::none );
     }
     else if ( tokens.size() == 1 )
     {
@@ -1185,11 +1184,9 @@ void dawn::Parser::scope_for( TokenIterator& it, Node& tree )
     ++it;
 
     auto& node = tree.emplace<ForNode>( it->location );
-    node.var.kind = VariableKind::REF;
-
     if ( it->type != TokenType::NAME )
         PARSER_PANIC( *it, "expected name" );
-    node.var.id = IDSystem::get( it->value );
+    node.var_id = IDSystem::get( it->value );
     ++it;
 
     if ( it->value != op_iter )

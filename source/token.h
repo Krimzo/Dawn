@@ -5,10 +5,6 @@
 
 namespace dawn
 {
-struct Bad
-{
-};
-
 struct Index
 {
     Index() = default;
@@ -39,13 +35,13 @@ struct Location
     {
     }
 
-    explicit constexpr Location( String path, Index const& index )
-        : file_path( std::move( path ) ), line( (IntType) index.line() ), col( (IntType) index.col() )
+    explicit constexpr Location( IntType line, IntType col )
+        : line( line ), col( col )
     {
     }
 
-    explicit constexpr Location( Bad bad )
-        : line( -1 ), col( -1 )
+    explicit constexpr Location( String path, Index const& index )
+        : file_path( std::move( path ) ), line( (IntType) index.line() ), col( (IntType) index.col() )
     {
     }
 
@@ -58,6 +54,8 @@ struct Location
             stream << "(" << file_path << ")<" << line << ", " << col << ">";
         return stream.str();
     }
+
+    static const Location none;
 };
 
 struct Token

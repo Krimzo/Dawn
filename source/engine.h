@@ -13,6 +13,7 @@ struct Engine
 
     friend struct Value;
     friend struct EnumValue;
+    friend struct Optimizer;
 
     Stack stack;
     GlobalStorage<Enum> enums;
@@ -27,7 +28,7 @@ struct Engine
     void load_struct( Struct const& entry );
     void load_variable( Variable const& entry );
 
-    void bind_cfunc( Int id, CFunction cfunc );
+    void bind_cfunc( Int id, Bool is_ctime, CFunction cfunc );
     Value call_func( Int id, Value* args, Int arg_count );
 
     void add_var( VariableKind kind, Int id, Value const& value );
@@ -36,7 +37,11 @@ struct Engine
     void bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func );
     void bind_method( ValueType type, StringRef const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body );
 
+    Set<Int> const& ctime_funcs() const;
+
 private:
+    Set<Int> m_ctime_funcs;
+
     void load_standard_functions();
     void load_standard_members();
 
@@ -60,6 +65,7 @@ private:
     void handle_loop_node( LoopNode const& node, Opt<Value>& retval );
     void handle_while_node( WhileNode const& node, Opt<Value>& retval );
     void handle_for_node( ForNode const& node, Opt<Value>& retval );
+    Value handle_lambda_node( LambdaNode const& node );
     Value handle_enum_node( EnumNode const& node );
     Value handle_struct_node( StructNode const& node );
     Value handle_array_node( ArrayNode const& node );
