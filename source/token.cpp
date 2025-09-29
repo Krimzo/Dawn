@@ -1,6 +1,8 @@
 #include "token.h"
 
 
+const dawn::Location dawn::Location::none{ -1, -1 };
+
 void dawn::Index::incr( Int n )
 {
     m_index += n;

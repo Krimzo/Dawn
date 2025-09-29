@@ -100,29 +100,36 @@ dawn::CFunction* dawn::FunctionValue::cfunction() const
 }
 
 dawn::StructValue::StructValue( StructValue const& other )
-    : engine( other.engine ), parent_id( other.parent_id )
+    : parent_id( other.parent_id )
 {
-    for ( auto& [key, val] : other.members )
-        members[key] = val.clone();
+    fields.reserve( other.fields.size() );
+    for ( auto& [key, val] : other.fields )
+        fields[key] = val.clone();
+    methods.reserve( other.methods.size() );
+    for ( auto& [key, val] : other.methods )
+        methods[key] = val.clone();
 }
 
 dawn::StructValue& dawn::StructValue::operator=( StructValue const& other )
 {
     if ( this != &other )
     {
-        engine = other.engine;
-        parent_id = other.parent_id;
-        members.clear();
-        for ( auto& [key, val] : other.members )
-            members[key] = val.clone();
+        fields.clear();
+        fields.reserve( other.fields.size() );
+        for ( auto& [key, val] : other.fields )
+            fields[key] = val.clone();
+        methods.clear();
+        methods.reserve( other.methods.size() );
+        for ( auto& [key, val] : other.methods )
+            methods[key] = val.clone();
     }
     return *this;
 }
 
 dawn::StructValue::StructValue( StructValue&& other ) noexcept
-    : engine( std::move( other.engine ) )
-    , parent_id( std::move( other.parent_id ) )
-    , members( std::move( other.members ) )
+    : parent_id( std::move( parent_id ) )
+    , fields( std::move( fields ) )
+    , methods( std::move( methods ) )
 {
 }
 
@@ -130,48 +137,19 @@ dawn::StructValue& dawn::StructValue::operator=( StructValue&& other ) noexcept
 {
     if ( this != &other )
     {
-        engine = std::move( other.engine );
-        parent_id = std::move( other.parent_id );
-        members = std::move( other.members );
+        parent_id = std::move( parent_id );
+        fields = std::move( fields );
+        methods = std::move( methods );
     }
     return *this;
 }
 
-dawn::Struct& dawn::StructValue::parent() const
-{
-    return *engine->structs.get( parent_id );
-}
-
-dawn::Value* dawn::StructValue::get_member( Int id )
-{
-    auto it = members.find( id );
-    if ( it == members.end() )
-        return nullptr;
-    return &it->second;
-}
-
 dawn::FunctionValue* dawn::StructValue::get_method( Int id, Bool has_no_args )
 {
-    auto it = members.find( id );
-    if ( it == members.end() )
+    auto it = methods.find( id );
+    if ( it == methods.end() )
         return nullptr;
-
-    if ( it->second.type() != ValueType::FUNCTION )
-        return nullptr;
-
-    auto& func = it->second.as_function();
-    if ( !func.is_method() )
-        return nullptr;
-
-    if ( has_no_args )
-    {
-        auto* dfunc = func.dfunction();
-        if ( !dfunc )
-            return nullptr;
-        if ( dfunc->args.size() != 1 )
-            return nullptr;
-    }
-    return &func;
+    return &it->second.as_function();
 }
 
 dawn::ArrayValue::ArrayValue( ArrayValue const& other )
@@ -353,19 +331,8 @@ dawn::Value dawn::Value::clone() const
     case ValueType::STRUCT:
     {
         Value result{ as_struct() };
-        auto& struc = result.as_struct();
-        auto& parent_methods = struc.parent().methods;
-        for ( auto& [id, member] : struc.members )
-        {
-            if ( member.type() != ValueType::FUNCTION )
-                continue;
-            const auto it = std::find_if( parent_methods.begin(), parent_methods.end(), [&]( Function const& func )
-                {
-                    return func.id == id;
-                } );
-            if ( it != parent_methods.end() )
-                *member.as_function().as_method().self = result;
-        }
+        for ( auto& [_, method] : result.as_struct().methods )
+            *method.as_function().as_method().self = result;
         return result;
     }
 
@@ -376,7 +343,7 @@ dawn::Value dawn::Value::clone() const
         return Value{ as_range() };
 
     default:
-        ENGINE_PANIC( Location{ Bad{} }, "can not clone type [", Int( m_type ), "]" );
+        ENGINE_PANIC( Location::none, "can not clone type [", Int( m_type ), "]" );
     }
 }
 
@@ -391,8 +358,8 @@ dawn::Value& dawn::Value::unlock_const()
     if ( m_type == ValueType::STRUCT )
     {
         auto& value = as_struct();
-        for ( auto& field : value.parent().fields )
-            value.members.at( field.id ).unlock_const();
+        for ( auto& [_, field] : value.fields )
+            field.unlock_const();
     }
     else if ( m_type == ValueType::ARRAY )
     {
@@ -403,7 +370,7 @@ dawn::Value& dawn::Value::unlock_const()
     return *this;
 }
 
-dawn::Value dawn::Value::un_plus( Location const& location ) const
+dawn::Value dawn::Value::un_plus( Location const& location, Engine& engine ) const
 {
     switch ( type() )
     {
@@ -421,7 +388,7 @@ dawn::Value dawn::Value::un_plus( Location const& location ) const
             ENGINE_PANIC( location, dawn::op_add, " struct [", IDSystem::get( left.parent_id ), "] not supported" );
 
         Value args[1] = { *this };
-        return left.engine->handle_func( location, *op, args, (Int) std::size( args ) );
+        return engine.handle_func( location, *op, args, (Int) std::size( args ) );
     }
 
     default:
@@ -429,7 +396,7 @@ dawn::Value dawn::Value::un_plus( Location const& location ) const
     }
 }
 
-dawn::Value dawn::Value::un_minus( Location const& location ) const
+dawn::Value dawn::Value::un_minus( Location const& location, Engine& engine ) const
 {
     switch ( type() )
     {
@@ -447,7 +414,7 @@ dawn::Value dawn::Value::un_minus( Location const& location ) const
             ENGINE_PANIC( location, dawn::op_sub, " struct [", IDSystem::get( left.parent_id ), "] not supported" );
 
         Value args[1] = { *this };
-        return left.engine->handle_func( location, *op, args, (Int) std::size( args ) );
+        return engine.handle_func( location, *op, args, (Int) std::size( args ) );
     }
 
     default:
@@ -455,7 +422,7 @@ dawn::Value dawn::Value::un_minus( Location const& location ) const
     }
 }
 
-dawn::Value dawn::Value::op_add( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_add( Location const& location, Engine& engine, Value const& other ) const
 {
     switch ( type() )
     {
@@ -526,7 +493,7 @@ dawn::Value dawn::Value::op_add( Location const& location, Value const& other ) 
             ENGINE_PANIC( location, "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_add, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
-        return left.engine->handle_func( location, *op, args, (Int) std::size( args ) );
+        return engine.handle_func( location, *op, args, (Int) std::size( args ) );
     }
 
     default:
@@ -534,7 +501,7 @@ dawn::Value dawn::Value::op_add( Location const& location, Value const& other ) 
     }
 }
 
-dawn::Value dawn::Value::op_sub( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_sub( Location const& location, Engine& engine, Value const& other ) const
 {
     switch ( type() )
     {
@@ -576,7 +543,7 @@ dawn::Value dawn::Value::op_sub( Location const& location, Value const& other ) 
             ENGINE_PANIC( location, "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_sub, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
-        return left.engine->handle_func( location, *op, args, (Int) std::size( args ) );
+        return engine.handle_func( location, *op, args, (Int) std::size( args ) );
     }
 
     default:
@@ -584,7 +551,7 @@ dawn::Value dawn::Value::op_sub( Location const& location, Value const& other ) 
     }
 }
 
-dawn::Value dawn::Value::op_mul( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_mul( Location const& location, Engine& engine, Value const& other ) const
 {
     switch ( type() )
     {
@@ -626,7 +593,7 @@ dawn::Value dawn::Value::op_mul( Location const& location, Value const& other ) 
             ENGINE_PANIC( location, "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_mul, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
-        return left.engine->handle_func( location, *op, args, (Int) std::size( args ) );
+        return engine.handle_func( location, *op, args, (Int) std::size( args ) );
     }
 
     default:
@@ -634,7 +601,7 @@ dawn::Value dawn::Value::op_mul( Location const& location, Value const& other ) 
     }
 }
 
-dawn::Value dawn::Value::op_div( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_div( Location const& location, Engine& engine, Value const& other ) const
 {
     switch ( type() )
     {
@@ -676,7 +643,7 @@ dawn::Value dawn::Value::op_div( Location const& location, Value const& other ) 
             ENGINE_PANIC( location, "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_div, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
-        return left.engine->handle_func( location, *op, args, (Int) std::size( args ) );
+        return engine.handle_func( location, *op, args, (Int) std::size( args ) );
     }
 
     default:
@@ -684,7 +651,7 @@ dawn::Value dawn::Value::op_div( Location const& location, Value const& other ) 
     }
 }
 
-dawn::Value dawn::Value::op_pow( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_pow( Location const& location, Engine& engine, Value const& other ) const
 {
     switch ( type() )
     {
@@ -726,7 +693,7 @@ dawn::Value dawn::Value::op_pow( Location const& location, Value const& other ) 
             ENGINE_PANIC( location, "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_pow, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
-        return left.engine->handle_func( location, *op, args, (Int) std::size( args ) );
+        return engine.handle_func( location, *op, args, (Int) std::size( args ) );
     }
 
     default:
@@ -734,7 +701,7 @@ dawn::Value dawn::Value::op_pow( Location const& location, Value const& other ) 
     }
 }
 
-dawn::Value dawn::Value::op_mod( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_mod( Location const& location, Engine& engine, Value const& other ) const
 {
     switch ( type() )
     {
@@ -776,7 +743,7 @@ dawn::Value dawn::Value::op_mod( Location const& location, Value const& other ) 
             ENGINE_PANIC( location, "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_mod, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
-        return left.engine->handle_func( location, *op, args, (Int) std::size( args ) );
+        return engine.handle_func( location, *op, args, (Int) std::size( args ) );
     }
 
     default:
@@ -784,7 +751,7 @@ dawn::Value dawn::Value::op_mod( Location const& location, Value const& other ) 
     }
 }
 
-dawn::Value dawn::Value::op_cmpr( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_cmpr( Location const& location, Engine& engine, Value const& other ) const
 {
     switch ( type() )
     {
@@ -881,7 +848,7 @@ dawn::Value dawn::Value::op_cmpr( Location const& location, Value const& other )
             ENGINE_PANIC( location, "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_cmpr, " [", other.type(), "] not supported" );
 
         Value args[2] = { *this, other };
-        return left.engine->handle_func( location, *op, args, (Int) std::size( args ) );
+        return engine.handle_func( location, *op, args, (Int) std::size( args ) );
     }
 
     case ValueType::ARRAY:
@@ -895,7 +862,7 @@ dawn::Value dawn::Value::op_cmpr( Location const& location, Value const& other )
 
             for ( Int i = 0; i < (Int) std::min( left.size(), right.size() ); i++ )
             {
-                Int cmpr_res = left[i].op_cmpr( location, right[i] ).as_int();
+                Int cmpr_res = left[i].op_cmpr( location, engine, right[i] ).as_int();
                 if ( cmpr_res != 0 )
                     return Value{ cmpr_res };
             }
@@ -912,66 +879,66 @@ dawn::Value dawn::Value::op_cmpr( Location const& location, Value const& other )
     }
 }
 
-dawn::Value dawn::Value::op_eq( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_eq( Location const& location, Engine& engine, Value const& other ) const
 {
-    auto result = op_cmpr( location, other ).as_int();
+    auto result = op_cmpr( location, engine, other ).as_int();
     return Value{ result == 0 };
 }
 
-dawn::Value dawn::Value::op_neq( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_neq( Location const& location, Engine& engine, Value const& other ) const
 {
-    auto result = op_cmpr( location, other ).as_int();
+    auto result = op_cmpr( location, engine, other ).as_int();
     return Value{ result != 0 };
 }
 
-dawn::Value dawn::Value::op_less( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_less( Location const& location, Engine& engine, Value const& other ) const
 {
-    auto result = op_cmpr( location, other ).as_int();
+    auto result = op_cmpr( location, engine, other ).as_int();
     return Value{ result < 0 };
 }
 
-dawn::Value dawn::Value::op_great( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_great( Location const& location, Engine& engine, Value const& other ) const
 {
-    auto result = op_cmpr( location, other ).as_int();
+    auto result = op_cmpr( location, engine, other ).as_int();
     return Value{ result > 0 };
 }
 
-dawn::Value dawn::Value::op_lesseq( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_lesseq( Location const& location, Engine& engine, Value const& other ) const
 {
-    auto result = op_cmpr( location, other ).as_int();
+    auto result = op_cmpr( location, engine, other ).as_int();
     return Value{ result <= 0 };
 }
 
-dawn::Value dawn::Value::op_greateq( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_greateq( Location const& location, Engine& engine, Value const& other ) const
 {
-    auto result = op_cmpr( location, other ).as_int();
+    auto result = op_cmpr( location, engine, other ).as_int();
     return Value{ result >= 0 };
 }
 
-dawn::Value dawn::Value::un_not( Location const& location ) const
+dawn::Value dawn::Value::un_not( Location const& location, Engine& engine ) const
 {
-    return Value{ !to_bool( location ) };
+    return Value{ !to_bool( location, engine ) };
 }
 
-dawn::Value dawn::Value::op_and( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_and( Location const& location, Engine& engine, Value const& other ) const
 {
-    return Value{ to_bool( location ) && other.to_bool( location ) };
+    return Value{ to_bool( location, engine ) && other.to_bool( location, engine ) };
 }
 
-dawn::Value dawn::Value::op_or( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_or( Location const& location, Engine& engine, Value const& other ) const
 {
-    return Value{ to_bool( location ) || other.to_bool( location ) };
+    return Value{ to_bool( location, engine ) || other.to_bool( location, engine ) };
 }
 
-dawn::Value dawn::Value::op_range( Location const& location, Value const& other ) const
+dawn::Value dawn::Value::op_range( Location const& location, Engine& engine, Value const& other ) const
 {
     RangeValue result;
-    result.start_incl = to_int( location );
-    result.end_excl = other.to_int( location );
+    result.start_incl = to_int( location, engine );
+    result.end_excl = other.to_int( location, engine );
     return Value{ result };
 }
 
-dawn::Bool dawn::Value::to_bool( Location const& location ) const
+dawn::Bool dawn::Value::to_bool( Location const& location, Engine& engine ) const
 {
     switch ( type() )
     {
@@ -1001,7 +968,7 @@ dawn::Bool dawn::Value::to_bool( Location const& location ) const
             ENGINE_PANIC( location, "can not convert struct [", IDSystem::get( left.parent_id ), "] to bool" );
 
         Value args[1] = { *this };
-        return left.engine->handle_func( location, *method, args, (Int) std::size( args ) ).to_bool( location );
+        return engine.handle_func( location, *method, args, (Int) std::size( args ) ).to_bool( location, engine );
     }
 
     default:
@@ -1009,7 +976,7 @@ dawn::Bool dawn::Value::to_bool( Location const& location ) const
     }
 }
 
-dawn::Int dawn::Value::to_int( Location const& location ) const
+dawn::Int dawn::Value::to_int( Location const& location, Engine& engine ) const
 {
     switch ( type() )
     {
@@ -1043,7 +1010,7 @@ dawn::Int dawn::Value::to_int( Location const& location ) const
             ENGINE_PANIC( location, "can not convert struct [", IDSystem::get( left.parent_id ), "] to int" );
 
         Value args[1] = { *this };
-        return left.engine->handle_func( location, *method, args, (Int) std::size( args ) ).to_int( location );
+        return engine.handle_func( location, *method, args, (Int) std::size( args ) ).to_int( location, engine );
     }
 
     default:
@@ -1051,7 +1018,7 @@ dawn::Int dawn::Value::to_int( Location const& location ) const
     }
 }
 
-dawn::Float dawn::Value::to_float( Location const& location ) const
+dawn::Float dawn::Value::to_float( Location const& location, Engine& engine ) const
 {
     switch ( type() )
     {
@@ -1085,7 +1052,7 @@ dawn::Float dawn::Value::to_float( Location const& location ) const
             ENGINE_PANIC( location, "can not convert struct [", IDSystem::get( left.parent_id ), "] to float" );
 
         Value args[1] = { *this };
-        return left.engine->handle_func( location, *method, args, (Int) std::size( args ) ).to_float( location );
+        return engine.handle_func( location, *method, args, (Int) std::size( args ) ).to_float( location, engine );
     }
 
     default:
@@ -1093,7 +1060,7 @@ dawn::Float dawn::Value::to_float( Location const& location ) const
     }
 }
 
-dawn::Char dawn::Value::to_char( Location const& location ) const
+dawn::Char dawn::Value::to_char( Location const& location, Engine& engine ) const
 {
     switch ( type() )
     {
@@ -1128,7 +1095,7 @@ dawn::Char dawn::Value::to_char( Location const& location ) const
             ENGINE_PANIC( location, "can not convert struct [", IDSystem::get( left.parent_id ), "] to char" );
 
         Value args[1] = { *this };
-        return left.engine->handle_func( location, *method, args, (Int) std::size( args ) ).to_char( location );
+        return engine.handle_func( location, *method, args, (Int) std::size( args ) ).to_char( location, engine );
     }
 
     default:
@@ -1136,7 +1103,7 @@ dawn::Char dawn::Value::to_char( Location const& location ) const
     }
 }
 
-dawn::String dawn::Value::to_string( Location const& location ) const
+dawn::String dawn::Value::to_string( Location const& location, Engine& engine ) const
 {
     switch ( type() )
     {
@@ -1205,23 +1172,23 @@ dawn::String dawn::Value::to_string( Location const& location ) const
         if ( auto* method = left.get_method( _string, true ) )
         {
             Value args[1] = { *this };
-            return left.engine->handle_func( location, *method, args, (Int) std::size( args ) ).to_string( location );
+            return engine.handle_func( location, *method, args, (Int) std::size( args ) ).to_string( location, engine );
         }
         else
         {
             StringStream stream;
             stream << IDSystem::get( left.parent_id );
-            if ( left.members.empty() )
+            if ( left.fields.empty() )
             {
                 stream << op_scope_opn << op_scope_cls;
                 return stream.str();
             }
 
-            auto it = left.members.begin();
+            auto it = left.fields.begin();
             stream << op_scope_opn;
-            for ( ; it != --left.members.end(); ++it )
-                stream << IDSystem::get( it->first ) << op_assign << it->second.to_string( location ) << op_split << ' ';
-            stream << IDSystem::get( it->first ) << op_assign << it->second.to_string( location ) << op_scope_cls;
+            for ( ; it != --left.fields.end(); ++it )
+                stream << IDSystem::get( it->first ) << op_assign << it->second.to_string( location, engine ) << op_split << ' ';
+            stream << IDSystem::get( it->first ) << op_assign << it->second.to_string( location, engine ) << op_scope_cls;
             return stream.str();
         }
     }
@@ -1235,8 +1202,8 @@ dawn::String dawn::Value::to_string( Location const& location ) const
         StringStream stream;
         stream << op_array_opn;
         for ( Int i = 0; i < (Int) value.data.size() - 1; i++ )
-            stream << value.data[i].to_string( location ) << op_split << ' ';
-        stream << value.data.back().to_string( location ) << op_array_cls;
+            stream << value.data[i].to_string( location, engine ) << op_split << ' ';
+        stream << value.data.back().to_string( location, engine ) << op_array_cls;
         return stream.str();
     }
 

@@ -82,6 +82,6 @@ int _shp_main( int argc, char** argv )
         return -3;
     }
 
-    Int retcode = retval.to_int( Location{ Bad{} } );
+    Int retcode = retval.to_int( Location::none, dawn.engine );
     return static_cast<int>( retcode );
 }

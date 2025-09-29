@@ -456,7 +456,7 @@ void dawn::Parser::parse_expression( ExtractType type, TokenIterator& it, Node& 
 {
     if ( !it.valid() )
     {
-        tree = make_nothing_node( Location{ Bad{} } );
+        tree = make_nothing_node( Location::none );
         return;
     }
 
@@ -723,13 +723,13 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
         Token left_scope;
         left_scope.value = op_scope_opn;
         left_scope.type = TokenType::OPERATOR;
-        left_scope.location = Location{ Bad{} };
+        left_scope.location = Location::none;
         right.insert( right.begin(), left_scope );
 
         Token right_scope;
         right_scope.value = op_scope_cls;
         right_scope.type = TokenType::OPERATOR;
-        right_scope.location = Location{ Bad{} };
+        right_scope.location = Location::none;
         right.push_back( right_scope );
 
         TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
@@ -837,7 +837,7 @@ void dawn::Parser::expression_pure( Vector<Token>& tokens, Node& tree )
 {
     if ( tokens.empty() )
     {
-        tree = make_nothing_node( Location{ Bad{} } );
+        tree = make_nothing_node( Location::none );
     }
     else if ( tokens.size() == 1 )
     {

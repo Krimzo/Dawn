@@ -252,7 +252,7 @@ struct ArrayNode : LocationHolder
 
 struct UnaryNode : LocationHolder
 {
-    UnaryType type;
+    UnaryType type{};
     NodeRef right;
 
     constexpr UnaryNode( Location const& location )
@@ -263,7 +263,7 @@ struct UnaryNode : LocationHolder
 
 struct OperatorNode : LocationHolder
 {
-    OperatorType type;
+    OperatorType type{};
     Vector<Node> sides;
 
     constexpr OperatorNode( Location const& location )
@@ -274,7 +274,7 @@ struct OperatorNode : LocationHolder
 
 struct AssignNode : LocationHolder
 {
-    AssignType type;
+    AssignType type{};
     Vector<Node> sides;
 
     constexpr AssignNode( Location const& location )
@@ -314,14 +314,14 @@ struct Node : Variant <
         return static_cast<NodeType>( this->index() );
     }
 
-    constexpr Location location() const
+    constexpr Location const& location() const
     {
         switch ( type() )
         {
         case NodeType::NONE:
         case NodeType::SCOPE:
         default:
-            return Location{ Bad{} };
+            return Location::none;
 
         case NodeType::VARIABLE:
         case NodeType::RETURN:

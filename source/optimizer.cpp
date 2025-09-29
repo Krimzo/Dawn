@@ -210,7 +210,7 @@ void dawn::Optimizer::optimize_expr_if( IfNode& node, Node& out_node )
         }
 
         auto const& value_node = std::get<ValueNode>( part.expr );
-        if ( value_node.value.to_bool( value_node.location ) )
+        if ( value_node.value.to_bool( value_node.location, m_engine ) )
         {
             optimize_instr( part.scope.instr ); // Optimize before resizing (invalid reference otherwise).
             node.parts.resize( i + 1 );
@@ -249,7 +249,7 @@ void dawn::Optimizer::optimize_expr_switch( SwitchNode& node, Node& out_node )
             ++is_value_counter;
 
             auto const& expr_val = std::get<ValueNode>( expr ).value;
-            if ( std::get<ValueNode>( main_expr ).value.op_eq( expr.location(), expr_val ).as_bool() )
+            if ( std::get<ValueNode>( main_expr ).value.op_eq( expr.location(), m_engine, expr_val ).as_bool() )
             {
                 optimize_instr( casee.scope.instr );
                 out_node.emplace<Scope>( Scope{ std::move( casee.scope ) } );
@@ -286,7 +286,7 @@ void dawn::Optimizer::optimize_expr_while( WhileNode& node, Node& out_node )
     optimize_instr( node.scope.instr );
     if ( expr_node.type() == NodeType::VALUE )
     {
-        if ( std::get<ValueNode>( expr_node ).value.to_bool( expr_node.location() ) )
+        if ( std::get<ValueNode>( expr_node ).value.to_bool( expr_node.location(), m_engine ) )
             out_node.emplace<LoopNode>( node.location ).scope = Scope{ std::move( node.scope ) };
         else
             out_node.emplace<Scope>();
@@ -437,9 +437,9 @@ void dawn::Optimizer::optimize_expr_unary( UnaryNode& node, Node& out_node )
     auto& value = val_node.value;
     switch ( node.type )
     {
-    case UnaryType::PLUS: value = value.un_plus( node.location ); break;
-    case UnaryType::MINUS: value = value.un_minus( node.location ); break;
-    case UnaryType::NOT: value = value.un_not( node.location ); break;
+    case UnaryType::PLUS: value = value.un_plus( node.location, m_engine ); break;
+    case UnaryType::MINUS: value = value.un_minus( node.location, m_engine ); break;
+    case UnaryType::NOT: value = value.un_not( node.location, m_engine ); break;
     }
     out_node.emplace<ValueNode>( ValueNode{ val_node } ); // Must copy into another ValueNode{} since out_node is the parent of node.
 }
@@ -460,22 +460,22 @@ void dawn::Optimizer::optimize_expr_op( OperatorNode& node, Node& out_node )
     switch ( node.type )
     {
     case OperatorType::ACCESS: return; // 1. could optimize access of let vars
-    case OperatorType::POW: left_value = left_value.op_pow( node.location, right_value ); break;
-    case OperatorType::MOD: left_value = left_value.op_mod( node.location, right_value ); break;
-    case OperatorType::MUL: left_value = left_value.op_mul( node.location, right_value ); break;
-    case OperatorType::DIV: left_value = left_value.op_div( node.location, right_value ); break;
-    case OperatorType::ADD: left_value = left_value.op_add( node.location, right_value ); break;
-    case OperatorType::SUB: left_value = left_value.op_sub( node.location, right_value ); break;
-    case OperatorType::COMPARE: left_value = left_value.op_cmpr( node.location, right_value ); break;
-    case OperatorType::LESS: left_value = left_value.op_less( node.location, right_value ); break;
-    case OperatorType::GREAT: left_value = left_value.op_great( node.location, right_value ); break;
-    case OperatorType::LESS_EQ: left_value = left_value.op_lesseq( node.location, right_value ); break;
-    case OperatorType::GREAT_EQ: left_value = left_value.op_greateq( node.location, right_value ); break;
-    case OperatorType::EQ: left_value = left_value.op_eq( node.location, right_value ); break;
-    case OperatorType::NOT_EQ: left_value = left_value.op_neq( node.location, right_value ); break;
-    case OperatorType::AND: left_value = left_value.op_and( node.location, right_value ); break;
-    case OperatorType::OR: left_value = left_value.op_or( node.location, right_value ); break;
-    case OperatorType::RANGE: left_value = left_value.op_range( node.location, right_value ); break;
+    case OperatorType::POW: left_value = left_value.op_pow( node.location, m_engine, right_value ); break;
+    case OperatorType::MOD: left_value = left_value.op_mod( node.location, m_engine, right_value ); break;
+    case OperatorType::MUL: left_value = left_value.op_mul( node.location, m_engine, right_value ); break;
+    case OperatorType::DIV: left_value = left_value.op_div( node.location, m_engine, right_value ); break;
+    case OperatorType::ADD: left_value = left_value.op_add( node.location, m_engine, right_value ); break;
+    case OperatorType::SUB: left_value = left_value.op_sub( node.location, m_engine, right_value ); break;
+    case OperatorType::COMPARE: left_value = left_value.op_cmpr( node.location, m_engine, right_value ); break;
+    case OperatorType::LESS: left_value = left_value.op_less( node.location, m_engine, right_value ); break;
+    case OperatorType::GREAT: left_value = left_value.op_great( node.location, m_engine, right_value ); break;
+    case OperatorType::LESS_EQ: left_value = left_value.op_lesseq( node.location, m_engine, right_value ); break;
+    case OperatorType::GREAT_EQ: left_value = left_value.op_greateq( node.location, m_engine, right_value ); break;
+    case OperatorType::EQ: left_value = left_value.op_eq( node.location, m_engine, right_value ); break;
+    case OperatorType::NOT_EQ: left_value = left_value.op_neq( node.location, m_engine, right_value ); break;
+    case OperatorType::AND: left_value = left_value.op_and( node.location, m_engine, right_value ); break;
+    case OperatorType::OR: left_value = left_value.op_or( node.location, m_engine, right_value ); break;
+    case OperatorType::RANGE: left_value = left_value.op_range( node.location, m_engine, right_value ); break;
     }
     out_node.emplace<ValueNode>( ValueNode{ left_val_node } ); // Must copy into another ValueNode{} since out_node is the parent of node.
 }

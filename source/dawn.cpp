@@ -81,7 +81,7 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* arg
     }
     catch ( Value const& err )
     {
-        return dawn::format( "Uncaught error: ", err.to_string( Location{ Bad{} } ) );
+        return dawn::format( "Uncaught error: ", err.to_string( Location::none, engine ) );
     }
     return std::nullopt;
 }

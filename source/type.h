@@ -11,7 +11,7 @@ namespace dawn
 {
 struct Variable
 {
-    VariableKind kind;
+    VariableKind kind{};
     Int id = 0;
     NodeRef expr;
 };
