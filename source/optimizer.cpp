@@ -234,16 +234,44 @@ void dawn::Optimizer::optimize_expr_if( IfNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_switch( SwitchNode& node, Node& out_node )
 {
-    // 1. if both main_expr and case are ctime values convert switch into a scope call
-    optimize_expr( node.main_expr.value() );
-    for ( auto& casee : node.cases )
+    auto& main_expr = node.main_expr.value();
+    optimize_expr( main_expr );
+    const Bool main_is_val = ( main_expr.type() == NodeType::VALUE );
+    for ( Int i = 0; i < (Int) node.cases.size(); i++ )
     {
+        auto& casee = node.cases[i];
+        Int is_value_counter = 0;
         for ( auto& expr : casee.exprs )
+        {
             optimize_expr( expr );
-        optimize_instr( casee.scope.instr );
+            if ( !main_is_val || expr.type() != NodeType::VALUE )
+                continue;
+            ++is_value_counter;
+
+            auto const& expr_val = std::get<ValueNode>( expr ).value;
+            if ( std::get<ValueNode>( main_expr ).value.op_eq( expr.location(), expr_val ).as_bool() )
+            {
+                optimize_instr( casee.scope.instr );
+                out_node.emplace<Scope>( Scope{ std::move( casee.scope ) } );
+                return;
+            }
+        }
+        if ( main_is_val && is_value_counter == (Int) casee.exprs.size() )
+        {
+            node.cases.erase( node.cases.begin() + i );
+            --i;
+        }
+        else
+            optimize_instr( casee.scope.instr );
     }
     if ( node.def_scope )
+    {
         optimize_instr( node.def_scope->instr );
+        if ( node.cases.empty() )
+            out_node.emplace<Scope>( Scope{ std::move( *node.def_scope ) } );
+    }
+    else if ( node.cases.size() == 1 )
+        out_node.emplace<Scope>( Scope{ std::move( node.cases.front().scope ) } );
 }
 
 void dawn::Optimizer::optimize_expr_loop( LoopNode& node, Node& out_node )

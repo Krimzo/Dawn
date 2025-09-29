@@ -138,14 +138,14 @@ struct IfNode : LocationHolder
 
 struct SwitchNode : LocationHolder
 {
-    struct Part
+    struct Case
     {
         Vector<Node> exprs;
         Scope scope;
     };
 
     NodeRef main_expr;
-    Vector<Part> cases;
+    Vector<Case> cases;
     Opt<Scope> def_scope;
 
     constexpr SwitchNode( Location const& location )
