@@ -193,8 +193,13 @@ void dawn::Optimizer::optimize_expr_throw( ThrowNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_try( TryNode& node, Node& out_node )
 {
-    optimize_instr( node.try_scope.instr );
-    optimize_instr( node.catch_scope.instr );
+    if ( !node.try_scope.instr.empty() )
+    {
+        optimize_instr( node.try_scope.instr );
+        optimize_instr( node.catch_scope.instr );
+    }
+    else
+        out_node.emplace<Scope>();
 }
 
 void dawn::Optimizer::optimize_expr_if( IfNode& node, Node& out_node )
@@ -276,7 +281,10 @@ void dawn::Optimizer::optimize_expr_switch( SwitchNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_loop( LoopNode& node, Node& out_node )
 {
-    optimize_instr( node.scope.instr );
+    if ( !node.scope.instr.empty() )
+        optimize_instr( node.scope.instr );
+    else
+        out_node.emplace<Scope>();
 }
 
 void dawn::Optimizer::optimize_expr_while( WhileNode& node, Node& out_node )
@@ -370,8 +378,12 @@ void dawn::Optimizer::optimize_expr_call( CallNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_index( IndexNode& node, Node& out_node )
 {
-    optimize_expr( node.left_expr.value() );
-    optimize_expr( node.expr.value() );
+    auto& left_node = node.left_expr.value();
+    optimize_expr( left_node );
+    auto& expr_node = node.expr.value();
+    optimize_expr( expr_node );
+    if ( left_node.type() == NodeType::VALUE && expr_node.type() == NodeType::VALUE )
+        out_node.emplace<ValueNode>( node.location ).value = m_engine.handle_index_node( node );
 }
 
 void dawn::Optimizer::optimize_expr_lambda( LambdaNode& node, Node& out_node )
