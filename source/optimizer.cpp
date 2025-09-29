@@ -199,17 +199,42 @@ void dawn::Optimizer::optimize_expr_try( TryNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_if( IfNode& node, Node& out_node )
 {
-    // 1. remove parts that are always false
-    // 2. convert first part that is always true to else (by removing the ones after)
-    for ( auto& part : node.parts )
+    for ( Int i = 0; i < (Int) node.parts.size(); i++ )
     {
+        auto& part = node.parts[i];
         optimize_expr( part.expr );
-        optimize_instr( part.scope.instr );
+        if ( part.expr.type() != NodeType::VALUE )
+        {
+            optimize_instr( part.scope.instr );
+            continue;
+        }
+
+        auto const& value_node = std::get<ValueNode>( part.expr );
+        if ( value_node.value.to_bool( value_node.location ) )
+        {
+            optimize_instr( part.scope.instr ); // Optimize before resizing (invalid reference otherwise).
+            node.parts.resize( i + 1 );
+            node.parts.back() // Store direct true so that to_bool is not computed again.
+                .expr.emplace<ValueNode>( value_node.location )
+                .value = Value{ Bool{ true } };
+            break;
+        }
+        else
+        {
+            node.parts.erase( node.parts.begin() + i );
+            --i;
+        }
+    }
+    if ( node.parts.size() == 1 && node.parts.front().expr.type() == NodeType::VALUE )
+    {
+        auto& part = node.parts.front();
+        out_node.emplace<Scope>( Scope{ std::move( part.scope ) } );
     }
 }
 
 void dawn::Optimizer::optimize_expr_switch( SwitchNode& node, Node& out_node )
 {
+    // 1. if both main_expr and case are ctime values convert switch into a scope call
     optimize_expr( node.main_expr.value() );
     for ( auto& casee : node.cases )
     {
