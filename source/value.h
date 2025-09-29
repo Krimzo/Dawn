@@ -101,6 +101,11 @@ struct RangeValue
 {
     Int start_incl = 0;
     Int end_excl = 0;
+
+    constexpr Bool empty() const
+    {
+        return start_incl >= end_excl;
+    }
 };
 
 struct Value

@@ -295,8 +295,38 @@ void dawn::Optimizer::optimize_expr_while( WhileNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_for( ForNode& node, Node& out_node )
 {
-    // 1. ignore for if expr is value and size <= 0
-    optimize_expr( node.expr.value() );
+    auto& expr_node = node.expr.value();
+    optimize_expr( expr_node );
+    if ( expr_node.type() == NodeType::VALUE )
+    {
+        auto const& expr_value = std::get<ValueNode>( expr_node ).value;
+        switch ( expr_value.type() )
+        {
+        case ValueType::RANGE:
+            if ( expr_value.as_range().empty() )
+            {
+                out_node.emplace<Scope>();
+                return;
+            }
+            break;
+
+        case ValueType::STRING:
+            if ( expr_value.as_string().empty() )
+            {
+                out_node.emplace<Scope>();
+                return;
+            }
+            break;
+
+        case ValueType::ARRAY:
+            if ( expr_value.as_array().data.empty() )
+            {
+                out_node.emplace<Scope>();
+                return;
+            }
+            break;
+        }
+    }
     optimize_instr( node.scope.instr );
 }
 
