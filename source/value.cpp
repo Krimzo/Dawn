@@ -127,9 +127,9 @@ dawn::StructValue& dawn::StructValue::operator=( StructValue const& other )
 }
 
 dawn::StructValue::StructValue( StructValue&& other ) noexcept
-    : parent_id( std::move( parent_id ) )
-    , fields( std::move( fields ) )
-    , methods( std::move( methods ) )
+    : parent_id( std::move( other.parent_id ) )
+    , fields( std::move( other.fields ) )
+    , methods( std::move( other.methods ) )
 {
 }
 
@@ -137,9 +137,9 @@ dawn::StructValue& dawn::StructValue::operator=( StructValue&& other ) noexcept
 {
     if ( this != &other )
     {
-        parent_id = std::move( parent_id );
-        fields = std::move( fields );
-        methods = std::move( methods );
+        parent_id = std::move( other.parent_id );
+        fields = std::move( other.fields );
+        methods = std::move( other.methods );
     }
     return *this;
 }
