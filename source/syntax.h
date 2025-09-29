@@ -14,8 +14,8 @@ inline constexpr StringRef kw_let = "let";
 inline constexpr StringRef kw_var = "var";
 inline constexpr StringRef kw_ref = "ref";
 inline constexpr StringRef kw_if = "if";
-inline constexpr StringRef kw_else = "else";
 inline constexpr StringRef kw_elif = "elif";
+inline constexpr StringRef kw_else = "else";
 inline constexpr StringRef kw_switch = "switch";
 inline constexpr StringRef kw_case = "case";
 inline constexpr StringRef kw_default = "default";
@@ -40,8 +40,6 @@ inline constexpr StringRef tp_float = "float";
 inline constexpr StringRef tp_char = "char";
 inline constexpr StringRef tp_string = "string";
 inline constexpr StringRef tp_function = "function";
-inline constexpr StringRef tp_enum = "enum";
-inline constexpr StringRef tp_struct = "struct";
 inline constexpr StringRef tp_array = "array";
 inline constexpr StringRef tp_range = "range";
 
@@ -72,7 +70,7 @@ inline constexpr StringRef op_link = "::";
 inline constexpr StringRef op_access = ".";
 inline constexpr StringRef op_range = ">>";
 
-inline constexpr StringRef op_iter = ":";
+inline constexpr StringRef op_set = ":";
 inline constexpr StringRef op_split = ",";
 inline constexpr StringRef op_lambda = "`";
 inline constexpr StringRef op_expr_opn = "(";

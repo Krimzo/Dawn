@@ -40,8 +40,8 @@ std::ostream& dawn::operator<<( std::ostream& stream, ValueType type )
     case ValueType::CHAR: stream << tp_char; break;
     case ValueType::STRING: stream << tp_string; break;
     case ValueType::FUNCTION: stream << tp_function; break;
-    case ValueType::ENUM: stream << tp_enum; break;
-    case ValueType::STRUCT: stream << tp_struct; break;
+    case ValueType::ENUM: stream << "enum"; break;
+    case ValueType::STRUCT: stream << "struct"; break;
     case ValueType::ARRAY: stream << tp_array; break;
     case ValueType::RANGE: stream << tp_range; break;
     }

@@ -14,8 +14,8 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) kw_var,
         (String) kw_ref,
         (String) kw_if,
-        (String) kw_else,
         (String) kw_elif,
+        (String) kw_else,
         (String) kw_switch,
         (String) kw_case,
         (String) kw_default,
@@ -34,11 +34,15 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) kw_false,
     };
     result.types = {
+        (String) tp_nothing,
         (String) tp_bool,
         (String) tp_int,
         (String) tp_float,
         (String) tp_char,
         (String) tp_string,
+        (String) tp_function,
+        (String) tp_array,
+        (String) tp_range,
     };
     result.operators = {
         (String) op_add,
@@ -67,7 +71,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) op_link,
         (String) op_access,
         (String) op_range,
-        (String) op_iter,
+        (String) op_set,
         (String) op_split,
         (String) op_lambda,
         (String) op_expr_opn,

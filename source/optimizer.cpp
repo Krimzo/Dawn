@@ -77,8 +77,6 @@ void dawn::Optimizer::optimize_enum( Enum& enu )
 
 void dawn::Optimizer::optimize_struct( Struct& struc )
 {
-    for ( auto& field : struc.fields )
-        optimize_expr( field.expr.value() );
     for ( auto& method : struc.methods )
     {
         const InlineDropper inline_dropper{ m_inline };
@@ -404,12 +402,14 @@ void dawn::Optimizer::optimize_expr_struct( StructNode& node, Node& out_node )
 {
     if ( std::holds_alternative<StructNode::NamedInit>( node.init ) )
     {
-        for ( auto& [_, arg] : std::get<StructNode::NamedInit>( node.init ).args )
+        auto& init = std::get<StructNode::NamedInit>( node.init );
+        for ( auto& [_, arg] : init.args )
             optimize_expr( arg );
     }
     else
     {
-        for ( auto& arg : std::get<StructNode::ListInit>( node.init ).args )
+        auto& init = std::get<StructNode::ListInit>( node.init );
+        for ( auto& arg : init.args )
             optimize_expr( arg );
     }
 }

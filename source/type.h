@@ -53,7 +53,7 @@ struct Struct
     struct Field
     {
         Int id = 0;
-        NodeRef expr;
+        Int type_id = 0;
     };
 
     Int id = 0;

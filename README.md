@@ -50,9 +50,9 @@ var value = animal.value
 # Structs
 ```dawn
 struct Person {
-    not_important // fields don't need initializers (value is set to nothing and can't be changed)
-    name = ""     // but should have them
-    age = int()
+    not_important : nothing
+    name : string
+    age : int
 
     func who() {
         print("{self.name} is {self.age} years old")

@@ -179,18 +179,19 @@ void dawn::Parser::parse_struct( TokenIterator& it, Struct& struc )
             Int name_id = IDSystem::get( it->value );
             if ( struc.contains( name_id ) )
                 PARSER_PANIC( *it, "struct field [", IDSystem::get( name_id ), "] already defined" );
-
-            auto& field_exp = struc.fields.emplace_back( name_id, NodeRef{} ).expr;
-            field_exp = node_pool().new_register();
             ++it;
 
-            if ( it->value == op_assign )
-            {
-                ++it;
-                parse_expression( ExtractType::NEW_LINE, it, field_exp.value() );
-            }
-            else
-                field_exp.value() = make_nothing_node( it->location );
+            if ( it->value != op_set )
+                PARSER_PANIC( *it, "expected struct field type setter" );
+            ++it;
+
+            if ( it->type != TokenType::TYPE )
+                PARSER_PANIC( *it, "expected field type" );
+            const Int type_id = IDSystem::get( it->value );
+            if ( type_id == struc.id )
+                PARSER_PANIC( *it, "field type can not be the same as the parent struct" );
+            struc.fields.emplace_back( name_id, type_id );
+            ++it;
         }
         else if ( it->value == kw_func )
         {
@@ -339,11 +340,15 @@ void dawn::Parser::parse_cast( TokenIterator& it, Function& function )
         PARSER_PANIC( *it, "expected cast" );
     ++it;
 
-    if ( it->value != tp_bool &&
+    if ( it->value != tp_nothing &&
+        it->value != tp_bool &&
         it->value != tp_int &&
         it->value != tp_float &&
         it->value != tp_char &&
-        it->value != tp_string )
+        it->value != tp_string &&
+        it->value != tp_function &&
+        it->value != tp_array &&
+        it->value != tp_range )
         PARSER_PANIC( *it, "expected cast type" );
     function.id = IDSystem::get( it->value );
     ++it;
@@ -917,7 +922,15 @@ void dawn::Parser::expression_single_keyword( Token const& token, Node& tree )
 
 void dawn::Parser::expression_single_type( Token const& token, Node& tree )
 {
-    if ( token.value == tp_bool || token.value == tp_int || token.value == tp_float || token.value == tp_char || token.value == tp_string )
+    if ( token.value == tp_nothing ||
+        token.value == tp_bool ||
+        token.value == tp_int ||
+        token.value == tp_float ||
+        token.value == tp_char ||
+        token.value == tp_string ||
+        token.value == tp_function ||
+        token.value == tp_array ||
+        token.value == tp_range )
         tree.emplace<IdentifierNode>( token.location ).id = IDSystem::get( token.value );
     else
         PARSER_PANIC( token, "type [", token.value, "] is not an expression" );
@@ -1189,7 +1202,7 @@ void dawn::Parser::scope_for( TokenIterator& it, Node& tree )
     node.var_id = IDSystem::get( it->value );
     ++it;
 
-    if ( it->value != op_iter )
+    if ( it->value != op_set )
         PARSER_PANIC( *it, "expected iterator operator" );
     ++it;
 

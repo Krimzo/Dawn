@@ -8,11 +8,15 @@
 
 namespace dawn
 {
+ID_HELPER( nothing );
 ID_HELPER( bool );
 ID_HELPER( int );
 ID_HELPER( float );
 ID_HELPER( char );
 ID_HELPER( string );
+ID_HELPER( function );
+ID_HELPER( array );
+ID_HELPER( range );
 
 OP_HELPER( add );
 OP_HELPER( sub );
@@ -938,6 +942,29 @@ dawn::Value dawn::Value::op_range( Location const& location, Engine& engine, Val
     return Value{ result };
 }
 
+dawn::Nothing dawn::Value::to_nothing( Location const& location, Engine& engine ) const
+{
+    switch ( type() )
+    {
+    case ValueType::NOTHING:
+        return Nothing{};
+
+    case ValueType::STRUCT:
+    {
+        auto& left = as_struct();
+        auto* method = left.get_method( _nothing, true );
+        if ( !method )
+            ENGINE_PANIC( location, "can not convert struct [", IDSystem::get( left.parent_id ), "] to nothing" );
+
+        Value args[1] = { *this };
+        return engine.handle_func( location, *method, args, (Int) std::size( args ) ).to_nothing( location, engine );
+    }
+
+    default:
+        ENGINE_PANIC( location, "can not convert [", type(), "] to nothing" );
+    }
+}
+
 dawn::Bool dawn::Value::to_bool( Location const& location, Engine& engine ) const
 {
     switch ( type() )
@@ -1215,5 +1242,84 @@ dawn::String dawn::Value::to_string( Location const& location, Engine& engine ) 
 
     default:
         ENGINE_PANIC( location, "can not convert [", type(), "] to string" );
+    }
+}
+
+dawn::FunctionValue dawn::Value::to_function( Location const& location, Engine& engine ) const
+{
+    switch ( type() )
+    {
+    case ValueType::FUNCTION:
+        return as_function();
+
+    case ValueType::STRUCT:
+    {
+        auto& left = as_struct();
+        auto* method = left.get_method( _function, true );
+        if ( !method )
+            ENGINE_PANIC( location, "can not convert struct [", IDSystem::get( left.parent_id ), "] to function" );
+
+        Value args[1] = { *this };
+        return engine.handle_func( location, *method, args, (Int) std::size( args ) ).to_function( location, engine );
+    }
+
+    default:
+        ENGINE_PANIC( location, "can not convert [", type(), "] to function" );
+    }
+}
+
+dawn::ArrayValue dawn::Value::to_array( Location const& location, Engine& engine ) const
+{
+    switch ( type() )
+    {
+    case ValueType::STRING:
+    {
+        auto& strval = as_string();
+        ArrayValue result;
+        result.data.reserve( strval.size() );
+        for ( Char c : strval )
+            result.data.emplace_back( c );
+        return result;
+    }
+
+    case ValueType::STRUCT:
+    {
+        auto& left = as_struct();
+        auto* method = left.get_method( _array, true );
+        if ( !method )
+            ENGINE_PANIC( location, "can not convert struct [", IDSystem::get( left.parent_id ), "] to array" );
+
+        Value args[1] = { *this };
+        return engine.handle_func( location, *method, args, (Int) std::size( args ) ).to_array( location, engine );
+    }
+
+    case ValueType::ARRAY:
+        return as_array();
+
+    default:
+        ENGINE_PANIC( location, "can not convert [", type(), "] to array" );
+    }
+}
+
+dawn::RangeValue dawn::Value::to_range( Location const& location, Engine& engine ) const
+{
+    switch ( type() )
+    {
+    case ValueType::STRUCT:
+    {
+        auto& left = as_struct();
+        auto* method = left.get_method( _range, true );
+        if ( !method )
+            ENGINE_PANIC( location, "can not convert struct [", IDSystem::get( left.parent_id ), "] to range" );
+
+        Value args[1] = { *this };
+        return engine.handle_func( location, *method, args, (Int) std::size( args ) ).to_range( location, engine );
+    }
+
+    case ValueType::RANGE:
+        return as_range();
+
+    default:
+        ENGINE_PANIC( location, "can not convert [", type(), "] to range" );
     }
 }

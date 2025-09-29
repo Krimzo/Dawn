@@ -546,14 +546,9 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
     struc_value.parent_id = node.type_id;
 
     // Structure default initialization.
-    {
-        static const Int self_id = IDSystem::get( kw_self );
-        auto pop_handler = stack.push_from( RegisterRef<Frame>{} );
-        stack.current().set( self_id, value );
-        struc_value.fields.reserve( struc.fields.size() );
-        for ( auto& field : struc.fields )
-            struc_value.fields[field.id] = handle_expr( field.expr.value() ).clone();
-    }
+    struc_value.fields.reserve( struc.fields.size() );
+    for ( auto& field : struc.fields )
+        struc_value.fields[field.id] = create_default_value( node.location, field.type_id );
 
     // Structure argument initialization.
     if ( std::holds_alternative<StructNode::NamedInit>( node.init ) )
@@ -781,26 +776,36 @@ dawn::Value dawn::Engine::handle_ac_type_node( Location const& location, Value c
 
 dawn::Value dawn::Engine::create_default_value( Location const& location, Int typeid_ )
 {
-    static const Int _boolid = IDSystem::get( tp_bool );
-    static const Int _intid = IDSystem::get( tp_int );
-    static const Int _floatid = IDSystem::get( tp_float );
-    static const Int _charid = IDSystem::get( tp_char );
-    static const Int _stringid = IDSystem::get( tp_string );
+    static const Int _id_nothing = IDSystem::get( tp_nothing );
+    static const Int _id_bool = IDSystem::get( tp_bool );
+    static const Int _id_int = IDSystem::get( tp_int );
+    static const Int _id_float = IDSystem::get( tp_float );
+    static const Int _id_char = IDSystem::get( tp_char );
+    static const Int _id_string = IDSystem::get( tp_string );
+    static const Int _id_function = IDSystem::get( tp_function );
+    static const Int _id_array = IDSystem::get( tp_array );
+    static const Int _id_range = IDSystem::get( tp_range );
 
-    if ( typeid_ == _boolid )
+    if ( typeid_ == _id_nothing )
+        return Value{ Nothing{} };
+
+    else if ( typeid_ == _id_bool )
         return Value{ Bool{} };
 
-    else if ( typeid_ == _intid )
+    else if ( typeid_ == _id_int )
         return Value{ Int{} };
 
-    else if ( typeid_ == _floatid )
+    else if ( typeid_ == _id_float )
         return Value{ Float{} };
 
-    else if ( typeid_ == _charid )
+    else if ( typeid_ == _id_char )
         return Value{ Char{} };
 
-    else if ( typeid_ == _stringid )
-        return Value{ String{} };
+    else if ( typeid_ == _id_string )
+        return Value{ StringRef{} };
+
+    else if ( typeid_ == _id_function )
+        return Value{ FunctionValue{} };
 
     else if ( auto* enum_ptr = enums.get( typeid_ ) )
     {
@@ -817,6 +822,12 @@ dawn::Value dawn::Engine::create_default_value( Location const& location, Int ty
         node.type_id = typeid_;
         return handle_struct_node( node );
     }
+
+    else if ( typeid_ == _id_array )
+        return Value{ ArrayValue{} };
+
+    else if ( typeid_ == _id_range )
+        return Value{ RangeValue{} };
 
     else
         ENGINE_PANIC( location, "type [", IDSystem::get( typeid_ ), "] does not exist" );

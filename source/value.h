@@ -7,6 +7,11 @@
 
 namespace dawn
 {
+struct Nothing
+{
+    constexpr Nothing() = default;
+};
+
 struct DFunction
 {
     Vector<Function::Arg> args;
@@ -105,7 +110,7 @@ struct RangeValue
 
 struct Value
 {
-    Value() = default;
+    constexpr Value( Nothing value = {} ) {}
     explicit Value( Bool value );
     explicit Value( Int value );
     explicit Value( Float value );
@@ -158,11 +163,15 @@ struct Value
 
     Value op_range( Location const& location, Engine& engine, Value const& other ) const;
 
+    Nothing to_nothing( Location const& location, Engine& engine ) const;
     Bool to_bool( Location const& location, Engine& engine ) const;
     Int to_int( Location const& location, Engine& engine ) const;
     Float to_float( Location const& location, Engine& engine ) const;
     Char to_char( Location const& location, Engine& engine ) const;
     String to_string( Location const& location, Engine& engine ) const;
+    FunctionValue to_function( Location const& location, Engine& engine ) const;
+    ArrayValue to_array( Location const& location, Engine& engine ) const;
+    RangeValue to_range( Location const& location, Engine& engine ) const;
 
 private:
     struct Void {};
