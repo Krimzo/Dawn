@@ -3,13 +3,19 @@
 
 void dawn::Optimizer::optimize( Module& module )
 {
-    m_engine = Engine{};
+    reset();
     m_engine.load_mod( module );
     optimize_imports( module.imports );
     optimize_variables( module.variables );
     optimize_functions( module.functions );
     optimize_enums( module.enums );
     optimize_structs( module.structs );
+}
+
+void dawn::Optimizer::reset()
+{
+    m_engine = {};
+    m_ctime_funcs = m_engine.ctime_funcs();
 }
 
 void dawn::Optimizer::optimize_imports( Set<String>& imports )
@@ -222,6 +228,7 @@ void dawn::Optimizer::optimize_expr_loop( LoopNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_while( WhileNode& node, Node& out_node )
 {
+    // 1. if expr is always true convert to LoopNode
     optimize_expr( node.expr.value() );
     optimize_instr( node.scope.instr );
 }
@@ -255,9 +262,19 @@ void dawn::Optimizer::optimize_expr_id( IdentifierNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_call( CallNode& node, Node& out_node )
 {
-    optimize_expr( node.left_expr.value() );
+    Bool is_ctime = true;
+    auto& left_expr = node.left_expr.value();
+    optimize_expr( left_expr );
+    if ( left_expr.type() != NodeType::IDENTIFIER || !m_ctime_funcs.contains( std::get<IdentifierNode>( left_expr ).id ) )
+        is_ctime = false;
     for ( auto& arg : node.args )
+    {
         optimize_expr( arg );
+        if ( arg.type() != NodeType::VALUE )
+            is_ctime = false;
+    }
+    if ( is_ctime )
+        out_node.emplace<ValueNode>( node.location ).value = m_engine.handle_call_node( node );
 }
 
 void dawn::Optimizer::optimize_expr_index( IndexNode& node, Node& out_node )
@@ -298,14 +315,14 @@ void dawn::Optimizer::optimize_expr_array( ArrayNode& node, Node& out_node )
 {
     if ( std::holds_alternative<ArrayNode::ListInit>( node.init ) )
     {
-        Bool is_constexpr = true;
+        Bool is_ctime = true;
         for ( auto& element : std::get<ArrayNode::ListInit>( node.init ).elements )
         {
             optimize_expr( element );
             if ( element.type() != NodeType::VALUE )
-                is_constexpr = false;
+                is_ctime = false;
         }
-        if ( is_constexpr )
+        if ( is_ctime )
             out_node.emplace<ValueNode>( node.location ).value = m_engine.handle_array_node( node );
     }
     else
@@ -374,5 +391,6 @@ void dawn::Optimizer::optimize_expr_op( OperatorNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_as( AssignNode& node, Node& out_node )
 {
-    optimize_expr( node.sides[1] );
+    for ( auto& side : node.sides )
+        optimize_expr( side );
 }

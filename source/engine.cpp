@@ -58,16 +58,17 @@ void dawn::Engine::load_variable( Variable const& entry )
     add_var( entry.kind, entry.id, handle_expr( entry.expr.value() ) );
 }
 
-void dawn::Engine::bind_cfunc( Int id, CFunction cfunc )
+void dawn::Engine::bind_cfunc( Int id, Bool is_ctime, CFunction cfunc )
 {
     if ( stack.root().get( id ) )
         ENGINE_PANIC( Location{ Bad{} }, "object [", IDSystem::get( id ), "] already exists" );
+    if ( is_ctime )
+        m_ctime_funcs.insert( id );
 
     FunctionValue fv{};
     auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
     global.id = id;
     global.func = std::move( cfunc );
-
     stack.root().set( id, Value{ fv } );
 }
 
@@ -125,6 +126,11 @@ void dawn::Engine::bind_method( ValueType type, StringRef const& name, Bool is_c
             *method.self = self;
             return (Value) fv;
         } );
+}
+
+dawn::Set<dawn::Int> const& dawn::Engine::ctime_funcs() const
+{
+    return m_ctime_funcs;
 }
 
 dawn::Value dawn::Engine::handle_func( Location const& location, FunctionValue const& func, Value* args, Int arg_count )

@@ -34,7 +34,10 @@ private:
     };
 
     Engine m_engine;
+    Set<Int> m_ctime_funcs;
     Vector<Inlineable> m_inline;
+
+    void reset();
 
     void optimize_imports( Set<String>& imports );
     void optimize_variables( Vector<Variable>& vars );
