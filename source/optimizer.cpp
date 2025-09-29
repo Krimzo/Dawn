@@ -281,13 +281,21 @@ void dawn::Optimizer::optimize_expr_loop( LoopNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_while( WhileNode& node, Node& out_node )
 {
-    // 1. if expr is always true convert to LoopNode
-    optimize_expr( node.expr.value() );
+    auto& expr_node = node.expr.value();
+    optimize_expr( expr_node );
     optimize_instr( node.scope.instr );
+    if ( expr_node.type() == NodeType::VALUE )
+    {
+        if ( std::get<ValueNode>( expr_node ).value.to_bool( expr_node.location() ) )
+            out_node.emplace<LoopNode>( node.location ).scope = Scope{ std::move( node.scope ) };
+        else
+            out_node.emplace<Scope>();
+    }
 }
 
 void dawn::Optimizer::optimize_expr_for( ForNode& node, Node& out_node )
 {
+    // 1. ignore for if expr is value and size <= 0
     optimize_expr( node.expr.value() );
     optimize_instr( node.scope.instr );
 }
