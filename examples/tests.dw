@@ -12,7 +12,7 @@ func main()
 	print("Done.")
 }
 
-func assert(ref check, ref msg)
+func assert(bool& check, string& msg)
 {
 	if !check {
 		throw msg
@@ -21,11 +21,11 @@ func assert(ref check, ref msg)
 
 func var_test()
 {
-	var a = 2
-	var b = (
+	int! a = 2
+	int b = (
 		a + 1 * 2
 	)
-	ref c = b
+	int& c = b
 	c *= 2
 
 	assert(a == 2, "a is bad")
@@ -34,7 +34,7 @@ func var_test()
 
 func branch_test()
 {
-	var a = -2
+	int! a = -2
 	if a < 0 {
 		print(a, " is negative")
 	}
@@ -60,7 +60,7 @@ func branch_test()
 
 func loop_test()
 {
-	var counter = 0
+	int counter = 0
 	loop {
 		if counter == 2 {
 			counter += 1
@@ -96,7 +96,7 @@ func loop_test()
 
 func throw_test()
 {
-	var a = 5
+	int a = 5
 	try {
 		throw a
 	}
@@ -108,8 +108,8 @@ func throw_test()
 
 func lambda_test()
 {
-	var c = 12
-	var sum = `ref a, ref b`{
+	int! c = 12
+	function! sum = `int a, int b`{
 		return a + b + c
 	}
 	assert(sum(4, 3) == 19, "lambda is bad")
@@ -124,7 +124,7 @@ enum SomeEnum
 
 func enum_test()
 {
-	var first_val = SomeEnum::two
+	SomeEnum first_val = SomeEnum::two
 	print(first_val.value[2][1])
 	assert(SomeEnum::two == SomeEnum::two, "bad enum comparsion 1")
 	assert(SomeEnum::one != SomeEnum::two, "bad enum comparsion 2")
@@ -132,15 +132,15 @@ func enum_test()
 
 struct SomeStruct
 {
-	name = "some name"
-	age = 0
+	name : string
+	age : int
 
 	func who()
 	{
 		print(self)
 	}
 
-	oper + (ref age)
+	oper + (int age)
 	{
 		self.age += age
 		return self
@@ -154,8 +154,8 @@ struct SomeStruct
 
 func struct_test()
 {
-	let some_val1 = SomeStruct("nobody", 7)
-	var some_val2 = SomeStruct{ name =
+	SomeStruct some_val1 = SomeStruct("nobody", 7)
+	SomeStruct some_val2 = SomeStruct{ name =
 		"really "
 		+
 		"cool", age =
@@ -167,20 +167,20 @@ func struct_test()
 
 func array_test()
 {
-	var data = []
+	array data = []
 	data += [ int[2] + float[2 + 1] ]
 	data += [SomeStruct[2]]
 
 	data[data.count - 1][1].age = 17
 	print(data)
 
-	var str_val = string( data[data.count - 1][1] )
+	string! str_val = string( data[data.count - 1][1] )
 	print( str_val )
 }
 
 func cmplx_str_test()
 {
-	let a = 2
-	let b = 15
+	int! a = 2
+	int! b = 15
 	assert("{a} + {b} = {a + b}" == "2 + 15 = 17", "bad complex strings")
 }

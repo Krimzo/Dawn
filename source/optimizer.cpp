@@ -97,7 +97,7 @@ void dawn::Optimizer::optimize_instr( Vector<Node>& scope )
             continue;
 
         auto& var = std::get<VariableNode>( instr ).var;
-        if ( var.kind != VariableKind::LET && var.kind != VariableKind::REF )
+        if ( var.type.kind != VarType::Kind::CONSTANT && var.type.kind != VarType::Kind::REFERENCE )
         {
             m_inline.emplace_back( var.id );
             continue;

@@ -86,9 +86,9 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* arg
     return std::nullopt;
 }
 
-void dawn::Dawn::add_var( VariableKind kind, StringRef const& name, Value const& value ) noexcept
+void dawn::Dawn::add_var( Location const& location, VarType const& type, StringRef const& name, Value const& value ) noexcept
 {
-    engine.add_var( kind, IDSystem::get( name ), value );
+    engine.add_var( location, type, IDSystem::get( name ), value );
 }
 
 dawn::Value* dawn::Dawn::get_var( StringRef const& name ) noexcept

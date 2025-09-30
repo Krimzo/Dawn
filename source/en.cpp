@@ -18,17 +18,6 @@ std::ostream& dawn::operator<<( std::ostream& stream, TokenType type )
     return stream;
 }
 
-std::ostream& dawn::operator<<( std::ostream& stream, VariableKind kind )
-{
-    switch ( kind )
-    {
-    case VariableKind::LET: stream << kw_let; break;
-    case VariableKind::VAR: stream << kw_var; break;
-    case VariableKind::REF: stream << kw_ref; break;
-    }
-    return stream;
-}
-
 std::ostream& dawn::operator<<( std::ostream& stream, ValueType type )
 {
     switch ( type )

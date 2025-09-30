@@ -13,119 +13,18 @@ void dawn::Engine::load_standard_functions()
     /* TYPE */
     bind_cfunc( IDSystem::get( "typeid" ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
         {
-            if ( arg_count != 1 )
+            if ( arg_count == 1 )
+                return Value{ args[0].type_id() };
+            else
                 ENGINE_PANIC( location, "typeid expected 1 argument, but got ", arg_count );
-
-            switch ( args[0].type() )
-            {
-            case ValueType::NOTHING:
-            {
-                static const Value id = Value{ IDSystem::get( tp_nothing ) };
-                return id;
-            }
-
-            case ValueType::BOOL:
-            {
-                static const Value id = Value{ IDSystem::get( tp_bool ) };
-                return id;
-            }
-
-            case ValueType::INT:
-            {
-                static const Value id = Value{ IDSystem::get( tp_int ) };
-                return id;
-            }
-
-            case ValueType::FLOAT:
-            {
-                static const Value id = Value{ IDSystem::get( tp_float ) };
-                return id;
-            }
-
-            case ValueType::CHAR:
-            {
-                static const Value id = Value{ IDSystem::get( tp_char ) };
-                return id;
-            }
-
-            case ValueType::STRING:
-            {
-                static const Value id = Value{ IDSystem::get( tp_string ) };
-                return id;
-            }
-
-            case ValueType::FUNCTION:
-            {
-                static const Value id = Value{ IDSystem::get( tp_function ) };
-                return id;
-            }
-
-            case ValueType::ENUM:
-                return Value{ args[0].as_enum().parent_id };
-
-            case ValueType::STRUCT:
-                return Value{ args[0].as_struct().parent_id };
-
-            case ValueType::ARRAY:
-            {
-                static const Value id = Value{ IDSystem::get( tp_array ) };
-                return id;
-            }
-
-            case ValueType::RANGE:
-            {
-                static const Value id = Value{ IDSystem::get( tp_range ) };
-                return id;
-            }
-
-            default:
-                ENGINE_PANIC( location, "unknown value type: ", (Int) args[0].type() );
-            }
         } );
 
     bind_cfunc( IDSystem::get( "typename" ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
         {
-            if ( arg_count != 1 )
+            if ( arg_count == 1 )
+                return Value{ IDSystem::get( args[0].type_id() ) };
+            else
                 ENGINE_PANIC( location, "typename expected 1 argument, but got ", arg_count );
-
-            switch ( args[0].type() )
-            {
-            case ValueType::NOTHING:
-                return Value{ tp_nothing };
-
-            case ValueType::BOOL:
-                return Value{ tp_bool };
-
-            case ValueType::INT:
-                return Value{ tp_int };
-
-            case ValueType::FLOAT:
-                return Value{ tp_float };
-
-            case ValueType::CHAR:
-                return Value{ tp_char };
-
-            case ValueType::STRING:
-                return Value{ tp_string };
-
-            case ValueType::FUNCTION:
-                return Value{ tp_function };
-
-            case ValueType::ENUM:
-                return Value{ IDSystem::get( args[0].as_enum().parent_id ) };
-
-            case ValueType::STRUCT:
-                return Value{ IDSystem::get( args[0].as_struct().parent_id ) };
-
-            case ValueType::ARRAY:
-                return Value{ tp_array };
-
-            case ValueType::RANGE:
-                return Value{ tp_range };
-
-            default:
-                ENGINE_PANIC( location, "unknown value type: ", (Int) args[0].type() );
-            }
         } );
 
     /* CAST */

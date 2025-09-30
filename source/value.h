@@ -134,6 +134,7 @@ struct Value
     inline ArrayValue& as_array() const { return m_regref.cast<ArrayValue>().value(); }
     inline RangeValue& as_range() const { return m_regref.cast<RangeValue>().value(); }
 
+    Int type_id() const;
     void assign( Location const& location, Value const& other );
     Value clone() const;
 

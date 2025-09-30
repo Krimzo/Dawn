@@ -10,9 +10,6 @@ inline constexpr StringRef kw_func = "func";
 inline constexpr StringRef kw_cast = "cast";
 inline constexpr StringRef kw_oper = "oper";
 inline constexpr StringRef kw_return = "return";
-inline constexpr StringRef kw_let = "let";
-inline constexpr StringRef kw_var = "var";
-inline constexpr StringRef kw_ref = "ref";
 inline constexpr StringRef kw_if = "if";
 inline constexpr StringRef kw_elif = "elif";
 inline constexpr StringRef kw_else = "else";
@@ -42,6 +39,9 @@ inline constexpr StringRef tp_string = "string";
 inline constexpr StringRef tp_function = "function";
 inline constexpr StringRef tp_array = "array";
 inline constexpr StringRef tp_range = "range";
+
+inline constexpr StringRef vr_constant = "!";
+inline constexpr StringRef vr_reference = "&";
 
 inline constexpr StringRef op_add = "+";
 inline constexpr StringRef op_sub = "-";

@@ -55,7 +55,8 @@ void dawn::Engine::load_struct( Struct const& entry )
 
 void dawn::Engine::load_variable( Variable const& entry )
 {
-    add_var( entry.kind, entry.id, handle_expr( entry.expr.value() ) );
+    auto& expr = entry.expr.value();
+    add_var( expr.location(), entry.type, entry.id, handle_expr( expr ) );
 }
 
 void dawn::Engine::bind_cfunc( Int id, Bool is_ctime, CFunction cfunc )
@@ -84,11 +85,14 @@ dawn::Value dawn::Engine::call_func( Int id, Value* args, Int arg_count )
     return handle_func( Location::none, value->as_function(), args, arg_count );
 }
 
-void dawn::Engine::add_var( VariableKind kind, Int id, Value const& value )
+void dawn::Engine::add_var( Location const& location, VarType const& type, Int id, Value const& value )
 {
-    if ( kind == VariableKind::LET )
+    if ( type.type_id != value.type_id() )
+        ENGINE_PANIC( location, "can not init variable of type [", IDSystem::get( type.type_id ), "] with type [", IDSystem::get( value.type_id() ), "]" );
+
+    if ( type.kind == VarType::Kind::CONSTANT )
         stack.current().set( id, value.clone() );
-    else if ( kind == VariableKind::VAR )
+    else if ( type.kind == VarType::Kind::DEFAULT )
         stack.current().set( id, value.clone().unlock_const() );
     else
         stack.current().set( id, value );
@@ -151,7 +155,7 @@ dawn::Value dawn::Engine::handle_func( Location const& location, FunctionValue c
             func.is_lambda() ? func.as_lambda().frame : RegisterRef<Frame>{} );
 
         for ( Int i = 0; i < arg_count; i++ )
-            add_var( dfunc->args[i].kind, dfunc->args[i].id, args[i] );
+            add_var( location, dfunc->args[i].type, dfunc->args[i].id, args[i] );
 
         Opt<Value> retval;
         handle_scope( dfunc->body, retval, nullptr, nullptr );
@@ -284,7 +288,7 @@ dawn::Value dawn::Engine::handle_value_node( ValueNode const& node )
 
 void dawn::Engine::handle_var_node( VariableNode const& node )
 {
-    add_var( node.var.kind, node.var.id, handle_expr( node.var.expr.value() ) );
+    add_var( node.location, node.var.type, node.var.id, handle_expr( node.var.expr.value() ) );
 }
 
 dawn::Value dawn::Engine::handle_id_node( IdentifierNode const& node )
@@ -379,7 +383,7 @@ void dawn::Engine::handle_try_node( TryNode const& node, Opt<Value>& retval, Boo
     catch ( Value const& value )
     {
         auto pop_handler = stack.push();
-        add_var( VariableKind::REF, node.catch_id, value );
+        stack.current().set( node.catch_id, value );
         handle_scope( node.catch_scope, retval, didbrk, didcon );
     }
 }
@@ -468,7 +472,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            add_var( VariableKind::REF, node.var_id, Value{ i } );
+            stack.current().set( node.var_id, Value{ i } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -484,7 +488,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            add_var( VariableKind::REF, node.var_id, Value{ c } );
+            stack.current().set( node.var_id, Value{ c } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -500,7 +504,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            add_var( VariableKind::REF, node.var_id, value );
+            stack.current().set( node.var_id, value );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }

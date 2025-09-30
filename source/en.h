@@ -96,13 +96,6 @@ enum struct NodeType
     ASSIGN,
 };
 
-enum struct VariableKind
-{
-    LET = 0,
-    VAR,
-    REF,
-};
-
 enum struct ValueType
 {
     NOTHING = 0,
@@ -126,6 +119,5 @@ enum struct FrameType
 };
 
 std::ostream& operator<<( std::ostream& stream, TokenType type );
-std::ostream& operator<<( std::ostream& stream, VariableKind kind );
 std::ostream& operator<<( std::ostream& stream, ValueType type );
 }
