@@ -1,10 +1,10 @@
 func main()
 {
-    let result = fib(30)
+    int result = fib(30)
     print(result)
 }
 
-func fib(ref n)
+func fib(int& n)
 {
     if n <= 1 {
         return n

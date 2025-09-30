@@ -55,7 +55,8 @@ void dawn::Engine::load_struct( Struct const& entry )
 
 void dawn::Engine::load_variable( Variable const& entry )
 {
-    add_var( entry.kind, entry.id, handle_expr( entry.expr.value() ) );
+    auto& expr = entry.expr.value();
+    add_var( expr.location(), entry.type, entry.id, handle_expr( expr ) );
 }
 
 void dawn::Engine::bind_cfunc( Int id, Bool is_ctime, CFunction cfunc )
@@ -84,11 +85,14 @@ dawn::Value dawn::Engine::call_func( Int id, Value* args, Int arg_count )
     return handle_func( Location::none, value->as_function(), args, arg_count );
 }
 
-void dawn::Engine::add_var( VariableKind kind, Int id, Value const& value )
+void dawn::Engine::add_var( Location const& location, VarType const& type, Int id, Value const& value )
 {
-    if ( kind == VariableKind::LET )
+    if ( type.type_id != value.type_id() )
+        ENGINE_PANIC( location, "can not init variable of type [", IDSystem::get( type.type_id ), "] with type [", IDSystem::get( value.type_id() ), "]" );
+
+    if ( type.kind == VarType::Kind::CONSTANT )
         stack.current().set( id, value.clone() );
-    else if ( kind == VariableKind::VAR )
+    else if ( type.kind == VarType::Kind::VARIABLE )
         stack.current().set( id, value.clone().unlock_const() );
     else
         stack.current().set( id, value );
@@ -101,27 +105,27 @@ dawn::Value* dawn::Engine::get_var( Int id )
 
 void dawn::Engine::bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func )
 {
-    member_generators[(Int) type].set( IDSystem::get( name ), [=]( Location const& location, Value const& self ) -> Value
+    member_generators[(Int) type].set( IDSystem::get( name ), [func]( Location const& location, Engine& engine, Value const& self ) -> Value
         {
-            return func( location, const_cast<Value&>( self ) );
+            return func( location, engine, const_cast<Value&>( self ) );
         } );
 }
 
-void dawn::Engine::bind_method( ValueType type, StringRef const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body )
+void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body )
 {
     const Int id = IDSystem::get( name );
-    member_generators[(Int) type].set( id, [=]( Location const& location, Value const& self ) -> Value
+    member_generators[(Int) type].set( id, [name, is_const, expected_args, body, id]( Location const& _, Engine& __, Value const& self ) -> Value
         {
             FunctionValue fv{};
             auto& method = fv.data.emplace<FunctionValue::AsMethod>();
             method.id = id;
-            method.func = [=]( Location const& location, Value* args, Int arg_count ) -> Value
+            method.func = [name, is_const, expected_args, body, self]( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
                 {
                     if ( !is_const && self.is_const() )
                         ENGINE_PANIC( location, "can not call [", name, "] on a const value" );
                     if ( ( 1 + expected_args ) != arg_count )
                         ENGINE_PANIC( location, "method [", name, "] expects self + ", expected_args, " arguments" );
-                    return body( location, args[0], args + 1 );
+                    return body( location, engine, args[0], args + 1 );
                 };
             *method.self = self;
             return (Value) fv;
@@ -151,7 +155,7 @@ dawn::Value dawn::Engine::handle_func( Location const& location, FunctionValue c
             func.is_lambda() ? func.as_lambda().frame : RegisterRef<Frame>{} );
 
         for ( Int i = 0; i < arg_count; i++ )
-            add_var( dfunc->args[i].kind, dfunc->args[i].id, args[i] );
+            add_var( location, dfunc->args[i].type, dfunc->args[i].id, args[i] );
 
         Opt<Value> retval;
         handle_scope( dfunc->body, retval, nullptr, nullptr );
@@ -160,7 +164,7 @@ dawn::Value dawn::Engine::handle_func( Location const& location, FunctionValue c
     else
     {
         auto& cfunc = *func.cfunction();
-        return cfunc( location, args, arg_count );
+        return cfunc( location, *this, args, arg_count );
     }
 }
 
@@ -284,7 +288,7 @@ dawn::Value dawn::Engine::handle_value_node( ValueNode const& node )
 
 void dawn::Engine::handle_var_node( VariableNode const& node )
 {
-    add_var( node.var.kind, node.var.id, handle_expr( node.var.expr.value() ) );
+    add_var( node.location, node.var.type, node.var.id, handle_expr( node.var.expr.value() ) );
 }
 
 dawn::Value dawn::Engine::handle_id_node( IdentifierNode const& node )
@@ -379,7 +383,7 @@ void dawn::Engine::handle_try_node( TryNode const& node, Opt<Value>& retval, Boo
     catch ( Value const& value )
     {
         auto pop_handler = stack.push();
-        add_var( VariableKind::REF, node.catch_id, value );
+        stack.current().set( node.catch_id, value );
         handle_scope( node.catch_scope, retval, didbrk, didcon );
     }
 }
@@ -468,7 +472,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            add_var( VariableKind::REF, node.var_id, Value{ i } );
+            stack.current().set( node.var_id, Value{ i } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -484,7 +488,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            add_var( VariableKind::REF, node.var_id, Value{ c } );
+            stack.current().set( node.var_id, Value{ c } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -500,7 +504,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            add_var( VariableKind::REF, node.var_id, value );
+            stack.current().set( node.var_id, value );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -771,7 +775,7 @@ dawn::Value dawn::Engine::handle_ac_type_node( Location const& location, Value c
     auto* generator_ptr = member_generators[(Int) self.type()].get( right_id );
     if ( !generator_ptr )
         ENGINE_PANIC( location, "type [", self.type(), "] does not have member [", IDSystem::get( right_id ), "]" );
-    return ( *generator_ptr )( location, self );
+    return ( *generator_ptr )( location, *this, self );
 }
 
 dawn::Value dawn::Engine::create_default_value( Location const& location, Int typeid_ )

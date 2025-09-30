@@ -8,8 +8,8 @@ namespace dawn
 {
 struct Engine
 {
-    using CustomMemberFunc = Func<Value( Location const&, Value& )>;
-    using CustomMethodFunc = Func<Value( Location const&, Value&, Value* )>;
+    using CustomMemberFunc = Func<Value( Location const&, Engine&, Value& )>;
+    using CustomMethodFunc = Func<Value( Location const&, Engine&, Value&, Value* )>;
 
     friend struct Value;
     friend struct EnumValue;
@@ -31,11 +31,11 @@ struct Engine
     void bind_cfunc( Int id, Bool is_ctime, CFunction cfunc );
     Value call_func( Int id, Value* args, Int arg_count );
 
-    void add_var( VariableKind kind, Int id, Value const& value );
+    void add_var( Location const& location, VarType const& type, Int id, Value const& value );
     Value* get_var( Int id );
 
     void bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func );
-    void bind_method( ValueType type, StringRef const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body );
+    void bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body );
 
     Set<Int> const& ctime_funcs() const;
 

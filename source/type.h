@@ -9,9 +9,22 @@
 
 namespace dawn
 {
+struct VarType
+{
+    enum struct Kind
+    {
+        CONSTANT = 0,
+        VARIABLE,
+        REFERENCE,
+    };
+
+    Int type_id = 0;
+    Kind kind{};
+};
+
 struct Variable
 {
-    VariableKind kind{};
+    VarType type;
     Int id = 0;
     NodeRef expr;
 };
@@ -25,7 +38,7 @@ struct Function
 {
     struct Arg
     {
-        VariableKind kind;
+        VarType type;
         Int id = 0;
     };
 
@@ -62,4 +75,7 @@ struct Struct
 
     Bool contains( Int id ) const;
 };
+
+std::ostream& operator<<( std::ostream& stream, VarType::Kind kind );
+std::ostream& operator<<( std::ostream& stream, VarType const& type );
 }

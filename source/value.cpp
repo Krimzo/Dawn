@@ -118,6 +118,7 @@ dawn::StructValue& dawn::StructValue::operator=( StructValue const& other )
 {
     if ( this != &other )
     {
+        parent_id = other.parent_id;
         fields.clear();
         fields.reserve( other.fields.size() );
         for ( auto& [key, val] : other.fields )
@@ -245,6 +246,75 @@ dawn::Value::Value( RangeValue const& value )
     : m_regref( range_pool().new_register().cast<Void>() ), m_type( ValueType::RANGE )
 {
     m_regref.cast<RangeValue>().value() = value;
+}
+
+dawn::Int dawn::Value::type_id() const
+{
+    switch ( type() )
+    {
+    case ValueType::NOTHING:
+    {
+        static const Int id = IDSystem::get( tp_nothing );
+        return id;
+    }
+
+    case ValueType::BOOL:
+    {
+        static const Int id = IDSystem::get( tp_bool );
+        return id;
+    }
+
+    case ValueType::INT:
+    {
+        static const Int id = IDSystem::get( tp_int );
+        return id;
+    }
+
+    case ValueType::FLOAT:
+    {
+        static const Int id = IDSystem::get( tp_float );
+        return id;
+    }
+
+    case ValueType::CHAR:
+    {
+        static const Int id = IDSystem::get( tp_char );
+        return id;
+    }
+
+    case ValueType::STRING:
+    {
+        static const Int id = IDSystem::get( tp_string );
+        return id;
+    }
+
+    case ValueType::FUNCTION:
+    {
+        static const Int id = IDSystem::get( tp_function );
+        return id;
+    }
+
+    case ValueType::ENUM:
+        return as_enum().parent_id;
+
+    case ValueType::STRUCT:
+        return as_struct().parent_id;
+
+    case ValueType::ARRAY:
+    {
+        static const Int id = IDSystem::get( tp_array );
+        return id;
+    }
+
+    case ValueType::RANGE:
+    {
+        static const Int id = IDSystem::get( tp_range );
+        return id;
+    }
+
+    default:
+        return 0;
+    }
 }
 
 void dawn::Value::assign( Location const& location, Value const& other )
@@ -1178,8 +1248,8 @@ dawn::String dawn::Value::to_string( Location const& location, Engine& engine ) 
             if ( !dfunc->args.empty() )
             {
                 for ( Int i = 0; i < (Int) dfunc->args.size() - 1; i++ )
-                    stream << dfunc->args[i].kind << ' ' << IDSystem::get( dfunc->args[i].id ) << op_split << ' ';
-                stream << dfunc->args.back().kind << ' ' << IDSystem::get( dfunc->args.back().id );
+                    stream << dfunc->args[i].type << ' ' << IDSystem::get( dfunc->args[i].id ) << op_split << ' ';
+                stream << dfunc->args.back().type << ' ' << IDSystem::get( dfunc->args.back().id );
             }
         }
 

@@ -11,208 +11,107 @@ static thread_local std::mt19937_64 RAND_ENGINE = []
 void dawn::Engine::load_standard_functions()
 {
     /* TYPE */
-    bind_cfunc( IDSystem::get( "typeid" ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "typeid" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
-            if ( arg_count != 1 )
+            if ( arg_count == 1 )
+                return Value{ args[0].type_id() };
+            else
                 ENGINE_PANIC( location, "typeid expected 1 argument, but got ", arg_count );
-
-            switch ( args[0].type() )
-            {
-            case ValueType::NOTHING:
-            {
-                static const Value id = Value{ IDSystem::get( tp_nothing ) };
-                return id;
-            }
-
-            case ValueType::BOOL:
-            {
-                static const Value id = Value{ IDSystem::get( tp_bool ) };
-                return id;
-            }
-
-            case ValueType::INT:
-            {
-                static const Value id = Value{ IDSystem::get( tp_int ) };
-                return id;
-            }
-
-            case ValueType::FLOAT:
-            {
-                static const Value id = Value{ IDSystem::get( tp_float ) };
-                return id;
-            }
-
-            case ValueType::CHAR:
-            {
-                static const Value id = Value{ IDSystem::get( tp_char ) };
-                return id;
-            }
-
-            case ValueType::STRING:
-            {
-                static const Value id = Value{ IDSystem::get( tp_string ) };
-                return id;
-            }
-
-            case ValueType::FUNCTION:
-            {
-                static const Value id = Value{ IDSystem::get( tp_function ) };
-                return id;
-            }
-
-            case ValueType::ENUM:
-                return Value{ args[0].as_enum().parent_id };
-
-            case ValueType::STRUCT:
-                return Value{ args[0].as_struct().parent_id };
-
-            case ValueType::ARRAY:
-            {
-                static const Value id = Value{ IDSystem::get( tp_array ) };
-                return id;
-            }
-
-            case ValueType::RANGE:
-            {
-                static const Value id = Value{ IDSystem::get( tp_range ) };
-                return id;
-            }
-
-            default:
-                ENGINE_PANIC( location, "unknown value type: ", (Int) args[0].type() );
-            }
         } );
 
-    bind_cfunc( IDSystem::get( "typename" ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "typename" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
-            if ( arg_count != 1 )
+            if ( arg_count == 1 )
+                return Value{ IDSystem::get( args[0].type_id() ) };
+            else
                 ENGINE_PANIC( location, "typename expected 1 argument, but got ", arg_count );
-
-            switch ( args[0].type() )
-            {
-            case ValueType::NOTHING:
-                return Value{ tp_nothing };
-
-            case ValueType::BOOL:
-                return Value{ tp_bool };
-
-            case ValueType::INT:
-                return Value{ tp_int };
-
-            case ValueType::FLOAT:
-                return Value{ tp_float };
-
-            case ValueType::CHAR:
-                return Value{ tp_char };
-
-            case ValueType::STRING:
-                return Value{ tp_string };
-
-            case ValueType::FUNCTION:
-                return Value{ tp_function };
-
-            case ValueType::ENUM:
-                return Value{ IDSystem::get( args[0].as_enum().parent_id ) };
-
-            case ValueType::STRUCT:
-                return Value{ IDSystem::get( args[0].as_struct().parent_id ) };
-
-            case ValueType::ARRAY:
-                return Value{ tp_array };
-
-            case ValueType::RANGE:
-                return Value{ tp_range };
-
-            default:
-                ENGINE_PANIC( location, "unknown value type: ", (Int) args[0].type() );
-            }
         } );
 
     /* CAST */
-    bind_cfunc( IDSystem::get( tp_nothing ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( tp_nothing ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_nothing( location, *this );
+                return (Value) args[0].to_nothing( location, engine );
             else if ( arg_count == 0 )
                 return Value{ Nothing{} };
             else
                 ENGINE_PANIC( location, tp_nothing, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( tp_bool ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( tp_bool ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_bool( location, *this );
+                return (Value) args[0].to_bool( location, engine );
             else if ( arg_count == 0 )
                 return Value{ Bool{} };
             else
                 ENGINE_PANIC( location, tp_bool, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( tp_int ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( tp_int ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_int( location, *this );
+                return (Value) args[0].to_int( location, engine );
             else if ( arg_count == 0 )
                 return Value{ Int{} };
             else
                 ENGINE_PANIC( location, tp_int, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( tp_float ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( tp_float ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_float( location, *this );
+                return (Value) args[0].to_float( location, engine );
             else if ( arg_count == 0 )
                 return Value{ Float{} };
             else
                 ENGINE_PANIC( location, tp_float, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( tp_char ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( tp_char ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_char( location, *this );
+                return (Value) args[0].to_char( location, engine );
             else if ( arg_count == 0 )
                 return Value{ Char{} };
             else
                 ENGINE_PANIC( location, tp_char, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( tp_string ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( tp_string ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_string( location, *this );
+                return (Value) args[0].to_string( location, engine );
             else if ( arg_count == 0 )
                 return Value{ StringRef{} };
             else
                 ENGINE_PANIC( location, tp_string, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( tp_function ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( tp_function ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_function( location, *this );
+                return (Value) args[0].to_function( location, engine );
             else if ( arg_count == 0 )
                 return Value{ FunctionValue{} };
             else
                 ENGINE_PANIC( location, tp_function, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( tp_array ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( tp_array ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_array( location, *this );
+                return (Value) args[0].to_array( location, engine );
             else if ( arg_count == 0 )
                 return Value{ ArrayValue{} };
             else
                 ENGINE_PANIC( location, tp_array, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( tp_range ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( tp_range ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_range( location, *this );
+                return (Value) args[0].to_range( location, engine );
             else if ( arg_count == 0 )
                 return Value{ RangeValue{} };
             else
@@ -220,42 +119,42 @@ void dawn::Engine::load_standard_functions()
         } );
 
     /* SYSTEM */
-    bind_cfunc( IDSystem::get( "exit" ), false, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "exit" ), false, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                std::exit( (int) args[0].to_int( location, *this ) );
+                std::exit( (int) args[0].to_int( location, engine ) );
             else
                 ENGINE_PANIC( location, "exit() expects 1 argument, but got ", arg_count );
             return {};
         } );
 
     /* UTILITY */
-    bind_cfunc( IDSystem::get( "format" ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "format" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             StringStream stream;
             for ( Int i = 0; i < arg_count; i++ )
-                stream << args[i].to_string( location, *this );
+                stream << args[i].to_string( location, engine );
             return (Value) stream.str();
         } );
 
-    bind_cfunc( IDSystem::get( "print" ), false, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "print" ), false, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             StringStream stream;
             for ( Int i = 0; i < arg_count; i++ )
-                stream << args[i].to_string( location, *this );
+                stream << args[i].to_string( location, engine );
             print( stream.str() );
             return Value{};
         } );
 
-    bind_cfunc( IDSystem::get( "rand_int" ), false, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "rand_int" ), false, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) Int( RAND_ENGINE() % args[0].to_int( location, *this ) );
+                return (Value) Int( RAND_ENGINE() % args[0].to_int( location, engine ) );
             else
                 ENGINE_PANIC( location, "rand_int() expects 1 argument, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( "rand_flt" ), false, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "rand_flt" ), false, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 0 )
                 return (Value) ( (Float) RAND_ENGINE() / UINT64_MAX );
@@ -264,14 +163,14 @@ void dawn::Engine::load_standard_functions()
         } );
 
     /* MATH */
-    bind_cfunc( IDSystem::get( "min" ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "min" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 2 )
             {
                 if ( args[0].type() == ValueType::INT )
-                    return (Value) std::min( args[0].to_int( location, *this ), args[1].to_int( location, *this ) );
+                    return (Value) std::min( args[0].to_int( location, engine ), args[1].to_int( location, engine ) );
                 else if ( args[0].type() == ValueType::FLOAT )
-                    return (Value) std::min( args[0].to_float( location, *this ), args[1].to_float( location, *this ) );
+                    return (Value) std::min( args[0].to_float( location, engine ), args[1].to_float( location, engine ) );
                 else
                     ENGINE_PANIC( location, "min() expects an int or float" );
             }
@@ -279,14 +178,14 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, "min() expects 2 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( "max" ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "max" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 2 )
             {
                 if ( args[0].type() == ValueType::INT )
-                    return (Value) std::max( args[0].to_int( location, *this ), args[1].to_int( location, *this ) );
+                    return (Value) std::max( args[0].to_int( location, engine ), args[1].to_int( location, engine ) );
                 else if ( args[0].type() == ValueType::FLOAT )
-                    return (Value) std::max( args[0].to_float( location, *this ), args[1].to_float( location, *this ) );
+                    return (Value) std::max( args[0].to_float( location, engine ), args[1].to_float( location, engine ) );
                 else
                     ENGINE_PANIC( location, "max() expects an int or float" );
             }
@@ -294,14 +193,14 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, "max() expects 2 arguments, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( "abs" ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "abs" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
             {
                 if ( args[0].type() == ValueType::INT )
-                    return (Value) std::abs( args[0].to_int( location, *this ) );
+                    return (Value) std::abs( args[0].to_int( location, engine ) );
                 else if ( args[0].type() == ValueType::FLOAT )
-                    return (Value) std::abs( args[0].to_float( location, *this ) );
+                    return (Value) std::abs( args[0].to_float( location, engine ) );
                 else
                     ENGINE_PANIC( location, "abs() expects an int or float" );
             }
@@ -309,26 +208,26 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, "abs() expects 1 argument, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( "sqrt" ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "sqrt" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) std::sqrt( args[0].to_float( location, *this ) );
+                return (Value) std::sqrt( args[0].to_float( location, engine ) );
             else
                 ENGINE_PANIC( location, "sqrt() expects 1 argument, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( "sin" ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "sin" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) std::sin( args[0].to_float( location, *this ) );
+                return (Value) std::sin( args[0].to_float( location, engine ) );
             else
                 ENGINE_PANIC( location, "sin() expects 1 argument, but got ", arg_count );
         } );
 
-    bind_cfunc( IDSystem::get( "cos" ), true, [this]( Location const& location, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( "cos" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) std::cos( args[0].to_float( location, *this ) );
+                return (Value) std::cos( args[0].to_float( location, engine ) );
             else
                 ENGINE_PANIC( location, "cos() expects 1 argument, but got ", arg_count );
         } );
@@ -337,36 +236,36 @@ void dawn::Engine::load_standard_functions()
 void dawn::Engine::load_standard_members()
 {
     // Strings.
-    bind_member( ValueType::STRING, "count", [this]( Location const& location, Value& self ) -> Value
+    bind_member( ValueType::STRING, "count", []( Location const& location, Engine& engine, Value& self ) -> Value
         {
             return (Value) (Int) self.as_string().size();
         } );
 
-    bind_method( ValueType::STRING, "push", false, 1, [this]( Location const& location, Value& self, Value* args ) -> Value
+    bind_method( ValueType::STRING, "push", false, 1, []( Location const& location, Engine& engine, Value& self, Value* args ) -> Value
         {
-            self.as_string().push_back( args[0].to_char( location, *this ) );
+            self.as_string().push_back( args[0].to_char( location, engine ) );
             return self;
         } );
 
-    bind_method( ValueType::STRING, "pop", false, 0, [this]( Location const& location, Value& self, Value* args ) -> Value
+    bind_method( ValueType::STRING, "pop", false, 0, []( Location const& location, Engine& engine, Value& self, Value* args ) -> Value
         {
             self.as_string().pop_back();
             return self;
         } );
 
-    bind_method( ValueType::STRING, "find", true, 1, [this]( Location const& location, Value& self, Value* args ) -> Value
+    bind_method( ValueType::STRING, "find", true, 1, []( Location const& location, Engine& engine, Value& self, Value* args ) -> Value
         {
             auto& self_str = self.as_string();
-            size_t index = self_str.find( args[0].to_string( location, *this ) );
+            size_t index = self_str.find( args[0].to_string( location, engine ) );
             return Value{ Int( index ) };
         } );
 
-    bind_method( ValueType::STRING, "set", false, 2, [this]( Location const& location, Value& self, Value* args ) -> Value
+    bind_method( ValueType::STRING, "set", false, 2, []( Location const& location, Engine& engine, Value& self, Value* args ) -> Value
         {
-            const Int index = args[0].to_int( location, *this );
+            const Int index = args[0].to_int( location, engine );
             if ( index < 0 )
                 ENGINE_PANIC( location, "string->set() index must be positive" );
-            const String str = args[1].to_string( location, *this );
+            const String str = args[1].to_string( location, engine );
             auto& self_str = self.as_string();
             self_str.resize( std::max( index + str.size(), self_str.size() ) );
             std::memcpy( &self_str[index], str.c_str(), str.size() * sizeof( Char ) );
@@ -374,49 +273,49 @@ void dawn::Engine::load_standard_members()
         } );
 
     // Enums.
-    bind_member( ValueType::ENUM, "value", [this]( Location const& location, Value& self ) -> Value
+    bind_member( ValueType::ENUM, "value", []( Location const& location, Engine& engine, Value& self ) -> Value
         {
             return *self.as_enum().value;
         } );
 
     // Arrays.
-    bind_member( ValueType::ARRAY, "count", [this]( Location const& location, Value& self ) -> Value
+    bind_member( ValueType::ARRAY, "count", []( Location const& location, Engine& engine, Value& self ) -> Value
         {
             return (Value) (Int) self.as_array().data.size();
         } );
 
-    bind_method( ValueType::ARRAY, "push", false, 1, [this]( Location const& location, Value& self, Value* args ) -> Value
+    bind_method( ValueType::ARRAY, "push", false, 1, []( Location const& location, Engine& engine, Value& self, Value* args ) -> Value
         {
             self.as_array().data.emplace_back( args[0] ).unlock_const();
             return self;
         } );
 
-    bind_method( ValueType::ARRAY, "pop", false, 0, [this]( Location const& location, Value& self, Value* args ) -> Value
+    bind_method( ValueType::ARRAY, "pop", false, 0, []( Location const& location, Engine& engine, Value& self, Value* args ) -> Value
         {
             self.as_array().data.pop_back();
             return self;
         } );
 
-    bind_method( ValueType::ARRAY, "find", true, 1, [this]( Location const& location, Value& self, Value* args ) -> Value
+    bind_method( ValueType::ARRAY, "find", true, 1, []( Location const& location, Engine& engine, Value& self, Value* args ) -> Value
         {
             auto& self_arr = self.as_array().data;
             auto& to_find = args[0];
             for ( Int i = 0; i < (Int) self_arr.size(); i++ )
             {
                 auto& element = self_arr[i];
-                if ( element.type() == to_find.type() && element.op_eq( location, *this, to_find ).as_bool() )
+                if ( element.type() == to_find.type() && element.op_eq( location, engine, to_find ).as_bool() )
                     return Value{ i };
             }
             return Value{ Int( -1 ) };
         } );
 
     // Ranges.
-    bind_member( ValueType::RANGE, "start", [this]( Location const& location, Value& self ) -> Value
+    bind_member( ValueType::RANGE, "start", []( Location const& location, Engine& engine, Value& self ) -> Value
         {
             return (Value) self.as_range().start_incl;
         } );
 
-    bind_member( ValueType::RANGE, "end", [this]( Location const& location, Value& self ) -> Value
+    bind_member( ValueType::RANGE, "end", []( Location const& location, Engine& engine, Value& self ) -> Value
         {
             return (Value) self.as_range().end_excl;
         } );

@@ -10,9 +10,6 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) kw_cast,
         (String) kw_oper,
         (String) kw_return,
-        (String) kw_let,
-        (String) kw_var,
-        (String) kw_ref,
         (String) kw_if,
         (String) kw_elif,
         (String) kw_else,
@@ -45,6 +42,8 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) tp_range,
     };
     result.operators = {
+        (String) vr_variable,
+        (String) vr_reference,
         (String) op_add,
         (String) op_sub,
         (String) op_mul,

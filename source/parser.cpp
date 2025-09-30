@@ -84,13 +84,24 @@ void dawn::Parser::parse( Vector<Token>& tokens, Module& module )
         {
             parse_global_function( it, module );
         }
-        else if ( it->value == kw_let || it->value == kw_var || it->value == kw_ref )
+        else if ( is_variable( it ) )
         {
             parse_global_variable( it, module );
         }
         else
             PARSER_PANIC( *it, "not allowed in global scope or allowed only 1 instance of" );
     }
+}
+
+dawn::Bool dawn::Parser::is_variable( TokenIterator const& it )
+{
+    if ( it->type != TokenType::TYPE )
+        return false;
+    TokenIterator next = it;
+    ++next;
+    return next->value == vr_variable
+        || next->value == vr_reference
+        || next->type == TokenType::NAME;
 }
 
 void dawn::Parser::parse_import( TokenIterator& it, Module& module )
@@ -151,6 +162,9 @@ void dawn::Parser::parse_global_variable( TokenIterator& it, Module& module )
     Variable variable;
     parse_variable( it, variable );
 
+    if ( variable.type.kind != VarType::Kind::CONSTANT )
+        PARSER_PANIC( *first_it, "global variables must be const" );
+
     if ( module.contains_id( variable.id ) )
         PARSER_PANIC( *first_it, "name [", IDSystem::get( variable.id ), "] already in use" );
 
@@ -201,7 +215,8 @@ void dawn::Parser::parse_struct( TokenIterator& it, Struct& struc )
                 PARSER_PANIC( *it, "struct method [", IDSystem::get( method.id ), "] already defined" );
 
             auto& self_var = *method.args.emplace( method.args.begin() );
-            self_var.kind = VariableKind::REF;
+            self_var.type.type_id = struc.id;
+            self_var.type.kind = VarType::Kind::REFERENCE;
             self_var.id = IDSystem::get( kw_self );
             struc.methods.push_back( method );
         }
@@ -213,7 +228,8 @@ void dawn::Parser::parse_struct( TokenIterator& it, Struct& struc )
                 PARSER_PANIC( *it, "struct cast [", IDSystem::get( cast.id ), "] already defined" );
 
             auto& self_var = *cast.args.emplace( cast.args.begin() );
-            self_var.kind = VariableKind::REF;
+            self_var.type.type_id = struc.id;
+            self_var.type.kind = VarType::Kind::REFERENCE;
             self_var.id = IDSystem::get( kw_self );
             struc.methods.push_back( cast );
         }
@@ -225,7 +241,8 @@ void dawn::Parser::parse_struct( TokenIterator& it, Struct& struc )
                 PARSER_PANIC( *it, "struct operator [", IDSystem::get( op.id ), "] already defined" );
 
             auto& self_var = *op.args.emplace( op.args.begin() );
-            self_var.kind = VariableKind::REF;
+            self_var.type.type_id = struc.id;
+            self_var.type.kind = VarType::Kind::REFERENCE;
             self_var.id = IDSystem::get( kw_self );
             struc.methods.push_back( op );
         }
@@ -303,15 +320,23 @@ void dawn::Parser::parse_function( TokenIterator& it, Function& function )
     {
         auto& arg = function.args.emplace_back();
 
-        if ( it->value == kw_let )
-            arg.kind = VariableKind::LET;
-        else if ( it->value == kw_var )
-            arg.kind = VariableKind::VAR;
-        else if ( it->value == kw_ref )
-            arg.kind = VariableKind::REF;
-        else
-            PARSER_PANIC( *it, "expected let, var or ref keyword" );
+        if ( it->type != TokenType::TYPE )
+            PARSER_PANIC( *it, "expected argument type" );
+        arg.type.type_id = IDSystem::get( it->value );
         ++it;
+
+        if ( it->value == vr_variable )
+        {
+            arg.type.kind = VarType::Kind::VARIABLE;
+            ++it;
+        }
+        else if ( it->value == vr_reference )
+        {
+            arg.type.kind = VarType::Kind::REFERENCE;
+            ++it;
+        }
+        else
+            arg.type.kind = VarType::Kind::CONSTANT;
 
         if ( it->type != TokenType::NAME )
             PARSER_PANIC( *it, "expected arg name" );
@@ -376,15 +401,23 @@ void dawn::Parser::parse_operator( TokenIterator& it, Function& operat )
     {
         auto& arg = operat.args.emplace_back();
 
-        if ( it->value == kw_let )
-            arg.kind = VariableKind::LET;
-        else if ( it->value == kw_var )
-            arg.kind = VariableKind::VAR;
-        else if ( it->value == kw_ref )
-            arg.kind = VariableKind::REF;
-        else
-            PARSER_PANIC( *it, "expected let, var or ref keyword" );
+        if ( it->type != TokenType::TYPE )
+            PARSER_PANIC( *it, "expected argument type" );
+        arg.type.type_id = IDSystem::get( it->value );
         ++it;
+
+        if ( it->value == vr_variable )
+        {
+            arg.type.kind = VarType::Kind::VARIABLE;
+            ++it;
+        }
+        else if ( it->value == vr_reference )
+        {
+            arg.type.kind = VarType::Kind::REFERENCE;
+            ++it;
+        }
+        else
+            arg.type.kind = VarType::Kind::CONSTANT;
 
         if ( it->type != TokenType::NAME )
             PARSER_PANIC( *it, "expected arg name" );
@@ -432,15 +465,23 @@ void dawn::Parser::parse_operator( TokenIterator& it, Function& operat )
 
 void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable )
 {
-    if ( it->value == kw_let )
-        variable.kind = VariableKind::LET;
-    else if ( it->value == kw_var )
-        variable.kind = VariableKind::VAR;
-    else if ( it->value == kw_ref )
-        variable.kind = VariableKind::REF;
-    else
-        PARSER_PANIC( *it, "expected let, var or ref keyword" );
+    if ( it->type != TokenType::TYPE )
+        PARSER_PANIC( *it, "expected variable type" );
+    variable.type.type_id = IDSystem::get( it->value );
     ++it;
+
+    if ( it->value == vr_variable )
+    {
+        variable.type.kind = VarType::Kind::VARIABLE;
+        ++it;
+    }
+    else if ( it->value == vr_reference )
+    {
+        variable.type.kind = VarType::Kind::REFERENCE;
+        ++it;
+    }
+    else
+        variable.type.kind = VarType::Kind::CONSTANT;
 
     if ( it->type != TokenType::NAME )
         PARSER_PANIC( *it, "expected variable name" );
@@ -698,15 +739,23 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
         {
             auto& arg = func.args.emplace_back();
 
-            if ( left_it->value == kw_let )
-                arg.kind = VariableKind::LET;
-            else if ( left_it->value == kw_var )
-                arg.kind = VariableKind::VAR;
-            else if ( left_it->value == kw_ref )
-                arg.kind = VariableKind::REF;
-            else
-                PARSER_PANIC( *left_it, "expected let, var or ref keyword" );
+            if ( left_it->type != TokenType::TYPE )
+                PARSER_PANIC( *left_it, "expected argument type" );
+            arg.type.type_id = IDSystem::get( left_it->value );
             ++left_it;
+
+            if ( left_it->value == vr_variable )
+            {
+                arg.type.kind = VarType::Kind::VARIABLE;
+                ++left_it;
+            }
+            else if ( left_it->value == vr_reference )
+            {
+                arg.type.kind = VarType::Kind::REFERENCE;
+                ++left_it;
+            }
+            else
+                arg.type.kind = VarType::Kind::CONSTANT;
 
             if ( left_it->type != TokenType::NAME )
                 PARSER_PANIC( *left_it, "expected arg name" );
@@ -950,7 +999,7 @@ void dawn::Parser::parse_scope( TokenIterator& it, Scope& scope )
     Set<Int> vars;
     while ( it->value != op_scope_cls )
     {
-        if ( it->value == kw_let || it->value == kw_var || it->value == kw_ref )
+        if ( is_variable( it ) )
         {
             auto& node = scope.instr.emplace_back().emplace<VariableNode>( it->location );
             parse_variable( it, node.var );

@@ -27,3 +27,20 @@ dawn::Bool dawn::Struct::contains( Int id ) const
     }
     return false;
 }
+
+std::ostream& dawn::operator<<( std::ostream& stream, VarType::Kind kind )
+{
+    switch ( kind )
+    {
+    case VarType::Kind::CONSTANT: stream << ""; break;
+    case VarType::Kind::VARIABLE: stream << vr_variable; break;
+    case VarType::Kind::REFERENCE: stream << vr_reference; break;
+    }
+    return stream;
+}
+
+std::ostream& dawn::operator<<( std::ostream& stream, VarType const& type )
+{
+    stream << IDSystem::get( type.type_id ) << type.kind;
+    return stream;
+}

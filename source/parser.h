@@ -42,6 +42,8 @@ struct Parser
     void parse( Vector<Token>& tokens, Module& module );
 
 private:
+    Bool is_variable( TokenIterator const& it );
+
     void parse_import( TokenIterator& it, Module& module );
     void parse_global_struct( TokenIterator& it, Module& module );
     void parse_global_enum( TokenIterator& it, Module& module );

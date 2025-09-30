@@ -18,9 +18,9 @@ struct DFunction
     Scope body;
 };
 
-struct CFunction : Func<Value( Location const&, Value*, Int )>
+struct CFunction : Func<Value( Location const&, Engine&, Value*, Int )>
 {
-    using Func<Value( Location const&, Value*, Int )>::function;
+    using Func<Value( Location const&, Engine&, Value*, Int )>::function;
 };
 
 struct FunctionValue
@@ -134,6 +134,7 @@ struct Value
     inline ArrayValue& as_array() const { return m_regref.cast<ArrayValue>().value(); }
     inline RangeValue& as_range() const { return m_regref.cast<RangeValue>().value(); }
 
+    Int type_id() const;
     void assign( Location const& location, Value const& other );
     Value clone() const;
 
