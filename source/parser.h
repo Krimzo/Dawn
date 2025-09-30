@@ -8,7 +8,7 @@ namespace dawn
 {
 struct Module
 {
-    Set<String> imports;
+    StringSet imports;
     Vector<Variable> variables;
     Vector<Function> functions;
     Vector<Enum> enums;

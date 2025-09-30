@@ -25,14 +25,14 @@ void dawn::Engine::load_mod( Module const& module )
 void dawn::Engine::load_function( Function const& entry )
 {
     if ( stack.root().get( entry.id ) )
-        ENGINE_PANIC( Location::none, "object [", IDSystem::get( entry.id ), "] already exists" );
+        ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( entry.id ), "] already exists" );
 
     FunctionValue fv{};
     auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
     global.id = entry.id;
     global.func = DFunction{ entry.args, entry.body };
 
-    stack.root().set( entry.id, Value{ fv } );
+    stack.root().set( entry.id, Value{ fv, LOCATION_NONE } );
 }
 
 void dawn::Engine::load_enum( Enum const& entry )
@@ -62,7 +62,7 @@ void dawn::Engine::load_variable( Variable const& entry )
 void dawn::Engine::bind_cfunc( Int id, Bool is_ctime, CFunction cfunc )
 {
     if ( stack.root().get( id ) )
-        ENGINE_PANIC( Location::none, "object [", IDSystem::get( id ), "] already exists" );
+        ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] already exists" );
     if ( is_ctime )
         m_ctime_funcs.insert( id );
 
@@ -70,19 +70,19 @@ void dawn::Engine::bind_cfunc( Int id, Bool is_ctime, CFunction cfunc )
     auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
     global.id = id;
     global.func = std::move( cfunc );
-    stack.root().set( id, Value{ fv } );
+    stack.root().set( id, Value{ fv, LOCATION_NONE } );
 }
 
 dawn::Value dawn::Engine::call_func( Int id, Value* args, Int arg_count )
 {
     Value* value = stack.root().get( id );
     if ( !value )
-        ENGINE_PANIC( Location::none, "object [", IDSystem::get( id ), "] does not exist" );
+        ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] does not exist" );
 
     if ( value->type() != ValueType::FUNCTION )
-        ENGINE_PANIC( Location::none, "object [", IDSystem::get( id ), "] can not be called" );
+        ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] can not be called" );
 
-    return handle_func( Location::none, value->as_function(), args, arg_count );
+    return handle_func( LOCATION_NONE, value->as_function(), args, arg_count );
 }
 
 void dawn::Engine::add_var( Location const& location, VarType const& type, Int id, Value const& value )
@@ -114,7 +114,7 @@ void dawn::Engine::bind_member( ValueType type, StringRef const& name, CustomMem
 void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body )
 {
     const Int id = IDSystem::get( name );
-    member_generators[(Int) type].set( id, [name, is_const, expected_args, body, id]( Location const& _, Engine& __, Value const& self ) -> Value
+    member_generators[(Int) type].set( id, [name, is_const, expected_args, body, id]( Location const& location, Engine& __, Value const& self ) -> Value
         {
             FunctionValue fv{};
             auto& method = fv.data.emplace<FunctionValue::AsMethod>();
@@ -128,7 +128,7 @@ void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_cons
                     return body( location, engine, args[0], args + 1 );
                 };
             *method.self = self;
-            return (Value) fv;
+            return Value{ fv, location };
         } );
 }
 
@@ -244,7 +244,7 @@ dawn::Value dawn::Engine::handle_expr( Node const& node )
     switch ( node.type() )
     {
     case NodeType::VALUE:
-        return handle_value_node( std::get<ValueNode>( node ) );
+        return std::get<Value>( node );
 
     case NodeType::IDENTIFIER:
         return handle_id_node( std::get<IdentifierNode>( node ) );
@@ -279,11 +279,6 @@ dawn::Value dawn::Engine::handle_expr( Node const& node )
     default:
         ENGINE_PANIC( node.location(), "unknown expr node type: ", (Int) node.type() );
     }
-}
-
-dawn::Value dawn::Engine::handle_value_node( ValueNode const& node )
-{
-    return node.value;
 }
 
 void dawn::Engine::handle_var_node( VariableNode const& node )
@@ -329,14 +324,14 @@ dawn::Value dawn::Engine::handle_call_node( CallNode const& node )
 dawn::Value dawn::Engine::handle_index_node( IndexNode const& node )
 {
     Value left = handle_expr( node.left_expr.value() );
-    Int index = handle_expr( node.expr.value() ).to_int( node.location, *this );
+    Int index = handle_expr( node.expr.value() ).as_int();
 
     if ( left.type() == ValueType::STRING )
     {
         auto& value = left.as_string();
         if ( index < 0 || index >= (Int) value.size() )
             ENGINE_PANIC( node.location, "string access [", index, "] out of bounds" );
-        return Value{ value[index] };
+        return Value{ value[index], node.location };
     }
     else if ( left.type() == ValueType::ARRAY )
     {
@@ -392,7 +387,7 @@ void dawn::Engine::handle_if_node( IfNode const& node, Opt<Value>& retval, Bool*
 {
     for ( auto& part : node.parts )
     {
-        if ( !handle_expr( part.expr ).to_bool( node.location, *this ) )
+        if ( !handle_expr( part.expr ).as_bool() )
             continue;
 
         auto pop_handler = stack.push();
@@ -409,7 +404,7 @@ void dawn::Engine::handle_switch_node( SwitchNode const& node, Opt<Value>& retva
     {
         for ( auto& expr : case_part.exprs )
         {
-            if ( !check_value.op_eq( node.location, *this, handle_expr( expr ) ).to_bool( node.location, *this ) )
+            if ( !check_value.op_eq( *this, handle_expr( expr ) ).as_bool() )
                 continue;
 
             auto pop_handler = stack.push();
@@ -448,7 +443,7 @@ void dawn::Engine::handle_while_node( WhileNode const& node, Opt<Value>& retval 
             break;
         didcon = false;
 
-        if ( !handle_expr( node.expr.value() ).to_bool( node.location, *this ) )
+        if ( !handle_expr( node.expr.value() ).as_bool() )
             break;
 
         auto pop_handler = stack.push();
@@ -472,7 +467,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            stack.current().set( node.var_id, Value{ i } );
+            stack.current().set( node.var_id, Value{ i, node.location } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -488,7 +483,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            stack.current().set( node.var_id, Value{ c } );
+            stack.current().set( node.var_id, Value{ c, node.location } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -535,7 +530,7 @@ dawn::Value dawn::Engine::handle_enum_node( EnumNode const& node )
     result.key_id = node.key_id;
     result.value = std::get<Holder<Value>>( entry_ptr->expr );
 
-    return Value{ result };
+    return Value{ result, node.location };
 }
 
 dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
@@ -545,7 +540,7 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
         ENGINE_PANIC( node.location, "struct [", IDSystem::get( node.type_id ), "] does not exist" );
     auto& struc = *struct_ptr;
 
-    Value value{ StructValue{} };
+    Value value{ StructValue{}, node.location };
     auto& struc_value = value.as_struct();
     struc_value.parent_id = node.type_id;
 
@@ -598,7 +593,7 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
         f.id = method.id;
         f.func = DFunction{ method.args, method.body };
         *f.self = value;
-        struc_value.methods[f.id] = Value{ fv };
+        struc_value.methods[f.id] = Value{ fv, node.location };
     }
 
     return value;
@@ -617,14 +612,14 @@ dawn::Value dawn::Engine::handle_array_node( ArrayNode const& node )
     else
     {
         auto& init_data = std::get<ArrayNode::SizedInit>( node.init );
-        Int size = handle_expr( init_data.size_expr.value() ).to_int( node.location, *this );
+        Int size = handle_expr( init_data.size_expr.value() ).as_int();
         if ( size < 0 )
             ENGINE_PANIC( node.location, "array size can not be negative" );
         result.data.reserve( size );
         for ( Int i = 0; i < size; i++ )
             result.data.push_back( create_default_value( node.location, init_data.type_id ) );
     }
-    return Value{ result };
+    return Value{ result, node.location };
 }
 
 dawn::Value dawn::Engine::handle_un_node( UnaryNode const& node )
@@ -632,13 +627,13 @@ dawn::Value dawn::Engine::handle_un_node( UnaryNode const& node )
     switch ( node.type )
     {
     case UnaryType::PLUS:
-        return Value{ handle_expr( node.right.value() ).un_plus( node.location, *this ) };
+        return Value{ handle_expr( node.right.value() ).un_plus( *this ) };
 
     case UnaryType::MINUS:
-        return Value{ handle_expr( node.right.value() ).un_minus( node.location, *this ) };
+        return Value{ handle_expr( node.right.value() ).un_minus( *this ) };
 
     case UnaryType::NOT:
-        return Value{ handle_expr( node.right.value() ).un_not( node.location, *this ) };
+        return Value{ handle_expr( node.right.value() ).un_not() };
 
     default:
         ENGINE_PANIC( node.location, "unknown unary node type: ", typeid( node ).name() );
@@ -653,52 +648,52 @@ dawn::Value dawn::Engine::handle_op_node( OperatorNode const& node )
         return handle_ac_node( node );
 
     case OperatorType::POW:
-        return handle_expr( node.sides[0] ).op_pow( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_pow( *this, handle_expr( node.sides[1] ) );
 
     case OperatorType::MOD:
-        return handle_expr( node.sides[0] ).op_mod( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_mod( *this, handle_expr( node.sides[1] ) );
 
     case OperatorType::MUL:
-        return handle_expr( node.sides[0] ).op_mul( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_mul( *this, handle_expr( node.sides[1] ) );
 
     case OperatorType::DIV:
-        return handle_expr( node.sides[0] ).op_div( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_div( *this, handle_expr( node.sides[1] ) );
 
     case OperatorType::ADD:
-        return handle_expr( node.sides[0] ).op_add( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_add( *this, handle_expr( node.sides[1] ) );
 
     case OperatorType::SUB:
-        return handle_expr( node.sides[0] ).op_sub( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_sub( *this, handle_expr( node.sides[1] ) );
 
     case OperatorType::COMPARE:
-        return handle_expr( node.sides[0] ).op_cmpr( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_cmpr( *this, handle_expr( node.sides[1] ) );
 
     case OperatorType::LESS:
-        return handle_expr( node.sides[0] ).op_less( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_less( *this, handle_expr( node.sides[1] ) );
 
     case OperatorType::GREAT:
-        return handle_expr( node.sides[0] ).op_great( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_great( *this, handle_expr( node.sides[1] ) );
 
     case OperatorType::LESS_EQ:
-        return handle_expr( node.sides[0] ).op_lesseq( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_lesseq( *this, handle_expr( node.sides[1] ) );
 
     case OperatorType::GREAT_EQ:
-        return handle_expr( node.sides[0] ).op_greateq( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_greateq( *this, handle_expr( node.sides[1] ) );
 
     case OperatorType::EQ:
-        return handle_expr( node.sides[0] ).op_eq( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_eq( *this, handle_expr( node.sides[1] ) );
 
     case OperatorType::NOT_EQ:
-        return handle_expr( node.sides[0] ).op_neq( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_neq( *this, handle_expr( node.sides[1] ) );
 
     case OperatorType::AND:
-        return handle_expr( node.sides[0] ).op_and( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_and( handle_expr( node.sides[1] ) );
 
     case OperatorType::OR:
-        return handle_expr( node.sides[0] ).op_or( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_or( handle_expr( node.sides[1] ) );
 
     case OperatorType::RANGE:
-        return handle_expr( node.sides[0] ).op_range( node.location, *this, handle_expr( node.sides[1] ) );
+        return handle_expr( node.sides[0] ).op_range( *this, handle_expr( node.sides[1] ) );
 
     default:
         ENGINE_PANIC( node.location, "unknown operator node type: ", typeid( node ).name() );
@@ -726,31 +721,31 @@ dawn::Value dawn::Engine::handle_as_node( AssignNode const& node )
     switch ( node.type )
     {
     case AssignType::ASSIGN:
-        left.assign( node.location, handle_expr( node.sides[1] ) );
+        left.assign( handle_expr( node.sides[1] ) );
         return left;
 
     case AssignType::ADD:
-        left.assign( node.location, left.op_add( node.location, *this, handle_expr( node.sides[1] ) ) );
+        left.assign( left.op_add( *this, handle_expr( node.sides[1] ) ) );
         return left;
 
     case AssignType::SUB:
-        left.assign( node.location, left.op_sub( node.location, *this, handle_expr( node.sides[1] ) ) );
+        left.assign( left.op_sub( *this, handle_expr( node.sides[1] ) ) );
         return left;
 
     case AssignType::MUL:
-        left.assign( node.location, left.op_mul( node.location, *this, handle_expr( node.sides[1] ) ) );
+        left.assign( left.op_mul( *this, handle_expr( node.sides[1] ) ) );
         return left;
 
     case AssignType::DIV:
-        left.assign( node.location, left.op_div( node.location, *this, handle_expr( node.sides[1] ) ) );
+        left.assign( left.op_div( *this, handle_expr( node.sides[1] ) ) );
         return left;
 
     case AssignType::POW:
-        left.assign( node.location, left.op_pow( node.location, *this, handle_expr( node.sides[1] ) ) );
+        left.assign( left.op_pow( *this, handle_expr( node.sides[1] ) ) );
         return left;
 
     case AssignType::MOD:
-        left.assign( node.location, left.op_mod( node.location, *this, handle_expr( node.sides[1] ) ) );
+        left.assign( left.op_mod( *this, handle_expr( node.sides[1] ) ) );
         return left;
 
     default:
@@ -794,22 +789,22 @@ dawn::Value dawn::Engine::create_default_value( Location const& location, Int ty
         return Value{ Nothing{} };
 
     else if ( typeid_ == _id_bool )
-        return Value{ Bool{} };
+        return Value{ Bool{}, location };
 
     else if ( typeid_ == _id_int )
-        return Value{ Int{} };
+        return Value{ Int{}, location };
 
     else if ( typeid_ == _id_float )
-        return Value{ Float{} };
+        return Value{ Float{}, location };
 
     else if ( typeid_ == _id_char )
-        return Value{ Char{} };
+        return Value{ Char{}, location };
 
     else if ( typeid_ == _id_string )
-        return Value{ StringRef{} };
+        return Value{ StringRef{}, location };
 
     else if ( typeid_ == _id_function )
-        return Value{ FunctionValue{} };
+        return Value{ FunctionValue{}, location };
 
     else if ( auto* enum_ptr = enums.get( typeid_ ) )
     {
@@ -828,10 +823,10 @@ dawn::Value dawn::Engine::create_default_value( Location const& location, Int ty
     }
 
     else if ( typeid_ == _id_array )
-        return Value{ ArrayValue{} };
+        return Value{ ArrayValue{}, location };
 
     else if ( typeid_ == _id_range )
-        return Value{ RangeValue{} };
+        return Value{ RangeValue{}, location };
 
     else
         ENGINE_PANIC( location, "type [", IDSystem::get( typeid_ ), "] does not exist" );

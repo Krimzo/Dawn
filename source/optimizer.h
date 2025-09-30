@@ -39,7 +39,7 @@ private:
 
     void reset();
 
-    void optimize_imports( Set<String>& imports );
+    void optimize_imports( StringSet& imports );
     void optimize_variables( Vector<Variable>& vars );
     void optimize_functions( Vector<Function>& funcs );
     void optimize_enums( Vector<Enum>& enums );
@@ -67,7 +67,7 @@ private:
     void optimize_expr_loop( LoopNode& node, Node& out_node );
     void optimize_expr_while( WhileNode& node, Node& out_node );
     void optimize_expr_for( ForNode& node, Node& out_node );
-    void optimize_expr_value( ValueNode& node, Node& out_node );
+    void optimize_expr_value( Value& node, Node& out_node );
     void optimize_expr_id( IdentifierNode& node, Node& out_node );
     void optimize_expr_call( CallNode& node, Node& out_node );
     void optimize_expr_index( IndexNode& node, Node& out_node );
@@ -77,6 +77,7 @@ private:
     void optimize_expr_array( ArrayNode& node, Node& out_node );
     void optimize_expr_unary( UnaryNode& node, Node& out_node );
     void optimize_expr_op( OperatorNode& node, Node& out_node );
+    void optimize_expr_ac( Value const& left, Int right_id, Node& out_node );
     void optimize_expr_as( AssignNode& node, Node& out_node );
 };
 }

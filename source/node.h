@@ -17,16 +17,7 @@ struct LocationHolder
 
 struct None
 {
-};
-
-struct ValueNode : LocationHolder
-{
-    Value value;
-
-    constexpr ValueNode( Location const& location )
-        : LocationHolder( location )
-    {
-    }
+    constexpr None() = default;
 };
 
 struct VariableNode : LocationHolder
@@ -297,7 +288,7 @@ struct Node : Variant <
     LoopNode,
     WhileNode,
     ForNode,
-    ValueNode,
+    Value,
     IdentifierNode,
     CallNode,
     IndexNode,
@@ -321,7 +312,10 @@ struct Node : Variant <
         case NodeType::NONE:
         case NodeType::SCOPE:
         default:
-            return Location::none;
+            return LOCATION_NONE;
+
+        case NodeType::VALUE:
+            return std::get<Value>( *this ).location();
 
         case NodeType::VARIABLE:
         case NodeType::RETURN:
@@ -334,7 +328,6 @@ struct Node : Variant <
         case NodeType::LOOP:
         case NodeType::WHILE:
         case NodeType::FOR:
-        case NodeType::VALUE:
         case NodeType::IDENTIFIER:
         case NodeType::CALL:
         case NodeType::INDEX:
@@ -350,11 +343,11 @@ struct Node : Variant <
     }
 };
 
-Node make_nothing_node( Location const& location );
+Node make_nothing_node();
 Node make_bool_node( Location const& location, Bool value );
 Node make_int_node( Location const& location, Int value );
 Node make_float_node( Location const& location, Float value );
 Node make_char_node( Location const& location, Char value );
 Node make_string_node( Location const& location, StringRef const& value );
-Node make_value_node( Location const& location, Value const& value );
+Node make_value_node( Value const& value );
 }

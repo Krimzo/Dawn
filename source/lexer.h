@@ -8,9 +8,9 @@ namespace dawn
 {
 struct LanguageDef
 {
-    Set<String> keywords;
-    Set<String> types;
-    Set<String> operators;
+    StringSet keywords;
+    StringSet types;
+    StringSet operators;
     String separator_identifier;
     String separator_number;
     String literal_char;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util.h"
+#include "id.h"
 
 
 namespace dawn
@@ -27,11 +27,11 @@ struct Location
 {
     using IntType = int32_t;
 
-    String file_path;
+    Int path_id = 0;
     IntType line = 1;
     IntType col = 1;
 
-    explicit constexpr Location()
+    constexpr Location()
     {
     }
 
@@ -40,22 +40,21 @@ struct Location
     {
     }
 
-    explicit constexpr Location( String path, Index const& index )
-        : file_path( std::move( path ) ), line( (IntType) index.line() ), col( (IntType) index.col() )
+    explicit Location( StringRef const& path, Index const& index )
+        : path_id( IDSystem::get( path ) ), line( (IntType) index.line() ), col( (IntType) index.col() )
     {
     }
 
-    inline String to_string( Opt<Color> const& color ) const
+    String to_string( Opt<Color> const& color ) const
     {
         StringStream stream;
+        auto& path = IDSystem::get( path_id );
         if ( color )
-            stream << "(" << ColoredText{ *color, file_path } << ")<" << ColoredText{ *color, line } << ", " << ColoredText{ *color, col } << ">";
+            stream << "(" << ColoredText{ *color, path } << ")<" << ColoredText{ *color, line } << ", " << ColoredText{ *color, col } << ">";
         else
-            stream << "(" << file_path << ")<" << line << ", " << col << ">";
+            stream << "(" << path << ")<" << line << ", " << col << ">";
         return stream.str();
     }
-
-    static const Location none;
 };
 
 struct Token
@@ -63,13 +62,15 @@ struct Token
     TokenType type;
     String value;
     String literal;
-    Location location{};
+    Location location;
 
     constexpr String const& any_value() const
     {
         return value.empty() ? literal : value;
     }
 };
+
+inline constexpr Location LOCATION_NONE{ -1, -1 };
 
 Color to_color( TokenType type );
 Bool is_custom_type( StringRef const& value );

@@ -73,15 +73,13 @@ int _shp_main( int argc, char** argv )
 
     ArrayValue arg;
     for ( int i = 2; i < argc; i++ )
-        arg.data.emplace_back( String{ argv[i] } );
+        arg.data.emplace_back( String{ argv[i] }, LOCATION_NONE );
 
-    Value retval{ Int() };
-    if ( auto error = dawn.call_func( "main", { Value{ arg } }, &retval ) )
+    Value retval{ Int(), LOCATION_NONE };
+    if ( auto error = dawn.call_func( "main", { Value{ arg, LOCATION_NONE } }, &retval ) )
     {
         print( error.value() );
         return -3;
     }
-
-    Int retcode = retval.to_int( Location::none, dawn.engine );
-    return static_cast<int>( retcode );
+    return (int) retval.to_int( dawn.engine );
 }

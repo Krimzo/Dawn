@@ -5,14 +5,14 @@ static dawn::MemoryPools pools;
 
 dawn::MemoryPools::~MemoryPools() noexcept
 {
-    constexpr auto clear_chunks = []( auto& pool )
+    static constexpr auto clear_chunks = []<typename T, Int N>( MemoryPool<T, N>&pool )
+    {
+        for ( auto& chunk : pool.m_chunks )
         {
-            for ( auto& chunk : pool.m_chunks )
-            {
-                for ( auto& regist : chunk.m_space )
-                    regist.value = {};
-            }
-        };
+            for ( auto& regist : chunk.m_space )
+                regist.value = T{};
+        }
+    };
 
     clear_chunks( node_memory );
     clear_chunks( frame_memory );

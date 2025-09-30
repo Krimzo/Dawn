@@ -3,11 +3,11 @@
 
 dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source ) noexcept
 {
-    Set<String> imports;
+    StringSet imports;
     return eval( source, imports );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, Set<String>& imported ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, StringSet& imported ) noexcept
 {
     try
     {
@@ -81,7 +81,7 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* arg
     }
     catch ( Value const& err )
     {
-        return dawn::format( "Uncaught error: ", err.to_string( Location::none, engine ) );
+        return dawn::format( "Uncaught error: ", err.to_string( engine ) );
     }
     return std::nullopt;
 }

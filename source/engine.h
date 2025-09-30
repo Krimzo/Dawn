@@ -50,7 +50,6 @@ private:
     void handle_instr( Node const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
     Value handle_expr( Node const& node );
 
-    Value handle_value_node( ValueNode const& node );
     void handle_var_node( VariableNode const& node );
     Value handle_id_node( IdentifierNode const& node );
     Value handle_call_node( CallNode const& node );

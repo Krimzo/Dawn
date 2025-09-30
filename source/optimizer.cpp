@@ -18,7 +18,7 @@ void dawn::Optimizer::reset()
     m_ctime_funcs = m_engine.ctime_funcs();
 }
 
-void dawn::Optimizer::optimize_imports( Set<String>& imports )
+void dawn::Optimizer::optimize_imports( StringSet& imports )
 {
     for ( auto& import : imports )
         optimize_import( const_cast<String&>( import ) );
@@ -110,7 +110,7 @@ void dawn::Optimizer::optimize_instr( Vector<Node>& scope )
             continue;
         }
 
-        auto& value = std::get<ValueNode>( expr ).value;
+        auto& value = std::get<Value>( expr );
         if ( !value.is_const() )
         {
             m_inline.emplace_back( var.id );
@@ -140,7 +140,7 @@ void dawn::Optimizer::optimize_expr( Node& node )
     case NodeType::LOOP: optimize_expr_loop( std::get<LoopNode>( node ), node ); break;
     case NodeType::WHILE: optimize_expr_while( std::get<WhileNode>( node ), node ); break;
     case NodeType::FOR: optimize_expr_for( std::get<ForNode>( node ), node ); break;
-    case NodeType::VALUE: optimize_expr_value( std::get<ValueNode>( node ), node ); break;
+    case NodeType::VALUE: optimize_expr_value( std::get<Value>( node ), node ); break;
     case NodeType::IDENTIFIER: optimize_expr_id( std::get<IdentifierNode>( node ), node ); break;
     case NodeType::CALL: optimize_expr_call( std::get<CallNode>( node ), node ); break;
     case NodeType::INDEX: optimize_expr_index( std::get<IndexNode>( node ), node ); break;
@@ -212,14 +212,10 @@ void dawn::Optimizer::optimize_expr_if( IfNode& node, Node& out_node )
             continue;
         }
 
-        auto const& value_node = std::get<ValueNode>( part.expr );
-        if ( value_node.value.to_bool( value_node.location, m_engine ) )
+        if ( std::get<Value>( part.expr ).as_bool() )
         {
             optimize_instr( part.scope.instr ); // Optimize before resizing (invalid reference otherwise).
             node.parts.resize( i + 1 );
-            node.parts.back() // Store direct true so that to_bool is not computed again.
-                .expr.emplace<ValueNode>( value_node.location )
-                .value = Value{ Bool{ true } };
             break;
         }
         else
@@ -251,8 +247,7 @@ void dawn::Optimizer::optimize_expr_switch( SwitchNode& node, Node& out_node )
                 continue;
             ++is_value_counter;
 
-            auto const& expr_val = std::get<ValueNode>( expr ).value;
-            if ( std::get<ValueNode>( main_expr ).value.op_eq( expr.location(), m_engine, expr_val ).as_bool() )
+            if ( std::get<Value>( main_expr ).op_eq( m_engine, std::get<Value>( expr ) ).as_bool() )
             {
                 optimize_instr( casee.scope.instr );
                 out_node.emplace<Scope>( Scope{ std::move( casee.scope ) } );
@@ -292,7 +287,7 @@ void dawn::Optimizer::optimize_expr_while( WhileNode& node, Node& out_node )
     optimize_instr( node.scope.instr );
     if ( expr_node.type() == NodeType::VALUE )
     {
-        if ( std::get<ValueNode>( expr_node ).value.to_bool( expr_node.location(), m_engine ) )
+        if ( std::get<Value>( expr_node ).as_bool() )
             out_node.emplace<LoopNode>( node.location ).scope = Scope{ std::move( node.scope ) };
         else
             out_node.emplace<Scope>();
@@ -305,7 +300,7 @@ void dawn::Optimizer::optimize_expr_for( ForNode& node, Node& out_node )
     optimize_expr( expr_node );
     if ( expr_node.type() == NodeType::VALUE )
     {
-        auto const& expr_value = std::get<ValueNode>( expr_node ).value;
+        auto const& expr_value = std::get<Value>( expr_node );
         switch ( expr_value.type() )
         {
         case ValueType::RANGE:
@@ -336,7 +331,7 @@ void dawn::Optimizer::optimize_expr_for( ForNode& node, Node& out_node )
     optimize_instr( node.scope.instr );
 }
 
-void dawn::Optimizer::optimize_expr_value( ValueNode& node, Node& out_node )
+void dawn::Optimizer::optimize_expr_value( Value& value, Node& out_node )
 {
     // None.
 }
@@ -350,9 +345,7 @@ void dawn::Optimizer::optimize_expr_id( IdentifierNode& node, Node& out_node )
             continue;
         if ( !can_inline )
             return;
-        ValueNode valnod{ node.location };
-        valnod.value = it->value;
-        out_node.emplace<ValueNode>( std::move( valnod ) );
+        out_node.emplace<Value>( it->value );
         break;
     }
 }
@@ -371,7 +364,7 @@ void dawn::Optimizer::optimize_expr_call( CallNode& node, Node& out_node )
             is_ctime = false;
     }
     if ( is_ctime )
-        out_node.emplace<ValueNode>( node.location ).value = m_engine.handle_call_node( node );
+        out_node.emplace<Value>( m_engine.handle_call_node( node ) );
 }
 
 void dawn::Optimizer::optimize_expr_index( IndexNode& node, Node& out_node )
@@ -381,7 +374,7 @@ void dawn::Optimizer::optimize_expr_index( IndexNode& node, Node& out_node )
     auto& expr_node = node.expr.value();
     optimize_expr( expr_node );
     if ( left_node.type() == NodeType::VALUE && expr_node.type() == NodeType::VALUE )
-        out_node.emplace<ValueNode>( node.location ).value = m_engine.handle_index_node( node );
+        out_node.emplace<Value>( m_engine.handle_index_node( node ) );
 }
 
 void dawn::Optimizer::optimize_expr_lambda( LambdaNode& node, Node& out_node )
@@ -410,7 +403,7 @@ void dawn::Optimizer::optimize_expr_struct( StructNode& node, Node& out_node )
                 is_ctime = false;
         }
         if ( is_ctime )
-            out_node.emplace<ValueNode>( node.location ).value = m_engine.handle_struct_node( node );
+            out_node.emplace<Value>( m_engine.handle_struct_node( node ) );
     }
     else
     {
@@ -422,7 +415,7 @@ void dawn::Optimizer::optimize_expr_struct( StructNode& node, Node& out_node )
                 is_ctime = false;
         }
         if ( is_ctime )
-            out_node.emplace<ValueNode>( node.location ).value = m_engine.handle_struct_node( node );
+            out_node.emplace<Value>( m_engine.handle_struct_node( node ) );
     }
 }
 
@@ -438,15 +431,15 @@ void dawn::Optimizer::optimize_expr_array( ArrayNode& node, Node& out_node )
                 is_ctime = false;
         }
         if ( is_ctime )
-            out_node.emplace<ValueNode>( node.location ).value = m_engine.handle_array_node( node );
+            out_node.emplace<Value>( m_engine.handle_array_node( node ) );
     }
     else
     {
         auto& init = std::get<ArrayNode::SizedInit>( node.init );
         auto& size_expr = init.size_expr.value();
         optimize_expr( size_expr );
-        if ( size_expr.type() == NodeType::VALUE && !is_custom_type( IDSystem::get( init.type_id ) ) )
-            out_node.emplace<ValueNode>( node.location ).value = m_engine.handle_array_node( node );
+        if ( size_expr.type() == NodeType::VALUE )
+            out_node.emplace<Value>( m_engine.handle_array_node( node ) );
     }
 }
 
@@ -457,15 +450,14 @@ void dawn::Optimizer::optimize_expr_unary( UnaryNode& node, Node& out_node )
     if ( right_node.type() != NodeType::VALUE )
         return;
 
-    auto& val_node = std::get<ValueNode>( right_node );
-    auto& value = val_node.value;
+    Value value = std::get<Value>( right_node );
     switch ( node.type )
     {
-    case UnaryType::PLUS: value = value.un_plus( node.location, m_engine ); break;
-    case UnaryType::MINUS: value = value.un_minus( node.location, m_engine ); break;
-    case UnaryType::NOT: value = value.un_not( node.location, m_engine ); break;
+    case UnaryType::PLUS: value = value.un_plus( m_engine ); break;
+    case UnaryType::MINUS: value = value.un_minus( m_engine ); break;
+    case UnaryType::NOT: value = value.un_not(); break;
     }
-    out_node.emplace<ValueNode>( ValueNode{ val_node } ); // Must copy into another ValueNode{} since out_node is the parent of node.
+    out_node.emplace<Value>( value );
 }
 
 void dawn::Optimizer::optimize_expr_op( OperatorNode& node, Node& out_node )
@@ -474,34 +466,39 @@ void dawn::Optimizer::optimize_expr_op( OperatorNode& node, Node& out_node )
     auto& right_node = node.sides[1];
     optimize_expr( left_node );
     optimize_expr( right_node );
+
+    if ( node.type == OperatorType::ACCESS && left_node.type() == NodeType::VALUE && right_node.type() == NodeType::IDENTIFIER )
+        return optimize_expr_ac( std::get<Value>( left_node ), std::get<IdentifierNode>( right_node ).id, out_node );
+
     if ( left_node.type() != NodeType::VALUE || right_node.type() != NodeType::VALUE )
         return;
 
-    auto& left_val_node = std::get<ValueNode>( left_node );
-    auto& right_val_node = std::get<ValueNode>( right_node );
-    auto& left_value = left_val_node.value;
-    auto& right_value = right_val_node.value;
+    Value left_value = std::get<Value>( left_node );
+    auto& right_value = std::get<Value>( right_node );
     switch ( node.type )
     {
-    case OperatorType::ACCESS: return; // 1. could optimize access of let vars
-    case OperatorType::POW: left_value = left_value.op_pow( node.location, m_engine, right_value ); break;
-    case OperatorType::MOD: left_value = left_value.op_mod( node.location, m_engine, right_value ); break;
-    case OperatorType::MUL: left_value = left_value.op_mul( node.location, m_engine, right_value ); break;
-    case OperatorType::DIV: left_value = left_value.op_div( node.location, m_engine, right_value ); break;
-    case OperatorType::ADD: left_value = left_value.op_add( node.location, m_engine, right_value ); break;
-    case OperatorType::SUB: left_value = left_value.op_sub( node.location, m_engine, right_value ); break;
-    case OperatorType::COMPARE: left_value = left_value.op_cmpr( node.location, m_engine, right_value ); break;
-    case OperatorType::LESS: left_value = left_value.op_less( node.location, m_engine, right_value ); break;
-    case OperatorType::GREAT: left_value = left_value.op_great( node.location, m_engine, right_value ); break;
-    case OperatorType::LESS_EQ: left_value = left_value.op_lesseq( node.location, m_engine, right_value ); break;
-    case OperatorType::GREAT_EQ: left_value = left_value.op_greateq( node.location, m_engine, right_value ); break;
-    case OperatorType::EQ: left_value = left_value.op_eq( node.location, m_engine, right_value ); break;
-    case OperatorType::NOT_EQ: left_value = left_value.op_neq( node.location, m_engine, right_value ); break;
-    case OperatorType::AND: left_value = left_value.op_and( node.location, m_engine, right_value ); break;
-    case OperatorType::OR: left_value = left_value.op_or( node.location, m_engine, right_value ); break;
-    case OperatorType::RANGE: left_value = left_value.op_range( node.location, m_engine, right_value ); break;
+    case OperatorType::POW: left_value = left_value.op_pow( m_engine, right_value ); break;
+    case OperatorType::MOD: left_value = left_value.op_mod( m_engine, right_value ); break;
+    case OperatorType::MUL: left_value = left_value.op_mul( m_engine, right_value ); break;
+    case OperatorType::DIV: left_value = left_value.op_div( m_engine, right_value ); break;
+    case OperatorType::ADD: left_value = left_value.op_add( m_engine, right_value ); break;
+    case OperatorType::SUB: left_value = left_value.op_sub( m_engine, right_value ); break;
+    case OperatorType::COMPARE: left_value = left_value.op_cmpr( m_engine, right_value ); break;
+    case OperatorType::LESS: left_value = left_value.op_less( m_engine, right_value ); break;
+    case OperatorType::GREAT: left_value = left_value.op_great( m_engine, right_value ); break;
+    case OperatorType::LESS_EQ: left_value = left_value.op_lesseq( m_engine, right_value ); break;
+    case OperatorType::GREAT_EQ: left_value = left_value.op_greateq( m_engine, right_value ); break;
+    case OperatorType::EQ: left_value = left_value.op_eq( m_engine, right_value ); break;
+    case OperatorType::NOT_EQ: left_value = left_value.op_neq( m_engine, right_value ); break;
+    case OperatorType::AND: left_value = left_value.op_and( right_value ); break;
+    case OperatorType::OR: left_value = left_value.op_or( right_value ); break;
+    case OperatorType::RANGE: left_value = left_value.op_range( m_engine, right_value ); break;
     }
-    out_node.emplace<ValueNode>( ValueNode{ left_val_node } ); // Must copy into another ValueNode{} since out_node is the parent of node.
+    out_node.emplace<Value>( left_value );
+}
+
+void dawn::Optimizer::optimize_expr_ac( Value const& left, const Int right_id, Node& out_node )
+{
 }
 
 void dawn::Optimizer::optimize_expr_as( AssignNode& node, Node& out_node )

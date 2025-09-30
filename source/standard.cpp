@@ -14,7 +14,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "typeid" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return Value{ args[0].type_id() };
+                return Value{ args[0].type_id(), location };
             else
                 ENGINE_PANIC( location, "typeid expected 1 argument, but got ", arg_count );
         } );
@@ -22,7 +22,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "typename" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return Value{ IDSystem::get( args[0].type_id() ) };
+                return Value{ IDSystem::get( args[0].type_id() ), location };
             else
                 ENGINE_PANIC( location, "typename expected 1 argument, but got ", arg_count );
         } );
@@ -31,7 +31,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( tp_nothing ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_nothing( location, engine );
+                return Value{ args[0].to_nothing( engine ) };
             else if ( arg_count == 0 )
                 return Value{ Nothing{} };
             else
@@ -41,9 +41,9 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( tp_bool ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_bool( location, engine );
+                return Value{ args[0].to_bool( engine ), location };
             else if ( arg_count == 0 )
-                return Value{ Bool{} };
+                return Value{ Bool{}, location };
             else
                 ENGINE_PANIC( location, tp_bool, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
@@ -51,9 +51,9 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( tp_int ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_int( location, engine );
+                return Value{ args[0].to_int( engine ), location };
             else if ( arg_count == 0 )
-                return Value{ Int{} };
+                return Value{ Int{}, location };
             else
                 ENGINE_PANIC( location, tp_int, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
@@ -61,9 +61,9 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( tp_float ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_float( location, engine );
+                return Value{ args[0].to_float( engine ), location };
             else if ( arg_count == 0 )
-                return Value{ Float{} };
+                return Value{ Float{}, location };
             else
                 ENGINE_PANIC( location, tp_float, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
@@ -71,9 +71,9 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( tp_char ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_char( location, engine );
+                return Value{ args[0].to_char( engine ), location };
             else if ( arg_count == 0 )
-                return Value{ Char{} };
+                return Value{ Char{}, location };
             else
                 ENGINE_PANIC( location, tp_char, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
@@ -81,9 +81,9 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( tp_string ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_string( location, engine );
+                return Value{ args[0].to_string( engine ), location };
             else if ( arg_count == 0 )
-                return Value{ StringRef{} };
+                return Value{ StringRef{}, location };
             else
                 ENGINE_PANIC( location, tp_string, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
@@ -91,9 +91,9 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( tp_function ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_function( location, engine );
+                return Value{ args[0].to_function( engine ), location };
             else if ( arg_count == 0 )
-                return Value{ FunctionValue{} };
+                return Value{ FunctionValue{}, location };
             else
                 ENGINE_PANIC( location, tp_function, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
@@ -101,9 +101,9 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( tp_array ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_array( location, engine );
+                return Value{ args[0].to_array( engine ), location };
             else if ( arg_count == 0 )
-                return Value{ ArrayValue{} };
+                return Value{ ArrayValue{}, location };
             else
                 ENGINE_PANIC( location, tp_array, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
@@ -111,9 +111,9 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( tp_range ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) args[0].to_range( location, engine );
+                return Value{ args[0].to_range( engine ), location };
             else if ( arg_count == 0 )
-                return Value{ RangeValue{} };
+                return Value{ RangeValue{}, location };
             else
                 ENGINE_PANIC( location, tp_range, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
@@ -122,7 +122,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "exit" ), false, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                std::exit( (int) args[0].to_int( location, engine ) );
+                std::exit( (int) args[0].as_int() );
             else
                 ENGINE_PANIC( location, "exit() expects 1 argument, but got ", arg_count );
             return {};
@@ -133,15 +133,15 @@ void dawn::Engine::load_standard_functions()
         {
             StringStream stream;
             for ( Int i = 0; i < arg_count; i++ )
-                stream << args[i].to_string( location, engine );
-            return (Value) stream.str();
+                stream << args[i].to_string( engine );
+            return Value{ stream.str(), location };
         } );
 
     bind_cfunc( IDSystem::get( "print" ), false, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             StringStream stream;
             for ( Int i = 0; i < arg_count; i++ )
-                stream << args[i].to_string( location, engine );
+                stream << args[i].to_string( engine );
             print( stream.str() );
             return Value{};
         } );
@@ -149,7 +149,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "rand_int" ), false, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) Int( RAND_ENGINE() % args[0].to_int( location, engine ) );
+                return Value{ Int( RAND_ENGINE() % args[0].as_int() ), location };
             else
                 ENGINE_PANIC( location, "rand_int() expects 1 argument, but got ", arg_count );
         } );
@@ -157,7 +157,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "rand_flt" ), false, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 0 )
-                return (Value) ( (Float) RAND_ENGINE() / UINT64_MAX );
+                return Value{ ( (Float) RAND_ENGINE() / UINT64_MAX ), location };
             else
                 ENGINE_PANIC( location, "rand_flt() expects 0 arguments, but got ", arg_count );
         } );
@@ -168,9 +168,9 @@ void dawn::Engine::load_standard_functions()
             if ( arg_count == 2 )
             {
                 if ( args[0].type() == ValueType::INT )
-                    return (Value) std::min( args[0].to_int( location, engine ), args[1].to_int( location, engine ) );
+                    return Value{ std::min( args[0].as_int(), args[1].as_int() ), location };
                 else if ( args[0].type() == ValueType::FLOAT )
-                    return (Value) std::min( args[0].to_float( location, engine ), args[1].to_float( location, engine ) );
+                    return Value{ std::min( args[0].as_float(), args[1].as_float() ), location };
                 else
                     ENGINE_PANIC( location, "min() expects an int or float" );
             }
@@ -183,9 +183,9 @@ void dawn::Engine::load_standard_functions()
             if ( arg_count == 2 )
             {
                 if ( args[0].type() == ValueType::INT )
-                    return (Value) std::max( args[0].to_int( location, engine ), args[1].to_int( location, engine ) );
+                    return Value{ std::max( args[0].as_int(), args[1].as_int() ), location };
                 else if ( args[0].type() == ValueType::FLOAT )
-                    return (Value) std::max( args[0].to_float( location, engine ), args[1].to_float( location, engine ) );
+                    return Value{ std::max( args[0].as_float(), args[1].as_float() ), location };
                 else
                     ENGINE_PANIC( location, "max() expects an int or float" );
             }
@@ -198,9 +198,9 @@ void dawn::Engine::load_standard_functions()
             if ( arg_count == 1 )
             {
                 if ( args[0].type() == ValueType::INT )
-                    return (Value) std::abs( args[0].to_int( location, engine ) );
+                    return Value{ std::abs( args[0].as_int() ), location };
                 else if ( args[0].type() == ValueType::FLOAT )
-                    return (Value) std::abs( args[0].to_float( location, engine ) );
+                    return Value{ std::abs( args[0].as_float() ), location };
                 else
                     ENGINE_PANIC( location, "abs() expects an int or float" );
             }
@@ -211,7 +211,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "sqrt" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) std::sqrt( args[0].to_float( location, engine ) );
+                return Value{ std::sqrt( args[0].as_float() ), location };
             else
                 ENGINE_PANIC( location, "sqrt() expects 1 argument, but got ", arg_count );
         } );
@@ -219,7 +219,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "sin" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) std::sin( args[0].to_float( location, engine ) );
+                return Value{ std::sin( args[0].as_float() ), location };
             else
                 ENGINE_PANIC( location, "sin() expects 1 argument, but got ", arg_count );
         } );
@@ -227,7 +227,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "cos" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return (Value) std::cos( args[0].to_float( location, engine ) );
+                return Value{ std::cos( args[0].as_float() ), location };
             else
                 ENGINE_PANIC( location, "cos() expects 1 argument, but got ", arg_count );
         } );
@@ -238,12 +238,12 @@ void dawn::Engine::load_standard_members()
     // Strings.
     bind_member( ValueType::STRING, "count", []( Location const& location, Engine& engine, Value& self ) -> Value
         {
-            return (Value) (Int) self.as_string().size();
+            return Value{ (Int) self.as_string().size(), location };
         } );
 
     bind_method( ValueType::STRING, "push", false, 1, []( Location const& location, Engine& engine, Value& self, Value* args ) -> Value
         {
-            self.as_string().push_back( args[0].to_char( location, engine ) );
+            self.as_string().push_back( args[0].as_char() );
             return self;
         } );
 
@@ -256,16 +256,16 @@ void dawn::Engine::load_standard_members()
     bind_method( ValueType::STRING, "find", true, 1, []( Location const& location, Engine& engine, Value& self, Value* args ) -> Value
         {
             auto& self_str = self.as_string();
-            size_t index = self_str.find( args[0].to_string( location, engine ) );
-            return Value{ Int( index ) };
+            size_t index = self_str.find( args[0].as_string() );
+            return Value{ Int( index ), location };
         } );
 
     bind_method( ValueType::STRING, "set", false, 2, []( Location const& location, Engine& engine, Value& self, Value* args ) -> Value
         {
-            const Int index = args[0].to_int( location, engine );
+            const Int index = args[0].as_int();
             if ( index < 0 )
                 ENGINE_PANIC( location, "string->set() index must be positive" );
-            const String str = args[1].to_string( location, engine );
+            const String str = args[1].as_string();
             auto& self_str = self.as_string();
             self_str.resize( std::max( index + str.size(), self_str.size() ) );
             std::memcpy( &self_str[index], str.c_str(), str.size() * sizeof( Char ) );
@@ -281,7 +281,7 @@ void dawn::Engine::load_standard_members()
     // Arrays.
     bind_member( ValueType::ARRAY, "count", []( Location const& location, Engine& engine, Value& self ) -> Value
         {
-            return (Value) (Int) self.as_array().data.size();
+            return Value{ (Int) self.as_array().data.size(), location };
         } );
 
     bind_method( ValueType::ARRAY, "push", false, 1, []( Location const& location, Engine& engine, Value& self, Value* args ) -> Value
@@ -298,25 +298,25 @@ void dawn::Engine::load_standard_members()
 
     bind_method( ValueType::ARRAY, "find", true, 1, []( Location const& location, Engine& engine, Value& self, Value* args ) -> Value
         {
-            auto& self_arr = self.as_array().data;
-            auto& to_find = args[0];
+            auto const& self_arr = self.as_array().data;
+            auto const& item = args[0];
             for ( Int i = 0; i < (Int) self_arr.size(); i++ )
             {
                 auto& element = self_arr[i];
-                if ( element.type() == to_find.type() && element.op_eq( location, engine, to_find ).as_bool() )
-                    return Value{ i };
+                if ( element.type() == item.type() && element.op_eq( engine, item ).as_bool() )
+                    return Value{ i, location };
             }
-            return Value{ Int( -1 ) };
+            return Value{ Int( -1 ), location };
         } );
 
     // Ranges.
     bind_member( ValueType::RANGE, "start", []( Location const& location, Engine& engine, Value& self ) -> Value
         {
-            return (Value) self.as_range().start_incl;
+            return Value{ self.as_range().start_incl, location };
         } );
 
     bind_member( ValueType::RANGE, "end", []( Location const& location, Engine& engine, Value& self ) -> Value
         {
-            return (Value) self.as_range().end_excl;
+            return Value{ self.as_range().end_excl, location };
         } );
 }

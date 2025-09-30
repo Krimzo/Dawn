@@ -289,7 +289,7 @@ void dawn::Parser::parse_enum( TokenIterator& it, Enum& en )
                 parse_expression( ExtractType::NEW_LINE, it, expr );
             }
             else
-                expr = make_nothing_node( it->location );
+                expr = make_nothing_node();
         }
         else
             PARSER_PANIC( *it, "expected key name" );
@@ -495,14 +495,14 @@ void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable )
         parse_expression( ExtractType::NEW_LINE, it, variable.expr.value() );
     }
     else
-        variable.expr.value() = make_nothing_node( it->location );
+        variable.expr.value() = make_nothing_node();
 }
 
 void dawn::Parser::parse_expression( ExtractType type, TokenIterator& it, Node& tree )
 {
     if ( !it.valid() )
     {
-        tree = make_nothing_node( Location::none );
+        tree = make_nothing_node();
         return;
     }
 
@@ -729,7 +729,7 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
         left.pop_back();
 
         auto& node = tree.emplace<LambdaNode>( op.location );
-        auto& func = ( node.func_value = Value{ FunctionValue{} } ).as_function()
+        auto& func = ( node.func_value = Value{ FunctionValue{}, op.location } ).as_function()
             .data.emplace<FunctionValue::AsLambda>()
             .func.emplace<DFunction>();
 
@@ -777,13 +777,13 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
         Token left_scope;
         left_scope.value = op_scope_opn;
         left_scope.type = TokenType::OPERATOR;
-        left_scope.location = Location::none;
+        left_scope.location = LOCATION_NONE;
         right.insert( right.begin(), left_scope );
 
         Token right_scope;
         right_scope.value = op_scope_cls;
         right_scope.type = TokenType::OPERATOR;
-        right_scope.location = Location::none;
+        right_scope.location = LOCATION_NONE;
         right.push_back( right_scope );
 
         TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
@@ -891,7 +891,7 @@ void dawn::Parser::expression_pure( Vector<Token>& tokens, Node& tree )
 {
     if ( tokens.empty() )
     {
-        tree = make_nothing_node( Location::none );
+        tree = make_nothing_node();
     }
     else if ( tokens.size() == 1 )
     {
@@ -1084,7 +1084,7 @@ void dawn::Parser::scope_return( TokenIterator& it, Node& tree )
     if ( it->location.line == return_location.line )
         parse_expression( ExtractType::NEW_LINE, it, node.expr.value() );
     else
-        node.expr.value() = make_nothing_node( return_location );
+        node.expr.value() = make_nothing_node();
 }
 
 void dawn::Parser::scope_break( TokenIterator& it, Node& tree )
