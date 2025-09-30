@@ -157,7 +157,7 @@ print(sub(5, 3))
 
 # Errors
 ```dawn
-int a = 5
+int? a = 5
 try {
     throw a
 }
