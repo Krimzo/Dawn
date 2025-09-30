@@ -402,15 +402,27 @@ void dawn::Optimizer::optimize_expr_struct( StructNode& node, Node& out_node )
 {
     if ( std::holds_alternative<StructNode::NamedInit>( node.init ) )
     {
-        auto& init = std::get<StructNode::NamedInit>( node.init );
-        for ( auto& [_, arg] : init.args )
+        Bool is_ctime = true;
+        for ( auto& [_, arg] : std::get<StructNode::NamedInit>( node.init ).args )
+        {
             optimize_expr( arg );
+            if ( arg.type() != NodeType::VALUE )
+                is_ctime = false;
+        }
+        if ( is_ctime )
+            out_node.emplace<ValueNode>( node.location ).value = m_engine.handle_struct_node( node );
     }
     else
     {
-        auto& init = std::get<StructNode::ListInit>( node.init );
-        for ( auto& arg : init.args )
+        Bool is_ctime = true;
+        for ( auto& arg : std::get<StructNode::ListInit>( node.init ).args )
+        {
             optimize_expr( arg );
+            if ( arg.type() != NodeType::VALUE )
+                is_ctime = false;
+        }
+        if ( is_ctime )
+            out_node.emplace<ValueNode>( node.location ).value = m_engine.handle_struct_node( node );
     }
 }
 
