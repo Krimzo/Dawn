@@ -13,8 +13,8 @@ struct VarType
 {
     enum struct Kind
     {
-        DEFAULT = 0,
-        CONSTANT,
+        CONSTANT = 0,
+        VARIABLE,
         REFERENCE,
     };
 

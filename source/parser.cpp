@@ -99,7 +99,7 @@ dawn::Bool dawn::Parser::is_variable( TokenIterator const& it )
         return false;
     TokenIterator next = it;
     ++next;
-    return next->value == vr_constant
+    return next->value == vr_variable
         || next->value == vr_reference
         || next->type == TokenType::NAME;
 }
@@ -161,6 +161,9 @@ void dawn::Parser::parse_global_variable( TokenIterator& it, Module& module )
 
     Variable variable;
     parse_variable( it, variable );
+
+    if ( variable.type.kind != VarType::Kind::CONSTANT )
+        PARSER_PANIC( *first_it, "global variables must be const" );
 
     if ( module.contains_id( variable.id ) )
         PARSER_PANIC( *first_it, "name [", IDSystem::get( variable.id ), "] already in use" );
@@ -322,9 +325,9 @@ void dawn::Parser::parse_function( TokenIterator& it, Function& function )
         arg.type.type_id = IDSystem::get( it->value );
         ++it;
 
-        if ( it->value == vr_constant )
+        if ( it->value == vr_variable )
         {
-            arg.type.kind = VarType::Kind::CONSTANT;
+            arg.type.kind = VarType::Kind::VARIABLE;
             ++it;
         }
         else if ( it->value == vr_reference )
@@ -333,7 +336,7 @@ void dawn::Parser::parse_function( TokenIterator& it, Function& function )
             ++it;
         }
         else
-            arg.type.kind = VarType::Kind::DEFAULT;
+            arg.type.kind = VarType::Kind::CONSTANT;
 
         if ( it->type != TokenType::NAME )
             PARSER_PANIC( *it, "expected arg name" );
@@ -403,9 +406,9 @@ void dawn::Parser::parse_operator( TokenIterator& it, Function& operat )
         arg.type.type_id = IDSystem::get( it->value );
         ++it;
 
-        if ( it->value == vr_constant )
+        if ( it->value == vr_variable )
         {
-            arg.type.kind = VarType::Kind::CONSTANT;
+            arg.type.kind = VarType::Kind::VARIABLE;
             ++it;
         }
         else if ( it->value == vr_reference )
@@ -414,7 +417,7 @@ void dawn::Parser::parse_operator( TokenIterator& it, Function& operat )
             ++it;
         }
         else
-            arg.type.kind = VarType::Kind::DEFAULT;
+            arg.type.kind = VarType::Kind::CONSTANT;
 
         if ( it->type != TokenType::NAME )
             PARSER_PANIC( *it, "expected arg name" );
@@ -467,9 +470,9 @@ void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable )
     variable.type.type_id = IDSystem::get( it->value );
     ++it;
 
-    if ( it->value == vr_constant )
+    if ( it->value == vr_variable )
     {
-        variable.type.kind = VarType::Kind::CONSTANT;
+        variable.type.kind = VarType::Kind::VARIABLE;
         ++it;
     }
     else if ( it->value == vr_reference )
@@ -478,7 +481,7 @@ void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable )
         ++it;
     }
     else
-        variable.type.kind = VarType::Kind::DEFAULT;
+        variable.type.kind = VarType::Kind::CONSTANT;
 
     if ( it->type != TokenType::NAME )
         PARSER_PANIC( *it, "expected variable name" );
@@ -741,9 +744,9 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
             arg.type.type_id = IDSystem::get( left_it->value );
             ++left_it;
 
-            if ( left_it->value == vr_constant )
+            if ( left_it->value == vr_variable )
             {
-                arg.type.kind = VarType::Kind::CONSTANT;
+                arg.type.kind = VarType::Kind::VARIABLE;
                 ++left_it;
             }
             else if ( left_it->value == vr_reference )
@@ -752,7 +755,7 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
                 ++left_it;
             }
             else
-                arg.type.kind = VarType::Kind::DEFAULT;
+                arg.type.kind = VarType::Kind::CONSTANT;
 
             if ( left_it->type != TokenType::NAME )
                 PARSER_PANIC( *left_it, "expected arg name" );

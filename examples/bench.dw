@@ -1,6 +1,6 @@
 func main()
 {
-    int! result = fib(30)
+    int result = fib(30)
     print(result)
 }
 

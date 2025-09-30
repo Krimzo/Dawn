@@ -18,9 +18,9 @@ struct DFunction
     Scope body;
 };
 
-struct CFunction : Func<Value( Location const&, Value*, Int )>
+struct CFunction : Func<Value( Location const&, Engine&, Value*, Int )>
 {
-    using Func<Value( Location const&, Value*, Int )>::function;
+    using Func<Value( Location const&, Engine&, Value*, Int )>::function;
 };
 
 struct FunctionValue

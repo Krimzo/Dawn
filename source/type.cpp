@@ -32,8 +32,8 @@ std::ostream& dawn::operator<<( std::ostream& stream, VarType::Kind kind )
 {
     switch ( kind )
     {
-    case VarType::Kind::DEFAULT: stream << ""; break;
-    case VarType::Kind::CONSTANT: stream << vr_constant; break;
+    case VarType::Kind::CONSTANT: stream << ""; break;
+    case VarType::Kind::VARIABLE: stream << vr_variable; break;
     case VarType::Kind::REFERENCE: stream << vr_reference; break;
     }
     return stream;

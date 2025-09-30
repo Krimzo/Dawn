@@ -42,7 +42,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) tp_range,
     };
     result.operators = {
-        (String) vr_constant,
+        (String) vr_variable,
         (String) vr_reference,
         (String) op_add,
         (String) op_sub,
