@@ -14,7 +14,7 @@ struct Module
     Vector<Enum> enums;
     Vector<Struct> structs;
 
-    Bool contains_id( Int id ) const;
+    Bool contains_id( ID id ) const;
 };
 
 struct TokenIterator

@@ -14,7 +14,7 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( "typeid" ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return Value{ args[0].type_id(), location };
+                return Value{ (Int) args[0].type_id().integer(), location };
             else
                 ENGINE_PANIC( location, "typeid expected 1 argument, but got ", arg_count );
         } );

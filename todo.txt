@@ -1,4 +1,3 @@
 add compilation of a .dw into a .cdw file (optimize module and serialize)
 add flag support to dawn, example: disable optimizations
-create ID struct instead of using Int
 optimize access operator

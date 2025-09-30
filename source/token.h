@@ -27,7 +27,7 @@ struct Location
 {
     using IntType = int32_t;
 
-    Int path_id = 0;
+    ID path_id;
     IntType line = 1;
     IntType col = 1;
 

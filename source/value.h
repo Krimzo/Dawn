@@ -29,13 +29,13 @@ struct FunctionValue
 
     struct AsGlobal
     {
-        Int id = 0;
+        ID id;
         Fn func;
     };
 
     struct AsMethod
     {
-        Int id = 0;
+        ID id;
         Fn func;
         Holder<Value> self;
     };
@@ -62,16 +62,16 @@ struct FunctionValue
 
 struct EnumValue
 {
-    Int parent_id = 0;
-    Int key_id = 0;
+    ID parent_id;
+    ID key_id;
     Holder<Value> value;
 };
 
 struct StructValue
 {
-    Int parent_id = 0;
-    Map<Int, Value> fields;
-    Map<Int, Value> methods;
+    ID parent_id;
+    Map<ID, Value> fields;
+    Map<ID, Value> methods;
 
     StructValue() = default;
 
@@ -81,7 +81,7 @@ struct StructValue
     StructValue( StructValue&& other ) noexcept;
     StructValue& operator=( StructValue&& other ) noexcept;
 
-    FunctionValue* get_method( Int id, Bool has_no_args );
+    FunctionValue* get_method( ID id, Bool has_no_args );
 };
 
 struct ArrayValue
@@ -136,7 +136,7 @@ struct Value
 
     constexpr Location const& location() const { return m_location; }
     constexpr ValueType type() const { return m_type; }
-    Int type_id() const;
+    ID type_id() const;
 
     void assign( Value const& other );
     Value clone() const;

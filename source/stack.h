@@ -13,8 +13,8 @@ struct Frame
 
     Frame( FrameType type = FrameType::LOCAL );
 
-    Value& set( Int id, Value const& value );
-    Value* get( Int id );
+    Value& set( ID id, Value const& value );
+    Value* get( ID id );
 
     void reset( RegisterRef<Frame> const& parent );
 

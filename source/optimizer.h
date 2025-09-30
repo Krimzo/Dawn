@@ -12,7 +12,7 @@ struct Optimizer
 private:
     struct Inlineable
     {
-        Int id = 0;
+        ID id;
         Value value{};
         Bool can_inline = false;
     };
@@ -34,7 +34,7 @@ private:
     };
 
     Engine m_engine;
-    Set<Int> m_ctime_funcs;
+    Set<ID> m_ctime_funcs;
     Vector<Inlineable> m_inline;
 
     void reset();
@@ -77,7 +77,7 @@ private:
     void optimize_expr_array( ArrayNode& node, Node& out_node );
     void optimize_expr_unary( UnaryNode& node, Node& out_node );
     void optimize_expr_op( OperatorNode& node, Node& out_node );
-    void optimize_expr_ac( Value const& left, Int right_id, Node& out_node );
+    void optimize_expr_ac( Value const& left, ID right_id, Node& out_node );
     void optimize_expr_as( AssignNode& node, Node& out_node );
 };
 }

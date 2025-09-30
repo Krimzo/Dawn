@@ -3,8 +3,8 @@
 #include "engine.h"
 
 
-#define ID_HELPER(id) static const Int _##id = IDSystem::get( #id )
-#define OP_HELPER(op) static const Int __##op = IDSystem::get( op_##op )
+#define ID_HELPER(id) static const ID _##id = IDSystem::get( #id )
+#define OP_HELPER(op) static const ID __##op = IDSystem::get( op_##op )
 
 namespace dawn
 {
@@ -149,7 +149,7 @@ dawn::StructValue& dawn::StructValue::operator=( StructValue&& other ) noexcept
     return *this;
 }
 
-dawn::FunctionValue* dawn::StructValue::get_method( Int id, Bool has_no_args )
+dawn::FunctionValue* dawn::StructValue::get_method( ID id, Bool has_no_args )
 {
     auto it = methods.find( id );
     if ( it == methods.end() )
@@ -345,49 +345,49 @@ dawn::RangeValue& dawn::Value::as_range() const
     return m_regref.cast<RangeValue>().value();
 }
 
-dawn::Int dawn::Value::type_id() const
+dawn::ID dawn::Value::type_id() const
 {
     switch ( type() )
     {
     case ValueType::NOTHING:
     {
-        static const Int id = IDSystem::get( tp_nothing );
+        static const ID id = IDSystem::get( tp_nothing );
         return id;
     }
 
     case ValueType::BOOL:
     {
-        static const Int id = IDSystem::get( tp_bool );
+        static const ID id = IDSystem::get( tp_bool );
         return id;
     }
 
     case ValueType::INT:
     {
-        static const Int id = IDSystem::get( tp_int );
+        static const ID id = IDSystem::get( tp_int );
         return id;
     }
 
     case ValueType::FLOAT:
     {
-        static const Int id = IDSystem::get( tp_float );
+        static const ID id = IDSystem::get( tp_float );
         return id;
     }
 
     case ValueType::CHAR:
     {
-        static const Int id = IDSystem::get( tp_char );
+        static const ID id = IDSystem::get( tp_char );
         return id;
     }
 
     case ValueType::STRING:
     {
-        static const Int id = IDSystem::get( tp_string );
+        static const ID id = IDSystem::get( tp_string );
         return id;
     }
 
     case ValueType::FUNCTION:
     {
-        static const Int id = IDSystem::get( tp_function );
+        static const ID id = IDSystem::get( tp_function );
         return id;
     }
 
@@ -399,18 +399,18 @@ dawn::Int dawn::Value::type_id() const
 
     case ValueType::ARRAY:
     {
-        static const Int id = IDSystem::get( tp_array );
+        static const ID id = IDSystem::get( tp_array );
         return id;
     }
 
     case ValueType::RANGE:
     {
-        static const Int id = IDSystem::get( tp_range );
+        static const ID id = IDSystem::get( tp_range );
         return id;
     }
 
     default:
-        return 0;
+        return ID{};
     }
 }
 

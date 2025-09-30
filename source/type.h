@@ -11,21 +11,14 @@ namespace dawn
 {
 struct VarType
 {
-    enum struct Kind
-    {
-        CONSTANT = 0,
-        VARIABLE,
-        REFERENCE,
-    };
-
-    Int type_id = 0;
-    Kind kind{};
+    ID type_id;
+    VarKind kind{};
 };
 
 struct Variable
 {
     VarType type;
-    Int id = 0;
+    ID id;
     NodeRef expr;
 };
 
@@ -39,10 +32,10 @@ struct Function
     struct Arg
     {
         VarType type;
-        Int id = 0;
+        ID id;
     };
 
-    Int id = 0;
+    ID id;
     Vector<Arg> args;
     Scope body;
 };
@@ -51,31 +44,31 @@ struct Enum
 {
     struct Entry
     {
-        Int id = 0;
+        ID id;
         Variant<NodeRef, Holder<Value>> expr;
     };
 
-    Int id = 0;
+    ID id;
     Vector<Entry> entries;
 
-    Entry* get( Int id );
+    Entry* get( ID id );
 };
 
 struct Struct
 {
     struct Field
     {
-        Int id = 0;
-        Int type_id = 0;
+        ID id;
+        ID type_id;
     };
 
-    Int id = 0;
+    ID id;
     Vector<Field> fields;
     Vector<Function> methods;
 
-    Bool contains( Int id ) const;
+    Bool contains( ID id ) const;
 };
 
-std::ostream& operator<<( std::ostream& stream, VarType::Kind kind );
+std::ostream& operator<<( std::ostream& stream, VarKind kind );
 std::ostream& operator<<( std::ostream& stream, VarType const& type );
 }

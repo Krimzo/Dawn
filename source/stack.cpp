@@ -12,7 +12,7 @@ dawn::Frame::Frame( FrameType type )
         m_frame.emplace<GlobalFrame>( GLOBAL_FRAME_SIZE );
 }
 
-dawn::Value& dawn::Frame::set( Int id, Value const& value )
+dawn::Value& dawn::Frame::set( ID id, Value const& value )
 {
     if ( std::holds_alternative<LocalFrame>( m_frame ) )
         return std::get<LocalFrame>( m_frame ).set( id, value );
@@ -20,7 +20,7 @@ dawn::Value& dawn::Frame::set( Int id, Value const& value )
         return std::get<GlobalFrame>( m_frame ).set( id, value );
 }
 
-dawn::Value* dawn::Frame::get( Int id )
+dawn::Value* dawn::Frame::get( ID id )
 {
     if ( std::holds_alternative<LocalFrame>( m_frame ) )
     {

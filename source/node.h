@@ -32,7 +32,7 @@ struct VariableNode : LocationHolder
 
 struct IdentifierNode : LocationHolder
 {
-    Int id = 0;
+    ID id;
 
     constexpr IdentifierNode( Location const& location )
         : LocationHolder( location )
@@ -101,7 +101,7 @@ struct ThrowNode : LocationHolder
 struct TryNode : LocationHolder
 {
     Scope try_scope;
-    Int catch_id = 0;
+    ID catch_id;
     Scope catch_scope;
 
     constexpr TryNode( Location const& location )
@@ -168,7 +168,7 @@ struct WhileNode : LocationHolder
 
 struct ForNode : LocationHolder
 {
-    Int var_id = 0;
+    ID var_id;
     NodeRef expr;
     Scope scope;
 
@@ -190,8 +190,8 @@ struct LambdaNode : LocationHolder
 
 struct EnumNode : LocationHolder
 {
-    Int type_id = 0;
-    Int key_id = 0;
+    ID type_id;
+    ID key_id;
 
     constexpr EnumNode( Location const& location )
         : LocationHolder( location )
@@ -203,7 +203,7 @@ struct StructNode : LocationHolder
 {
     struct NamedInit
     {
-        Map<Int, Node> args;
+        Map<ID, Node> args;
     };
 
     struct ListInit
@@ -211,7 +211,7 @@ struct StructNode : LocationHolder
         Vector<Node> args;
     };
 
-    Int type_id = 0;
+    ID type_id;
     Variant<NamedInit, ListInit> init;
 
     constexpr StructNode( Location const& location )
@@ -229,7 +229,7 @@ struct ArrayNode : LocationHolder
 
     struct SizedInit
     {
-        Int type_id = 0;
+        ID type_id;
         NodeRef size_expr;
     };
 

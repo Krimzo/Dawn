@@ -28,19 +28,19 @@ struct Engine
     void load_struct( Struct const& entry );
     void load_variable( Variable const& entry );
 
-    void bind_cfunc( Int id, Bool is_ctime, CFunction cfunc );
-    Value call_func( Int id, Value* args, Int arg_count );
+    void bind_cfunc( ID id, Bool is_ctime, CFunction cfunc );
+    Value call_func( ID id, Value* args, Int arg_count );
 
-    void add_var( Location const& location, VarType const& type, Int id, Value const& value );
-    Value* get_var( Int id );
+    void add_var( Location const& location, VarType const& type, ID id, Value const& value );
+    Value* get_var( ID id );
 
     void bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func );
     void bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body );
 
-    Set<Int> const& ctime_funcs() const;
+    constexpr Set<ID> const& ctime_funcs() const { return m_ctime_funcs; }
 
 private:
-    Set<Int> m_ctime_funcs;
+    Set<ID> m_ctime_funcs;
 
     void load_standard_functions();
     void load_standard_members();
@@ -73,9 +73,9 @@ private:
     Value handle_ac_node( OperatorNode const& node );
     Value handle_as_node( AssignNode const& node );
 
-    Value handle_ac_struct_node( Location const& location, Value const& self, Int right_id );
-    Value handle_ac_type_node( Location const& location, Value const& self, Int right_id );
+    Value handle_ac_struct_node( Location const& location, Value const& self, ID right_id );
+    Value handle_ac_type_node( Location const& location, Value const& self, ID right_id );
 
-    Value create_default_value( Location const& location, Int typeid_ );
+    Value create_default_value( Location const& location, ID typeid_ );
 };
 }

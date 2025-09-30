@@ -59,7 +59,7 @@ void dawn::Engine::load_variable( Variable const& entry )
     add_var( expr.location(), entry.type, entry.id, handle_expr( expr ) );
 }
 
-void dawn::Engine::bind_cfunc( Int id, Bool is_ctime, CFunction cfunc )
+void dawn::Engine::bind_cfunc( ID id, Bool is_ctime, CFunction cfunc )
 {
     if ( stack.root().get( id ) )
         ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] already exists" );
@@ -73,7 +73,7 @@ void dawn::Engine::bind_cfunc( Int id, Bool is_ctime, CFunction cfunc )
     stack.root().set( id, Value{ fv, LOCATION_NONE } );
 }
 
-dawn::Value dawn::Engine::call_func( Int id, Value* args, Int arg_count )
+dawn::Value dawn::Engine::call_func( ID id, Value* args, Int arg_count )
 {
     Value* value = stack.root().get( id );
     if ( !value )
@@ -85,20 +85,20 @@ dawn::Value dawn::Engine::call_func( Int id, Value* args, Int arg_count )
     return handle_func( LOCATION_NONE, value->as_function(), args, arg_count );
 }
 
-void dawn::Engine::add_var( Location const& location, VarType const& type, Int id, Value const& value )
+void dawn::Engine::add_var( Location const& location, VarType const& type, ID id, Value const& value )
 {
     if ( type.type_id != value.type_id() )
         ENGINE_PANIC( location, "can not init variable of type [", IDSystem::get( type.type_id ), "] with type [", IDSystem::get( value.type_id() ), "]" );
 
-    if ( type.kind == VarType::Kind::CONSTANT )
+    if ( type.kind == VarKind::CONSTANT )
         stack.current().set( id, value.clone() );
-    else if ( type.kind == VarType::Kind::VARIABLE )
+    else if ( type.kind == VarKind::VARIABLE )
         stack.current().set( id, value.clone().unlock_const() );
     else
         stack.current().set( id, value );
 }
 
-dawn::Value* dawn::Engine::get_var( Int id )
+dawn::Value* dawn::Engine::get_var( ID id )
 {
     return stack.current().get( id );
 }
@@ -113,7 +113,7 @@ void dawn::Engine::bind_member( ValueType type, StringRef const& name, CustomMem
 
 void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body )
 {
-    const Int id = IDSystem::get( name );
+    const ID id = IDSystem::get( name );
     member_generators[(Int) type].set( id, [name, is_const, expected_args, body, id]( Location const& location, Engine& __, Value const& self ) -> Value
         {
             FunctionValue fv{};
@@ -130,11 +130,6 @@ void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_cons
             *method.self = self;
             return Value{ fv, location };
         } );
-}
-
-dawn::Set<dawn::Int> const& dawn::Engine::ctime_funcs() const
-{
-    return m_ctime_funcs;
 }
 
 dawn::Value dawn::Engine::handle_func( Location const& location, FunctionValue const& func, Value* args, Int arg_count )
@@ -707,7 +702,7 @@ dawn::Value dawn::Engine::handle_ac_node( OperatorNode const& node )
     if ( node.sides[1].type() != NodeType::IDENTIFIER )
         ENGINE_PANIC( node.location, "access must be an identifier" );
 
-    Int right_id = std::get<IdentifierNode>( node.sides[1] ).id;
+    ID right_id = std::get<IdentifierNode>( node.sides[1] ).id;
     if ( left.type() == ValueType::STRUCT )
         return handle_ac_struct_node( node.location, left, right_id );
     else
@@ -753,7 +748,7 @@ dawn::Value dawn::Engine::handle_as_node( AssignNode const& node )
     }
 }
 
-dawn::Value dawn::Engine::handle_ac_struct_node( Location const& location, Value const& self, Int right_id )
+dawn::Value dawn::Engine::handle_ac_struct_node( Location const& location, Value const& self, ID right_id )
 {
     auto& left = self.as_struct();
     auto it = left.fields.find( right_id );
@@ -765,7 +760,7 @@ dawn::Value dawn::Engine::handle_ac_struct_node( Location const& location, Value
     ENGINE_PANIC( location, "struct [", IDSystem::get( left.parent_id ), "] does not have member [", IDSystem::get( right_id ), "]" );
 }
 
-dawn::Value dawn::Engine::handle_ac_type_node( Location const& location, Value const& self, Int right_id )
+dawn::Value dawn::Engine::handle_ac_type_node( Location const& location, Value const& self, ID right_id )
 {
     auto* generator_ptr = member_generators[(Int) self.type()].get( right_id );
     if ( !generator_ptr )
@@ -773,17 +768,17 @@ dawn::Value dawn::Engine::handle_ac_type_node( Location const& location, Value c
     return ( *generator_ptr )( location, *this, self );
 }
 
-dawn::Value dawn::Engine::create_default_value( Location const& location, Int typeid_ )
+dawn::Value dawn::Engine::create_default_value( Location const& location, ID typeid_ )
 {
-    static const Int _id_nothing = IDSystem::get( tp_nothing );
-    static const Int _id_bool = IDSystem::get( tp_bool );
-    static const Int _id_int = IDSystem::get( tp_int );
-    static const Int _id_float = IDSystem::get( tp_float );
-    static const Int _id_char = IDSystem::get( tp_char );
-    static const Int _id_string = IDSystem::get( tp_string );
-    static const Int _id_function = IDSystem::get( tp_function );
-    static const Int _id_array = IDSystem::get( tp_array );
-    static const Int _id_range = IDSystem::get( tp_range );
+    static const ID _id_nothing = IDSystem::get( tp_nothing );
+    static const ID _id_bool = IDSystem::get( tp_bool );
+    static const ID _id_int = IDSystem::get( tp_int );
+    static const ID _id_float = IDSystem::get( tp_float );
+    static const ID _id_char = IDSystem::get( tp_char );
+    static const ID _id_string = IDSystem::get( tp_string );
+    static const ID _id_function = IDSystem::get( tp_function );
+    static const ID _id_array = IDSystem::get( tp_array );
+    static const ID _id_range = IDSystem::get( tp_range );
 
     if ( typeid_ == _id_nothing )
         return Value{ Nothing{} };

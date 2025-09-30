@@ -3,7 +3,7 @@
 #include "syntax.h"
 
 
-dawn::Enum::Entry* dawn::Enum::get( Int id )
+dawn::Enum::Entry* dawn::Enum::get( ID id )
 {
     for ( auto& entry : entries )
     {
@@ -13,7 +13,7 @@ dawn::Enum::Entry* dawn::Enum::get( Int id )
     return nullptr;
 }
 
-dawn::Bool dawn::Struct::contains( Int id ) const
+dawn::Bool dawn::Struct::contains( ID id ) const
 {
     for ( auto& field : fields )
     {
@@ -28,13 +28,13 @@ dawn::Bool dawn::Struct::contains( Int id ) const
     return false;
 }
 
-std::ostream& dawn::operator<<( std::ostream& stream, VarType::Kind kind )
+std::ostream& dawn::operator<<( std::ostream& stream, VarKind kind )
 {
     switch ( kind )
     {
-    case VarType::Kind::CONSTANT: stream << ""; break;
-    case VarType::Kind::VARIABLE: stream << vr_variable; break;
-    case VarType::Kind::REFERENCE: stream << vr_reference; break;
+    case VarKind::CONSTANT: stream << ""; break;
+    case VarKind::VARIABLE: stream << vr_variable; break;
+    case VarKind::REFERENCE: stream << vr_reference; break;
     }
     return stream;
 }

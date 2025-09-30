@@ -97,7 +97,7 @@ void dawn::Optimizer::optimize_instr( Vector<Node>& scope )
             continue;
 
         auto& var = std::get<VariableNode>( instr ).var;
-        if ( var.type.kind != VarType::Kind::CONSTANT && var.type.kind != VarType::Kind::REFERENCE )
+        if ( var.type.kind != VarKind::CONSTANT && var.type.kind != VarKind::REFERENCE )
         {
             m_inline.emplace_back( var.id );
             continue;
@@ -497,7 +497,7 @@ void dawn::Optimizer::optimize_expr_op( OperatorNode& node, Node& out_node )
     out_node.emplace<Value>( left_value );
 }
 
-void dawn::Optimizer::optimize_expr_ac( Value const& left, const Int right_id, Node& out_node )
+void dawn::Optimizer::optimize_expr_ac( Value const& left, const ID right_id, Node& out_node )
 {
 }
 

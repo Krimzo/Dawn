@@ -5,7 +5,7 @@
 
 namespace dawn
 {
-enum struct TokenType
+enum struct TokenType : uint8_t
 {
     INTEGER = 0,
     FLOAT,
@@ -17,7 +17,7 @@ enum struct TokenType
     OPERATOR,
 };
 
-enum struct ExtractType
+enum struct ExtractType : uint8_t
 {
     DEFAULT = 0,
     NEW_LINE,
@@ -25,14 +25,14 @@ enum struct ExtractType
     SCOPE_START,
 };
 
-enum struct UnaryType
+enum struct UnaryType : uint8_t
 {
     PLUS = 0,
     MINUS,
     NOT,
 };
 
-enum struct OperatorType
+enum struct OperatorType : uint8_t
 {
     ACCESS = 0,
     POW,
@@ -53,7 +53,7 @@ enum struct OperatorType
     RANGE,
 };
 
-enum struct AssignType
+enum struct AssignType : uint8_t
 {
     ASSIGN = 0,
     ADD,
@@ -64,7 +64,7 @@ enum struct AssignType
     MOD,
 };
 
-enum struct NodeType
+enum struct NodeType : uint8_t
 {
     NONE = 0,
 
@@ -96,7 +96,7 @@ enum struct NodeType
     ASSIGN,
 };
 
-enum struct ValueType
+enum struct ValueType : uint8_t
 {
     NOTHING = 0,
     BOOL,
@@ -112,7 +112,14 @@ enum struct ValueType
     _COUNT,
 };
 
-enum struct FrameType
+enum struct VarKind : uint8_t
+{
+    CONSTANT = 0,
+    VARIABLE,
+    REFERENCE,
+};
+
+enum struct FrameType : uint8_t
 {
     LOCAL = 0,
     GLOBAL = 1,
