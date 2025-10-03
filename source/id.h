@@ -18,12 +18,12 @@ struct ID
         return m_id;
     }
 
-    constexpr auto operator==( ID other ) const
+    constexpr auto operator==( const ID other ) const
     {
         return m_id == other.m_id;
     }
 
-    constexpr auto operator<=>( ID other ) const
+    constexpr auto operator<=>( const ID other ) const
     {
         return m_id <=> other.m_id;
     }
@@ -31,7 +31,7 @@ struct ID
 private:
     uint32_t m_id = 0;
 
-    constexpr ID( uint32_t id )
+    constexpr ID( const uint32_t id )
         : m_id( id )
     {
     }

@@ -93,33 +93,8 @@ void dawn::Optimizer::optimize_instr( Vector<Node>& scope )
     {
         auto& instr = scope[i];
         optimize_expr( instr );
-        if ( instr.type() != NodeType::VARIABLE )
-            continue;
-
-        auto& var = std::get<VariableNode>( instr ).var;
-        if ( var.type.kind != VarKind::CONSTANT && var.type.kind != VarKind::REFERENCE )
-        {
-            m_inline.emplace_back( var.id );
-            continue;
-        }
-
-        auto& expr = var.expr.value();
-        if ( expr.type() != NodeType::VALUE )
-        {
-            m_inline.emplace_back( var.id );
-            continue;
-        }
-
-        auto& value = std::get<Value>( expr );
-        if ( !value.is_const() )
-        {
-            m_inline.emplace_back( var.id );
-            continue;
-        }
-
-        m_inline.emplace_back( var.id, value, true );
-        scope.erase( scope.begin() + i );
-        --i;
+        if ( instr.type() == NodeType::VARIABLE )
+            inline_var( std::get<VariableNode>( instr ).var, scope, i );
     }
 }
 
@@ -152,6 +127,36 @@ void dawn::Optimizer::optimize_expr( Node& node )
     case NodeType::OPERATOR: optimize_expr_op( std::get<OperatorNode>( node ), node ); break;
     case NodeType::ASSIGN: optimize_expr_as( std::get<AssignNode>( node ), node ); break;
     }
+}
+
+void dawn::Optimizer::inline_var( Variable& var, Vector<Node>& scope, Int& i )
+{
+    if ( var.type.kind != VarKind::CONSTANT && var.type.kind != VarKind::REFERENCE )
+    {
+        m_inline.emplace_back( var.id );
+        return;
+    }
+
+    auto& expr = var.expr.value();
+    if ( expr.type() != NodeType::VALUE )
+    {
+        m_inline.emplace_back( var.id );
+        return;
+    }
+
+    auto& value = std::get<Value>( expr );
+    if ( !value.is_const() )
+    {
+        m_inline.emplace_back( var.id );
+        return;
+    }
+
+    if ( value.type_id() != var.type.type_id )
+        ENGINE_PANIC( var.expr.value().location(), "optimizer can not inline variable of type [", IDSystem::get( var.type.type_id ), "] because expr is of type [", IDSystem::get( value.type_id() ), "]" );
+
+    m_inline.emplace_back( var.id, value, true );
+    scope.erase( scope.begin() + i );
+    --i;
 }
 
 void dawn::Optimizer::optimize_expr_none( None& node, Node& out_node )

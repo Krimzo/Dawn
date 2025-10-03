@@ -8,6 +8,7 @@ namespace dawn
 {
 struct Engine
 {
+    using MemberGenerator = Func<Value( Location const&, Engine&, Value const& )>;
     using CustomMemberFunc = Func<Value( Location const&, Engine&, Value& )>;
     using CustomMethodFunc = Func<Value( Location const&, Engine&, Value&, Value* )>;
 

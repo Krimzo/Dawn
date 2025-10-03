@@ -53,6 +53,7 @@ private:
 
     void optimize_instr( Vector<Node>& scope );
     void optimize_expr( Node& node );
+    void inline_var( Variable& var, Vector<Node>& scope, Int& i );
 
     void optimize_expr_none( None& node, Node& out_node );
     void optimize_expr_scope( Scope& node, Node& out_node );
