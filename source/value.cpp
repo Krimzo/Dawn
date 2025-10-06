@@ -440,10 +440,10 @@ dawn::ID dawn::Value::type_id() const
 void dawn::Value::assign( Value const& other )
 {
     if ( is_const() )
-        ENGINE_PANIC( location(), "can not assign [", other.type(), "] to a const value" );
+        ENGINE_PANIC( location(), "can not assign [", IDSystem::get( other.type_id() ), "] to a const value" );
 
-    if ( type() != other.type() )
-        ENGINE_PANIC( location(), "can not assign [", other.type(), "] to [", type(), "]" );
+    if ( type_id() != other.type_id() )
+        ENGINE_PANIC( location(), "can not assign [", IDSystem::get( other.type_id() ), "] to [", IDSystem::get( type_id() ), "]" );
 
     switch ( type() )
     {
