@@ -82,7 +82,7 @@ struct RegisterRef
         return *this;
     }
 
-    Bool valid() const noexcept
+    operator Bool () const noexcept
     {
         return static_cast<Bool>( m_regptr );
     }

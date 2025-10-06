@@ -360,12 +360,12 @@ dawn::RangeValue& dawn::Value::as_range() const
 
 dawn::Location const& dawn::Value::location() const
 {
-    return m_regref.valid() ? m_regref->location : LOCATION_NONE;
+    return m_regref ? m_regref->location : LOCATION_NONE;
 }
 
 dawn::ValueType dawn::Value::type() const
 {
-    return m_regref.valid() ? m_regref->type : ValueType::NOTHING;
+    return m_regref ? m_regref->type : ValueType::NOTHING;
 }
 
 dawn::ID dawn::Value::type_id() const
@@ -543,7 +543,7 @@ dawn::Value dawn::Value::clone() const
 
 dawn::Bool dawn::Value::is_const() const
 {
-    return m_regref.valid() ? m_regref->is_const : true;
+    return m_regref ? m_regref->is_const : true;
 }
 
 dawn::Value& dawn::Value::unlock_const()

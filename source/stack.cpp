@@ -32,7 +32,7 @@ dawn::Value* dawn::Frame::get( ID id )
         if ( Value* ptr = std::get<GlobalFrame>( m_frame ).get( id ) )
             return ptr;
     }
-    return m_parent.valid() ? m_parent->get( id ) : nullptr;
+    return m_parent ? m_parent->get( id ) : nullptr;
 }
 
 void dawn::Frame::reset( RegisterRef<Frame> const& parent )
@@ -58,7 +58,7 @@ dawn::PopHandler dawn::Stack::push()
 
 dawn::PopHandler dawn::Stack::push_from( RegisterRef<Frame> const& frame )
 {
-    m_frames.emplace_back( frame_pool().new_register() )->reset( frame.valid() ? frame : m_frames.front() );
+    m_frames.emplace_back( frame_pool().new_register() )->reset( frame ? frame : m_frames.front() );
     return PopHandler{ *this };
 }
 

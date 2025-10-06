@@ -289,7 +289,7 @@ void dawn::Parser::parse_enum( TokenIterator& it, Enum& en )
                 parse_expression( ExtractType::NEW_LINE, it, expr );
             }
             else
-                expr = make_nothing_node();
+                expr.emplace<Value>();
         }
         else
             PARSER_PANIC( *it, "expected key name" );
@@ -495,14 +495,14 @@ void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable )
         parse_expression( ExtractType::NEW_LINE, it, *variable.expr );
     }
     else
-        *variable.expr = make_nothing_node();
+        variable.expr->emplace<Value>();
 }
 
 void dawn::Parser::parse_expression( ExtractType type, TokenIterator& it, Node& tree )
 {
     if ( !it.valid() )
     {
-        tree = make_nothing_node();
+        tree.emplace<Value>();
         return;
     }
 
@@ -891,7 +891,7 @@ void dawn::Parser::expression_pure( Vector<Token>& tokens, Node& tree )
 {
     if ( tokens.empty() )
     {
-        tree = make_nothing_node();
+        tree.emplace<Value>();
     }
     else if ( tokens.size() == 1 )
     {
@@ -933,19 +933,19 @@ void dawn::Parser::expression_single_literal( Token const& token, Node& tree )
 {
     if ( token.type == TokenType::INTEGER )
     {
-        tree = make_int_node( token.location, std::stoll( token.literal ) );
+        tree.emplace<Value>( (Int) std::stoll( token.literal ), token.location );
     }
     else if ( token.type == TokenType::FLOAT )
     {
-        tree = make_float_node( token.location, std::stod( token.literal ) );
+        tree.emplace<Value>( (Float) std::stod( token.literal ), token.location );
     }
     else if ( token.type == TokenType::CHAR )
     {
-        tree = make_char_node( token.location, token.literal[0] );
+        tree.emplace<Value>( (Char) token.literal[0], token.location );
     }
     else if ( token.type == TokenType::STRING )
     {
-        tree = make_string_node( token.location, token.literal );
+        tree.emplace<Value>( (String const&) token.literal, token.location );
     }
     else
         PARSER_PANIC( token, "expected literal" );
@@ -955,15 +955,16 @@ void dawn::Parser::expression_single_keyword( Token const& token, Node& tree )
 {
     if ( token.value == kw_true )
     {
-        tree = make_bool_node( token.location, true );
+        tree.emplace<Value>( (Bool) true, token.location );
     }
     else if ( token.value == kw_false )
     {
-        tree = make_bool_node( token.location, false );
+        tree.emplace<Value>( (Bool) false, token.location );
     }
     else if ( token.value == kw_self )
     {
-        tree.emplace<IdentifierNode>( token.location ).id = IDSystem::get( kw_self );
+        static const ID self_id = IDSystem::get( kw_self );
+        tree.emplace<IdentifierNode>( token.location ).id = self_id;
     }
     else
         PARSER_PANIC( token, "keyword [", token.value, "] is not an expression" );
@@ -1084,7 +1085,7 @@ void dawn::Parser::scope_return( TokenIterator& it, Node& tree )
     if ( it->location.line == return_location.line )
         parse_expression( ExtractType::NEW_LINE, it, *node.expr );
     else
-        *node.expr = make_nothing_node();
+        node.expr->emplace<Value>();
 }
 
 void dawn::Parser::scope_break( TokenIterator& it, Node& tree )
@@ -1162,7 +1163,7 @@ void dawn::Parser::scope_if( TokenIterator& it, Node& tree )
         {
             ++it;
             auto& part = node.parts.emplace_back();
-            part.expr = make_bool_node( it->location, true );
+            part.expr.emplace<Value>( (Bool) true, it->location );
             parse_scope( it, part.scope );
             break;
         }

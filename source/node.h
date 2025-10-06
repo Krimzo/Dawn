@@ -342,12 +342,4 @@ struct Node : Variant <
         }
     }
 };
-
-Node make_nothing_node();
-Node make_bool_node( Location const& location, Bool value );
-Node make_int_node( Location const& location, Int value );
-Node make_float_node( Location const& location, Float value );
-Node make_char_node( Location const& location, Char value );
-Node make_string_node( Location const& location, StringRef const& value );
-Node make_value_node( Value const& value );
 }
