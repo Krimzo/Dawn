@@ -770,7 +770,7 @@ dawn::Value dawn::Engine::handle_ac_type_node( Location const& location, Value c
 
 dawn::Value dawn::Engine::create_default_value( Location const& location, ID typeid_ )
 {
-    static const ID _id_nothing = IDSystem::get( tp_nothing );
+    static const ID _id_void = IDSystem::get( tp_void );
     static const ID _id_bool = IDSystem::get( tp_bool );
     static const ID _id_int = IDSystem::get( tp_int );
     static const ID _id_float = IDSystem::get( tp_float );
@@ -780,7 +780,7 @@ dawn::Value dawn::Engine::create_default_value( Location const& location, ID typ
     static const ID _id_array = IDSystem::get( tp_array );
     static const ID _id_range = IDSystem::get( tp_range );
 
-    if ( typeid_ == _id_nothing )
+    if ( typeid_ == _id_void )
         return Value{};
 
     else if ( typeid_ == _id_bool )

@@ -39,7 +39,7 @@ struct ParserError
 
 struct EngineError
 {
-    static constexpr Color COLOR = { 107, 217, 199 };
+    static constexpr Color COLOR = { 255, 149, 85 };
 
     String msg;
 

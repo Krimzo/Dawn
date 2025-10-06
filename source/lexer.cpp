@@ -31,7 +31,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) kw_false,
     };
     result.types = {
-        (String) tp_nothing,
+        (String) tp_void,
         (String) tp_bool,
         (String) tp_int,
         (String) tp_float,

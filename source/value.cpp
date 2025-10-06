@@ -8,7 +8,7 @@
 
 namespace dawn
 {
-ID_HELPER( nothing );
+ID_HELPER( void );
 ID_HELPER( bool );
 ID_HELPER( int );
 ID_HELPER( float );
@@ -365,54 +365,33 @@ dawn::Location const& dawn::Value::location() const
 
 dawn::ValueType dawn::Value::type() const
 {
-    return m_regref ? m_regref->type : ValueType::NOTHING;
+    return m_regref ? m_regref->type : ValueType::VOID;
 }
 
 dawn::ID dawn::Value::type_id() const
 {
     switch ( type() )
     {
-    case ValueType::NOTHING:
-    {
-        static const ID id = IDSystem::get( tp_nothing );
-        return id;
-    }
+    case ValueType::VOID:
+        return _void;
 
     case ValueType::BOOL:
-    {
-        static const ID id = IDSystem::get( tp_bool );
-        return id;
-    }
+        return _bool;
 
     case ValueType::INT:
-    {
-        static const ID id = IDSystem::get( tp_int );
-        return id;
-    }
+        return _int;
 
     case ValueType::FLOAT:
-    {
-        static const ID id = IDSystem::get( tp_float );
-        return id;
-    }
+        return _float;
 
     case ValueType::CHAR:
-    {
-        static const ID id = IDSystem::get( tp_char );
-        return id;
-    }
+        return _char;
 
     case ValueType::STRING:
-    {
-        static const ID id = IDSystem::get( tp_string );
-        return id;
-    }
+        return _string;
 
     case ValueType::FUNCTION:
-    {
-        static const ID id = IDSystem::get( tp_function );
-        return id;
-    }
+        return _function;
 
     case ValueType::ENUM:
         return as_enum().parent_id;
@@ -421,16 +400,10 @@ dawn::ID dawn::Value::type_id() const
         return as_struct().parent_id;
 
     case ValueType::ARRAY:
-    {
-        static const ID id = IDSystem::get( tp_array );
-        return id;
-    }
+        return _array;
 
     case ValueType::RANGE:
-    {
-        static const ID id = IDSystem::get( tp_range );
-        return id;
-    }
+        return _range;
 
     default:
         return ID{};
@@ -498,7 +471,7 @@ dawn::Value dawn::Value::clone() const
 {
     switch ( type() )
     {
-    case ValueType::NOTHING:
+    case ValueType::VOID:
         return Value{};
 
     case ValueType::BOOL:
@@ -548,7 +521,8 @@ dawn::Bool dawn::Value::is_const() const
 
 dawn::Value& dawn::Value::unlock_const()
 {
-    m_regref->is_const = false;
+    if ( m_regref )
+        m_regref->is_const = false;
     switch ( type() )
     {
     case ValueType::STRUCT:
@@ -1142,7 +1116,7 @@ dawn::Bool dawn::Value::to_bool( Engine& engine ) const
 {
     switch ( type() )
     {
-    case ValueType::NOTHING:
+    case ValueType::VOID:
         return Bool{};
 
     case ValueType::BOOL:
@@ -1180,7 +1154,7 @@ dawn::Int dawn::Value::to_int( Engine& engine ) const
 {
     switch ( type() )
     {
-    case ValueType::NOTHING:
+    case ValueType::VOID:
         return Int{};
 
     case ValueType::BOOL:
@@ -1222,7 +1196,7 @@ dawn::Float dawn::Value::to_float( Engine& engine ) const
 {
     switch ( type() )
     {
-    case ValueType::NOTHING:
+    case ValueType::VOID:
         return Float{};
 
     case ValueType::BOOL:
@@ -1264,7 +1238,7 @@ dawn::Char dawn::Value::to_char( Engine& engine ) const
 {
     switch ( type() )
     {
-    case ValueType::NOTHING:
+    case ValueType::VOID:
         return Char{};
 
     case ValueType::BOOL:
@@ -1307,7 +1281,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
 {
     switch ( type() )
     {
-    case ValueType::NOTHING:
+    case ValueType::VOID:
         return String{};
 
     case ValueType::BOOL:
@@ -1445,6 +1419,9 @@ dawn::ArrayValue dawn::Value::to_array( Engine& engine ) const
 {
     switch ( type() )
     {
+    case ValueType::VOID:
+        return ArrayValue{};
+
     case ValueType::STRING:
     {
         auto& strval = as_string();
@@ -1478,6 +1455,9 @@ dawn::RangeValue dawn::Value::to_range( Engine& engine ) const
 {
     switch ( type() )
     {
+    case ValueType::VOID:
+        return RangeValue{};
+
     case ValueType::STRUCT:
     {
         auto& left = as_struct();

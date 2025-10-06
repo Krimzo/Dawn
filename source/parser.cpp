@@ -365,7 +365,7 @@ void dawn::Parser::parse_cast( TokenIterator& it, Function& function )
         PARSER_PANIC( *it, "expected cast" );
     ++it;
 
-    if ( it->value != tp_nothing &&
+    if ( it->value != tp_void &&
         it->value != tp_bool &&
         it->value != tp_int &&
         it->value != tp_float &&
@@ -972,7 +972,7 @@ void dawn::Parser::expression_single_keyword( Token const& token, Node& tree )
 
 void dawn::Parser::expression_single_type( Token const& token, Node& tree )
 {
-    if ( token.value == tp_nothing ||
+    if ( token.value == tp_void ||
         token.value == tp_bool ||
         token.value == tp_int ||
         token.value == tp_float ||

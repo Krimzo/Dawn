@@ -28,14 +28,14 @@ void dawn::Engine::load_standard_functions()
         } );
 
     /* CAST */
-    bind_cfunc( IDSystem::get( tp_nothing ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
+    bind_cfunc( IDSystem::get( tp_void ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{};
             else if ( arg_count == 0 )
                 return Value{};
             else
-                ENGINE_PANIC( location, tp_nothing, "() expects 1 or 0 arguments, but got ", arg_count );
+                ENGINE_PANIC( location, tp_void, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
     bind_cfunc( IDSystem::get( tp_bool ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value

@@ -98,7 +98,7 @@ enum struct NodeType : uint8_t
 
 enum struct ValueType : uint8_t
 {
-    NOTHING = 0,
+    VOID = 0,
     BOOL,
     INT,
     FLOAT,

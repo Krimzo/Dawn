@@ -106,7 +106,7 @@ struct RangeValue
 struct ValueInfo
 {
     Location location;
-    ValueType type = ValueType::NOTHING;
+    ValueType type = ValueType::VOID;
     Bool is_const = true;
 };
 

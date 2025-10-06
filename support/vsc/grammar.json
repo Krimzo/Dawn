@@ -57,7 +57,7 @@
             "patterns": [
                 {
                     "name": "keyword.other.dawn",
-                    "match": "\\b(self|true|false|nothing|bool|int|float|char|string|function|array|range)\\b"
+                    "match": "\\b(self|true|false|void|bool|int|float|char|string|function|array|range)\\b"
                 }
             ]
         },

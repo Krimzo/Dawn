@@ -22,7 +22,7 @@ std::ostream& dawn::operator<<( std::ostream& stream, ValueType type )
 {
     switch ( type )
     {
-    case ValueType::NOTHING: stream << tp_nothing; break;
+    case ValueType::VOID: stream << tp_void; break;
     case ValueType::BOOL: stream << tp_bool; break;
     case ValueType::INT: stream << tp_int; break;
     case ValueType::FLOAT: stream << tp_float; break;

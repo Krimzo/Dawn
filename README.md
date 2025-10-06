@@ -16,7 +16,7 @@ int& p = b // reference
 
 # Types
 ```dawn
-nothing n = ()                    // nothing (0 bytes)
+void n = ()                       // void (0 bytes)
 bool b = false                    // bool (1 byte)
 int i = -10                       // integer (8 bytes)
 float f = 6.0                     // float (8 bytes)
@@ -47,7 +47,7 @@ a1[1] += " stuff"              // access of the second element
 enum Animal {
     dog
     cat = -6 // enums can store values
-    mouse    // but don't have to (value is set to nothing)
+    mouse    // but don't have to (value is set to void)
 }
 Animal animal = Animal::cat
 int value = animal.value
@@ -56,7 +56,7 @@ int value = animal.value
 # Structs
 ```dawn
 struct Person {
-    not_important : nothing
+    not_important : void
     name : string
     age : int
 

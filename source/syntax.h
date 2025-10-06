@@ -30,7 +30,7 @@ inline constexpr StringRef kw_self = "self";
 inline constexpr StringRef kw_true = "true";
 inline constexpr StringRef kw_false = "false";
 
-inline constexpr StringRef tp_nothing = "nothing";
+inline constexpr StringRef tp_void = "void";
 inline constexpr StringRef tp_bool = "bool";
 inline constexpr StringRef tp_int = "int";
 inline constexpr StringRef tp_float = "float";
