@@ -31,9 +31,9 @@ void dawn::Engine::load_standard_functions()
     bind_cfunc( IDSystem::get( tp_nothing ), true, []( Location const& location, Engine& engine, Value* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return Value{ args[0].to_nothing( engine ) };
+                return Value{};
             else if ( arg_count == 0 )
-                return Value{ Nothing{} };
+                return Value{};
             else
                 ENGINE_PANIC( location, tp_nothing, "() expects 1 or 0 arguments, but got ", arg_count );
         } );

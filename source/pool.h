@@ -7,38 +7,47 @@
 
 namespace dawn
 {
+using NodeMemory = MemoryPool<Node, 1024>;
+using FrameMemory = MemoryPool<Frame, 256>;
+using BoolMemory = MemoryPool<ValueStorage<Bool>, 1024>;
+using IntMemory = MemoryPool<ValueStorage<Int>, 1024>;
+using FloatMemory = MemoryPool<ValueStorage<Float>, 1024>;
+using CharMemory = MemoryPool<ValueStorage<Char>, 1024>;
+using StringMemory = MemoryPool<ValueStorage<String>, 1024>;
+using FunctionMemory = MemoryPool<ValueStorage<FunctionValue>, 1024>;
+using EnumMemory = MemoryPool<ValueStorage<EnumValue>, 1024>;
+using StructMemory = MemoryPool<ValueStorage<StructValue>, 1024>;
+using ArrayMemory = MemoryPool<ValueStorage<ArrayValue>, 1024>;
+using RangeMemory = MemoryPool<ValueStorage<RangeValue>, 1024>;
+
 struct MemoryPools
 {
-    MemoryPool<Node, 1024> node_memory;
-    MemoryPool<Frame, 256> frame_memory;
-
-    MemoryPool<Bool, 1024> bool_memory;
-    MemoryPool<Int, 1024> int_memory;
-    MemoryPool<Float, 1024> float_memory;
-    MemoryPool<Char, 1024> char_memory;
-    MemoryPool<String, 1024> string_memory;
-
-    MemoryPool<FunctionValue, 1024> function_memory;
-    MemoryPool<EnumValue, 1024> enum_memory;
-    MemoryPool<StructValue, 1024> struct_memory;
-    MemoryPool<ArrayValue, 1024> array_memory;
-    MemoryPool<RangeValue, 1024> range_memory;
+    NodeMemory node_memory;
+    FrameMemory frame_memory;
+    BoolMemory bool_memory;
+    IntMemory int_memory;
+    FloatMemory float_memory;
+    CharMemory char_memory;
+    StringMemory string_memory;
+    FunctionMemory function_memory;
+    EnumMemory enum_memory;
+    StructMemory struct_memory;
+    ArrayMemory array_memory;
+    RangeMemory range_memory;
 
     ~MemoryPools() noexcept;
 };
 
-MemoryPool<Node, 1024>& node_pool();
-MemoryPool<Frame, 256>& frame_pool();
-
-MemoryPool<Bool, 1024>& bool_pool();
-MemoryPool<Int, 1024>& int_pool();
-MemoryPool<Float, 1024>& float_pool();
-MemoryPool<Char, 1024>& char_pool();
-MemoryPool<String, 1024>& string_pool();
-
-MemoryPool<FunctionValue, 1024>& function_pool();
-MemoryPool<EnumValue, 1024>& enum_pool();
-MemoryPool<StructValue, 1024>& struct_pool();
-MemoryPool<ArrayValue, 1024>& array_pool();
-MemoryPool<RangeValue, 1024>& range_pool();
+NodeMemory& node_pool();
+FrameMemory& frame_pool();
+BoolMemory& bool_pool();
+IntMemory& int_pool();
+FloatMemory& float_pool();
+CharMemory& char_pool();
+StringMemory& string_pool();
+FunctionMemory& function_pool();
+EnumMemory& enum_pool();
+StructMemory& struct_pool();
+ArrayMemory& array_pool();
+RangeMemory& range_pool();
 }

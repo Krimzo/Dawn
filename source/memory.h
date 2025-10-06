@@ -87,9 +87,14 @@ struct RegisterRef
         return static_cast<Bool>( m_regptr );
     }
 
-    T& value() const noexcept
+    T& operator*() const noexcept
     {
         return m_regptr->value;
+    }
+
+    T* operator->() const noexcept
+    {
+        return &m_regptr->value;
     }
 
     template<typename C>

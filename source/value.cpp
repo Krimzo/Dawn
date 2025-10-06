@@ -189,160 +189,183 @@ dawn::ArrayValue& dawn::ArrayValue::operator=( ArrayValue&& other ) noexcept
 }
 
 dawn::Value::Value( Bool value, Location const& location )
-    : m_regref( bool_pool().new_register().cast<Void>() )
-    , m_type( ValueType::BOOL )
-    , m_location( location )
+    : m_regref( bool_pool().new_register().cast<ValueInfo>() )
 {
-    m_regref.cast<Bool>().value() = value;
+    auto& storage = *m_regref.cast<ValueStorage<Bool>>();
+    storage.info.location = location;
+    storage.info.type = ValueType::BOOL;
+    storage.info.is_const = true;
+    storage.value = value;
 }
 
 dawn::Value::Value( Int value, Location const& location )
-    : m_regref( int_pool().new_register().cast<Void>() )
-    , m_type( ValueType::INT )
-    , m_location( location )
+    : m_regref( int_pool().new_register().cast<ValueInfo>() )
 {
-    m_regref.cast<Int>().value() = value;
+    auto& storage = *m_regref.cast<ValueStorage<Int>>();
+    storage.info.location = location;
+    storage.info.type = ValueType::INT;
+    storage.info.is_const = true;
+    storage.value = value;
 }
 
 dawn::Value::Value( Float value, Location const& location )
-    : m_regref( float_pool().new_register().cast<Void>() )
-    , m_type( ValueType::FLOAT )
-    , m_location( location )
+    : m_regref( float_pool().new_register().cast<ValueInfo>() )
 {
-    m_regref.cast<Float>().value() = value;
+    auto& storage = *m_regref.cast<ValueStorage<Float>>();
+    storage.info.location = location;
+    storage.info.type = ValueType::FLOAT;
+    storage.info.is_const = true;
+    storage.value = value;
 }
 
 dawn::Value::Value( Char value, Location const& location )
-    : m_regref( char_pool().new_register().cast<Void>() )
-    , m_type( ValueType::CHAR )
-    , m_location( location )
+    : m_regref( char_pool().new_register().cast<ValueInfo>() )
 {
-    m_regref.cast<Char>().value() = value;
+    auto& storage = *m_regref.cast<ValueStorage<Char>>();
+    storage.info.location = location;
+    storage.info.type = ValueType::CHAR;
+    storage.info.is_const = true;
+    storage.value = value;
 }
 
 dawn::Value::Value( StringRef const& value, Location const& location )
-    : m_regref( string_pool().new_register().cast<Void>() )
-    , m_type( ValueType::STRING )
-    , m_location( location )
+    : m_regref( string_pool().new_register().cast<ValueInfo>() )
 {
-    m_regref.cast<String>().value() = value;
+    auto& storage = *m_regref.cast<ValueStorage<String>>();
+    storage.info.location = location;
+    storage.info.type = ValueType::STRING;
+    storage.info.is_const = true;
+    storage.value = value;
 }
 
 dawn::Value::Value( FunctionValue const& value, Location const& location )
-    : m_regref( function_pool().new_register().cast<Void>() )
-    , m_type( ValueType::FUNCTION )
-    , m_location( location )
+    : m_regref( function_pool().new_register().cast<ValueInfo>() )
 {
-    m_regref.cast<FunctionValue>().value() = value;
+    auto& storage = *m_regref.cast<ValueStorage<FunctionValue>>();
+    storage.info.location = location;
+    storage.info.type = ValueType::FUNCTION;
+    storage.info.is_const = true;
+    storage.value = value;
 }
 
 dawn::Value::Value( EnumValue const& value, Location const& location )
-    : m_regref( enum_pool().new_register().cast<Void>() )
-    , m_type( ValueType::ENUM )
-    , m_location( location )
+    : m_regref( enum_pool().new_register().cast<ValueInfo>() )
 {
-    m_regref.cast<EnumValue>().value() = value;
+    auto& storage = *m_regref.cast<ValueStorage<EnumValue>>();
+    storage.info.location = location;
+    storage.info.type = ValueType::ENUM;
+    storage.info.is_const = true;
+    storage.value = value;
 }
 
 dawn::Value::Value( StructValue const& value, Location const& location )
-    : m_regref( struct_pool().new_register().cast<Void>() )
-    , m_type( ValueType::STRUCT )
-    , m_location( location )
+    : m_regref( struct_pool().new_register().cast<ValueInfo>() )
 {
-    m_regref.cast<StructValue>().value() = value;
+    auto& storage = *m_regref.cast<ValueStorage<StructValue>>();
+    storage.info.location = location;
+    storage.info.type = ValueType::STRUCT;
+    storage.info.is_const = true;
+    storage.value = value;
 }
 
 dawn::Value::Value( ArrayValue const& value, Location const& location )
-    : m_regref( array_pool().new_register().cast<Void>() )
-    , m_type( ValueType::ARRAY )
-    , m_location( location )
+    : m_regref( array_pool().new_register().cast<ValueInfo>() )
 {
-    m_regref.cast<ArrayValue>().value() = value;
+    auto& storage = *m_regref.cast<ValueStorage<ArrayValue>>();
+    storage.info.location = location;
+    storage.info.type = ValueType::ARRAY;
+    storage.info.is_const = true;
+    storage.value = value;
 }
 
 dawn::Value::Value( RangeValue const& value, Location const& location )
-    : m_regref( range_pool().new_register().cast<Void>() )
-    , m_type( ValueType::RANGE )
-    , m_location( location )
+    : m_regref( range_pool().new_register().cast<ValueInfo>() )
 {
-    m_regref.cast<RangeValue>().value() = value;
-}
-
-dawn::Nothing dawn::Value::as_nothing() const
-{
-    if ( type() != ValueType::NOTHING )
-        ENGINE_PANIC( location(), "expected [", ValueType::NOTHING, "] but got [", type(), "]" );
-    return Nothing{};
+    auto& storage = *m_regref.cast<ValueStorage<RangeValue>>();
+    storage.info.location = location;
+    storage.info.type = ValueType::RANGE;
+    storage.info.is_const = true;
+    storage.value = value;
 }
 
 dawn::Bool& dawn::Value::as_bool() const
 {
     if ( type() != ValueType::BOOL )
         ENGINE_PANIC( location(), "expected [", ValueType::BOOL, "] but got [", type(), "]" );
-    return m_regref.cast<Bool>().value();
+    return m_regref.cast<ValueStorage<Bool>>()->value;
 }
 
 dawn::Int& dawn::Value::as_int() const
 {
     if ( type() != ValueType::INT )
         ENGINE_PANIC( location(), "expected [", ValueType::INT, "] but got [", type(), "]" );
-    return m_regref.cast<Int>().value();
+    return m_regref.cast<ValueStorage<Int>>()->value;
 }
 
 dawn::Float& dawn::Value::as_float() const
 {
     if ( type() != ValueType::FLOAT )
         ENGINE_PANIC( location(), "expected [", ValueType::FLOAT, "] but got [", type(), "]" );
-    return m_regref.cast<Float>().value();
+    return m_regref.cast<ValueStorage<Float>>()->value;
 }
 
 dawn::Char& dawn::Value::as_char() const
 {
     if ( type() != ValueType::CHAR )
         ENGINE_PANIC( location(), "expected [", ValueType::CHAR, "] but got [", type(), "]" );
-    return m_regref.cast<Char>().value();
+    return m_regref.cast<ValueStorage<Char>>()->value;
 }
 
 dawn::String& dawn::Value::as_string() const
 {
     if ( type() != ValueType::STRING )
         ENGINE_PANIC( location(), "expected [", ValueType::STRING, "] but got [", type(), "]" );
-    return m_regref.cast<String>().value();
+    return m_regref.cast<ValueStorage<String>>()->value;
 }
 
 dawn::FunctionValue& dawn::Value::as_function() const
 {
     if ( type() != ValueType::FUNCTION )
         ENGINE_PANIC( location(), "expected [", ValueType::FUNCTION, "] but got [", type(), "]" );
-    return m_regref.cast<FunctionValue>().value();
+    return m_regref.cast<ValueStorage<FunctionValue>>()->value;
 }
 
 dawn::EnumValue& dawn::Value::as_enum() const
 {
     if ( type() != ValueType::ENUM )
         ENGINE_PANIC( location(), "expected [", ValueType::ENUM, "] but got [", type(), "]" );
-    return m_regref.cast<EnumValue>().value();
+    return m_regref.cast<ValueStorage<EnumValue>>()->value;
 }
 
 dawn::StructValue& dawn::Value::as_struct() const
 {
     if ( type() != ValueType::STRUCT )
         ENGINE_PANIC( location(), "expected [", ValueType::STRUCT, "] but got [", type(), "]" );
-    return m_regref.cast<StructValue>().value();
+    return m_regref.cast<ValueStorage<StructValue>>()->value;
 }
 
 dawn::ArrayValue& dawn::Value::as_array() const
 {
     if ( type() != ValueType::ARRAY )
         ENGINE_PANIC( location(), "expected [", ValueType::ARRAY, "] but got [", type(), "]" );
-    return m_regref.cast<ArrayValue>().value();
+    return m_regref.cast<ValueStorage<ArrayValue>>()->value;
 }
 
 dawn::RangeValue& dawn::Value::as_range() const
 {
     if ( type() != ValueType::RANGE )
         ENGINE_PANIC( location(), "expected [", ValueType::RANGE, "] but got [", type(), "]" );
-    return m_regref.cast<RangeValue>().value();
+    return m_regref.cast<ValueStorage<RangeValue>>()->value;
+}
+
+dawn::Location const& dawn::Value::location() const
+{
+    return m_regref.valid() ? m_regref->location : LOCATION_NONE;
+}
+
+dawn::ValueType dawn::Value::type() const
+{
+    return m_regref.valid() ? m_regref->type : ValueType::NOTHING;
 }
 
 dawn::ID dawn::Value::type_id() const
@@ -416,13 +439,13 @@ dawn::ID dawn::Value::type_id() const
 
 void dawn::Value::assign( Value const& other )
 {
-    if ( m_const )
-        ENGINE_PANIC( location(), "can not assign [", other.m_type, "] to a const value" );
+    if ( is_const() )
+        ENGINE_PANIC( location(), "can not assign [", other.type(), "] to a const value" );
 
-    if ( m_type != other.m_type )
-        ENGINE_PANIC( location(), "can not assign [", other.m_type, "] to [", m_type, "]" );
+    if ( type() != other.type() )
+        ENGINE_PANIC( location(), "can not assign [", other.type(), "] to [", type(), "]" );
 
-    switch ( m_type )
+    switch ( type() )
     {
     case ValueType::BOOL:
         as_bool() = other.as_bool();
@@ -465,7 +488,7 @@ void dawn::Value::assign( Value const& other )
         break;
 
     default:
-        ENGINE_PANIC( location(), "assign to [", m_type, "] not supported" );
+        ENGINE_PANIC( location(), "assign to [", type(), "] not supported" );
     }
 
     unlock_const();
@@ -473,10 +496,10 @@ void dawn::Value::assign( Value const& other )
 
 dawn::Value dawn::Value::clone() const
 {
-    switch ( m_type )
+    switch ( type() )
     {
     case ValueType::NOTHING:
-        return Value{ as_nothing() };
+        return Value{};
 
     case ValueType::BOOL:
         return Value{ as_bool(), location() };
@@ -514,29 +537,35 @@ dawn::Value dawn::Value::clone() const
         return Value{ as_range(), location() };
 
     default:
-        ENGINE_PANIC( LOCATION_NONE, "can not clone type [", Int( m_type ), "]" );
+        ENGINE_PANIC( LOCATION_NONE, "can not clone type [", (Int) type(), "]" );
     }
 }
 
 dawn::Bool dawn::Value::is_const() const
 {
-    return m_const;
+    return m_regref.valid() ? m_regref->is_const : true;
 }
 
 dawn::Value& dawn::Value::unlock_const()
 {
-    m_const = false;
-    if ( m_type == ValueType::STRUCT )
+    m_regref->is_const = false;
+    switch ( type() )
+    {
+    case ValueType::STRUCT:
     {
         auto& value = as_struct();
         for ( auto& [_, field] : value.fields )
             field.unlock_const();
     }
-    else if ( m_type == ValueType::ARRAY )
+    break;
+
+    case ValueType::ARRAY:
     {
         auto& value = as_array();
         for ( auto& entry : value.data )
             entry.unlock_const();
+    }
+    break;
     }
     return *this;
 }
@@ -1107,29 +1136,6 @@ dawn::Value dawn::Value::op_range( Engine& engine, Value const& other ) const
     result.start_incl = as_int();
     result.end_excl = other.as_int();
     return Value{ result, location() };
-}
-
-dawn::Nothing dawn::Value::to_nothing( Engine& engine ) const
-{
-    switch ( type() )
-    {
-    case ValueType::NOTHING:
-        return Nothing{};
-
-    case ValueType::STRUCT:
-    {
-        auto& left = as_struct();
-        auto* method = left.get_method( _nothing, true );
-        if ( !method )
-            ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to nothing" );
-
-        Value args[1] = { *this };
-        return engine.handle_func( location(), *method, args, (Int) std::size( args ) ).as_nothing();
-    }
-
-    default:
-        ENGINE_PANIC( location(), "can not convert [", type(), "] to nothing" );
-    }
 }
 
 dawn::Bool dawn::Value::to_bool( Engine& engine ) const

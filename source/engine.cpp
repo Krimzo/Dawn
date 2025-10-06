@@ -42,7 +42,7 @@ void dawn::Engine::load_enum( Enum const& entry )
     {
         if ( !std::holds_alternative<NodeRef>( entry.expr ) )
             continue;
-        auto const& expr = std::get<NodeRef>( entry.expr ).value();
+        auto const& expr = *std::get<NodeRef>( entry.expr );
         *entry.expr.emplace<Holder<Value>>() = handle_expr( expr );
     }
     enums.set( enu.id, enu );
@@ -55,7 +55,7 @@ void dawn::Engine::load_struct( Struct const& entry )
 
 void dawn::Engine::load_variable( Variable const& entry )
 {
-    auto& expr = entry.expr.value();
+    auto& expr = *entry.expr;
     add_var( expr.location(), entry.type, entry.id, handle_expr( expr ) );
 }
 
@@ -278,7 +278,7 @@ dawn::Value dawn::Engine::handle_expr( Node const& node )
 
 void dawn::Engine::handle_var_node( VariableNode const& node )
 {
-    add_var( node.location, node.var.type, node.var.id, handle_expr( node.var.expr.value() ) );
+    add_var( node.location, node.var.type, node.var.id, handle_expr( *node.var.expr ) );
 }
 
 dawn::Value dawn::Engine::handle_id_node( IdentifierNode const& node )
@@ -291,7 +291,7 @@ dawn::Value dawn::Engine::handle_id_node( IdentifierNode const& node )
 
 dawn::Value dawn::Engine::handle_call_node( CallNode const& node )
 {
-    Value left = handle_expr( node.left_expr.value() );
+    Value left = handle_expr( *node.left_expr );
     if ( left.type() != ValueType::FUNCTION )
         ENGINE_PANIC( node.location, "can not call [", left.type(), "]" );
 
@@ -318,8 +318,8 @@ dawn::Value dawn::Engine::handle_call_node( CallNode const& node )
 
 dawn::Value dawn::Engine::handle_index_node( IndexNode const& node )
 {
-    Value left = handle_expr( node.left_expr.value() );
-    Int index = handle_expr( node.expr.value() ).as_int();
+    Value left = handle_expr( *node.left_expr );
+    Int index = handle_expr( *node.expr ).as_int();
 
     if ( left.type() == ValueType::STRING )
     {
@@ -341,7 +341,7 @@ dawn::Value dawn::Engine::handle_index_node( IndexNode const& node )
 
 void dawn::Engine::handle_return_node( ReturnNode const& node, Opt<Value>& retval )
 {
-    retval = handle_expr( node.expr.value() );
+    retval = handle_expr( *node.expr );
 }
 
 void dawn::Engine::handle_break_node( BreakNode const& node, Bool* didbrk )
@@ -360,7 +360,7 @@ void dawn::Engine::handle_continue_node( ContinueNode const& node, Bool* didcon 
 
 void dawn::Engine::handle_throw_node( ThrowNode const& node )
 {
-    throw handle_expr( node.expr.value() );
+    throw handle_expr( *node.expr );
 }
 
 void dawn::Engine::handle_try_node( TryNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
@@ -393,7 +393,7 @@ void dawn::Engine::handle_if_node( IfNode const& node, Opt<Value>& retval, Bool*
 
 void dawn::Engine::handle_switch_node( SwitchNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
 {
-    Value check_value = handle_expr( node.main_expr.value() );
+    Value check_value = handle_expr( *node.main_expr );
 
     for ( auto& case_part : node.cases )
     {
@@ -438,7 +438,7 @@ void dawn::Engine::handle_while_node( WhileNode const& node, Opt<Value>& retval 
             break;
         didcon = false;
 
-        if ( !handle_expr( node.expr.value() ).as_bool() )
+        if ( !handle_expr( *node.expr ).as_bool() )
             break;
 
         auto pop_handler = stack.push();
@@ -448,7 +448,7 @@ void dawn::Engine::handle_while_node( WhileNode const& node, Opt<Value>& retval 
 
 void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
 {
-    Value loop_value = handle_expr( node.expr.value() );
+    Value loop_value = handle_expr( *node.expr );
 
     if ( loop_value.type() == ValueType::RANGE )
     {
@@ -607,7 +607,7 @@ dawn::Value dawn::Engine::handle_array_node( ArrayNode const& node )
     else
     {
         auto& init_data = std::get<ArrayNode::SizedInit>( node.init );
-        Int size = handle_expr( init_data.size_expr.value() ).as_int();
+        Int size = handle_expr( *init_data.size_expr ).as_int();
         if ( size < 0 )
             ENGINE_PANIC( node.location, "array size can not be negative" );
         result.data.reserve( size );
@@ -622,13 +622,13 @@ dawn::Value dawn::Engine::handle_un_node( UnaryNode const& node )
     switch ( node.type )
     {
     case UnaryType::PLUS:
-        return Value{ handle_expr( node.right.value() ).un_plus( *this ) };
+        return Value{ handle_expr( *node.right ).un_plus( *this ) };
 
     case UnaryType::MINUS:
-        return Value{ handle_expr( node.right.value() ).un_minus( *this ) };
+        return Value{ handle_expr( *node.right ).un_minus( *this ) };
 
     case UnaryType::NOT:
-        return Value{ handle_expr( node.right.value() ).un_not() };
+        return Value{ handle_expr( *node.right ).un_not() };
 
     default:
         ENGINE_PANIC( node.location, "unknown unary node type: ", typeid( node ).name() );
@@ -781,7 +781,7 @@ dawn::Value dawn::Engine::create_default_value( Location const& location, ID typ
     static const ID _id_range = IDSystem::get( tp_range );
 
     if ( typeid_ == _id_nothing )
-        return Value{ Nothing{} };
+        return Value{};
 
     else if ( typeid_ == _id_bool )
         return Value{ Bool{}, location };

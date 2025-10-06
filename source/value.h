@@ -7,11 +7,6 @@
 
 namespace dawn
 {
-struct Nothing
-{
-    constexpr Nothing() = default;
-};
-
 struct DFunction
 {
     Vector<Function::Arg> args;
@@ -108,9 +103,23 @@ struct RangeValue
     }
 };
 
+struct ValueInfo
+{
+    Location location;
+    ValueType type = ValueType::NOTHING;
+    Bool is_const = true;
+};
+
+template<typename T>
+struct ValueStorage
+{
+    ValueInfo info{};
+    T value{};
+};
+
 struct Value
 {
-    constexpr Value( Nothing value = {} ) {}
+    constexpr Value() = default;
     explicit Value( Bool value, Location const& location );
     explicit Value( Int value, Location const& location );
     explicit Value( Float value, Location const& location );
@@ -122,7 +131,6 @@ struct Value
     explicit Value( ArrayValue const& value, Location const& location );
     explicit Value( RangeValue const& value, Location const& location );
 
-    Nothing as_nothing() const;
     Bool& as_bool() const;
     Int& as_int() const;
     Float& as_float() const;
@@ -134,8 +142,8 @@ struct Value
     ArrayValue& as_array() const;
     RangeValue& as_range() const;
 
-    constexpr Location const& location() const { return m_location; }
-    constexpr ValueType type() const { return m_type; }
+    Location const& location() const;
+    ValueType type() const;
     ID type_id() const;
 
     void assign( Value const& other );
@@ -167,7 +175,6 @@ struct Value
 
     Value op_range( Engine& engine, Value const& other ) const;
 
-    Nothing to_nothing( Engine& engine ) const;
     Bool to_bool( Engine& engine ) const;
     Int to_int( Engine& engine ) const;
     Float to_float( Engine& engine ) const;
@@ -178,11 +185,6 @@ struct Value
     RangeValue to_range( Engine& engine ) const;
 
 private:
-    struct Void {};
-
-    RegisterRef<Void> m_regref;
-    Location m_location;
-    ValueType m_type = ValueType::NOTHING;
-    Bool m_const = true;
+    RegisterRef<ValueInfo> m_regref;
 };
 }

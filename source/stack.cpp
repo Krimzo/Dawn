@@ -32,7 +32,7 @@ dawn::Value* dawn::Frame::get( ID id )
         if ( Value* ptr = std::get<GlobalFrame>( m_frame ).get( id ) )
             return ptr;
     }
-    return m_parent.valid() ? m_parent.value().get( id ) : nullptr;
+    return m_parent.valid() ? m_parent->get( id ) : nullptr;
 }
 
 void dawn::Frame::reset( RegisterRef<Frame> const& parent )
@@ -47,21 +47,18 @@ void dawn::Frame::reset( RegisterRef<Frame> const& parent )
 dawn::Stack::Stack()
 {
     m_frames.reserve( 128 );
-    m_frames.emplace_back( frame_pool().new_register() )
-        .value() = Frame{ FrameType::GLOBAL };
+    *m_frames.emplace_back( frame_pool().new_register() ) = Frame{ FrameType::GLOBAL };
 }
 
 dawn::PopHandler dawn::Stack::push()
 {
-    m_frames.emplace_back( frame_pool().new_register() )
-        .value().reset( *( ++m_frames.rbegin() ) );
+    m_frames.emplace_back( frame_pool().new_register() )->reset( *( ++m_frames.rbegin() ) );
     return PopHandler{ *this };
 }
 
 dawn::PopHandler dawn::Stack::push_from( RegisterRef<Frame> const& frame )
 {
-    m_frames.emplace_back( frame_pool().new_register() )
-        .value().reset( frame.valid() ? frame : m_frames.front() );
+    m_frames.emplace_back( frame_pool().new_register() )->reset( frame.valid() ? frame : m_frames.front() );
     return PopHandler{ *this };
 }
 
@@ -72,12 +69,12 @@ void dawn::Stack::pop()
 
 dawn::Frame& dawn::Stack::root()
 {
-    return m_frames.front().value();
+    return *m_frames.front();
 }
 
 dawn::Frame& dawn::Stack::current()
 {
-    return m_frames.back().value();
+    return *m_frames.back();
 }
 
 dawn::RegisterRef<dawn::Frame> const& dawn::Stack::peek() const

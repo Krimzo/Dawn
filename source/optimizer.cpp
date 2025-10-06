@@ -55,7 +55,7 @@ void dawn::Optimizer::optimize_import( String& import )
 
 void dawn::Optimizer::optimize_variable( Variable& var )
 {
-    optimize_expr( var.expr.value() );
+    optimize_expr( *var.expr );
 }
 
 void dawn::Optimizer::optimize_function( Function& func )
@@ -71,7 +71,7 @@ void dawn::Optimizer::optimize_enum( Enum& enu )
     for ( auto& entry : enu.entries )
     {
         if ( std::holds_alternative<NodeRef>( entry.expr ) )
-            optimize_expr( std::get<NodeRef>( entry.expr ).value() );
+            optimize_expr( *std::get<NodeRef>( entry.expr ) );
     }
 }
 
@@ -137,7 +137,7 @@ void dawn::Optimizer::inline_var( Variable& var, Vector<Node>& scope, Int& i )
         return;
     }
 
-    auto& expr = var.expr.value();
+    auto& expr = *var.expr;
     if ( expr.type() != NodeType::VALUE )
     {
         m_inline.emplace_back( var.id );
@@ -152,7 +152,7 @@ void dawn::Optimizer::inline_var( Variable& var, Vector<Node>& scope, Int& i )
     }
 
     if ( value.type_id() != var.type.type_id )
-        ENGINE_PANIC( var.expr.value().location(), "optimizer can not inline variable of type [", IDSystem::get( var.type.type_id ), "] because expr is of type [", IDSystem::get( value.type_id() ), "]" );
+        ENGINE_PANIC( expr.location(), "optimizer can not inline variable of type [", IDSystem::get( var.type.type_id ), "] because expr is of type [", IDSystem::get( value.type_id() ), "]" );
 
     m_inline.emplace_back( var.id, value, true );
     scope.erase( scope.begin() + i );
@@ -171,12 +171,12 @@ void dawn::Optimizer::optimize_expr_scope( Scope& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_var( VariableNode& node, Node& out_node )
 {
-    optimize_expr( node.var.expr.value() );
+    optimize_expr( *node.var.expr );
 }
 
 void dawn::Optimizer::optimize_expr_return( ReturnNode& node, Node& out_node )
 {
-    optimize_expr( node.expr.value() );
+    optimize_expr( *node.expr );
 }
 
 void dawn::Optimizer::optimize_expr_break( BreakNode& node, Node& out_node )
@@ -191,7 +191,7 @@ void dawn::Optimizer::optimize_expr_continue( ContinueNode& node, Node& out_node
 
 void dawn::Optimizer::optimize_expr_throw( ThrowNode& node, Node& out_node )
 {
-    optimize_expr( node.expr.value() );
+    optimize_expr( *node.expr );
 }
 
 void dawn::Optimizer::optimize_expr_try( TryNode& node, Node& out_node )
@@ -238,7 +238,7 @@ void dawn::Optimizer::optimize_expr_if( IfNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_switch( SwitchNode& node, Node& out_node )
 {
-    auto& main_expr = node.main_expr.value();
+    auto& main_expr = *node.main_expr;
     optimize_expr( main_expr );
     const Bool main_is_val = ( main_expr.type() == NodeType::VALUE );
     for ( Int i = 0; i < (Int) node.cases.size(); i++ )
@@ -287,7 +287,7 @@ void dawn::Optimizer::optimize_expr_loop( LoopNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_while( WhileNode& node, Node& out_node )
 {
-    auto& expr_node = node.expr.value();
+    auto& expr_node = *node.expr;
     optimize_expr( expr_node );
     optimize_instr( node.scope.instr );
     if ( expr_node.type() == NodeType::VALUE )
@@ -301,7 +301,7 @@ void dawn::Optimizer::optimize_expr_while( WhileNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_for( ForNode& node, Node& out_node )
 {
-    auto& expr_node = node.expr.value();
+    auto& expr_node = *node.expr;
     optimize_expr( expr_node );
     if ( expr_node.type() == NodeType::VALUE )
     {
@@ -358,7 +358,7 @@ void dawn::Optimizer::optimize_expr_id( IdentifierNode& node, Node& out_node )
 void dawn::Optimizer::optimize_expr_call( CallNode& node, Node& out_node )
 {
     Bool is_ctime = true;
-    auto& left_expr = node.left_expr.value();
+    auto& left_expr = *node.left_expr;
     optimize_expr( left_expr );
     if ( left_expr.type() != NodeType::IDENTIFIER || !m_ctime_funcs.contains( std::get<IdentifierNode>( left_expr ).id ) )
         is_ctime = false;
@@ -374,9 +374,9 @@ void dawn::Optimizer::optimize_expr_call( CallNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_index( IndexNode& node, Node& out_node )
 {
-    auto& left_node = node.left_expr.value();
+    auto& left_node = *node.left_expr;
     optimize_expr( left_node );
-    auto& expr_node = node.expr.value();
+    auto& expr_node = *node.expr;
     optimize_expr( expr_node );
     if ( left_node.type() == NodeType::VALUE && expr_node.type() == NodeType::VALUE )
         out_node.emplace<Value>( m_engine.handle_index_node( node ) );
@@ -441,7 +441,7 @@ void dawn::Optimizer::optimize_expr_array( ArrayNode& node, Node& out_node )
     else
     {
         auto& init = std::get<ArrayNode::SizedInit>( node.init );
-        auto& size_expr = init.size_expr.value();
+        auto& size_expr = *init.size_expr;
         optimize_expr( size_expr );
         if ( size_expr.type() == NodeType::VALUE )
             out_node.emplace<Value>( m_engine.handle_array_node( node ) );
@@ -450,7 +450,7 @@ void dawn::Optimizer::optimize_expr_array( ArrayNode& node, Node& out_node )
 
 void dawn::Optimizer::optimize_expr_unary( UnaryNode& node, Node& out_node )
 {
-    auto& right_node = node.right.value();
+    auto& right_node = *node.right;
     optimize_expr( right_node );
     if ( right_node.type() != NodeType::VALUE )
         return;

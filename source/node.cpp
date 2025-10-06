@@ -3,7 +3,7 @@
 
 dawn::Node dawn::make_nothing_node()
 {
-    return make_value_node( Value{ Nothing{} } );
+    return make_value_node( Value{} );
 }
 
 dawn::Node dawn::make_bool_node( Location const& location, Bool value )
