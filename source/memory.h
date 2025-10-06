@@ -98,13 +98,13 @@ struct RegisterRef
     }
 
     template<typename C>
-    RegisterRef<C>& cast()
+    RegisterRef<C>& as()
     {
         return reinterpret_cast<RegisterRef<C>&>( *this );
     }
 
     template<typename C>
-    RegisterRef<C> const& cast() const
+    RegisterRef<C> const& as() const
     {
         return reinterpret_cast<RegisterRef<C> const&>( *this );
     }
