@@ -64,9 +64,15 @@ struct EnumValue
 
 struct StructValue
 {
+    template<typename T> // Template is required because Value does not exist at this stage.
+    struct Member
+    {
+        T value;
+        MemberType type = MemberType::FIELD;
+    };
+
     ID parent_id;
-    Map<ID, Value> fields;
-    Map<ID, Value> methods;
+    Map<ID, Member<Value>> members;
 
     StructValue() = default;
 

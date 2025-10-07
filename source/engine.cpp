@@ -539,10 +539,11 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
     auto& struc_value = value.as_struct();
     struc_value.parent_id = node.type_id;
 
+    struc_value.members.reserve( struc.fields.size() + struc.methods.size() );
+
     // Structure default initialization.
-    struc_value.fields.reserve( struc.fields.size() );
     for ( auto& field : struc.fields )
-        struc_value.fields[field.id] = create_default_value( node.location, field.type_id );
+        struc_value.members[field.id] = { .value = create_default_value( node.location, field.type_id ), .type = MemberType::FIELD };
 
     // Structure argument initialization.
     if ( std::holds_alternative<StructNode::NamedInit>( node.init ) )
@@ -550,16 +551,16 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
         auto& args = std::get<StructNode::NamedInit>( node.init ).args;
         for ( auto& [id, arg_node] : args )
         {
-            auto field_it = struc_value.fields.find( id );
-            if ( field_it == struc_value.fields.end() )
+            auto field_it = struc_value.members.find( id );
+            if ( field_it == struc_value.members.end() ) // Only fields are stored at this stage.
                 ENGINE_PANIC( node.location, "struct [", IDSystem::get( struc.id ), "] does not contain field [", IDSystem::get( id ), "]" );
 
             auto& field = field_it->second;
             Value expr = handle_expr( arg_node ).clone();
-            if ( field.type() != expr.type() )
-                ENGINE_PANIC( node.location, "can not assign type [", expr.type(), "] to type [", field.type(), "]" );
+            if ( field.value.type() != expr.type() )
+                ENGINE_PANIC( node.location, "can not assign type [", expr.type(), "] to type [", field.value.type(), "]" );
 
-            field = expr; // Must use = instead of assign() because member is const at this stage.
+            field.value = expr; // Must use = instead of assign() because member is const at this stage.
         }
     }
     else
@@ -570,17 +571,16 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
 
         for ( Int i = 0; i < (Int) args.size(); i++ )
         {
-            auto& field = struc_value.fields[struc.fields[i].id];
+            auto& field = struc_value.members[struc.fields[i].id];
             Value expr = handle_expr( args[i] ).clone();
-            if ( field.type() != expr.type() )
-                ENGINE_PANIC( node.location, "can not assign type [", expr.type(), "] to type [", field.type(), "]" );
+            if ( field.value.type() != expr.type() )
+                ENGINE_PANIC( node.location, "can not assign type [", expr.type(), "] to type [", field.value.type(), "]" );
 
-            field = expr; // Must use = instead of assign() because member is const at this stage.
+            field = { .value = expr, .type = MemberType::FIELD }; // Must use = instead of assign() because member is const at this stage.
         }
     }
 
     // Structure methods.
-    struc_value.methods.reserve( struc.methods.size() );
     for ( auto& method : struc.methods )
     {
         FunctionValue fv{};
@@ -588,7 +588,7 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
         f.id = method.id;
         f.func = DFunction{ method.args, method.body };
         *f.self = value;
-        struc_value.methods[f.id] = Value{ fv, node.location };
+        struc_value.members[f.id] = { .value = Value{ fv, node.location }, .type = MemberType::METHOD };
     }
 
     return value;
@@ -751,13 +751,10 @@ dawn::Value dawn::Engine::handle_as_node( AssignNode const& node )
 dawn::Value dawn::Engine::handle_ac_struct_node( Location const& location, Value const& self, ID right_id )
 {
     auto& left = self.as_struct();
-    auto it = left.fields.find( right_id );
-    if ( it != left.fields.end() )
-        return it->second;
-    it = left.methods.find( right_id );
-    if ( it != left.methods.end() )
-        return it->second;
-    ENGINE_PANIC( location, "struct [", IDSystem::get( left.parent_id ), "] does not have member [", IDSystem::get( right_id ), "]" );
+    auto it = left.members.find( right_id );
+    if ( it == left.members.end() )
+        ENGINE_PANIC( location, "struct [", IDSystem::get( left.parent_id ), "] does not have member [", IDSystem::get( right_id ), "]" );
+    return it->second.value;
 }
 
 dawn::Value dawn::Engine::handle_ac_type_node( Location const& location, Value const& self, ID right_id )

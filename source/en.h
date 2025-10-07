@@ -112,6 +112,12 @@ enum struct ValueType : uint8_t
     _COUNT,
 };
 
+enum struct MemberType : uint8_t
+{
+    FIELD = 0,
+    METHOD,
+};
+
 enum struct VarKind : uint8_t
 {
     CONSTANT = 0,

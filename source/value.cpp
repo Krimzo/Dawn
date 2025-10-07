@@ -106,12 +106,9 @@ dawn::CFunction* dawn::FunctionValue::cfunction() const
 dawn::StructValue::StructValue( StructValue const& other )
     : parent_id( other.parent_id )
 {
-    fields.reserve( other.fields.size() );
-    for ( auto& [key, val] : other.fields )
-        fields[key] = val.clone();
-    methods.reserve( other.methods.size() );
-    for ( auto& [key, val] : other.methods )
-        methods[key] = val.clone();
+    members.reserve( other.members.size() );
+    for ( auto& [key, member] : other.members )
+        members[key] = { .value = member.value.clone(), .type = member.type };
 }
 
 dawn::StructValue& dawn::StructValue::operator=( StructValue const& other )
@@ -119,22 +116,17 @@ dawn::StructValue& dawn::StructValue::operator=( StructValue const& other )
     if ( this != &other )
     {
         parent_id = other.parent_id;
-        fields.clear();
-        fields.reserve( other.fields.size() );
-        for ( auto& [key, val] : other.fields )
-            fields[key] = val.clone();
-        methods.clear();
-        methods.reserve( other.methods.size() );
-        for ( auto& [key, val] : other.methods )
-            methods[key] = val.clone();
+        members.clear();
+        members.reserve( other.members.size() );
+        for ( auto& [key, member] : other.members )
+            members[key] = { .value = member.value.clone(), .type = member.type };
     }
     return *this;
 }
 
 dawn::StructValue::StructValue( StructValue&& other ) noexcept
     : parent_id( std::move( other.parent_id ) )
-    , fields( std::move( other.fields ) )
-    , methods( std::move( other.methods ) )
+    , members( std::move( other.members ) )
 {
 }
 
@@ -143,18 +135,19 @@ dawn::StructValue& dawn::StructValue::operator=( StructValue&& other ) noexcept
     if ( this != &other )
     {
         parent_id = std::move( other.parent_id );
-        fields = std::move( other.fields );
-        methods = std::move( other.methods );
+        members = std::move( other.members );
     }
     return *this;
 }
 
 dawn::FunctionValue* dawn::StructValue::get_method( ID id, Bool has_no_args )
 {
-    auto it = methods.find( id );
-    if ( it == methods.end() )
+    const auto it = members.find( id );
+    if ( it == members.end() )
         return nullptr;
-    return &it->second.as_function();
+    if ( it->second.type != MemberType::METHOD )
+        return nullptr;
+    return &it->second.value.as_function();
 }
 
 dawn::ArrayValue::ArrayValue( ArrayValue const& other )
@@ -498,8 +491,11 @@ dawn::Value dawn::Value::clone() const
     case ValueType::STRUCT:
     {
         Value result{ as_struct(), location() };
-        for ( auto& [_, method] : result.as_struct().methods )
-            *method.as_function().as_method().self = result;
+        for ( auto& [_, member] : result.as_struct().members )
+        {
+            if ( member.type == MemberType::METHOD )
+                *member.value.as_function().as_method().self = result;
+        }
         return result;
     }
 
@@ -528,8 +524,11 @@ dawn::Value& dawn::Value::unlock_const()
     case ValueType::STRUCT:
     {
         auto& value = as_struct();
-        for ( auto& [_, field] : value.fields )
-            field.unlock_const();
+        for ( auto& [_, member] : value.members )
+        {
+            if ( member.type == MemberType::FIELD )
+                member.value.unlock_const();
+        }
     }
     break;
 
@@ -1352,17 +1351,17 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
         {
             StringStream stream;
             stream << IDSystem::get( left.parent_id );
-            if ( left.fields.empty() )
+            if ( left.members.empty() )
             {
                 stream << op_scope_opn << op_scope_cls;
                 return stream.str();
             }
 
-            auto it = left.fields.begin();
+            auto it = left.members.begin();
             stream << op_scope_opn;
-            for ( ; it != --left.fields.end(); ++it )
-                stream << IDSystem::get( it->first ) << op_assign << it->second.to_string( engine ) << op_split << ' ';
-            stream << IDSystem::get( it->first ) << op_assign << it->second.to_string( engine ) << op_scope_cls;
+            for ( ; it != --left.members.end(); ++it )
+                stream << IDSystem::get( it->first ) << op_assign << it->second.value.to_string( engine ) << op_split << ' ';
+            stream << IDSystem::get( it->first ) << op_assign << it->second.value.to_string( engine ) << op_scope_cls;
             return stream.str();
         }
     }
