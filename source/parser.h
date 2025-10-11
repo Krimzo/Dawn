@@ -19,27 +19,28 @@ struct Module
 
 struct TokenIterator
 {
-    constexpr TokenIterator( Token* ptr, Token* end )
+    constexpr TokenIterator( Token const* ptr, Token const* end )
         : m_ptr( ptr ), m_start( ptr ), m_end( end )
     {
     }
 
     Bool valid() const;
-    Token& operator*() const;
-    Token* operator->() const;
+    Token const& operator*() const;
+    Token const* operator->() const;
     Bool operator==( TokenIterator const& other ) const;
     void operator++();
     void operator--();
 
 private:
-    Token* m_ptr = nullptr;
-    Token* const m_start;
-    Token* const m_end;
+    Token const* m_ptr = nullptr;
+    Token const* const m_start;
+    Token const* const m_end;
 };
 
 struct Parser
 {
-    void parse( Vector<Token>& tokens, Module& module );
+    void parse( Vector<Token> const& tokens, Module& module );
+    void parse( Token const* token_ptr, Int token_count, Module& module );
 
 private:
     Bool is_variable( TokenIterator const& it );

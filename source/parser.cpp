@@ -24,7 +24,7 @@ dawn::Bool dawn::TokenIterator::valid() const
     return m_ptr >= m_start && m_ptr < m_end;
 }
 
-dawn::Token& dawn::TokenIterator::operator*() const
+dawn::Token const& dawn::TokenIterator::operator*() const
 {
     if ( !valid() )
     {
@@ -36,7 +36,7 @@ dawn::Token& dawn::TokenIterator::operator*() const
     return *m_ptr;
 }
 
-dawn::Token* dawn::TokenIterator::operator->() const
+dawn::Token const* dawn::TokenIterator::operator->() const
 {
     if ( !valid() )
     {
@@ -63,9 +63,14 @@ void dawn::TokenIterator::operator--()
     --m_ptr;
 }
 
-void dawn::Parser::parse( Vector<Token>& tokens, Module& module )
+void dawn::Parser::parse( Vector<Token> const& tokens, Module& module )
 {
-    TokenIterator it{ tokens.begin()._Ptr, tokens.end()._Ptr };
+    parse( tokens.data(), (Int) tokens.size(), module );
+}
+
+void dawn::Parser::parse( Token const* token_ptr, Int token_count, Module& module )
+{
+    TokenIterator it{ token_ptr, token_ptr + token_count };
     while ( it.valid() )
     {
         if ( it->value == kw_import )
