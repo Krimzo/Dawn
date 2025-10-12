@@ -82,7 +82,8 @@ struct StructValue
     StructValue( StructValue&& other ) noexcept;
     StructValue& operator=( StructValue&& other ) noexcept;
 
-    FunctionValue* get_method( ID id, Bool has_no_args );
+    FunctionValue* get_method( ID id );
+    FunctionValue* get_unary( ID id );
 };
 
 struct ArrayValue

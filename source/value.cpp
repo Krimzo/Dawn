@@ -140,7 +140,7 @@ dawn::StructValue& dawn::StructValue::operator=( StructValue&& other ) noexcept
     return *this;
 }
 
-dawn::FunctionValue* dawn::StructValue::get_method( ID id, Bool has_no_args )
+dawn::FunctionValue* dawn::StructValue::get_method( ID id )
 {
     const auto it = members.find( id );
     if ( it == members.end() )
@@ -148,6 +148,22 @@ dawn::FunctionValue* dawn::StructValue::get_method( ID id, Bool has_no_args )
     if ( it->second.type != MemberType::METHOD )
         return nullptr;
     return &it->second.value.as_function();
+}
+
+dawn::FunctionValue* dawn::StructValue::get_unary( ID id )
+{
+    const auto it = members.find( id );
+    if ( it == members.end() )
+        return nullptr;
+    if ( it->second.type != MemberType::METHOD )
+        return nullptr;
+    auto& func = it->second.value.as_function();
+    if ( auto* dfunc = func.dfunction() )
+    {
+        if ( dfunc->args.size() != 1 )
+            return nullptr;
+    }
+    return &func;
 }
 
 dawn::ArrayValue::ArrayValue( ArrayValue const& other )
@@ -556,7 +572,7 @@ dawn::Value dawn::Value::un_plus( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* op = left.get_method( __add, true );
+        auto* op = left.get_unary( __add );
         if ( !op )
             ENGINE_PANIC( location(), dawn::op_add, " struct [", IDSystem::get( left.parent_id ), "] not supported" );
 
@@ -582,7 +598,7 @@ dawn::Value dawn::Value::un_minus( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* op = left.get_method( __sub, true );
+        auto* op = left.get_unary( __sub );
         if ( !op )
             ENGINE_PANIC( location(), dawn::op_sub, " struct [", IDSystem::get( left.parent_id ), "] not supported" );
 
@@ -661,7 +677,7 @@ dawn::Value dawn::Value::op_add( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* op = left.get_method( __add, false );
+        auto* op = left.get_method( __add );
         if ( !op )
             ENGINE_PANIC( location(), "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_add, " [", other.type(), "] not supported" );
 
@@ -711,7 +727,7 @@ dawn::Value dawn::Value::op_sub( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* op = left.get_method( __sub, false );
+        auto* op = left.get_method( __sub );
         if ( !op )
             ENGINE_PANIC( location(), "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_sub, " [", other.type(), "] not supported" );
 
@@ -761,7 +777,7 @@ dawn::Value dawn::Value::op_mul( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* op = left.get_method( __mul, false );
+        auto* op = left.get_method( __mul );
         if ( !op )
             ENGINE_PANIC( location(), "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_mul, " [", other.type(), "] not supported" );
 
@@ -811,7 +827,7 @@ dawn::Value dawn::Value::op_div( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* op = left.get_method( __div, false );
+        auto* op = left.get_method( __div );
         if ( !op )
             ENGINE_PANIC( location(), "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_div, " [", other.type(), "] not supported" );
 
@@ -861,7 +877,7 @@ dawn::Value dawn::Value::op_pow( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* op = left.get_method( __pow, false );
+        auto* op = left.get_method( __pow );
         if ( !op )
             ENGINE_PANIC( location(), "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_pow, " [", other.type(), "] not supported" );
 
@@ -911,7 +927,7 @@ dawn::Value dawn::Value::op_mod( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* op = left.get_method( __mod, false );
+        auto* op = left.get_method( __mod );
         if ( !op )
             ENGINE_PANIC( location(), "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_mod, " [", other.type(), "] not supported" );
 
@@ -1016,7 +1032,7 @@ dawn::Value dawn::Value::op_cmpr( Engine& engine, Value const& other ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* op = left.get_method( __cmpr, false );
+        auto* op = left.get_method( __cmpr );
         if ( !op )
             ENGINE_PANIC( location(), "struct [", IDSystem::get( left.parent_id ), "] ", dawn::op_cmpr, " [", other.type(), "] not supported" );
 
@@ -1136,7 +1152,7 @@ dawn::Bool dawn::Value::to_bool( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _bool, true );
+        auto* method = left.get_method( _bool );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to bool" );
 
@@ -1178,7 +1194,7 @@ dawn::Int dawn::Value::to_int( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _int, true );
+        auto* method = left.get_method( _int );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to int" );
 
@@ -1220,7 +1236,7 @@ dawn::Float dawn::Value::to_float( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _float, true );
+        auto* method = left.get_method( _float );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to float" );
 
@@ -1263,7 +1279,7 @@ dawn::Char dawn::Value::to_char( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _char, true );
+        auto* method = left.get_method( _char );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to char" );
 
@@ -1342,7 +1358,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        if ( auto* method = left.get_method( _string, true ) )
+        if ( auto* method = left.get_method( _string ) )
         {
             Value args[1] = { *this };
             return engine.handle_func( location(), *method, args, (Int) std::size( args ) ).as_string();
@@ -1401,7 +1417,7 @@ dawn::FunctionValue dawn::Value::to_function( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _function, true );
+        auto* method = left.get_method( _function );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to function" );
 
@@ -1434,7 +1450,7 @@ dawn::ArrayValue dawn::Value::to_array( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _array, true );
+        auto* method = left.get_method( _array );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to array" );
 
@@ -1463,7 +1479,7 @@ dawn::RangeValue dawn::Value::to_range( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _range, true );
+        auto* method = left.get_method( _range );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to range" );
 
