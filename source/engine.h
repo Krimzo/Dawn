@@ -9,8 +9,8 @@ namespace dawn
 struct Engine
 {
     using MemberGenerator = Func<Value( Location const&, Engine&, Value const& )>;
-    using CustomMemberFunc = Func<Value( Location const&, Engine&, Value& )>;
-    using CustomMethodFunc = Func<Value( Location const&, Engine&, Value&, Value* )>;
+    using CustomMemberFunc = Func<Value( Location const&, Engine&, Value const& )>;
+    using CustomMethodFunc = Func<Value( Location const&, Engine&, Value const&, Value const* )>;
 
     friend struct Value;
     friend struct EnumValue;
@@ -19,17 +19,21 @@ struct Engine
     Stack stack;
     GlobalStorage<Enum> enums;
     GlobalStorage<Struct> structs;
+    GlobalStorage<GlobalStorage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
     GlobalStorage<MemberGenerator> member_generators[(Int) ValueType::_COUNT] = {};
 
     Engine();
 
     void load_mod( Module const& module );
+    void load_operator( Operator const& entry );
     void load_function( Function const& entry );
     void load_enum( Enum const& entry );
     void load_struct( Struct const& entry );
     void load_variable( Variable const& entry );
 
-    void bind_cfunc( ID id, Bool is_ctime, CFunction cfunc );
+    void bind_oper( ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const, CFunction cfunc );
+
+    void bind_func( ID id, Bool is_ctime, CFunction cfunc );
     Value call_func( ID id, Value* args, Int arg_count );
 
     void add_var( Location const& location, VarType const& type, ID id, Value const& value );
@@ -41,12 +45,15 @@ struct Engine
     constexpr Set<ID> const& ctime_funcs() const { return m_ctime_funcs; }
 
 private:
+    Set<uint64_t> m_ctime_ops[(Int) OperatorType::_COUNT] = {};
     Set<ID> m_ctime_funcs;
 
+    void load_standard_operators();
     void load_standard_functions();
     void load_standard_members();
 
-    Value handle_func( Location const& location, FunctionValue const& func, Value* args, Int arg_count );
+    Value handle_oper( Location const& location, Value const& left, OperatorType op_type, Value const& right );
+    Value handle_func( Location const& location, FunctionValue const& func, Value const* args, Int arg_count );
     void handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
     void handle_instr( Node const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
     Value handle_expr( Node const& node );
@@ -69,13 +76,9 @@ private:
     Value handle_enum_node( EnumNode const& node );
     Value handle_struct_node( StructNode const& node );
     Value handle_array_node( ArrayNode const& node );
-    Value handle_un_node( UnaryNode const& node );
+    Value handle_ac_node( AccessNode const& node );
     Value handle_op_node( OperatorNode const& node );
-    Value handle_ac_node( OperatorNode const& node );
     Value handle_as_node( AssignNode const& node );
-
-    Value handle_ac_struct_node( Location const& location, Value const& self, ID right_id );
-    Value handle_ac_type_node( Location const& location, Value const& self, ID right_id );
 
     Value create_default_value( Location const& location, ID typeid_ );
 };

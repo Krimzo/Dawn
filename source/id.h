@@ -48,6 +48,11 @@ private:
     static Vector<String> m_id_str;
     static StringMap<ID> m_str_id;
 };
+
+constexpr uint64_t combine_ids( ID left, ID right )
+{
+    return ( uint64_t( left.integer() ) << 32 ) | right.integer();
+}
 }
 
 namespace std

@@ -25,22 +25,15 @@ enum struct ExtractType : uint8_t
     SCOPE_START,
 };
 
-enum struct UnaryType : uint8_t
-{
-    PLUS = 0,
-    MINUS,
-    NOT,
-};
-
 enum struct OperatorType : uint8_t
 {
-    ACCESS = 0,
-    POW,
+    POW = 0,
     MOD,
     MUL,
     DIV,
     ADD,
     SUB,
+    NOT,
     COMPARE,
     LESS,
     GREAT,
@@ -51,6 +44,7 @@ enum struct OperatorType : uint8_t
     AND,
     OR,
     RANGE,
+    _COUNT,
 };
 
 enum struct AssignType : uint8_t
@@ -91,7 +85,7 @@ enum struct NodeType : uint8_t
     ENUM,
     STRUCT,
     ARRAY,
-    UNARY,
+    ACCESS,
     OPERATOR,
     ASSIGN,
 };
@@ -132,5 +126,6 @@ enum struct FrameType : uint8_t
 };
 
 std::ostream& operator<<( std::ostream& stream, TokenType type );
+std::ostream& operator<<( std::ostream& stream, OperatorType type );
 std::ostream& operator<<( std::ostream& stream, ValueType type );
 }

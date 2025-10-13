@@ -64,10 +64,6 @@ struct Person {
         print("{self.name} is {self.age} years old")
     }
 
-    oper +(int age) {
-        return Person{ name = self.name, age = self.age + age }
-    }
-
     cast string {
         return "Person({self.name}, {self.age})"
     }
@@ -136,6 +132,13 @@ for c : "stuff" {
 }
 for val : [1, 4.2, ["other", " array"]] {
     print(val)
+}
+```
+
+# Operators
+```
+oper *(Float2& left, float right) {
+    return Float2(left.x * right, left.y * right)
 }
 ```
 

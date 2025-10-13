@@ -48,7 +48,7 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, StringSet& impor
 
 void dawn::Dawn::bind_func( StringRef const& name, Bool is_ctime, CFunction cfunc ) noexcept
 {
-    engine.bind_cfunc( IDSystem::get( name ), is_ctime, std::move( cfunc ) );
+    engine.bind_func( IDSystem::get( name ), is_ctime, std::move( cfunc ) );
 }
 
 dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name ) noexcept
