@@ -10,6 +10,7 @@ struct Module
 {
     StringSet imports;
     Vector<Variable> variables;
+    Vector<Operator> operators;
     Vector<Function> functions;
     Vector<Enum> enums;
     Vector<Struct> structs;
@@ -49,13 +50,14 @@ private:
     void parse_global_struct( TokenIterator& it, Module& module );
     void parse_global_enum( TokenIterator& it, Module& module );
     void parse_global_function( TokenIterator& it, Module& module );
+    void parse_global_operator( TokenIterator& it, Module& module );
     void parse_global_variable( TokenIterator& it, Module& module );
 
     void parse_struct( TokenIterator& it, Struct& struc );
     void parse_enum( TokenIterator& it, Enum& en );
+    void parse_operator( TokenIterator& it, Operator& oper );
     void parse_function( TokenIterator& it, Function& function );
     void parse_cast( TokenIterator& it, Function& function );
-    void parse_operator( TokenIterator& it, Function& operat );
     void parse_variable( TokenIterator& it, Variable& variable );
 
     void parse_expression( ExtractType type, TokenIterator& it, Node& tree );
@@ -88,8 +90,8 @@ private:
 
 Bool is_unary( Token const& token );
 Int token_depth( Token const& token, Bool& in_lambda );
+OperatorType get_op_type( StringRef const& value );
 
-void create_unary_node( Token const& token, Node& node );
 void create_operator_node( Token const& token, Node& node );
 void create_assign_node( Token const& token, Node& node );
 }

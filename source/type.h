@@ -22,19 +22,26 @@ struct Variable
     NodeRef expr;
 };
 
+struct Arg
+{
+    VarType type;
+    ID id;
+};
+
 struct Scope
 {
     Vector<Node> instr;
 };
 
+struct Operator
+{
+    OperatorType type;
+    Vector<Arg> args;
+    Scope body;
+};
+
 struct Function
 {
-    struct Arg
-    {
-        VarType type;
-        ID id;
-    };
-
     ID id;
     Vector<Arg> args;
     Scope body;

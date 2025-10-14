@@ -41,12 +41,14 @@ private:
 
     void optimize_imports( StringSet& imports );
     void optimize_variables( Vector<Variable>& vars );
+    void optimize_operators( Vector<Operator>& ops );
     void optimize_functions( Vector<Function>& funcs );
     void optimize_enums( Vector<Enum>& enums );
     void optimize_structs( Vector<Struct>& structs );
 
     void optimize_import( String& import );
     void optimize_variable( Variable& var );
+    void optimize_operator( Operator& op );
     void optimize_function( Function& func );
     void optimize_enum( Enum& enu );
     void optimize_struct( Struct& struc );
@@ -76,9 +78,8 @@ private:
     void optimize_expr_enum( EnumNode& node, Node& out_node );
     void optimize_expr_struct( StructNode& node, Node& out_node );
     void optimize_expr_array( ArrayNode& node, Node& out_node );
-    void optimize_expr_unary( UnaryNode& node, Node& out_node );
+    void optimize_expr_ac( AccessNode& node, Node& out_node );
     void optimize_expr_op( OperatorNode& node, Node& out_node );
-    void optimize_expr_ac( Value const& left, ID right_id, Node& out_node );
     void optimize_expr_as( AssignNode& node, Node& out_node );
 };
 }

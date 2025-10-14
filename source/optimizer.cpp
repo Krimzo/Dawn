@@ -7,6 +7,7 @@ void dawn::Optimizer::optimize( Module& module )
     m_engine.load_mod( module );
     optimize_imports( module.imports );
     optimize_variables( module.variables );
+    optimize_operators( module.operators );
     optimize_functions( module.functions );
     optimize_enums( module.enums );
     optimize_structs( module.structs );
@@ -28,6 +29,12 @@ void dawn::Optimizer::optimize_variables( Vector<Variable>& vars )
 {
     for ( auto& var : vars )
         optimize_variable( var );
+}
+
+void dawn::Optimizer::optimize_operators( Vector<Operator>& ops )
+{
+    for ( auto& op : ops )
+        optimize_operator( op );
 }
 
 void dawn::Optimizer::optimize_functions( Vector<Function>& funcs )
@@ -58,6 +65,14 @@ void dawn::Optimizer::optimize_variable( Variable& var )
     optimize_expr( *var.expr );
 }
 
+void dawn::Optimizer::optimize_operator( Operator& op )
+{
+    const InlineDropper inline_dropper{ m_inline };
+    for ( auto& arg : op.args )
+        m_inline.emplace_back( arg.id );
+    optimize_instr( op.body.instr );
+}
+
 void dawn::Optimizer::optimize_function( Function& func )
 {
     const InlineDropper inline_dropper{ m_inline };
@@ -70,8 +85,8 @@ void dawn::Optimizer::optimize_enum( Enum& enu )
 {
     for ( auto& entry : enu.entries )
     {
-        if ( std::holds_alternative<NodeRef>( entry.expr ) )
-            optimize_expr( *std::get<NodeRef>( entry.expr ) );
+        if ( auto* expr_refptr = std::get_if<NodeRef>( &entry.expr ) )
+            optimize_expr( **expr_refptr );
     }
 }
 
@@ -123,7 +138,7 @@ void dawn::Optimizer::optimize_expr( Node& node )
     case NodeType::ENUM: optimize_expr_enum( std::get<EnumNode>( node ), node ); break;
     case NodeType::STRUCT: optimize_expr_struct( std::get<StructNode>( node ), node ); break;
     case NodeType::ARRAY: optimize_expr_array( std::get<ArrayNode>( node ), node ); break;
-    case NodeType::UNARY: optimize_expr_unary( std::get<UnaryNode>( node ), node ); break;
+    case NodeType::ACCESS: optimize_expr_ac( std::get<AccessNode>( node ), node ); break;
     case NodeType::OPERATOR: optimize_expr_op( std::get<OperatorNode>( node ), node ); break;
     case NodeType::ASSIGN: optimize_expr_as( std::get<AssignNode>( node ), node ); break;
     }
@@ -252,7 +267,7 @@ void dawn::Optimizer::optimize_expr_switch( SwitchNode& node, Node& out_node )
                 continue;
             ++is_value_counter;
 
-            if ( std::get<Value>( main_expr ).op_eq( m_engine, std::get<Value>( expr ) ).as_bool() )
+            if ( m_engine.handle_oper( expr.location(), std::get<Value>( main_expr ), OperatorType::EQ, std::get<Value>( expr ) ).as_bool() )
             {
                 optimize_instr( casee.scope.instr );
                 out_node.emplace<Scope>( Scope{ std::move( casee.scope ) } );
@@ -448,21 +463,9 @@ void dawn::Optimizer::optimize_expr_array( ArrayNode& node, Node& out_node )
     }
 }
 
-void dawn::Optimizer::optimize_expr_unary( UnaryNode& node, Node& out_node )
+void dawn::Optimizer::optimize_expr_ac( AccessNode& node, Node& out_node )
 {
-    auto& right_node = *node.right;
-    optimize_expr( right_node );
-    if ( right_node.type() != NodeType::VALUE )
-        return;
-
-    Value value = std::get<Value>( right_node );
-    switch ( node.type )
-    {
-    case UnaryType::PLUS: value = value.un_plus( m_engine ); break;
-    case UnaryType::MINUS: value = value.un_minus( m_engine ); break;
-    case UnaryType::NOT: value = value.un_not(); break;
-    }
-    out_node.emplace<Value>( value );
+    optimize_expr( *node.left_expr );
 }
 
 void dawn::Optimizer::optimize_expr_op( OperatorNode& node, Node& out_node )
@@ -472,38 +475,16 @@ void dawn::Optimizer::optimize_expr_op( OperatorNode& node, Node& out_node )
     optimize_expr( left_node );
     optimize_expr( right_node );
 
-    if ( node.type == OperatorType::ACCESS && left_node.type() == NodeType::VALUE && right_node.type() == NodeType::IDENTIFIER )
-        return optimize_expr_ac( std::get<Value>( left_node ), std::get<IdentifierNode>( right_node ).id, out_node );
-
     if ( left_node.type() != NodeType::VALUE || right_node.type() != NodeType::VALUE )
         return;
 
     Value left_value = std::get<Value>( left_node );
     auto& right_value = std::get<Value>( right_node );
-    switch ( node.type )
-    {
-    case OperatorType::POW: left_value = left_value.op_pow( m_engine, right_value ); break;
-    case OperatorType::MOD: left_value = left_value.op_mod( m_engine, right_value ); break;
-    case OperatorType::MUL: left_value = left_value.op_mul( m_engine, right_value ); break;
-    case OperatorType::DIV: left_value = left_value.op_div( m_engine, right_value ); break;
-    case OperatorType::ADD: left_value = left_value.op_add( m_engine, right_value ); break;
-    case OperatorType::SUB: left_value = left_value.op_sub( m_engine, right_value ); break;
-    case OperatorType::COMPARE: left_value = left_value.op_cmpr( m_engine, right_value ); break;
-    case OperatorType::LESS: left_value = left_value.op_less( m_engine, right_value ); break;
-    case OperatorType::GREAT: left_value = left_value.op_great( m_engine, right_value ); break;
-    case OperatorType::LESS_EQ: left_value = left_value.op_lesseq( m_engine, right_value ); break;
-    case OperatorType::GREAT_EQ: left_value = left_value.op_greateq( m_engine, right_value ); break;
-    case OperatorType::EQ: left_value = left_value.op_eq( m_engine, right_value ); break;
-    case OperatorType::NOT_EQ: left_value = left_value.op_neq( m_engine, right_value ); break;
-    case OperatorType::AND: left_value = left_value.op_and( right_value ); break;
-    case OperatorType::OR: left_value = left_value.op_or( right_value ); break;
-    case OperatorType::RANGE: left_value = left_value.op_range( m_engine, right_value ); break;
-    }
-    out_node.emplace<Value>( left_value );
-}
+    if ( !m_engine.m_ctime_ops[(Int) node.type].contains( combine_ids( left_value.type_id(), right_value.type_id() ) ) )
+        return;
 
-void dawn::Optimizer::optimize_expr_ac( Value const& left, const ID right_id, Node& out_node )
-{
+    left_value = m_engine.handle_oper( node.location, left_value, node.type, right_value );
+    out_node.emplace<Value>( left_value );
 }
 
 void dawn::Optimizer::optimize_expr_as( AssignNode& node, Node& out_node )

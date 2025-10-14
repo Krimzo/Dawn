@@ -9,13 +9,13 @@ namespace dawn
 {
 struct DFunction
 {
-    Vector<Function::Arg> args;
+    Vector<Arg> args;
     Scope body;
 };
 
-struct CFunction : Func<Value( Location const&, Engine&, Value*, Int )>
+struct CFunction : Func<Value( Location const&, Engine&, Value const*, Int )>
 {
-    using Func<Value( Location const&, Engine&, Value*, Int )>::function;
+    using Func<Value( Location const&, Engine&, Value const*, Int )>::function;
 };
 
 struct FunctionValue
@@ -158,29 +158,6 @@ struct Value
 
     Bool is_const() const;
     Value& unlock_const();
-
-    Value un_plus( Engine& engine ) const;
-    Value un_minus( Engine& engine ) const;
-    Value op_add( Engine& engine, Value const& other ) const;
-    Value op_sub( Engine& engine, Value const& other ) const;
-    Value op_mul( Engine& engine, Value const& other ) const;
-    Value op_div( Engine& engine, Value const& other ) const;
-    Value op_pow( Engine& engine, Value const& other ) const;
-    Value op_mod( Engine& engine, Value const& other ) const;
-
-    Value op_cmpr( Engine& engine, Value const& other ) const;
-    Value op_eq( Engine& engine, Value const& other ) const;
-    Value op_neq( Engine& engine, Value const& other ) const;
-    Value op_less( Engine& engine, Value const& other ) const;
-    Value op_great( Engine& engine, Value const& other ) const;
-    Value op_lesseq( Engine& engine, Value const& other ) const;
-    Value op_greateq( Engine& engine, Value const& other ) const;
-
-    Value un_not() const;
-    Value op_and( Value const& other ) const;
-    Value op_or( Value const& other ) const;
-
-    Value op_range( Engine& engine, Value const& other ) const;
 
     Bool to_bool( Engine& engine ) const;
     Int to_int( Engine& engine ) const;

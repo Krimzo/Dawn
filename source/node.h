@@ -241,12 +241,12 @@ struct ArrayNode : LocationHolder
     }
 };
 
-struct UnaryNode : LocationHolder
+struct AccessNode : LocationHolder
 {
-    UnaryType type{};
-    NodeRef right;
+    NodeRef left_expr;
+    ID right_id;
 
-    constexpr UnaryNode( Location const& location )
+    constexpr AccessNode( Location const& location )
         : LocationHolder( location )
     {
     }
@@ -296,7 +296,7 @@ struct Node : Variant <
     EnumNode,
     StructNode,
     ArrayNode,
-    UnaryNode,
+    AccessNode,
     OperatorNode,
     AssignNode >
 {
@@ -335,7 +335,7 @@ struct Node : Variant <
         case NodeType::ENUM:
         case NodeType::STRUCT:
         case NodeType::ARRAY:
-        case NodeType::UNARY:
+        case NodeType::ACCESS:
         case NodeType::OPERATOR:
         case NodeType::ASSIGN:
             return reinterpret_cast<LocationHolder const*>( this )->location;

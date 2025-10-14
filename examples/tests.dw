@@ -83,7 +83,7 @@ func loop_test()
 		counter += 1
 	}
 
-	for i : 0 >> 4 {
+	for i : 0>>4 {
 		print(i)
 	}
 	for i : "nice" {
@@ -125,9 +125,10 @@ enum SomeEnum
 func enum_test()
 {
 	SomeEnum first_val = SomeEnum::two
+	print(first_val.name)
 	print(first_val.value[2][1])
-	assert(SomeEnum::two == SomeEnum::two, "bad enum comparsion 1")
-	assert(SomeEnum::one != SomeEnum::two, "bad enum comparsion 2")
+	assert(SomeEnum::two.id == SomeEnum::two.id, "bad enum comparsion 1")
+	assert(SomeEnum::one.id != SomeEnum::two.id, "bad enum comparsion 2")
 }
 
 struct SomeStruct
@@ -140,16 +141,16 @@ struct SomeStruct
 		print(self)
 	}
 
-	oper + (int age)
-	{
-		self.age += age
-		return self
-	}
-
 	cast string
 	{
 		return "SomeStruct: {self.name} is {self.age} years old"
 	}
+}
+
+oper +(SomeStruct& left, int right)
+{
+	left.age += right
+	return left
 }
 
 func struct_test()
