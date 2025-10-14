@@ -173,41 +173,26 @@ void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_cons
 
 dawn::Value dawn::Engine::handle_oper( Location const& location, Value const& left, const OperatorType op_type, Value const& right )
 {
-    const auto overload_caller = [&]() -> Value
-        {
-            auto& op_left_ids = operators[(Int) op_type];
-            auto* op_right_ids = op_left_ids.get( left.type_id() );
-            if ( !op_right_ids )
-                ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "]" );
-            auto* func = op_right_ids->get( right.type_id() );
-            if ( !func )
-                ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "] with right type being [", IDSystem::get( right.type_id() ), "]" );
-            Value args[2] = { left, right };
-            return handle_func( location, *func, args, (Int) std::size( args ) );
-        };
-
     switch ( op_type )
     {
     case OperatorType::POW:
-        return overload_caller();
-
     case OperatorType::MOD:
-        return overload_caller();
-
     case OperatorType::MUL:
-        return overload_caller();
-
     case OperatorType::DIV:
-        return overload_caller();
-
     case OperatorType::ADD:
-        return overload_caller();
-
     case OperatorType::SUB:
-        return overload_caller();
-
     case OperatorType::COMPARE:
-        return overload_caller();
+    {
+        auto& op_left_ids = operators[(Int) op_type];
+        auto* op_right_ids = op_left_ids.get( left.type_id() );
+        if ( !op_right_ids )
+            ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "]" );
+        auto* func = op_right_ids->get( right.type_id() );
+        if ( !func )
+            ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "] with right type being [", IDSystem::get( right.type_id() ), "]" );
+        Value args[2] = { left, right };
+        return handle_func( location, *func, args, (Int) std::size( args ) );
+    }
 
     case OperatorType::LESS:
         return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() < 0, location };
