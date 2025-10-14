@@ -39,6 +39,7 @@
 38.  222642us
 39.  239412us
 40.  342801us :)
+41.  256740us __forceinline engine
 
 // linear fib(30)
 01.    9871us
