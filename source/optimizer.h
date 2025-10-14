@@ -34,7 +34,6 @@ private:
     };
 
     Engine m_engine;
-    Set<ID> m_ctime_funcs;
     Vector<Inlineable> m_inline;
 
     void reset();

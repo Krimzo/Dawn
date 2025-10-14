@@ -16,7 +16,7 @@ void dawn::Optimizer::optimize( Module& module )
 void dawn::Optimizer::reset()
 {
     m_engine = {};
-    m_ctime_funcs = m_engine.ctime_funcs();
+    m_inline.clear();
 }
 
 void dawn::Optimizer::optimize_imports( StringSet& imports )
@@ -375,7 +375,7 @@ void dawn::Optimizer::optimize_expr_call( CallNode& node, Node& out_node )
     Bool is_ctime = true;
     auto& left_expr = *node.left_expr;
     optimize_expr( left_expr );
-    if ( left_expr.type() != NodeType::IDENTIFIER || !m_ctime_funcs.contains( std::get<IdentifierNode>( left_expr ).id ) )
+    if ( left_expr.type() != NodeType::IDENTIFIER || !m_engine.m_ctime_funcs.contains( std::get<IdentifierNode>( left_expr ).id ) )
         is_ctime = false;
     for ( auto& arg : node.args )
     {

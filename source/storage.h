@@ -22,9 +22,8 @@ struct LocalStorage
     {
         for ( auto it = m_data.rbegin(); it != m_data.rend(); ++it )
         {
-            auto& [obj_id, obj] = *it;
-            if ( obj_id == id )
-                return &obj;
+            if ( it->first == id )
+                return &it->second;
         }
         return nullptr;
     }
