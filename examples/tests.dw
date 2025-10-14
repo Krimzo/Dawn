@@ -83,7 +83,7 @@ func loop_test()
 		counter += 1
 	}
 
-	for i : 0 >> 4 {
+	for i : 0>>4 {
 		print(i)
 	}
 	for i : "nice" {
