@@ -64,10 +64,8 @@ void dawn::Engine::load_enum( Enum const& entry )
     Enum enu = entry;
     for ( auto& entry : enu.entries )
     {
-        if ( !std::holds_alternative<NodeRef>( entry.expr ) )
-            continue;
-        auto const& expr = *std::get<NodeRef>( entry.expr );
-        *entry.expr.emplace<Holder<Value>>() = handle_expr( expr );
+        if ( auto* expr_refptr = std::get_if<NodeRef>( &entry.expr ) )
+            *entry.expr.emplace<Holder<Value>>() = handle_expr( **expr_refptr );
     }
     enums.set( enu.id, enu );
 }

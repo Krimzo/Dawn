@@ -85,8 +85,8 @@ void dawn::Optimizer::optimize_enum( Enum& enu )
 {
     for ( auto& entry : enu.entries )
     {
-        if ( std::holds_alternative<NodeRef>( entry.expr ) )
-            optimize_expr( *std::get<NodeRef>( entry.expr ) );
+        if ( auto* expr_refptr = std::get_if<NodeRef>( &entry.expr ) )
+            optimize_expr( **expr_refptr );
     }
 }
 
