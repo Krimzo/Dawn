@@ -42,8 +42,6 @@ struct Engine
     void bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func );
     void bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body );
 
-    constexpr Set<ID> const& ctime_funcs() const { return m_ctime_funcs; }
-
 private:
     Set<uint64_t> m_ctime_ops[(Int) OperatorType::_COUNT] = {};
     Set<ID> m_ctime_funcs;
