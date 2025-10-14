@@ -206,9 +206,6 @@ dawn::Value dawn::Engine::handle_oper( Location const& location, Value const& le
     case OperatorType::SUB:
         return overload_caller();
 
-    case OperatorType::NOT:
-        return Value{ !right.as_bool(), location };
-
     case OperatorType::COMPARE:
         return overload_caller();
 
@@ -229,6 +226,9 @@ dawn::Value dawn::Engine::handle_oper( Location const& location, Value const& le
 
     case OperatorType::NOT_EQ:
         return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() != 0, location };
+
+    case OperatorType::NOT:
+        return Value{ !right.as_bool(), location };
 
     case OperatorType::AND:
         return Value{ left.as_bool() && right.as_bool(), location };
@@ -751,7 +751,7 @@ dawn::Value dawn::Engine::handle_ac_node( AccessNode const& node )
 
 dawn::Value dawn::Engine::handle_op_node( OperatorNode const& node )
 {
-    const Value left = handle_expr( node.sides[0] ); // Make sure that left side is called first.
+    const Value left = handle_expr( node.sides[0] ); // Make sure that left side is computed first.
     return handle_oper( node.location, left, node.type, handle_expr( node.sides[1] ) );
 }
 

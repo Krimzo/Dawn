@@ -28,7 +28,6 @@ std::ostream& dawn::operator<<( std::ostream& stream, OperatorType type )
     case OperatorType::DIV: stream << "Div"; break;
     case OperatorType::ADD: stream << "Add"; break;
     case OperatorType::SUB: stream << "Sub"; break;
-    case OperatorType::NOT: stream << "Not"; break;
     case OperatorType::COMPARE: stream << "Compare"; break;
     case OperatorType::LESS: stream << "Less"; break;
     case OperatorType::GREAT: stream << "Great"; break;
@@ -36,6 +35,7 @@ std::ostream& dawn::operator<<( std::ostream& stream, OperatorType type )
     case OperatorType::GREAT_EQ: stream << "Great_Eq"; break;
     case OperatorType::EQ: stream << "Eq"; break;
     case OperatorType::NOT_EQ: stream << "Not_Eq"; break;
+    case OperatorType::NOT: stream << "Not"; break;
     case OperatorType::AND: stream << "And"; break;
     case OperatorType::OR: stream << "Or"; break;
     case OperatorType::RANGE: stream << "Range"; break;

@@ -383,7 +383,7 @@ void dawn::Parser::parse_operator( TokenIterator& it, Operator& oper )
         break;
 
     default:
-        PARSER_PANIC( *it, "operator can have either 1 or 2 arguments" );
+        PARSER_PANIC( *it, "operator must have either 1 or 2 arguments" );
     }
 
     if ( oper.args.size() == 1 )
@@ -1329,9 +1329,6 @@ dawn::OperatorType dawn::get_op_type( StringRef const& value )
     else if ( value == op_sub )
         return OperatorType::SUB;
 
-    else if ( value == op_not )
-        return OperatorType::NOT;
-
     else if ( value == op_cmpr )
         return OperatorType::COMPARE;
 
@@ -1353,6 +1350,9 @@ dawn::OperatorType dawn::get_op_type( StringRef const& value )
     else if ( value == op_neq )
         return OperatorType::NOT_EQ;
 
+    else if ( value == op_not )
+        return OperatorType::NOT;
+
     else if ( value == op_and )
         return OperatorType::AND;
 
@@ -1363,7 +1363,7 @@ dawn::OperatorType dawn::get_op_type( StringRef const& value )
         return OperatorType::RANGE;
 
     else
-        PARSER_PANIC( {}, "unknown binary operator" );
+        PARSER_PANIC( {}, "unknown operator [", value, "]" );
 }
 
 void dawn::create_operator_node( Token const& token, Node& node )
