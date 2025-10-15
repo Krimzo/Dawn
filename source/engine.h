@@ -72,62 +72,19 @@ private:
     Value handle_op_node( OperatorNode const& node );
     Value handle_as_node( AssignNode const& node );
 
+    void handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon ); // Should not inline since scope calls instr and instr calls scope.
+
     __forceinline Value handle_oper( Location const& location, Value const& left, const OperatorType op_type, Value const& right )
     {
-        switch ( op_type )
-        {
-        case OperatorType::POW:
-        case OperatorType::MOD:
-        case OperatorType::MUL:
-        case OperatorType::DIV:
-        case OperatorType::ADD:
-        case OperatorType::SUB:
-        case OperatorType::COMPARE:
-        {
-            auto& op_left_ids = operators[(Int) op_type];
-            auto* op_right_ids = op_left_ids.get( left.type_id() );
-            if ( !op_right_ids )
-                ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "]" );
-            auto* func = op_right_ids->get( right.type_id() );
-            if ( !func )
-                ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "] with right type being [", IDSystem::get( right.type_id() ), "]" );
-            Value args[2] = { left, right };
-            return handle_func( location, *func, args, (Int) std::size( args ) );
-        }
-
-        case OperatorType::LESS:
-            return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() < 0, location };
-
-        case OperatorType::GREAT:
-            return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() > 0, location };
-
-        case OperatorType::LESS_EQ:
-            return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() <= 0, location };
-
-        case OperatorType::GREAT_EQ:
-            return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() >= 0, location };
-
-        case OperatorType::EQ:
-            return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() == 0, location };
-
-        case OperatorType::NOT_EQ:
-            return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() != 0, location };
-
-        case OperatorType::NOT:
-            return Value{ !right.as_bool(), location };
-
-        case OperatorType::AND:
-            return Value{ left.as_bool() && right.as_bool(), location };
-
-        case OperatorType::OR:
-            return Value{ left.as_bool() || right.as_bool(), location };
-
-        case OperatorType::RANGE:
-            return Value{ RangeValue{ .start_incl = left.as_int(), .end_excl = right.as_int() }, location };
-
-        default:
-            ENGINE_PANIC( location, "unknown operator type [", op_type, "]" );
-        }
+        auto& op_left_ids = operators[(Int) op_type];
+        auto* op_right_ids = op_left_ids.get( left.type_id() );
+        if ( !op_right_ids )
+            ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "]" );
+        auto* func = op_right_ids->get( right.type_id() );
+        if ( !func )
+            ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "] with right type being [", IDSystem::get( right.type_id() ), "]" );
+        Value args[2] = { left, right };
+        return handle_func( location, *func, args, (Int) std::size( args ) );
     }
 
     __forceinline Value handle_func( Location const& location, FunctionValue const& func, Value const* args, Int arg_count )
@@ -161,24 +118,13 @@ private:
         }
     }
 
-    __forceinline void handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
-    {
-        for ( auto& instr : scope.instr )
-        {
-            if ( retval || ( didbrk && *didbrk ) || ( didcon && *didcon ) )
-                break;
-
-            handle_instr( instr, retval, didbrk, didcon );
-        }
-    }
-
     __forceinline void handle_instr( Node const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
     {
         switch ( node.type() )
         {
         case NodeType::SCOPE:
         {
-            auto pop_handler = stack.push();
+            const auto pop_handler = stack.push();
             handle_scope( std::get<Scope>( node ), retval, didbrk, didcon );
         }
         break;

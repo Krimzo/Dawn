@@ -4,7 +4,6 @@
 
 
 #define ID_HELPER(id) static const ID _##id = IDSystem::get( #id )
-#define OP_HELPER(op) static const ID __##op = IDSystem::get( op_##op )
 
 namespace dawn
 {
@@ -17,14 +16,6 @@ ID_HELPER( string );
 ID_HELPER( function );
 ID_HELPER( array );
 ID_HELPER( range );
-
-OP_HELPER( add );
-OP_HELPER( sub );
-OP_HELPER( mul );
-OP_HELPER( div );
-OP_HELPER( pow );
-OP_HELPER( mod );
-OP_HELPER( cmpr );
 }
 
 dawn::Bool dawn::FunctionValue::is_global() const

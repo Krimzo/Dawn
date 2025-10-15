@@ -363,34 +363,13 @@ void dawn::Parser::parse_operator( TokenIterator& it, Operator& oper )
     }
     ++it;
 
-    switch ( oper.args.size() )
-    {
-    case 1:
-        if ( oper.type != OperatorType::ADD
-            && oper.type != OperatorType::SUB )
-            PARSER_PANIC( *it, "operator [", op_val, "] can not be overloaded as unary" );
-        break;
-
-    case 2:
-        if ( oper.type != OperatorType::ADD
-            && oper.type != OperatorType::SUB
-            && oper.type != OperatorType::MUL
-            && oper.type != OperatorType::DIV
-            && oper.type != OperatorType::POW
-            && oper.type != OperatorType::MOD
-            && oper.type != OperatorType::COMPARE )
-            PARSER_PANIC( *it, "operator [", op_val, "] can not be overloaded" );
-        break;
-
-    default:
-        PARSER_PANIC( *it, "operator must have either 1 or 2 arguments" );
-    }
-
     if ( oper.args.size() == 1 )
     {
         auto& arg = *oper.args.emplace( oper.args.begin() );
         arg.type = VarType{ .type_id = IDSystem::get( tp_void ), .kind = VarKind::CONSTANT };
     }
+    else if ( oper.args.size() != 2 )
+        PARSER_PANIC( *it, "operator must have either 1 or 2 arguments" );
 
     parse_scope( it, oper.body );
 }
@@ -1311,11 +1290,12 @@ dawn::Int dawn::token_depth( Token const& token, Bool& in_lambda )
 
 dawn::OperatorType dawn::get_op_type( StringRef const& value )
 {
-    if ( value == op_pow )
-        return OperatorType::POW;
 
-    else if ( value == op_mod )
-        return OperatorType::MOD;
+    if ( value == op_add )
+        return OperatorType::ADD;
+
+    else if ( value == op_sub )
+        return OperatorType::SUB;
 
     else if ( value == op_mul )
         return OperatorType::MUL;
@@ -1323,14 +1303,17 @@ dawn::OperatorType dawn::get_op_type( StringRef const& value )
     else if ( value == op_div )
         return OperatorType::DIV;
 
-    else if ( value == op_add )
-        return OperatorType::ADD;
+    else if ( value == op_pow )
+        return OperatorType::POW;
 
-    else if ( value == op_sub )
-        return OperatorType::SUB;
+    else if ( value == op_mod )
+        return OperatorType::MOD;
 
-    else if ( value == op_cmpr )
-        return OperatorType::COMPARE;
+    else if ( value == op_eq )
+        return OperatorType::EQ;
+
+    else if ( value == op_neq )
+        return OperatorType::NOT_EQ;
 
     else if ( value == op_less )
         return OperatorType::LESS;
@@ -1343,12 +1326,6 @@ dawn::OperatorType dawn::get_op_type( StringRef const& value )
 
     else if ( value == op_greateq )
         return OperatorType::GREAT_EQ;
-
-    else if ( value == op_eq )
-        return OperatorType::EQ;
-
-    else if ( value == op_neq )
-        return OperatorType::NOT_EQ;
 
     else if ( value == op_not )
         return OperatorType::NOT;

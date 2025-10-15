@@ -194,7 +194,7 @@ dawn::Value dawn::Engine::handle_call_node( CallNode const& node )
     Int arg_count = func.is_method() ? ( 1 + node.args.size() ) : node.args.size();
 
     Value* args_ptr = SALLOC( Value, arg_count );
-    SAllocManager alloc_manager{ args_ptr, arg_count };
+    SAllocManager<Value> alloc_manager{ args_ptr, arg_count };
 
     if ( func.is_method() )
     {
@@ -574,5 +574,16 @@ dawn::Value dawn::Engine::handle_as_node( AssignNode const& node )
 
     default:
         ENGINE_PANIC( node.location, "unknown assign node type: ", (Int) node.type );
+    }
+}
+
+void dawn::Engine::handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
+{
+    for ( auto& instr : scope.instr )
+    {
+        if ( retval || ( didbrk && *didbrk ) || ( didcon && *didcon ) )
+            break;
+
+        handle_instr( instr, retval, didbrk, didcon );
     }
 }

@@ -59,7 +59,6 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) op_not,
         (String) op_and,
         (String) op_or,
-        (String) op_cmpr,
         (String) op_eq,
         (String) op_neq,
         (String) op_less,
