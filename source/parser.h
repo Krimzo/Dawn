@@ -90,8 +90,84 @@ private:
 
 Bool is_unary( Token const& token );
 Int token_depth( Token const& token, Bool& in_lambda );
-OperatorType get_op_type( StringRef const& value );
 
 void create_operator_node( Token const& token, Node& node );
 void create_assign_node( Token const& token, Node& node );
+
+__forceinline Bool is_op( StringRef const& value )
+{
+    static const StringSet OPS = {
+        (String) op_add,
+        (String) op_sub,
+        (String) op_mul,
+        (String) op_div,
+        (String) op_pow,
+        (String) op_mod,
+        (String) op_eq,
+        (String) op_neq,
+        (String) op_less,
+        (String) op_great,
+        (String) op_lesseq,
+        (String) op_greateq,
+        (String) op_not,
+        (String) op_and,
+        (String) op_or,
+        (String) op_range,
+    };
+    return OPS.contains( value );
+}
+
+__forceinline OperatorType get_op( StringRef const& value )
+{
+    if ( value == op_add )
+        return OperatorType::ADD;
+
+    else if ( value == op_sub )
+        return OperatorType::SUB;
+
+    else if ( value == op_mul )
+        return OperatorType::MUL;
+
+    else if ( value == op_div )
+        return OperatorType::DIV;
+
+    else if ( value == op_pow )
+        return OperatorType::POW;
+
+    else if ( value == op_mod )
+        return OperatorType::MOD;
+
+    else if ( value == op_eq )
+        return OperatorType::EQ;
+
+    else if ( value == op_neq )
+        return OperatorType::NOT_EQ;
+
+    else if ( value == op_less )
+        return OperatorType::LESS;
+
+    else if ( value == op_great )
+        return OperatorType::GREAT;
+
+    else if ( value == op_lesseq )
+        return OperatorType::LESS_EQ;
+
+    else if ( value == op_greateq )
+        return OperatorType::GREAT_EQ;
+
+    else if ( value == op_not )
+        return OperatorType::NOT;
+
+    else if ( value == op_and )
+        return OperatorType::AND;
+
+    else if ( value == op_or )
+        return OperatorType::OR;
+
+    else if ( value == op_range )
+        return OperatorType::RANGE;
+
+    else
+        PARSER_PANIC( {}, "unknown operator [", value, "]" );
+}
 }

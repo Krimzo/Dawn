@@ -316,7 +316,7 @@ void dawn::Parser::parse_operator( TokenIterator& it, Operator& oper )
     if ( it->type != TokenType::OPERATOR )
         PARSER_PANIC( *it, "expected operator" );
     const String op_val = it->value;
-    oper.type = get_op_type( op_val );
+    oper.type = get_op( op_val );
     ++it;
 
     if ( it->value != op_expr_opn )
@@ -878,23 +878,19 @@ void dawn::Parser::expression_complex_default( Vector<Token>& left, Token op, Ve
         *ac_node.left_expr = left_expr;
         ac_node.right_id = IDSystem::get( right.front().value );
     }
+    else if ( is_op( op.value ) )
+    {
+        create_operator_node( op, tree );
+        auto& op_node = std::get<OperatorNode>( tree );
+        op_node.sides.emplace_back( left_expr );
+        op_node.sides.emplace_back( right_expr );
+    }
     else
     {
-        try
-        {
-            create_operator_node( op, tree );
-            auto& op_node = std::get<OperatorNode>( tree );
-            op_node.sides.emplace_back( left_expr );
-            op_node.sides.emplace_back( right_expr );
-        }
-        catch ( ... )
-        {
-            tree = {};
-            create_assign_node( op, tree );
-            auto& as_node = std::get<AssignNode>( tree );
-            as_node.sides.emplace_back( left_expr );
-            as_node.sides.emplace_back( right_expr );
-        }
+        create_assign_node( op, tree );
+        auto& as_node = std::get<AssignNode>( tree );
+        as_node.sides.emplace_back( left_expr );
+        as_node.sides.emplace_back( right_expr );
     }
 }
 
@@ -1293,64 +1289,10 @@ dawn::Int dawn::token_depth( Token const& token, Bool& in_lambda )
     return 0;
 }
 
-dawn::OperatorType dawn::get_op_type( StringRef const& value )
-{
-    if ( value == op_add )
-        return OperatorType::ADD;
-
-    else if ( value == op_sub )
-        return OperatorType::SUB;
-
-    else if ( value == op_mul )
-        return OperatorType::MUL;
-
-    else if ( value == op_div )
-        return OperatorType::DIV;
-
-    else if ( value == op_pow )
-        return OperatorType::POW;
-
-    else if ( value == op_mod )
-        return OperatorType::MOD;
-
-    else if ( value == op_eq )
-        return OperatorType::EQ;
-
-    else if ( value == op_neq )
-        return OperatorType::NOT_EQ;
-
-    else if ( value == op_less )
-        return OperatorType::LESS;
-
-    else if ( value == op_great )
-        return OperatorType::GREAT;
-
-    else if ( value == op_lesseq )
-        return OperatorType::LESS_EQ;
-
-    else if ( value == op_greateq )
-        return OperatorType::GREAT_EQ;
-
-    else if ( value == op_not )
-        return OperatorType::NOT;
-
-    else if ( value == op_and )
-        return OperatorType::AND;
-
-    else if ( value == op_or )
-        return OperatorType::OR;
-
-    else if ( value == op_range )
-        return OperatorType::RANGE;
-
-    else
-        PARSER_PANIC( {}, "unknown operator [", value, "]" );
-}
-
 void dawn::create_operator_node( Token const& token, Node& node )
 {
     auto& op_node = node.emplace<OperatorNode>( token.location );
-    op_node.type = get_op_type( token.value );
+    op_node.type = get_op( token.value );
 }
 
 void dawn::create_assign_node( Token const& token, Node& node )
