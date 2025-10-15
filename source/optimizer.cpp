@@ -323,16 +323,16 @@ void dawn::Optimizer::optimize_expr_for( ForNode& node, Node& out_node )
         auto const& expr_value = std::get<Value>( expr_node );
         switch ( expr_value.type() )
         {
-        case ValueType::RANGE:
-            if ( expr_value.as_range().empty() )
+        case ValueType::STRING:
+            if ( expr_value.as_string().empty() )
             {
                 out_node.emplace<Scope>();
                 return;
             }
             break;
 
-        case ValueType::STRING:
-            if ( expr_value.as_string().empty() )
+        case ValueType::RANGE:
+            if ( expr_value.as_range().empty() )
             {
                 out_node.emplace<Scope>();
                 return;

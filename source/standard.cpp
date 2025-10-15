@@ -16,9 +16,9 @@ void dawn::Engine::load_standard_operators()
     static const ID id_float = IDSystem::get( tp_float );
     static const ID id_char = IDSystem::get( tp_char );
     static const ID id_string = IDSystem::get( tp_string );
+    static const ID id_range = IDSystem::get( tp_range );
     static const ID id_func = IDSystem::get( tp_function );
     static const ID id_array = IDSystem::get( tp_array );
-    static const ID id_range = IDSystem::get( tp_range );
 
     // op add
     bind_oper( id_void, OperatorType::ADD, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
@@ -209,67 +209,230 @@ void dawn::Engine::load_standard_operators()
             return Value{ dawn_mod( left.as_float(), right.as_float() ), location };
         } );
 
-    // op compare
-    bind_oper( id_void, OperatorType::COMPARE, id_void, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    // op equals
+    bind_oper( id_void, OperatorType::EQ, id_void, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             auto& left = args[0]; auto& right = args[1];
-            return Value{ Int{ 0 }, location };
+            return Value{ Bool{ true }, location };
         } );
 
-    bind_oper( id_bool, OperatorType::COMPARE, id_bool, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_oper( id_bool, OperatorType::EQ, id_bool, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             auto& left = args[0]; auto& right = args[1];
-            return Value{ (Int) ( left.as_bool() <=> right.as_bool() )._Value, location };
+            return Value{ left.as_bool() == right.as_bool(), location };
         } );
 
-    bind_oper( id_int, OperatorType::COMPARE, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_oper( id_int, OperatorType::EQ, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             auto& left = args[0]; auto& right = args[1];
-            return Value{ (Int) ( left.as_int() <=> right.as_int() )._Value, location };
+            return Value{ left.as_int() == right.as_int(), location };
         } );
 
-    bind_oper( id_int, OperatorType::COMPARE, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_oper( id_int, OperatorType::EQ, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             auto& left = args[0]; auto& right = args[1];
-            return Value{ (Int) ( left.as_int() <=> right.as_float() )._Value, location };
+            return Value{ left.as_int() == right.as_float(), location };
         } );
 
-    bind_oper( id_float, OperatorType::COMPARE, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_oper( id_float, OperatorType::EQ, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             auto& left = args[0]; auto& right = args[1];
-            return Value{ (Int) ( left.as_float() <=> right.as_float() )._Value, location };
+            return Value{ left.as_float() == right.as_float(), location };
         } );
 
-    bind_oper( id_float, OperatorType::COMPARE, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_oper( id_float, OperatorType::EQ, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             auto& left = args[0]; auto& right = args[1];
-            return Value{ (Int) ( left.as_float() <=> right.as_int() )._Value, location };
+            return Value{ left.as_float() == right.as_int(), location };
         } );
 
-    bind_oper( id_char, OperatorType::COMPARE, id_char, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_oper( id_char, OperatorType::EQ, id_char, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             auto& left = args[0]; auto& right = args[1];
-            return Value{ (Int) ( left.as_char() <=> right.as_char() )._Value, location };
+            return Value{ left.as_char() == right.as_char(), location };
         } );
 
-    bind_oper( id_string, OperatorType::COMPARE, id_string, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_oper( id_string, OperatorType::EQ, id_string, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             auto& left = args[0]; auto& right = args[1];
-            return Value{ (Int) ( left.as_string() <=> right.as_string() )._Value, location };
+            return Value{ left.as_string() == right.as_string(), location };
         } );
 
-    bind_oper( id_array, OperatorType::COMPARE, id_array, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    // op not equals
+    bind_oper( id_void, OperatorType::NOT_EQ, id_void, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             auto& left = args[0]; auto& right = args[1];
-            auto const& left_data = left.as_array().data;
-            auto const& right_data = right.as_array().data;
-            for ( Int i = 0; i < (Int) std::min( left_data.size(), right_data.size() ); i++ )
-            {
-                const Int cmpr_res = engine.handle_oper( location, left_data[i], OperatorType::EQ, right_data[i] ).as_int();
-                if ( cmpr_res != 0 )
-                    return Value{ cmpr_res, location };
-            }
-            return Value{ (Int) ( left_data.size() <=> right_data.size() )._Value, location };
+            return Value{ Int{ false }, location };
+        } );
+
+    bind_oper( id_bool, OperatorType::NOT_EQ, id_bool, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_bool() != right.as_bool(), location };
+        } );
+
+    bind_oper( id_int, OperatorType::NOT_EQ, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_int() != right.as_int(), location };
+        } );
+
+    bind_oper( id_int, OperatorType::NOT_EQ, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_int() != right.as_float(), location };
+        } );
+
+    bind_oper( id_float, OperatorType::NOT_EQ, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_float() != right.as_float(), location };
+        } );
+
+    bind_oper( id_float, OperatorType::NOT_EQ, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_float() != right.as_int(), location };
+        } );
+
+    bind_oper( id_char, OperatorType::NOT_EQ, id_char, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_char() != right.as_char(), location };
+        } );
+
+    bind_oper( id_string, OperatorType::NOT_EQ, id_string, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_string() != right.as_string(), location };
+        } );
+
+    // op less
+    bind_oper( id_int, OperatorType::LESS, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_int() < right.as_int(), location };
+        } );
+
+    bind_oper( id_int, OperatorType::LESS, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_int() < right.as_float(), location };
+        } );
+
+    bind_oper( id_float, OperatorType::LESS, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_float() < right.as_float(), location };
+        } );
+
+    bind_oper( id_float, OperatorType::LESS, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_float() < right.as_int(), location };
+        } );
+
+    // op great
+    bind_oper( id_int, OperatorType::GREAT, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_int() > right.as_int(), location };
+        } );
+
+    bind_oper( id_int, OperatorType::GREAT, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_int() > right.as_float(), location };
+        } );
+
+    bind_oper( id_float, OperatorType::GREAT, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_float() > right.as_float(), location };
+        } );
+
+    bind_oper( id_float, OperatorType::GREAT, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_float() > right.as_int(), location };
+        } );
+
+    // op less equals
+    bind_oper( id_int, OperatorType::LESS_EQ, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_int() <= right.as_int(), location };
+        } );
+
+    bind_oper( id_int, OperatorType::LESS_EQ, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_int() <= right.as_float(), location };
+        } );
+
+    bind_oper( id_float, OperatorType::LESS_EQ, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_float() <= right.as_float(), location };
+        } );
+
+    bind_oper( id_float, OperatorType::LESS_EQ, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_float() <= right.as_int(), location };
+        } );
+
+    // op great equals
+    bind_oper( id_int, OperatorType::GREAT_EQ, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_int() >= right.as_int(), location };
+        } );
+
+    bind_oper( id_int, OperatorType::GREAT_EQ, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_int() >= right.as_float(), location };
+        } );
+
+    bind_oper( id_float, OperatorType::GREAT_EQ, id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_float() >= right.as_float(), location };
+        } );
+
+    bind_oper( id_float, OperatorType::GREAT_EQ, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_float() >= right.as_int(), location };
+        } );
+
+    // op not
+    bind_oper( id_void, OperatorType::NOT, id_bool, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ !right.as_bool(), location };
+        } );
+
+    // op and
+    bind_oper( id_bool, OperatorType::AND, id_bool, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_bool() && right.as_bool(), location };
+        } );
+
+    // op or
+    bind_oper( id_bool, OperatorType::OR, id_bool, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ left.as_bool() || right.as_bool(), location };
+        } );
+
+    // op range
+    bind_oper( id_int, OperatorType::RANGE, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ RangeValue{ .start_incl = left.as_int(), .end_excl = right.as_int() }, location };
         } );
 }
 
@@ -353,6 +516,16 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, tp_string, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
+    bind_func( IDSystem::get( tp_range ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            if ( arg_count == 1 )
+                return Value{ args[0].to_range( engine ), location };
+            else if ( arg_count == 0 )
+                return Value{ RangeValue{}, location };
+            else
+                ENGINE_PANIC( location, tp_range, "() expects 1 or 0 arguments, but got ", arg_count );
+        } );
+
     bind_func( IDSystem::get( tp_function ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
@@ -371,16 +544,6 @@ void dawn::Engine::load_standard_functions()
                 return Value{ ArrayValue{}, location };
             else
                 ENGINE_PANIC( location, tp_array, "() expects 1 or 0 arguments, but got ", arg_count );
-        } );
-
-    bind_func( IDSystem::get( tp_range ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
-        {
-            if ( arg_count == 1 )
-                return Value{ args[0].to_range( engine ), location };
-            else if ( arg_count == 0 )
-                return Value{ RangeValue{}, location };
-            else
-                ENGINE_PANIC( location, tp_range, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
     /* SYSTEM */
@@ -537,6 +700,17 @@ void dawn::Engine::load_standard_members()
             return self;
         } );
 
+    // Ranges.
+    bind_member( ValueType::RANGE, "start", []( Location const& location, Engine& engine, Value const& self ) -> Value
+        {
+            return Value{ self.as_range().start_incl, location };
+        } );
+
+    bind_member( ValueType::RANGE, "end", []( Location const& location, Engine& engine, Value const& self ) -> Value
+        {
+            return Value{ self.as_range().end_excl, location };
+        } );
+
     // Enums.
     bind_member( ValueType::ENUM, "id", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
@@ -582,16 +756,5 @@ void dawn::Engine::load_standard_members()
                     return Value{ i, location };
             }
             return Value{ Int( -1 ), location };
-        } );
-
-    // Ranges.
-    bind_member( ValueType::RANGE, "start", []( Location const& location, Engine& engine, Value const& self ) -> Value
-        {
-            return Value{ self.as_range().start_incl, location };
-        } );
-
-    bind_member( ValueType::RANGE, "end", []( Location const& location, Engine& engine, Value const& self ) -> Value
-        {
-            return Value{ self.as_range().end_excl, location };
         } );
 }

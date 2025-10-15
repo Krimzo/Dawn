@@ -15,6 +15,7 @@ struct Engine
     friend struct Value;
     friend struct EnumValue;
     friend struct Optimizer;
+    friend Value create_default_value( Engine* engine, ID typeid_, Location const& location );
 
     Stack stack;
     GlobalStorage<Enum> enums;
@@ -72,62 +73,19 @@ private:
     Value handle_op_node( OperatorNode const& node );
     Value handle_as_node( AssignNode const& node );
 
+    void handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon ); // Should not inline since scope calls instr and instr calls scope.
+
     __forceinline Value handle_oper( Location const& location, Value const& left, const OperatorType op_type, Value const& right )
     {
-        switch ( op_type )
-        {
-        case OperatorType::POW:
-        case OperatorType::MOD:
-        case OperatorType::MUL:
-        case OperatorType::DIV:
-        case OperatorType::ADD:
-        case OperatorType::SUB:
-        case OperatorType::COMPARE:
-        {
-            auto& op_left_ids = operators[(Int) op_type];
-            auto* op_right_ids = op_left_ids.get( left.type_id() );
-            if ( !op_right_ids )
-                ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "]" );
-            auto* func = op_right_ids->get( right.type_id() );
-            if ( !func )
-                ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "] with right type being [", IDSystem::get( right.type_id() ), "]" );
-            Value args[2] = { left, right };
-            return handle_func( location, *func, args, (Int) std::size( args ) );
-        }
-
-        case OperatorType::LESS:
-            return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() < 0, location };
-
-        case OperatorType::GREAT:
-            return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() > 0, location };
-
-        case OperatorType::LESS_EQ:
-            return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() <= 0, location };
-
-        case OperatorType::GREAT_EQ:
-            return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() >= 0, location };
-
-        case OperatorType::EQ:
-            return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() == 0, location };
-
-        case OperatorType::NOT_EQ:
-            return Value{ handle_oper( location, left, OperatorType::COMPARE, right ).as_int() != 0, location };
-
-        case OperatorType::NOT:
-            return Value{ !right.as_bool(), location };
-
-        case OperatorType::AND:
-            return Value{ left.as_bool() && right.as_bool(), location };
-
-        case OperatorType::OR:
-            return Value{ left.as_bool() || right.as_bool(), location };
-
-        case OperatorType::RANGE:
-            return Value{ RangeValue{ .start_incl = left.as_int(), .end_excl = right.as_int() }, location };
-
-        default:
-            ENGINE_PANIC( location, "unknown operator type [", op_type, "]" );
-        }
+        auto& op_left_ids = operators[(Int) op_type];
+        auto* op_right_ids = op_left_ids.get( left.type_id() );
+        if ( !op_right_ids )
+            ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "]" );
+        auto* func = op_right_ids->get( right.type_id() );
+        if ( !func )
+            ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "] with right type being [", IDSystem::get( right.type_id() ), "]" );
+        Value args[2] = { left, right };
+        return handle_func( location, *func, args, (Int) std::size( args ) );
     }
 
     __forceinline Value handle_func( Location const& location, FunctionValue const& func, Value const* args, Int arg_count )
@@ -161,24 +119,13 @@ private:
         }
     }
 
-    __forceinline void handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
-    {
-        for ( auto& instr : scope.instr )
-        {
-            if ( retval || ( didbrk && *didbrk ) || ( didcon && *didcon ) )
-                break;
-
-            handle_instr( instr, retval, didbrk, didcon );
-        }
-    }
-
     __forceinline void handle_instr( Node const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
     {
         switch ( node.type() )
         {
         case NodeType::SCOPE:
         {
-            auto pop_handler = stack.push();
+            const auto pop_handler = stack.push();
             handle_scope( std::get<Scope>( node ), retval, didbrk, didcon );
         }
         break;
@@ -273,64 +220,64 @@ private:
             ENGINE_PANIC( node.location(), "unknown expr node type: ", (Int) node.type() );
         }
     }
-
-    __forceinline Value create_default_value( Location const& location, ID typeid_ )
-    {
-        static const ID _id_void = IDSystem::get( tp_void );
-        static const ID _id_bool = IDSystem::get( tp_bool );
-        static const ID _id_int = IDSystem::get( tp_int );
-        static const ID _id_float = IDSystem::get( tp_float );
-        static const ID _id_char = IDSystem::get( tp_char );
-        static const ID _id_string = IDSystem::get( tp_string );
-        static const ID _id_function = IDSystem::get( tp_function );
-        static const ID _id_array = IDSystem::get( tp_array );
-        static const ID _id_range = IDSystem::get( tp_range );
-
-        if ( typeid_ == _id_void )
-            return Value{};
-
-        else if ( typeid_ == _id_bool )
-            return Value{ Bool{}, location };
-
-        else if ( typeid_ == _id_int )
-            return Value{ Int{}, location };
-
-        else if ( typeid_ == _id_float )
-            return Value{ Float{}, location };
-
-        else if ( typeid_ == _id_char )
-            return Value{ Char{}, location };
-
-        else if ( typeid_ == _id_string )
-            return Value{ StringRef{}, location };
-
-        else if ( typeid_ == _id_function )
-            return Value{ FunctionValue{}, location };
-
-        else if ( auto* enum_ptr = enums.get( typeid_ ) )
-        {
-            auto& entry = *enum_ptr->entries.begin();
-            EnumNode node{ location };
-            node.type_id = typeid_;
-            node.key_id = entry.id;
-            return handle_enum_node( node );
-        }
-
-        else if ( auto* struct_ptr = structs.get( typeid_ ) )
-        {
-            StructNode node{ location };
-            node.type_id = typeid_;
-            return handle_struct_node( node );
-        }
-
-        else if ( typeid_ == _id_array )
-            return Value{ ArrayValue{}, location };
-
-        else if ( typeid_ == _id_range )
-            return Value{ RangeValue{}, location };
-
-        else
-            ENGINE_PANIC( location, "type [", IDSystem::get( typeid_ ), "] does not exist" );
-    }
 };
+
+__forceinline Value create_default_value( Engine* engine, ID typeid_, Location const& location )
+{
+    static const ID _id_void = IDSystem::get( tp_void );
+    static const ID _id_bool = IDSystem::get( tp_bool );
+    static const ID _id_int = IDSystem::get( tp_int );
+    static const ID _id_float = IDSystem::get( tp_float );
+    static const ID _id_char = IDSystem::get( tp_char );
+    static const ID _id_string = IDSystem::get( tp_string );
+    static const ID _id_range = IDSystem::get( tp_range );
+    static const ID _id_function = IDSystem::get( tp_function );
+    static const ID _id_array = IDSystem::get( tp_array );
+
+    if ( typeid_ == _id_void )
+        return Value{};
+
+    else if ( typeid_ == _id_bool )
+        return Value{ Bool{}, location };
+
+    else if ( typeid_ == _id_int )
+        return Value{ Int{}, location };
+
+    else if ( typeid_ == _id_float )
+        return Value{ Float{}, location };
+
+    else if ( typeid_ == _id_char )
+        return Value{ Char{}, location };
+
+    else if ( typeid_ == _id_string )
+        return Value{ StringRef{}, location };
+
+    else if ( typeid_ == _id_range )
+        return Value{ RangeValue{}, location };
+
+    else if ( typeid_ == _id_function )
+        return Value{ FunctionValue{}, location };
+
+    else if ( typeid_ == _id_array )
+        return Value{ ArrayValue{}, location };
+
+    else if ( auto* enum_ptr = engine->enums.get( typeid_ ) )
+    {
+        auto& entry = *enum_ptr->entries.begin();
+        EnumNode node{ location };
+        node.type_id = typeid_;
+        node.key_id = entry.id;
+        return engine->handle_enum_node( node );
+    }
+
+    else if ( auto* struct_ptr = engine->structs.get( typeid_ ) )
+    {
+        StructNode node{ location };
+        node.type_id = typeid_;
+        return engine->handle_struct_node( node );
+    }
+
+    else
+        ENGINE_PANIC( location, "type [", IDSystem::get( typeid_ ), "] does not exist" );
+}
 }

@@ -194,7 +194,7 @@ dawn::Value dawn::Engine::handle_call_node( CallNode const& node )
     Int arg_count = func.is_method() ? ( 1 + node.args.size() ) : node.args.size();
 
     Value* args_ptr = SALLOC( Value, arg_count );
-    SAllocManager alloc_manager{ args_ptr, arg_count };
+    SAllocManager<Value> alloc_manager{ args_ptr, arg_count };
 
     if ( func.is_method() )
     {
@@ -344,24 +344,8 @@ void dawn::Engine::handle_while_node( WhileNode const& node, Opt<Value>& retval 
 void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
 {
     Value loop_value = handle_expr( *node.expr );
-
-    if ( loop_value.type() == ValueType::RANGE )
-    {
-        auto& value_rng = loop_value.as_range();
-
-        Bool didbrk = false, didcon = false;
-        for ( Int i = value_rng.start_incl; i < value_rng.end_excl; ++i )
-        {
-            if ( retval || didbrk )
-                break;
-            didcon = false;
-
-            auto pop_handler = stack.push();
-            stack.current().set( node.var_id, Value{ i, node.location } );
-            handle_scope( node.scope, retval, &didbrk, &didcon );
-        }
-    }
-    else if ( loop_value.type() == ValueType::STRING )
+    const auto value_type = loop_value.type();
+    if ( value_type == ValueType::STRING )
     {
         auto& value_str = loop_value.as_string();
 
@@ -377,7 +361,23 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
-    else if ( loop_value.type() == ValueType::ARRAY )
+    else if ( value_type == ValueType::RANGE )
+    {
+        auto& value_rng = loop_value.as_range();
+
+        Bool didbrk = false, didcon = false;
+        for ( Int i = value_rng.start_incl; i < value_rng.end_excl; ++i )
+        {
+            if ( retval || didbrk )
+                break;
+            didcon = false;
+
+            auto pop_handler = stack.push();
+            stack.current().set( node.var_id, Value{ i, node.location } );
+            handle_scope( node.scope, retval, &didbrk, &didcon );
+        }
+    }
+    else if ( value_type == ValueType::ARRAY )
     {
         auto& value_arr = loop_value.as_array();
 
@@ -394,7 +394,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
         }
     }
     else
-        ENGINE_PANIC( node.location, "can not for loop [", loop_value.type(), "]" );
+        ENGINE_PANIC( node.location, "can not for loop [", value_type, "]" );
 }
 
 dawn::Value dawn::Engine::handle_lambda_node( LambdaNode const& node )
@@ -438,7 +438,7 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
 
     // Structure default initialization.
     for ( auto& field : struc.fields )
-        struc_value.members[field.id] = { .value = create_default_value( node.location, field.type_id ), .type = MemberType::FIELD };
+        struc_value.members[field.id] = { .value = create_default_value( this, field.type_id, node.location ), .type = MemberType::FIELD };
 
     // Structure argument initialization.
     if ( std::holds_alternative<StructNode::NamedInit>( node.init ) )
@@ -507,7 +507,7 @@ dawn::Value dawn::Engine::handle_array_node( ArrayNode const& node )
             ENGINE_PANIC( node.location, "array size can not be negative" );
         result.data.reserve( size );
         for ( Int i = 0; i < size; i++ )
-            result.data.push_back( create_default_value( node.location, init_data.type_id ) );
+            result.data.push_back( create_default_value( this, init_data.type_id, node.location ) );
     }
     return Value{ result, node.location };
 }
@@ -574,5 +574,16 @@ dawn::Value dawn::Engine::handle_as_node( AssignNode const& node )
 
     default:
         ENGINE_PANIC( node.location, "unknown assign node type: ", (Int) node.type );
+    }
+}
+
+void dawn::Engine::handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
+{
+    for ( auto& instr : scope.instr )
+    {
+        if ( retval || ( didbrk && *didbrk ) || ( didcon && *didcon ) )
+            break;
+
+        handle_instr( instr, retval, didbrk, didcon );
     }
 }

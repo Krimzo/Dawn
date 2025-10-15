@@ -10,8 +10,8 @@ namespace dawn
 template<typename T>
 struct SAllocManager
 {
-    T* ptr;
-    Int count;
+    T* const ptr;
+    Int const count;
 
     SAllocManager( T* ptr, Int count )
         : ptr( ptr ), count( count )

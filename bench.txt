@@ -40,7 +40,9 @@
 39.  239412us
 40.  342801us :)
 41.  256740us __forceinline engine
+42.  236666us remove __forceinline from handle_scope and remove compare op
 
 // linear fib(30)
 01.    9871us
 02.    9510us
+03.    8621us

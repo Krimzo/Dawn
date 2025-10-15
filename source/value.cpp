@@ -4,7 +4,6 @@
 
 
 #define ID_HELPER(id) static const ID _##id = IDSystem::get( #id )
-#define OP_HELPER(op) static const ID __##op = IDSystem::get( op_##op )
 
 namespace dawn
 {
@@ -17,14 +16,6 @@ ID_HELPER( string );
 ID_HELPER( function );
 ID_HELPER( array );
 ID_HELPER( range );
-
-OP_HELPER( add );
-OP_HELPER( sub );
-OP_HELPER( mul );
-OP_HELPER( div );
-OP_HELPER( pow );
-OP_HELPER( mod );
-OP_HELPER( cmpr );
 }
 
 dawn::Bool dawn::FunctionValue::is_global() const
@@ -247,12 +238,32 @@ dawn::Value::Value( StringRef const& value, Location const& location )
     storage.value = value;
 }
 
+dawn::Value::Value( RangeValue const& value, Location const& location )
+    : m_regref( range_pool().new_register().as<ValueInfo>() )
+{
+    auto& storage = *m_regref.as<ValueStorage<RangeValue>>();
+    storage.info.location = location;
+    storage.info.type = ValueType::RANGE;
+    storage.info.is_const = true;
+    storage.value = value;
+}
+
 dawn::Value::Value( FunctionValue const& value, Location const& location )
     : m_regref( function_pool().new_register().as<ValueInfo>() )
 {
     auto& storage = *m_regref.as<ValueStorage<FunctionValue>>();
     storage.info.location = location;
     storage.info.type = ValueType::FUNCTION;
+    storage.info.is_const = true;
+    storage.value = value;
+}
+
+dawn::Value::Value( ArrayValue const& value, Location const& location )
+    : m_regref( array_pool().new_register().as<ValueInfo>() )
+{
+    auto& storage = *m_regref.as<ValueStorage<ArrayValue>>();
+    storage.info.location = location;
+    storage.info.type = ValueType::ARRAY;
     storage.info.is_const = true;
     storage.value = value;
 }
@@ -273,26 +284,6 @@ dawn::Value::Value( StructValue const& value, Location const& location )
     auto& storage = *m_regref.as<ValueStorage<StructValue>>();
     storage.info.location = location;
     storage.info.type = ValueType::STRUCT;
-    storage.info.is_const = true;
-    storage.value = value;
-}
-
-dawn::Value::Value( ArrayValue const& value, Location const& location )
-    : m_regref( array_pool().new_register().as<ValueInfo>() )
-{
-    auto& storage = *m_regref.as<ValueStorage<ArrayValue>>();
-    storage.info.location = location;
-    storage.info.type = ValueType::ARRAY;
-    storage.info.is_const = true;
-    storage.value = value;
-}
-
-dawn::Value::Value( RangeValue const& value, Location const& location )
-    : m_regref( range_pool().new_register().as<ValueInfo>() )
-{
-    auto& storage = *m_regref.as<ValueStorage<RangeValue>>();
-    storage.info.location = location;
-    storage.info.type = ValueType::RANGE;
     storage.info.is_const = true;
     storage.value = value;
 }
@@ -332,11 +323,25 @@ dawn::String& dawn::Value::as_string() const
     return m_regref.as<ValueStorage<String>>()->value;
 }
 
+dawn::RangeValue& dawn::Value::as_range() const
+{
+    if ( type() != ValueType::RANGE )
+        ENGINE_PANIC( location(), "expected [", ValueType::RANGE, "] but got [", type(), "]" );
+    return m_regref.as<ValueStorage<RangeValue>>()->value;
+}
+
 dawn::FunctionValue& dawn::Value::as_function() const
 {
     if ( type() != ValueType::FUNCTION )
         ENGINE_PANIC( location(), "expected [", ValueType::FUNCTION, "] but got [", type(), "]" );
     return m_regref.as<ValueStorage<FunctionValue>>()->value;
+}
+
+dawn::ArrayValue& dawn::Value::as_array() const
+{
+    if ( type() != ValueType::ARRAY )
+        ENGINE_PANIC( location(), "expected [", ValueType::ARRAY, "] but got [", type(), "]" );
+    return m_regref.as<ValueStorage<ArrayValue>>()->value;
 }
 
 dawn::EnumValue& dawn::Value::as_enum() const
@@ -351,20 +356,6 @@ dawn::StructValue& dawn::Value::as_struct() const
     if ( type() != ValueType::STRUCT )
         ENGINE_PANIC( location(), "expected [", ValueType::STRUCT, "] but got [", type(), "]" );
     return m_regref.as<ValueStorage<StructValue>>()->value;
-}
-
-dawn::ArrayValue& dawn::Value::as_array() const
-{
-    if ( type() != ValueType::ARRAY )
-        ENGINE_PANIC( location(), "expected [", ValueType::ARRAY, "] but got [", type(), "]" );
-    return m_regref.as<ValueStorage<ArrayValue>>()->value;
-}
-
-dawn::RangeValue& dawn::Value::as_range() const
-{
-    if ( type() != ValueType::RANGE )
-        ENGINE_PANIC( location(), "expected [", ValueType::RANGE, "] but got [", type(), "]" );
-    return m_regref.as<ValueStorage<RangeValue>>()->value;
 }
 
 dawn::Location const& dawn::Value::location() const
@@ -399,20 +390,20 @@ dawn::ID dawn::Value::type_id() const
     case ValueType::STRING:
         return _string;
 
+    case ValueType::RANGE:
+        return _range;
+
     case ValueType::FUNCTION:
         return _function;
+
+    case ValueType::ARRAY:
+        return _array;
 
     case ValueType::ENUM:
         return as_enum().parent_id;
 
     case ValueType::STRUCT:
         return as_struct().parent_id;
-
-    case ValueType::ARRAY:
-        return _array;
-
-    case ValueType::RANGE:
-        return _range;
 
     default:
         return ID{};
@@ -449,8 +440,16 @@ void dawn::Value::assign( Value const& other )
         as_string() = other.as_string();
         break;
 
+    case ValueType::RANGE:
+        as_range() = other.as_range();
+        break;
+
     case ValueType::FUNCTION:
         as_function() = other.as_function();
+        break;
+
+    case ValueType::ARRAY:
+        as_array() = other.as_array();
         break;
 
     case ValueType::ENUM:
@@ -459,14 +458,6 @@ void dawn::Value::assign( Value const& other )
 
     case ValueType::STRUCT:
         as_struct() = other.as_struct();
-        break;
-
-    case ValueType::ARRAY:
-        as_array() = other.as_array();
-        break;
-
-    case ValueType::RANGE:
-        as_range() = other.as_range();
         break;
 
     default:
@@ -498,8 +489,14 @@ dawn::Value dawn::Value::clone() const
     case ValueType::STRING:
         return Value{ as_string(), location() };
 
+    case ValueType::RANGE:
+        return Value{ as_range(), location() };
+
     case ValueType::FUNCTION:
         return Value{ as_function(), location() };
+
+    case ValueType::ARRAY:
+        return Value{ as_array(), location() };
 
     case ValueType::ENUM:
         return Value{ as_enum(), location() };
@@ -514,12 +511,6 @@ dawn::Value dawn::Value::clone() const
         }
         return result;
     }
-
-    case ValueType::ARRAY:
-        return Value{ as_array(), location() };
-
-    case ValueType::RANGE:
-        return Value{ as_range(), location() };
 
     default:
         ENGINE_PANIC( LOCATION_NONE, "can not clone type [", (Int) type(), "]" );
@@ -537,6 +528,14 @@ dawn::Value& dawn::Value::unlock_const()
         m_regref->is_const = false;
     switch ( type() )
     {
+    case ValueType::ARRAY:
+    {
+        auto& value = as_array();
+        for ( auto& entry : value.data )
+            entry.unlock_const();
+    }
+    break;
+
     case ValueType::STRUCT:
     {
         auto& value = as_struct();
@@ -545,14 +544,6 @@ dawn::Value& dawn::Value::unlock_const()
             if ( member.type == MemberType::FIELD )
                 member.value.unlock_const();
         }
-    }
-    break;
-
-    case ValueType::ARRAY:
-    {
-        auto& value = as_array();
-        for ( auto& entry : value.data )
-            entry.unlock_const();
     }
     break;
     }
@@ -746,6 +737,12 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
     case ValueType::STRING:
         return as_string();
 
+    case ValueType::RANGE:
+    {
+        auto& value = as_range();
+        return format( op_array_opn, value.start_incl, op_split, ' ', value.end_excl, op_expr_cls );
+    }
+
     case ValueType::FUNCTION:
     {
         StringStream stream;
@@ -781,6 +778,20 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
         return stream.str();
     }
 
+    case ValueType::ARRAY:
+    {
+        auto& value = as_array();
+        if ( value.data.empty() )
+            return format( op_array_opn, op_array_cls );
+
+        StringStream stream;
+        stream << op_array_opn;
+        for ( Int i = 0; i < (Int) value.data.size() - 1; i++ )
+            stream << value.data[i].to_string( engine ) << op_split << ' ';
+        stream << value.data.back().to_string( engine ) << op_array_cls;
+        return stream.str();
+    }
+
     case ValueType::ENUM:
     {
         auto const& value = as_enum();
@@ -812,26 +823,6 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
             stream << IDSystem::get( it->first ) << op_assign << it->second.value.to_string( engine ) << op_scope_cls;
             return stream.str();
         }
-    }
-
-    case ValueType::ARRAY:
-    {
-        auto& value = as_array();
-        if ( value.data.empty() )
-            return format( op_array_opn, op_array_cls );
-
-        StringStream stream;
-        stream << op_array_opn;
-        for ( Int i = 0; i < (Int) value.data.size() - 1; i++ )
-            stream << value.data[i].to_string( engine ) << op_split << ' ';
-        stream << value.data.back().to_string( engine ) << op_array_cls;
-        return stream.str();
-    }
-
-    case ValueType::RANGE:
-    {
-        auto& value = as_range();
-        return format( op_array_opn, value.start_incl, op_split, ' ', value.end_excl, op_expr_cls );
     }
 
     default:
@@ -879,6 +870,9 @@ dawn::ArrayValue dawn::Value::to_array( Engine& engine ) const
         return result;
     }
 
+    case ValueType::ARRAY:
+        return as_array();
+
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
@@ -889,9 +883,6 @@ dawn::ArrayValue dawn::Value::to_array( Engine& engine ) const
         Value args[1] = { *this };
         return engine.handle_func( location(), *method, args, (Int) std::size( args ) ).as_array();
     }
-
-    case ValueType::ARRAY:
-        return as_array();
 
     default:
         ENGINE_PANIC( location(), "can not convert [", type(), "] to array" );
@@ -908,6 +899,9 @@ dawn::RangeValue dawn::Value::to_range( Engine& engine ) const
     case ValueType::INT:
         return RangeValue{ 0, as_int() };
 
+    case ValueType::RANGE:
+        return as_range();
+
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
@@ -918,9 +912,6 @@ dawn::RangeValue dawn::Value::to_range( Engine& engine ) const
         Value args[1] = { *this };
         return engine.handle_func( location(), *method, args, (Int) std::size( args ) ).as_range();
     }
-
-    case ValueType::RANGE:
-        return as_range();
 
     default:
         ENGINE_PANIC( location(), "can not convert [", type(), "] to range" );
