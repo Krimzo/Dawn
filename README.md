@@ -22,11 +22,11 @@ int i = -10                       // integer (8 bytes)
 float f = 6.0                     // float (8 bytes)
 char c = 'd'                      // char (1 byte)
 string s = "nice"                 // string
+range r = 0>>10                   // range (16 bytes)
 function fn = ``{}                // function
+array a = []                      // array
 SomeEnum se = SomeEnum::something // enum
 SomeStruct ss = SomeStruct{}      // struct
-array a = []                      // array
-range r = 0>>10                   // range (16 bytes)
 ```
 
 # Strings
