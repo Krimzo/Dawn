@@ -15,6 +15,7 @@ struct Engine
     friend struct Value;
     friend struct EnumValue;
     friend struct Optimizer;
+    friend Value create_default_value( Engine* engine, ID typeid_, Location const& location );
 
     Stack stack;
     GlobalStorage<Enum> enums;
@@ -219,64 +220,64 @@ private:
             ENGINE_PANIC( node.location(), "unknown expr node type: ", (Int) node.type() );
         }
     }
-
-    __forceinline Value create_default_value( Location const& location, ID typeid_ )
-    {
-        static const ID _id_void = IDSystem::get( tp_void );
-        static const ID _id_bool = IDSystem::get( tp_bool );
-        static const ID _id_int = IDSystem::get( tp_int );
-        static const ID _id_float = IDSystem::get( tp_float );
-        static const ID _id_char = IDSystem::get( tp_char );
-        static const ID _id_string = IDSystem::get( tp_string );
-        static const ID _id_function = IDSystem::get( tp_function );
-        static const ID _id_array = IDSystem::get( tp_array );
-        static const ID _id_range = IDSystem::get( tp_range );
-
-        if ( typeid_ == _id_void )
-            return Value{};
-
-        else if ( typeid_ == _id_bool )
-            return Value{ Bool{}, location };
-
-        else if ( typeid_ == _id_int )
-            return Value{ Int{}, location };
-
-        else if ( typeid_ == _id_float )
-            return Value{ Float{}, location };
-
-        else if ( typeid_ == _id_char )
-            return Value{ Char{}, location };
-
-        else if ( typeid_ == _id_string )
-            return Value{ StringRef{}, location };
-
-        else if ( typeid_ == _id_function )
-            return Value{ FunctionValue{}, location };
-
-        else if ( auto* enum_ptr = enums.get( typeid_ ) )
-        {
-            auto& entry = *enum_ptr->entries.begin();
-            EnumNode node{ location };
-            node.type_id = typeid_;
-            node.key_id = entry.id;
-            return handle_enum_node( node );
-        }
-
-        else if ( auto* struct_ptr = structs.get( typeid_ ) )
-        {
-            StructNode node{ location };
-            node.type_id = typeid_;
-            return handle_struct_node( node );
-        }
-
-        else if ( typeid_ == _id_array )
-            return Value{ ArrayValue{}, location };
-
-        else if ( typeid_ == _id_range )
-            return Value{ RangeValue{}, location };
-
-        else
-            ENGINE_PANIC( location, "type [", IDSystem::get( typeid_ ), "] does not exist" );
-    }
 };
+
+__forceinline Value create_default_value( Engine* engine, ID typeid_, Location const& location )
+{
+    static const ID _id_void = IDSystem::get( tp_void );
+    static const ID _id_bool = IDSystem::get( tp_bool );
+    static const ID _id_int = IDSystem::get( tp_int );
+    static const ID _id_float = IDSystem::get( tp_float );
+    static const ID _id_char = IDSystem::get( tp_char );
+    static const ID _id_string = IDSystem::get( tp_string );
+    static const ID _id_range = IDSystem::get( tp_range );
+    static const ID _id_function = IDSystem::get( tp_function );
+    static const ID _id_array = IDSystem::get( tp_array );
+
+    if ( typeid_ == _id_void )
+        return Value{};
+
+    else if ( typeid_ == _id_bool )
+        return Value{ Bool{}, location };
+
+    else if ( typeid_ == _id_int )
+        return Value{ Int{}, location };
+
+    else if ( typeid_ == _id_float )
+        return Value{ Float{}, location };
+
+    else if ( typeid_ == _id_char )
+        return Value{ Char{}, location };
+
+    else if ( typeid_ == _id_string )
+        return Value{ StringRef{}, location };
+
+    else if ( typeid_ == _id_range )
+        return Value{ RangeValue{}, location };
+
+    else if ( typeid_ == _id_function )
+        return Value{ FunctionValue{}, location };
+
+    else if ( typeid_ == _id_array )
+        return Value{ ArrayValue{}, location };
+
+    else if ( auto* enum_ptr = engine->enums.get( typeid_ ) )
+    {
+        auto& entry = *enum_ptr->entries.begin();
+        EnumNode node{ location };
+        node.type_id = typeid_;
+        node.key_id = entry.id;
+        return engine->handle_enum_node( node );
+    }
+
+    else if ( auto* struct_ptr = engine->structs.get( typeid_ ) )
+    {
+        StructNode node{ location };
+        node.type_id = typeid_;
+        return engine->handle_struct_node( node );
+    }
+
+    else
+        ENGINE_PANIC( location, "type [", IDSystem::get( typeid_ ), "] does not exist" );
+}
 }

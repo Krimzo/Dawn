@@ -16,9 +16,9 @@ void dawn::Engine::load_standard_operators()
     static const ID id_float = IDSystem::get( tp_float );
     static const ID id_char = IDSystem::get( tp_char );
     static const ID id_string = IDSystem::get( tp_string );
+    static const ID id_range = IDSystem::get( tp_range );
     static const ID id_func = IDSystem::get( tp_function );
     static const ID id_array = IDSystem::get( tp_array );
-    static const ID id_range = IDSystem::get( tp_range );
 
     // op add
     bind_oper( id_void, OperatorType::ADD, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
@@ -516,6 +516,16 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, tp_string, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
+    bind_func( IDSystem::get( tp_range ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            if ( arg_count == 1 )
+                return Value{ args[0].to_range( engine ), location };
+            else if ( arg_count == 0 )
+                return Value{ RangeValue{}, location };
+            else
+                ENGINE_PANIC( location, tp_range, "() expects 1 or 0 arguments, but got ", arg_count );
+        } );
+
     bind_func( IDSystem::get( tp_function ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
@@ -534,16 +544,6 @@ void dawn::Engine::load_standard_functions()
                 return Value{ ArrayValue{}, location };
             else
                 ENGINE_PANIC( location, tp_array, "() expects 1 or 0 arguments, but got ", arg_count );
-        } );
-
-    bind_func( IDSystem::get( tp_range ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
-        {
-            if ( arg_count == 1 )
-                return Value{ args[0].to_range( engine ), location };
-            else if ( arg_count == 0 )
-                return Value{ RangeValue{}, location };
-            else
-                ENGINE_PANIC( location, tp_range, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
     /* SYSTEM */
@@ -700,6 +700,17 @@ void dawn::Engine::load_standard_members()
             return self;
         } );
 
+    // Ranges.
+    bind_member( ValueType::RANGE, "start", []( Location const& location, Engine& engine, Value const& self ) -> Value
+        {
+            return Value{ self.as_range().start_incl, location };
+        } );
+
+    bind_member( ValueType::RANGE, "end", []( Location const& location, Engine& engine, Value const& self ) -> Value
+        {
+            return Value{ self.as_range().end_excl, location };
+        } );
+
     // Enums.
     bind_member( ValueType::ENUM, "id", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
@@ -745,16 +756,5 @@ void dawn::Engine::load_standard_members()
                     return Value{ i, location };
             }
             return Value{ Int( -1 ), location };
-        } );
-
-    // Ranges.
-    bind_member( ValueType::RANGE, "start", []( Location const& location, Engine& engine, Value const& self ) -> Value
-        {
-            return Value{ self.as_range().start_incl, location };
-        } );
-
-    bind_member( ValueType::RANGE, "end", []( Location const& location, Engine& engine, Value const& self ) -> Value
-        {
-            return Value{ self.as_range().end_excl, location };
         } );
 }

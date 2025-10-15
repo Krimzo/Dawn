@@ -37,9 +37,9 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) tp_float,
         (String) tp_char,
         (String) tp_string,
+        (String) tp_range,
         (String) tp_function,
         (String) tp_array,
-        (String) tp_range,
     };
     result.operators = {
         (String) vr_variable,

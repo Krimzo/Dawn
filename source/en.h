@@ -97,11 +97,11 @@ enum struct ValueType : uint8_t
     FLOAT,
     CHAR,
     STRING,
+    RANGE,
     FUNCTION,
+    ARRAY,
     ENUM,
     STRUCT,
-    ARRAY,
-    RANGE,
     _COUNT,
 };
 

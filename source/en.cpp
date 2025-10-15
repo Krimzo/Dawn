@@ -52,11 +52,11 @@ std::ostream& dawn::operator<<( std::ostream& stream, ValueType type )
     case ValueType::FLOAT: stream << tp_float; break;
     case ValueType::CHAR: stream << tp_char; break;
     case ValueType::STRING: stream << tp_string; break;
+    case ValueType::RANGE: stream << tp_range; break;
     case ValueType::FUNCTION: stream << tp_function; break;
+    case ValueType::ARRAY: stream << tp_array; break;
     case ValueType::ENUM: stream << kw_enum; break;
     case ValueType::STRUCT: stream << kw_struct; break;
-    case ValueType::ARRAY: stream << tp_array; break;
-    case ValueType::RANGE: stream << tp_range; break;
     }
     return stream;
 }

@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "pool.h"
+#include "engine.h"
 
 
 dawn::Bool dawn::Module::contains_id( ID id ) const
@@ -445,9 +446,9 @@ void dawn::Parser::parse_cast( TokenIterator& it, Function& function )
         it->value != tp_float &&
         it->value != tp_char &&
         it->value != tp_string &&
+        it->value != tp_range &&
         it->value != tp_function &&
-        it->value != tp_array &&
-        it->value != tp_range )
+        it->value != tp_array )
         PARSER_PANIC( *it, "expected cast type" );
     function.id = IDSystem::get( it->value );
     ++it;
@@ -459,6 +460,7 @@ void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable )
 {
     if ( it->type != TokenType::TYPE )
         PARSER_PANIC( *it, "expected variable type" );
+    const Bool is_custom_type = dawn::is_custom_type( it->value );
     variable.type.type_id = IDSystem::get( it->value );
     ++it;
 
@@ -478,6 +480,7 @@ void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable )
     if ( it->type != TokenType::NAME )
         PARSER_PANIC( *it, "expected variable name" );
     variable.id = IDSystem::get( it->value );
+    const Location var_location = it->location;
     ++it;
 
     variable.expr = node_pool().new_register();
@@ -486,8 +489,10 @@ void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable )
         ++it;
         parse_expression( ExtractType::NEW_LINE, it, *variable.expr );
     }
+    else if ( !is_custom_type )
+        variable.expr->emplace<Value>( create_default_value( nullptr, variable.type.type_id, var_location ) );
     else
-        variable.expr->emplace<Value>();
+        PARSER_PANIC( *it, "custom type variable must be initialized" );
 }
 
 void dawn::Parser::parse_expression( ExtractType type, TokenIterator& it, Node& tree )
@@ -984,9 +989,9 @@ void dawn::Parser::expression_single_type( Token const& token, Node& tree )
         token.value == tp_float ||
         token.value == tp_char ||
         token.value == tp_string ||
+        token.value == tp_range ||
         token.value == tp_function ||
-        token.value == tp_array ||
-        token.value == tp_range )
+        token.value == tp_array )
         tree.emplace<IdentifierNode>( token.location ).id = IDSystem::get( token.value );
     else
         PARSER_PANIC( token, "type [", token.value, "] is not an expression" );
@@ -1290,7 +1295,6 @@ dawn::Int dawn::token_depth( Token const& token, Bool& in_lambda )
 
 dawn::OperatorType dawn::get_op_type( StringRef const& value )
 {
-
     if ( value == op_add )
         return OperatorType::ADD;
 

@@ -7,6 +7,17 @@
 
 namespace dawn
 {
+struct RangeValue
+{
+    Int start_incl = 0;
+    Int end_excl = 0;
+
+    constexpr Bool empty() const
+    {
+        return start_incl >= end_excl;
+    }
+};
+
 struct DFunction
 {
     Vector<Arg> args;
@@ -55,6 +66,19 @@ struct FunctionValue
     CFunction* cfunction() const;
 };
 
+struct ArrayValue
+{
+    Vector<Value> data;
+
+    ArrayValue() = default;
+
+    ArrayValue( ArrayValue const& other );
+    ArrayValue& operator=( ArrayValue const& other );
+
+    ArrayValue( ArrayValue&& other ) noexcept;
+    ArrayValue& operator=( ArrayValue&& other ) noexcept;
+};
+
 struct EnumValue
 {
     ID parent_id;
@@ -86,30 +110,6 @@ struct StructValue
     FunctionValue* get_unary( ID id );
 };
 
-struct ArrayValue
-{
-    Vector<Value> data;
-
-    ArrayValue() = default;
-
-    ArrayValue( ArrayValue const& other );
-    ArrayValue& operator=( ArrayValue const& other );
-
-    ArrayValue( ArrayValue&& other ) noexcept;
-    ArrayValue& operator=( ArrayValue&& other ) noexcept;
-};
-
-struct RangeValue
-{
-    Int start_incl = 0;
-    Int end_excl = 0;
-
-    constexpr Bool empty() const
-    {
-        return start_incl >= end_excl;
-    }
-};
-
 struct ValueInfo
 {
     Location location;
@@ -132,22 +132,22 @@ struct Value
     explicit Value( Float value, Location const& location );
     explicit Value( Char value, Location const& location );
     explicit Value( StringRef const& value, Location const& location );
+    explicit Value( RangeValue const& value, Location const& location );
     explicit Value( FunctionValue const& value, Location const& location );
+    explicit Value( ArrayValue const& value, Location const& location );
     explicit Value( EnumValue const& value, Location const& location );
     explicit Value( StructValue const& value, Location const& location );
-    explicit Value( ArrayValue const& value, Location const& location );
-    explicit Value( RangeValue const& value, Location const& location );
 
     Bool& as_bool() const;
     Int& as_int() const;
     Float& as_float() const;
     Char& as_char() const;
     String& as_string() const;
+    RangeValue& as_range() const;
     FunctionValue& as_function() const;
+    ArrayValue& as_array() const;
     EnumValue& as_enum() const;
     StructValue& as_struct() const;
-    ArrayValue& as_array() const;
-    RangeValue& as_range() const;
 
     Location const& location() const;
     ValueType type() const;
@@ -164,9 +164,9 @@ struct Value
     Float to_float( Engine& engine ) const;
     Char to_char( Engine& engine ) const;
     String to_string( Engine& engine ) const;
+    RangeValue to_range( Engine& engine ) const;
     FunctionValue to_function( Engine& engine ) const;
     ArrayValue to_array( Engine& engine ) const;
-    RangeValue to_range( Engine& engine ) const;
 
 private:
     RegisterRef<ValueInfo> m_regref;
