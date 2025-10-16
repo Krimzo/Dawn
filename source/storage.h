@@ -62,11 +62,6 @@ struct GlobalStorage
         return nullptr;
     }
 
-    void clear()
-    {
-        m_data.clear();
-    }
-
 private:
     Vector<Opt<T>> m_data;
 };

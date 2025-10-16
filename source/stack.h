@@ -19,8 +19,8 @@ struct Frame
     void reset( RegisterRef<Frame> const& parent );
 
 private:
-    RegisterRef<Frame> m_parent;
     Variant<LocalFrame, GlobalFrame> m_frame;
+    RegisterRef<Frame> m_parent;
 };
 
 struct Stack

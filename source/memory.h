@@ -116,26 +116,22 @@ private:
 template<typename T, Int S>
 struct MemoryChunk
 {
-    Int m_current = 0;
     Register<T> m_space[S] = {};
+    Int m_current = 0;
 
     // Does not reset value. Caller should reset after obtaining a new register.
     Register<T>* move_to_unused()
     {
-        Int start_index = m_current;
+        const Int start_index = m_current;
         while ( m_space[m_current].count != 0 )
         {
-            increment_current();
+            if ( ++m_current == S )
+                m_current = 0;
+
             if ( m_current == start_index )
                 return nullptr;
         }
         return m_space + m_current;
-    }
-
-    void increment_current()
-    {
-        if ( ++m_current == S )
-            m_current = 0;
     }
 };
 
@@ -146,43 +142,32 @@ struct MemoryPool
 
     MemoryPool()
     {
-        allocate_chunk();
+        m_chunks.emplace_front();
+        m_current = m_chunks.begin();
     }
 
     // Does not reset value. Caller should reset after obtaining a new register.
     RegisterRef<T> new_register()
     {
-        return { move_to_unused() };
-    }
-
-private:
-    List<MemoryChunk<T, ChunkSize>> m_chunks;
-    List<MemoryChunk<T, ChunkSize>>::iterator m_current;
-
-    Register<T>* move_to_unused()
-    {
-        auto start_iterator = m_current;
+        const auto start_iterator = m_current;
         while ( true )
         {
             if ( Register<T>* ptr = m_current->move_to_unused() )
                 return ptr;
 
-            increment_current();
+            if ( ++m_current == m_chunks.end() )
+                m_current = m_chunks.begin();
+
             if ( m_current == start_iterator )
-                allocate_chunk();
+            {
+                m_chunks.emplace_front();
+                m_current = m_chunks.begin();
+            }
         }
     }
 
-    void increment_current()
-    {
-        if ( ++m_current == m_chunks.end() )
-            m_current = m_chunks.begin();
-    }
-
-    void allocate_chunk()
-    {
-        m_chunks.emplace_front();
-        m_current = m_chunks.begin();
-    }
+private:
+    List<MemoryChunk<T, ChunkSize>> m_chunks;
+    List<MemoryChunk<T, ChunkSize>>::iterator m_current;
 };
 }

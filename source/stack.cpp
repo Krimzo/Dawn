@@ -1,8 +1,8 @@
 #include "stack.h"
 #include "pool.h"
 
-static constexpr dawn::Int LOCAL_FRAME_RESERVE_SIZE = 16;
-static constexpr dawn::Int GLOBAL_FRAME_SIZE = 1024;
+static constexpr auto LOCAL_FRAME_RESERVE_SIZE = 16;
+static constexpr auto GLOBAL_FRAME_SIZE = 1024;
 
 dawn::Frame::Frame( FrameType type )
 {
@@ -14,33 +14,28 @@ dawn::Frame::Frame( FrameType type )
 
 dawn::Value& dawn::Frame::set( ID id, Value const& value )
 {
-    if ( std::holds_alternative<LocalFrame>( m_frame ) )
-        return std::get<LocalFrame>( m_frame ).set( id, value );
+    if ( auto* local_frame = std::get_if<LocalFrame>( &m_frame ) )
+        return local_frame->set( id, value );
     else
         return std::get<GlobalFrame>( m_frame ).set( id, value );
 }
 
 dawn::Value* dawn::Frame::get( ID id )
 {
-    if ( std::holds_alternative<LocalFrame>( m_frame ) )
+    if ( auto* local_frame = std::get_if<LocalFrame>( &m_frame ) )
     {
-        if ( Value* ptr = std::get<LocalFrame>( m_frame ).get( id ) )
+        if ( Value* ptr = local_frame->get( id ) )
             return ptr;
     }
-    else
-    {
-        if ( Value* ptr = std::get<GlobalFrame>( m_frame ).get( id ) )
-            return ptr;
-    }
+    else if ( Value* ptr = std::get<GlobalFrame>( m_frame ).get( id ) )
+        return ptr;
     return m_parent ? m_parent->get( id ) : nullptr;
 }
 
 void dawn::Frame::reset( RegisterRef<Frame> const& parent )
 {
-    if ( std::holds_alternative<LocalFrame>( m_frame ) )
-        std::get<LocalFrame>( m_frame ).clear();
-    else
-        std::get<GlobalFrame>( m_frame ).clear();
+    if ( auto* local_frame = std::get_if<LocalFrame>( &m_frame ) )
+        local_frame->clear();
     m_parent = parent;
 }
 
