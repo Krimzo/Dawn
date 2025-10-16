@@ -430,10 +430,8 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
         ENGINE_PANIC( node.location, "struct [", IDSystem::get( node.type_id ), "] does not exist" );
     auto& struc = *struct_ptr;
 
-    Value value{ StructValue{}, node.location };
-    auto& struc_value = value.as_struct();
-    struc_value.parent_id = node.type_id;
-
+    Value value{ StructValue{ node.type_id }, node.location };
+    auto& struc_value = const_cast<StructValue&>( value.as_struct() ); // This is fine because parent_id was already passed in the constructor, line above.
     struc_value.members.reserve( struc.fields.size() + struc.methods.size() );
 
     // Structure default initialization.

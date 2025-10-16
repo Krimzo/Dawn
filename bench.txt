@@ -42,6 +42,7 @@
 41.  256740us __forceinline engine
 42.  236666us remove __forceinline from handle_scope and remove compare op
 43.  227623us add ProxyArg
+44.  200936us store type_id directly in ValueStorage
 
 // linear fib(30)
 01.    9871us

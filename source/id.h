@@ -9,9 +9,7 @@ struct ID
 {
     friend struct IDSystem;
 
-    constexpr ID()
-    {
-    }
+    constexpr ID() = default;
 
     constexpr auto integer() const
     {

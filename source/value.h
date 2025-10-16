@@ -98,7 +98,10 @@ struct StructValue
     ID parent_id;
     Map<ID, Member<Value>> members;
 
-    StructValue() = default;
+    StructValue( ID parent_id = {} )
+        : parent_id( parent_id )
+    {
+    }
 
     StructValue( StructValue const& other );
     StructValue& operator=( StructValue const& other );
@@ -106,13 +109,14 @@ struct StructValue
     StructValue( StructValue&& other ) noexcept;
     StructValue& operator=( StructValue&& other ) noexcept;
 
-    FunctionValue* get_method( ID id );
-    FunctionValue* get_unary( ID id );
+    FunctionValue* get_method( ID id ) const;
+    FunctionValue* get_unary( ID id ) const;
 };
 
 struct ValueInfo
 {
     Location location;
+    ID type_id;
     ValueType type = ValueType::VOID;
     Bool is_const = true;
 };
@@ -146,8 +150,8 @@ struct Value
     RangeValue& as_range() const;
     FunctionValue& as_function() const;
     ArrayValue& as_array() const;
-    EnumValue& as_enum() const;
-    StructValue& as_struct() const;
+    EnumValue const& as_enum() const;     // Must be const since parent_id mustn't be changed.
+    StructValue const& as_struct() const; // Must be const since parent_id mustn't be changed.
 
     Location const& location() const;
     ValueType type() const;
