@@ -52,7 +52,7 @@ private:
     void load_standard_members();
 
     void handle_var_node( VariableNode const& node );
-    Value handle_id_node( IdentifierNode const& node );
+    Value const& handle_id_node( IdentifierNode const& node );
     Value handle_call_node( CallNode const& node );
     Value handle_index_node( IndexNode const& node );
     void handle_return_node( ReturnNode const& node, Opt<Value>& retval );
@@ -65,7 +65,7 @@ private:
     void handle_loop_node( LoopNode const& node, Opt<Value>& retval );
     void handle_while_node( WhileNode const& node, Opt<Value>& retval );
     void handle_for_node( ForNode const& node, Opt<Value>& retval );
-    Value handle_lambda_node( LambdaNode const& node );
+    Value const& handle_lambda_node( LambdaNode const& node );
     Value handle_enum_node( EnumNode const& node );
     Value handle_struct_node( StructNode const& node );
     Value handle_array_node( ArrayNode const& node );

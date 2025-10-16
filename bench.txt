@@ -44,6 +44,7 @@
 43.  227623us add ProxyArg
 44.  200936us store type_id directly in ValueStorage
 45.  195454us improve stack get
+46.  190906us make handle_id_node return const ref
 
 // linear fib(30)
 01.    9871us

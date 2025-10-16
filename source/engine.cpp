@@ -176,12 +176,11 @@ void dawn::Engine::handle_var_node( VariableNode const& node )
     add_var( node.location, node.var.type, node.var.id, handle_expr( *node.var.expr ) );
 }
 
-dawn::Value dawn::Engine::handle_id_node( IdentifierNode const& node )
+dawn::Value const& dawn::Engine::handle_id_node( IdentifierNode const& node )
 {
-    auto* ptr = get_var( node.id );
-    if ( !ptr )
-        ENGINE_PANIC( node.location, "object [", IDSystem::get( node.id ), "] does not exist" );
-    return *ptr;
+    if ( auto* ptr = get_var( node.id ) )
+        return *ptr;
+    ENGINE_PANIC( node.location, "object [", IDSystem::get( node.id ), "] does not exist" );
 }
 
 dawn::Value dawn::Engine::handle_call_node( CallNode const& node )
@@ -397,10 +396,11 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
         ENGINE_PANIC( node.location, "can not for loop [", value_type, "]" );
 }
 
-dawn::Value dawn::Engine::handle_lambda_node( LambdaNode const& node )
+dawn::Value const& dawn::Engine::handle_lambda_node( LambdaNode const& node )
 {
-    node.func_value.as_function().as_lambda().frame = stack.peek();
-    return node.func_value;
+    auto& func_val = node.func_value;
+    func_val.as_function().as_lambda().frame = stack.peek();
+    return func_val;
 }
 
 dawn::Value dawn::Engine::handle_enum_node( EnumNode const& node )
