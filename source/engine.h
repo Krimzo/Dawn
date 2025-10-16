@@ -84,8 +84,13 @@ private:
         auto* func = op_right_ids->get( right.type_id() );
         if ( !func )
             ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "] with right type being [", IDSystem::get( right.type_id() ), "]" );
-        Value args[2] = { left, right };
-        return handle_func( location, *func, args, (Int) std::size( args ) );
+
+        using ProxyArg = uint64_t;
+        static_assert( sizeof( ProxyArg ) == sizeof( Value ), "ProxyArg size must be the same as Value" );
+        static_assert( alignof( ProxyArg ) == alignof( Value ), "ProxyArg alignment must be the same as Value" );
+        ProxyArg proxy_args[2] = { reinterpret_cast<ProxyArg const&>( left ), reinterpret_cast<ProxyArg const&>( right ) }; // Improves performance by not calling the constructors or destructors of Value.
+
+        return handle_func( location, *func, reinterpret_cast<Value*>( proxy_args ), (Int) std::size( proxy_args ) );
     }
 
     __forceinline Value handle_func( Location const& location, FunctionValue const& func, Value const* args, Int arg_count )

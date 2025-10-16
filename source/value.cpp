@@ -578,9 +578,7 @@ dawn::Bool dawn::Value::to_bool( Engine& engine ) const
         auto* method = left.get_method( _bool );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to bool" );
-
-        Value args[1] = { *this };
-        return engine.handle_func( location(), *method, args, (Int) std::size( args ) ).as_bool();
+        return engine.handle_func( location(), *method, this, 1 ).as_bool();
     }
 
     default:
@@ -620,9 +618,7 @@ dawn::Int dawn::Value::to_int( Engine& engine ) const
         auto* method = left.get_method( _int );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to int" );
-
-        Value args[1] = { *this };
-        return engine.handle_func( location(), *method, args, (Int) std::size( args ) ).as_int();
+        return engine.handle_func( location(), *method, this, 1 ).as_int();
     }
 
     default:
@@ -662,9 +658,7 @@ dawn::Float dawn::Value::to_float( Engine& engine ) const
         auto* method = left.get_method( _float );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to float" );
-
-        Value args[1] = { *this };
-        return engine.handle_func( location(), *method, args, (Int) std::size( args ) ).as_float();
+        return engine.handle_func( location(), *method, this, 1 ).as_float();
     }
 
     default:
@@ -705,9 +699,7 @@ dawn::Char dawn::Value::to_char( Engine& engine ) const
         auto* method = left.get_method( _char );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to char" );
-
-        Value args[1] = { *this };
-        return engine.handle_func( location(), *method, args, (Int) std::size( args ) ).as_char();
+        return engine.handle_func( location(), *method, this, 1 ).as_char();
     }
 
     default:
@@ -803,8 +795,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
         auto& left = as_struct();
         if ( auto* method = left.get_method( _string ) )
         {
-            Value args[1] = { *this };
-            return engine.handle_func( location(), *method, args, (Int) std::size( args ) ).as_string();
+            return engine.handle_func( location(), *method, this, 1 ).as_string();
         }
         else
         {
@@ -843,9 +834,7 @@ dawn::FunctionValue dawn::Value::to_function( Engine& engine ) const
         auto* method = left.get_method( _function );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to function" );
-
-        Value args[1] = { *this };
-        return engine.handle_func( location(), *method, args, (Int) std::size( args ) ).as_function();
+        return engine.handle_func( location(), *method, this, 1 ).as_function();
     }
 
     default:
@@ -879,9 +868,7 @@ dawn::ArrayValue dawn::Value::to_array( Engine& engine ) const
         auto* method = left.get_method( _array );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to array" );
-
-        Value args[1] = { *this };
-        return engine.handle_func( location(), *method, args, (Int) std::size( args ) ).as_array();
+        return engine.handle_func( location(), *method, this, 1 ).as_array();
     }
 
     default:
@@ -908,9 +895,7 @@ dawn::RangeValue dawn::Value::to_range( Engine& engine ) const
         auto* method = left.get_method( _range );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to range" );
-
-        Value args[1] = { *this };
-        return engine.handle_func( location(), *method, args, (Int) std::size( args ) ).as_range();
+        return engine.handle_func( location(), *method, this, 1 ).as_range();
     }
 
     default:

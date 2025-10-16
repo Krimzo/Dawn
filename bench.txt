@@ -41,6 +41,7 @@
 40.  342801us :)
 41.  256740us __forceinline engine
 42.  236666us remove __forceinline from handle_scope and remove compare op
+43.  227623us add ProxyArg
 
 // linear fib(30)
 01.    9871us
