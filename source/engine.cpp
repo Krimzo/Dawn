@@ -185,15 +185,15 @@ dawn::Value const& dawn::Engine::handle_id_node( IdentifierNode const& node )
 
 dawn::Value dawn::Engine::handle_call_node( CallNode const& node )
 {
-    Value left = handle_expr( *node.left_expr );
+    const Value left = handle_expr( *node.left_expr );
     if ( left.type() != ValueType::FUNCTION )
         ENGINE_PANIC( node.location, "can not call [", left.type(), "]" );
 
-    auto& func = left.as_function();
-    Int arg_count = func.is_method() ? ( 1 + node.args.size() ) : node.args.size();
+    auto const& func = left.as_function();
+    const Int arg_count = func.is_method() ? ( 1 + node.args.size() ) : node.args.size();
 
-    Value* args_ptr = SALLOC( Value, arg_count );
-    SAllocManager<Value> alloc_manager{ args_ptr, arg_count };
+    Value* const args_ptr = SALLOC( Value, arg_count );
+    const SAllocManager<Value> alloc_manager{ args_ptr, arg_count };
 
     if ( func.is_method() )
     {
@@ -539,7 +539,6 @@ dawn::Value dawn::Engine::handle_op_node( OperatorNode const& node )
 dawn::Value dawn::Engine::handle_as_node( AssignNode const& node )
 {
     Value left = handle_expr( node.sides[0] );
-
     switch ( node.type )
     {
     case AssignType::ASSIGN:
