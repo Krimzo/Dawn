@@ -86,12 +86,12 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* arg
     return std::nullopt;
 }
 
-void dawn::Dawn::add_var( Location const& location, VarType const& type, StringRef const& name, Value const& value ) noexcept
+void dawn::Dawn::add_gvar( StringRef const& name, Value const& value ) noexcept
 {
-    engine.add_var( location, type, IDSystem::get( name ), value );
+    engine.globals.set( IDSystem::get( name ), value );
 }
 
-dawn::Value* dawn::Dawn::get_var( StringRef const& name ) noexcept
+dawn::Value* dawn::Dawn::get_gvar( StringRef const& name ) noexcept
 {
-    return engine.get_var( IDSystem::get( name ) );
+    return engine.globals.get( IDSystem::get( name ) );
 }

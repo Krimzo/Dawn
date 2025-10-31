@@ -48,7 +48,7 @@ void dawn::Engine::load_operator( Operator const& entry )
 
 void dawn::Engine::load_function( Function const& entry )
 {
-    if ( stack.root().get( entry.id ) )
+    if ( globals.get( entry.id ) )
         ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( entry.id ), "] already exists" );
 
     FunctionValue fv{};
@@ -56,7 +56,7 @@ void dawn::Engine::load_function( Function const& entry )
     global.id = entry.id;
     global.func = DFunction{ entry.args, entry.body };
 
-    stack.root().set( entry.id, Value{ fv, LOCATION_NONE } );
+    globals.set( entry.id, Value{ fv, LOCATION_NONE } );
 }
 
 void dawn::Engine::load_enum( Enum const& entry )
@@ -77,8 +77,8 @@ void dawn::Engine::load_struct( Struct const& entry )
 
 void dawn::Engine::load_variable( Variable const& entry )
 {
-    auto& expr = *entry.expr;
-    add_var( expr.location(), entry.type, entry.id, handle_expr( expr ) );
+    auto const& expr = *entry.expr;
+    globals.set( entry.id, handle_expr( expr ) );
 }
 
 void dawn::Engine::bind_oper( ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const, CFunction cfunc )
@@ -100,7 +100,7 @@ void dawn::Engine::bind_oper( ID left_type_id, OperatorType op_type, ID right_ty
 
 void dawn::Engine::bind_func( ID id, Bool is_ctime, CFunction cfunc )
 {
-    if ( stack.root().get( id ) )
+    if ( globals.get( id ) )
         ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] already exists" );
     if ( is_ctime )
         m_ctime_funcs.insert( id );
@@ -109,12 +109,12 @@ void dawn::Engine::bind_func( ID id, Bool is_ctime, CFunction cfunc )
     auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
     global.id = id;
     global.func = std::move( cfunc );
-    stack.root().set( id, Value{ fv, LOCATION_NONE } );
+    globals.set( id, Value{ fv, LOCATION_NONE } );
 }
 
 dawn::Value dawn::Engine::call_func( ID id, Value* args, Int arg_count )
 {
-    Value* value = stack.root().get( id );
+    Value* value = globals.get( id );
     if ( !value )
         ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] does not exist" );
 
@@ -122,24 +122,6 @@ dawn::Value dawn::Engine::call_func( ID id, Value* args, Int arg_count )
         ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] can not be called" );
 
     return handle_func( LOCATION_NONE, value->as_function(), args, arg_count );
-}
-
-void dawn::Engine::add_var( Location const& location, VarType const& type, ID id, Value const& value )
-{
-    if ( type.type_id != value.type_id() )
-        ENGINE_PANIC( location, "can not init variable of type [", IDSystem::get( type.type_id ), "] with type [", IDSystem::get( value.type_id() ), "]" );
-
-    if ( type.kind == VarKind::CONSTANT )
-        stack.current().set( id, value.clone() );
-    else if ( type.kind == VarKind::VARIABLE )
-        stack.current().set( id, value.clone().unlock_const() );
-    else
-        stack.current().set( id, value );
-}
-
-dawn::Value* dawn::Engine::get_var( ID id )
-{
-    return stack.current().get( id );
 }
 
 void dawn::Engine::bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func )
@@ -171,6 +153,19 @@ void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_cons
         } );
 }
 
+void dawn::Engine::add_var( Location const& location, VarType const& type, ID id, Value const& value )
+{
+    if ( type.type_id != value.type_id() )
+        ENGINE_PANIC( location, "can not init variable of type [", IDSystem::get( type.type_id ), "] with type [", IDSystem::get( value.type_id() ), "]" );
+
+    if ( type.kind == VarKind::CONSTANT )
+        stack.set( id, value.clone() );
+    else if ( type.kind == VarKind::VARIABLE )
+        stack.set( id, value.clone().unlock_const() );
+    else
+        stack.set( id, value );
+}
+
 void dawn::Engine::handle_var_node( VariableNode const& node )
 {
     add_var( node.location, node.var.type, node.var.id, handle_expr( *node.var.expr ) );
@@ -178,7 +173,7 @@ void dawn::Engine::handle_var_node( VariableNode const& node )
 
 dawn::Value const& dawn::Engine::handle_id_node( IdentifierNode const& node )
 {
-    if ( auto* ptr = get_var( node.id ) )
+    if ( auto* ptr = stack.get( node.id ) )
         return *ptr;
     ENGINE_PANIC( node.location, "object [", IDSystem::get( node.id ), "] does not exist" );
 }
@@ -267,7 +262,7 @@ void dawn::Engine::handle_try_node( TryNode const& node, Opt<Value>& retval, Boo
     catch ( Value const& value )
     {
         auto pop_handler = stack.push();
-        stack.current().set( node.catch_id, value );
+        stack.set( node.catch_id, value );
         handle_scope( node.catch_scope, retval, didbrk, didcon );
     }
 }
@@ -356,7 +351,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            stack.current().set( node.var_id, Value{ c, node.location } );
+            stack.set( node.var_id, Value{ c, node.location } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -372,7 +367,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            stack.current().set( node.var_id, Value{ i, node.location } );
+            stack.set( node.var_id, Value{ i, node.location } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -388,7 +383,7 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             didcon = false;
 
             auto pop_handler = stack.push();
-            stack.current().set( node.var_id, value );
+            stack.set( node.var_id, value );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }

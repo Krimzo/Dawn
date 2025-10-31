@@ -118,12 +118,6 @@ enum struct VarKind : uint8_t
     REFERENCE,
 };
 
-enum struct FrameType : uint8_t
-{
-    LOCAL = 0,
-    GLOBAL = 1,
-};
-
 std::ostream& operator<<( std::ostream& stream, TokenType type );
 std::ostream& operator<<( std::ostream& stream, OperatorType type );
 std::ostream& operator<<( std::ostream& stream, ValueType type );

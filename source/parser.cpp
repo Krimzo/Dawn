@@ -304,7 +304,7 @@ void dawn::Parser::parse_enum( TokenIterator& it, Enum& en )
     ++it;
 
     if ( en.entries.empty() )
-        PARSER_PANIC( *first_it, "enum [", IDSystem::get( en.id ), "] cannot be empty" );
+        PARSER_PANIC( *first_it, "enum [", IDSystem::get( en.id ), "] can not be empty" );
 }
 
 void dawn::Parser::parse_operator( TokenIterator& it, Operator& oper )

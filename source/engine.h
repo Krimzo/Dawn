@@ -17,11 +17,12 @@ struct Engine
     friend struct Optimizer;
     friend Value create_default_value( Engine* engine, ID typeid_, Location const& location );
 
-    Stack stack;
     GlobalStorage<Enum> enums;
     GlobalStorage<Struct> structs;
     GlobalStorage<GlobalStorage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
     GlobalStorage<MemberGenerator> member_generators[(Int) ValueType::_COUNT] = {};
+    Globals globals;
+    Stack stack{ globals };
 
     Engine();
 
@@ -37,9 +38,6 @@ struct Engine
     void bind_func( ID id, Bool is_ctime, CFunction cfunc );
     Value call_func( ID id, Value* args, Int arg_count );
 
-    void add_var( Location const& location, VarType const& type, ID id, Value const& value );
-    Value* get_var( ID id );
-
     void bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func );
     void bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body );
 
@@ -50,6 +48,8 @@ private:
     void load_standard_operators();
     void load_standard_functions();
     void load_standard_members();
+
+    void add_var( Location const& location, VarType const& type, ID id, Value const& value );
 
     void handle_var_node( VariableNode const& node );
     Value const& handle_id_node( IdentifierNode const& node );

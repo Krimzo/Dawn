@@ -33,7 +33,7 @@ private:
         }
     };
 
-    Engine m_engine;
+    Holder<Engine> m_engine;
     Vector<Inlineable> m_inline;
 
     void reset();

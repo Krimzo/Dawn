@@ -4,7 +4,7 @@
 void dawn::Optimizer::optimize( Module& module )
 {
     reset();
-    m_engine.load_mod( module );
+    m_engine->load_mod( module );
     optimize_imports( module.imports );
     optimize_variables( module.variables );
     optimize_operators( module.operators );
@@ -267,7 +267,7 @@ void dawn::Optimizer::optimize_expr_switch( SwitchNode& node, Node& out_node )
                 continue;
             ++is_value_counter;
 
-            if ( m_engine.handle_oper( expr.location(), std::get<Value>( main_expr ), OperatorType::EQ, std::get<Value>( expr ) ).as_bool() )
+            if ( m_engine->handle_oper( expr.location(), std::get<Value>( main_expr ), OperatorType::EQ, std::get<Value>( expr ) ).as_bool() )
             {
                 optimize_instr( casee.scope.instr );
                 out_node.emplace<Scope>( Scope{ std::move( casee.scope ) } );
@@ -375,7 +375,7 @@ void dawn::Optimizer::optimize_expr_call( CallNode& node, Node& out_node )
     Bool is_ctime = true;
     auto& left_expr = *node.left_expr;
     optimize_expr( left_expr );
-    if ( left_expr.type() != NodeType::IDENTIFIER || !m_engine.m_ctime_funcs.contains( std::get<IdentifierNode>( left_expr ).id ) )
+    if ( left_expr.type() != NodeType::IDENTIFIER || !m_engine->m_ctime_funcs.contains( std::get<IdentifierNode>( left_expr ).id ) )
         is_ctime = false;
     for ( auto& arg : node.args )
     {
@@ -384,7 +384,7 @@ void dawn::Optimizer::optimize_expr_call( CallNode& node, Node& out_node )
             is_ctime = false;
     }
     if ( is_ctime )
-        out_node.emplace<Value>( m_engine.handle_call_node( node ) );
+        out_node.emplace<Value>( m_engine->handle_call_node( node ) );
 }
 
 void dawn::Optimizer::optimize_expr_index( IndexNode& node, Node& out_node )
@@ -394,7 +394,7 @@ void dawn::Optimizer::optimize_expr_index( IndexNode& node, Node& out_node )
     auto& expr_node = *node.expr;
     optimize_expr( expr_node );
     if ( left_node.type() == NodeType::VALUE && expr_node.type() == NodeType::VALUE )
-        out_node.emplace<Value>( m_engine.handle_index_node( node ) );
+        out_node.emplace<Value>( m_engine->handle_index_node( node ) );
 }
 
 void dawn::Optimizer::optimize_expr_lambda( LambdaNode& node, Node& out_node )
@@ -423,7 +423,7 @@ void dawn::Optimizer::optimize_expr_struct( StructNode& node, Node& out_node )
                 is_ctime = false;
         }
         if ( is_ctime )
-            out_node.emplace<Value>( m_engine.handle_struct_node( node ) );
+            out_node.emplace<Value>( m_engine->handle_struct_node( node ) );
     }
     else
     {
@@ -435,7 +435,7 @@ void dawn::Optimizer::optimize_expr_struct( StructNode& node, Node& out_node )
                 is_ctime = false;
         }
         if ( is_ctime )
-            out_node.emplace<Value>( m_engine.handle_struct_node( node ) );
+            out_node.emplace<Value>( m_engine->handle_struct_node( node ) );
     }
 }
 
@@ -451,7 +451,7 @@ void dawn::Optimizer::optimize_expr_array( ArrayNode& node, Node& out_node )
                 is_ctime = false;
         }
         if ( is_ctime )
-            out_node.emplace<Value>( m_engine.handle_array_node( node ) );
+            out_node.emplace<Value>( m_engine->handle_array_node( node ) );
     }
     else
     {
@@ -459,7 +459,7 @@ void dawn::Optimizer::optimize_expr_array( ArrayNode& node, Node& out_node )
         auto& size_expr = *init.size_expr;
         optimize_expr( size_expr );
         if ( size_expr.type() == NodeType::VALUE )
-            out_node.emplace<Value>( m_engine.handle_array_node( node ) );
+            out_node.emplace<Value>( m_engine->handle_array_node( node ) );
     }
 }
 
@@ -480,10 +480,10 @@ void dawn::Optimizer::optimize_expr_op( OperatorNode& node, Node& out_node )
 
     Value left_value = std::get<Value>( left_node );
     auto& right_value = std::get<Value>( right_node );
-    if ( !m_engine.m_ctime_ops[(Int) node.type].contains( combine_ids( left_value.type_id(), right_value.type_id() ) ) )
+    if ( !m_engine->m_ctime_ops[(Int) node.type].contains( combine_ids( left_value.type_id(), right_value.type_id() ) ) )
         return;
 
-    left_value = m_engine.handle_oper( node.location, left_value, node.type, right_value );
+    left_value = m_engine->handle_oper( node.location, left_value, node.type, right_value );
     out_node.emplace<Value>( left_value );
 }
 

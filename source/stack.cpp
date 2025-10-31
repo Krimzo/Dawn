@@ -1,75 +1,46 @@
 #include "stack.h"
 #include "pool.h"
 
-static constexpr auto LOCAL_FRAME_RESERVE_SIZE = 16;
-static constexpr auto GLOBAL_FRAME_SIZE = 1024;
 
-dawn::Frame::Frame( FrameType type )
+void dawn::Frame::reset( RegisterRef<Frame> const& parent )
 {
-    if ( type == FrameType::LOCAL )
-        m_frame.emplace<LocalFrame>( LOCAL_FRAME_RESERVE_SIZE );
-    else
-        m_frame.emplace<GlobalFrame>( GLOBAL_FRAME_SIZE );
+    m_parent = parent;
+    m_locals.clear();
 }
 
 dawn::Value& dawn::Frame::set( ID id, Value const& value )
 {
-    if ( auto* local_frame = std::get_if<LocalFrame>( &m_frame ) )
-        return local_frame->set( id, value );
-    else
-        return std::get<GlobalFrame>( m_frame ).set( id, value );
+    return m_locals.set( id, value );
 }
 
-dawn::Value* dawn::Frame::get( ID id )
+dawn::Value* dawn::Frame::get( ID id, Globals& globals )
 {
-    if ( auto* local_frame = std::get_if<LocalFrame>( &m_frame ) )
-    {
-        if ( Value* ptr = local_frame->get( id ) )
-            return ptr;
-    }
-    else if ( Value* ptr = std::get<GlobalFrame>( m_frame ).get( id ) )
+    if ( Value* ptr = m_locals.get( id ) )
         return ptr;
-    return m_parent ? m_parent->get( id ) : nullptr;
+    else if ( m_parent )
+        return m_parent->get( id, globals );
+    else
+        return globals.get( id );
 }
 
-void dawn::Frame::reset( RegisterRef<Frame> const& parent )
-{
-    if ( auto* local_frame = std::get_if<LocalFrame>( &m_frame ) )
-        local_frame->clear();
-    m_parent = parent;
-}
-
-dawn::Stack::Stack()
+dawn::Stack::Stack( Globals& globals )
+    : m_globals( globals )
 {
     m_frames.reserve( 128 );
-    *m_frames.emplace_back( frame_pool().new_register() ) = Frame{ FrameType::GLOBAL };
 }
 
 dawn::PopHandler dawn::Stack::push()
 {
-    m_frames.emplace_back( frame_pool().new_register() )->reset( *( ++m_frames.rbegin() ) );
+    m_frames.emplace_back( frame_pool().new_register() )
+        ->reset( *( ++m_frames.rbegin() ) );
     return PopHandler{ *this };
 }
 
-dawn::PopHandler dawn::Stack::push_from( RegisterRef<Frame> const& frame )
+dawn::PopHandler dawn::Stack::push_from( RegisterRef<Frame> const& parent_frame )
 {
-    m_frames.emplace_back( frame_pool().new_register() )->reset( frame ? frame : m_frames.front() );
+    m_frames.emplace_back( frame_pool().new_register() )
+        ->reset( parent_frame ? parent_frame : RegisterRef<Frame>{} );
     return PopHandler{ *this };
-}
-
-void dawn::Stack::pop()
-{
-    m_frames.pop_back();
-}
-
-dawn::Frame& dawn::Stack::root()
-{
-    return *m_frames.front();
-}
-
-dawn::Frame& dawn::Stack::current()
-{
-    return *m_frames.back();
 }
 
 dawn::RegisterRef<dawn::Frame> const& dawn::Stack::peek() const
@@ -77,12 +48,33 @@ dawn::RegisterRef<dawn::Frame> const& dawn::Stack::peek() const
     return m_frames.back();
 }
 
+dawn::Value& dawn::Stack::set( ID id, Value const& value )
+{
+    if ( m_frames.empty() )
+        return m_globals.set( id, value );
+    else
+        return m_frames.back()->set( id, value );
+}
+
+dawn::Value* dawn::Stack::get( ID id )
+{
+    if ( m_frames.empty() )
+        return m_globals.get( id );
+    else
+        return m_frames.back()->get( id, m_globals );
+}
+
+void dawn::Stack::pop()
+{
+    m_frames.pop_back();
+}
+
 dawn::PopHandler::~PopHandler() noexcept
 {
-    stack.pop();
+    m_stack.pop();
 }
 
 dawn::PopHandler::PopHandler( Stack& stack )
-    : stack( stack )
+    : m_stack( stack )
 {
 }
