@@ -39,7 +39,7 @@ dawn::PopHandler dawn::Stack::push()
 dawn::PopHandler dawn::Stack::push_from( RegisterRef<Frame> const& parent_frame )
 {
     m_frames.emplace_back( frame_pool().new_register() )
-        ->reset( parent_frame ? parent_frame : RegisterRef<Frame>{} );
+        ->reset( parent_frame );
     return PopHandler{ *this };
 }
 
