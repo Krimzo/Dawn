@@ -8,19 +8,29 @@ namespace dawn
 template<typename T>
 struct Register
 {
-    Int count = 0;
-    T value = {};
-
     void incr()
     {
-        ++count;
+        std::atomic_ref<Int>{ m_count }.fetch_add( 1, std::memory_order_relaxed );
     }
 
-    // Does not reset value. Caller should reset after obtaining a new register.
     void decr()
     {
-        --count;
+        std::atomic_ref<Int>{ m_count }.fetch_sub( 1, std::memory_order_relaxed );
     }
+
+    Int count() const
+    {
+        return std::atomic_ref<Int>{ const_cast<Int&>( m_count ) }.load( std::memory_order_relaxed );
+    }
+
+    T& value() const
+    {
+        return const_cast<T&>( m_value );
+    }
+
+private:
+    alignas( std::atomic_ref<Int>::required_alignment ) Int m_count = 0;
+    T m_value = {};
 };
 
 template<typename T>
@@ -89,12 +99,12 @@ struct RegisterRef
 
     T& operator*() const noexcept
     {
-        return m_regptr->value;
+        return m_regptr->value();
     }
 
     T* operator->() const noexcept
     {
-        return &m_regptr->value;
+        return &m_regptr->value();
     }
 
     template<typename C>
@@ -114,28 +124,6 @@ private:
 };
 
 template<typename T, Int S>
-struct MemoryChunk
-{
-    Register<T> m_space[S] = {};
-    Int m_current = 0;
-
-    // Does not reset value. Caller should reset after obtaining a new register.
-    Register<T>* move_to_unused()
-    {
-        const Int start_index = m_current;
-        while ( m_space[m_current].count != 0 )
-        {
-            if ( ++m_current == S )
-                m_current = 0;
-
-            if ( m_current == start_index )
-                return nullptr;
-        }
-        return m_space + m_current;
-    }
-};
-
-template<typename T, Int ChunkSize>
 struct MemoryPool
 {
     friend struct MemoryPools;
@@ -167,7 +155,27 @@ struct MemoryPool
     }
 
 private:
-    List<MemoryChunk<T, ChunkSize>> m_chunks;
-    List<MemoryChunk<T, ChunkSize>>::iterator m_current;
+    struct Chunk
+    {
+        Register<T> m_space[S] = {};
+        Int m_current = 0;
+
+        Register<T>* move_to_unused()
+        {
+            const Int start_index = m_current;
+            while ( m_space[m_current].count() != 0 )
+            {
+                if ( ++m_current == S )
+                    m_current = 0;
+
+                if ( m_current == start_index )
+                    return nullptr;
+            }
+            return m_space + m_current;
+        }
+    };
+
+    List<Chunk> m_chunks;
+    List<Chunk>::iterator m_current;
 };
 }
