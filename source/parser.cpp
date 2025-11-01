@@ -182,9 +182,6 @@ void dawn::Parser::parse_global_variable( TokenIterator& it, Module& module )
     Variable variable;
     parse_variable( it, variable );
 
-    if ( variable.type.kind != VarKind::CONSTANT )
-        PARSER_PANIC( *first_it, "global variables must be const" );
-
     if ( module.contains_id( variable.id ) )
         PARSER_PANIC( *first_it, "name [", IDSystem::get( variable.id ), "] already in use" );
 

@@ -34,7 +34,7 @@ int _dev_main( int argc, char** argv )
 
     if ( auto error = dawn.eval( Source::from_file(
 #if _DEBUG
-#if 0
+#if 1
         "examples/tests.dw"
 #else
         "examples/dev.dw"
