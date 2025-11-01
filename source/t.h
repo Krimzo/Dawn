@@ -15,6 +15,7 @@
 #include <map>
 #include <optional>
 #include <thread>
+#include <mutex>
 #include <memory>
 #include <variant>
 #include <ranges>

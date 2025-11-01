@@ -6,9 +6,6 @@
 
 namespace dawn
 {
-using Globals = GlobalStorage<Value>;
-using Locals = LocalStorage<Value>;
-
 struct Frame
 {
     friend struct Stack;
@@ -17,17 +14,17 @@ struct Frame
 
 private:
     RegisterRef<Frame> m_parent;
-    Locals m_locals;
+    LocalStorage<Value> m_local_values;
 
     Value& set( ID id, Value const& value );
-    Value* get( ID id, Globals& globals );
+    Value* get( ID id, GlobalStorage<Value>& global_values );
 };
 
 struct Stack
 {
     friend struct PopHandler;
 
-    Stack( Globals& globals );
+    Stack( GlobalStorage<Value>& global_values );
 
     [[nodiscard]] PopHandler push();
     [[nodiscard]] PopHandler push_from( RegisterRef<Frame> const& parent_frame );
@@ -38,7 +35,7 @@ struct Stack
     Value* get( ID id );
 
 private:
-    Globals& m_globals;
+    GlobalStorage<Value>& m_global_values;
     Vector<RegisterRef<Frame>> m_frames;
 
     void pop();

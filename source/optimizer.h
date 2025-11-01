@@ -33,7 +33,8 @@ private:
         }
     };
 
-    Holder<Engine> m_engine;
+    std::unique_ptr<Global> m_global;
+    std::unique_ptr<Engine> m_engine;
     Vector<Inlineable> m_inline;
 
     void reset();

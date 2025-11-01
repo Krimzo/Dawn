@@ -14,7 +14,8 @@ struct Dawn
     Lexer lexer;
     Parser parser;
     Optimizer optimizer;
-    Engine engine;
+    Global global;
+    Engine engine{ global };
 
     Opt<String> eval( Source const& source ) noexcept;
     Opt<String> eval( Source const& source, StringSet& imported ) noexcept;

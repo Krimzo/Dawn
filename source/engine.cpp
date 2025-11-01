@@ -1,7 +1,9 @@
 #include "engine.h"
 
 
-dawn::Engine::Engine()
+dawn::Engine::Engine( Global& global )
+    : global{ global }
+    , stack{ global.values }
 {
     load_standard_operators();
     load_standard_functions();
@@ -34,7 +36,7 @@ void dawn::Engine::load_operator( Operator const& entry )
     auto const& left = entry.args[0];
     auto const& right = entry.args[1];
 
-    auto& left_types = operators[(Int) entry.type];
+    auto& left_types = global.operators[(Int) entry.type];
 
     auto* right_types = left_types.get( left.type.type_id );
     if ( !right_types )
@@ -48,15 +50,14 @@ void dawn::Engine::load_operator( Operator const& entry )
 
 void dawn::Engine::load_function( Function const& entry )
 {
-    if ( globals.get( entry.id ) )
+    if ( global.values.get( entry.id ) )
         ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( entry.id ), "] already exists" );
 
     FunctionValue fv{};
-    auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
-    global.id = entry.id;
-    global.func = DFunction{ entry.args, entry.body };
-
-    globals.set( entry.id, Value{ fv, LOCATION_NONE } );
+    auto& as_global = fv.data.emplace<FunctionValue::AsGlobal>();
+    as_global.id = entry.id;
+    as_global.func = DFunction{ entry.args, entry.body };
+    global.values.set( entry.id, Value{ fv, LOCATION_NONE } );
 }
 
 void dawn::Engine::load_enum( Enum const& entry )
@@ -67,23 +68,23 @@ void dawn::Engine::load_enum( Enum const& entry )
         if ( auto* expr_refptr = std::get_if<NodeRef>( &entry.expr ) )
             *entry.expr.emplace<Holder<Value>>() = handle_expr( **expr_refptr );
     }
-    enums.set( enu.id, enu );
+    global.enums.set( enu.id, enu );
 }
 
 void dawn::Engine::load_struct( Struct const& entry )
 {
-    structs.set( entry.id, entry );
+    global.structs.set( entry.id, entry );
 }
 
 void dawn::Engine::load_variable( Variable const& entry )
 {
     auto const& expr = *entry.expr;
-    globals.set( entry.id, handle_expr( expr ) );
+    global.values.set( entry.id, handle_expr( expr ) );
 }
 
 void dawn::Engine::bind_oper( ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const, CFunction cfunc )
 {
-    auto& left_types = operators[(Int) op_type];
+    auto& left_types = global.operators[(Int) op_type];
 
     auto* right_types = left_types.get( left_type_id );
     if ( !right_types )
@@ -95,26 +96,26 @@ void dawn::Engine::bind_oper( ID left_type_id, OperatorType op_type, ID right_ty
     right_types->set( right_type_id, {} ).as_global().func.emplace<CFunction>( std::move( cfunc ) );
 
     if ( is_const )
-        m_ctime_ops[(Int) op_type].insert( combine_ids( left_type_id, right_type_id ) );
+        global.ctime_ops[(Int) op_type].insert( combine_ids( left_type_id, right_type_id ) );
 }
 
 void dawn::Engine::bind_func( ID id, Bool is_ctime, CFunction cfunc )
 {
-    if ( globals.get( id ) )
+    if ( global.values.get( id ) )
         ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] already exists" );
     if ( is_ctime )
-        m_ctime_funcs.insert( id );
+        global.ctime_funcs.insert( id );
 
     FunctionValue fv{};
-    auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
-    global.id = id;
-    global.func = std::move( cfunc );
-    globals.set( id, Value{ fv, LOCATION_NONE } );
+    auto& as_global = fv.data.emplace<FunctionValue::AsGlobal>();
+    as_global.id = id;
+    as_global.func = std::move( cfunc );
+    global.values.set( id, Value{ fv, LOCATION_NONE } );
 }
 
 dawn::Value dawn::Engine::call_func( ID id, Value* args, Int arg_count )
 {
-    Value* value = globals.get( id );
+    Value* value = global.values.get( id );
     if ( !value )
         ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] does not exist" );
 
@@ -124,18 +125,18 @@ dawn::Value dawn::Engine::call_func( ID id, Value* args, Int arg_count )
     return handle_func( LOCATION_NONE, value->as_function(), args, arg_count );
 }
 
-void dawn::Engine::bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func )
+void dawn::Engine::bind_member( ValueType type, StringRef const& name, MemberFunc const& func )
 {
-    member_generators[(Int) type].set( IDSystem::get( name ), [func]( Location const& location, Engine& engine, Value const& self ) -> Value
+    global.member_generators[(Int) type].set( IDSystem::get( name ), [func]( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return func( location, engine, const_cast<Value&>( self ) );
         } );
 }
 
-void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body )
+void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, MethodFunc const& body )
 {
     const ID id = IDSystem::get( name );
-    member_generators[(Int) type].set( id, [name, is_const, expected_args, body, id]( Location const& location, Engine& __, Value const& self ) -> Value
+    global.member_generators[(Int) type].set( id, [name, is_const, expected_args, body, id]( Location const& location, Engine& __, Value const& self ) -> Value
         {
             FunctionValue fv{};
             auto& method = fv.data.emplace<FunctionValue::AsMethod>();
@@ -400,7 +401,7 @@ dawn::Value const& dawn::Engine::handle_lambda_node( LambdaNode const& node )
 
 dawn::Value dawn::Engine::handle_enum_node( EnumNode const& node )
 {
-    auto* enum_ptr = enums.get( node.type_id );
+    auto* enum_ptr = global.enums.get( node.type_id );
     if ( !enum_ptr )
         ENGINE_PANIC( node.location, "enum [", IDSystem::get( node.type_id ), "] does not exist" );
 
@@ -420,7 +421,7 @@ dawn::Value dawn::Engine::handle_enum_node( EnumNode const& node )
 
 dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
 {
-    auto* struct_ptr = structs.get( node.type_id );
+    auto* struct_ptr = global.structs.get( node.type_id );
     if ( !struct_ptr )
         ENGINE_PANIC( node.location, "struct [", IDSystem::get( node.type_id ), "] does not exist" );
     auto& struc = *struct_ptr;
@@ -518,7 +519,7 @@ dawn::Value dawn::Engine::handle_ac_node( AccessNode const& node )
     }
     else
     {
-        auto* generator_ptr = member_generators[(Int) left.type()].get( node.right_id );
+        auto* generator_ptr = global.member_generators[(Int) left.type()].get( node.right_id );
         if ( !generator_ptr )
             ENGINE_PANIC( node.location, "type [", left.type(), "] does not have member [", IDSystem::get( node.right_id ), "]" );
         return ( *generator_ptr )( node.location, *this, left );

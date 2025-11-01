@@ -15,7 +15,8 @@ void dawn::Optimizer::optimize( Module& module )
 
 void dawn::Optimizer::reset()
 {
-    m_engine = {};
+    m_global = std::make_unique<Global>();
+    m_engine = std::make_unique<Engine>( *m_global );
     m_inline.clear();
 }
 
@@ -375,7 +376,7 @@ void dawn::Optimizer::optimize_expr_call( CallNode& node, Node& out_node )
     Bool is_ctime = true;
     auto& left_expr = *node.left_expr;
     optimize_expr( left_expr );
-    if ( left_expr.type() != NodeType::IDENTIFIER || !m_engine->m_ctime_funcs.contains( std::get<IdentifierNode>( left_expr ).id ) )
+    if ( left_expr.type() != NodeType::IDENTIFIER || !m_engine->global.ctime_funcs.contains( std::get<IdentifierNode>( left_expr ).id ) )
         is_ctime = false;
     for ( auto& arg : node.args )
     {
@@ -480,7 +481,7 @@ void dawn::Optimizer::optimize_expr_op( OperatorNode& node, Node& out_node )
 
     Value left_value = std::get<Value>( left_node );
     auto& right_value = std::get<Value>( right_node );
-    if ( !m_engine->m_ctime_ops[(Int) node.type].contains( combine_ids( left_value.type_id(), right_value.type_id() ) ) )
+    if ( !m_engine->global.ctime_ops[(Int) node.type].contains( combine_ids( left_value.type_id(), right_value.type_id() ) ) )
         return;
 
     left_value = m_engine->handle_oper( node.location, left_value, node.type, right_value );

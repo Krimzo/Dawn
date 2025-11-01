@@ -6,25 +6,34 @@
 
 namespace dawn
 {
+using MemberGenerator = Func<Value( Location const&, Engine&, Value const& )>;
+using MemberFunc = Func<Value( Location const&, Engine&, Value const& )>;
+using MethodFunc = Func<Value( Location const&, Engine&, Value const&, Value const* )>;
+
+struct Global
+{
+    GlobalStorage<Enum> enums;
+    GlobalStorage<Struct> structs;
+    GlobalStorage<Value> values;
+
+    GlobalStorage<GlobalStorage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
+    GlobalStorage<MemberGenerator> member_generators[(Int) ValueType::_COUNT] = {};
+
+    Set<uint64_t> ctime_ops[(Int) OperatorType::_COUNT] = {};
+    Set<ID> ctime_funcs;
+};
+
 struct Engine
 {
-    using MemberGenerator = Func<Value( Location const&, Engine&, Value const& )>;
-    using CustomMemberFunc = Func<Value( Location const&, Engine&, Value const& )>;
-    using CustomMethodFunc = Func<Value( Location const&, Engine&, Value const&, Value const* )>;
-
     friend struct Value;
     friend struct EnumValue;
     friend struct Optimizer;
     friend Value create_default_value( Engine* engine, ID typeid_, Location const& location );
 
-    GlobalStorage<Enum> enums;
-    GlobalStorage<Struct> structs;
-    GlobalStorage<GlobalStorage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
-    GlobalStorage<MemberGenerator> member_generators[(Int) ValueType::_COUNT] = {};
-    Globals globals;
-    Stack stack{ globals };
+    Global& global;
+    Stack stack;
 
-    Engine();
+    Engine( Global& global );
 
     void load_mod( Module const& module );
     void load_operator( Operator const& entry );
@@ -38,13 +47,10 @@ struct Engine
     void bind_func( ID id, Bool is_ctime, CFunction cfunc );
     Value call_func( ID id, Value* args, Int arg_count );
 
-    void bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func );
-    void bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body );
+    void bind_member( ValueType type, StringRef const& name, MemberFunc const& func );
+    void bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, MethodFunc const& body );
 
 private:
-    Set<uint64_t> m_ctime_ops[(Int) OperatorType::_COUNT] = {};
-    Set<ID> m_ctime_funcs;
-
     void load_standard_operators();
     void load_standard_functions();
     void load_standard_members();
@@ -77,7 +83,7 @@ private:
 
     __forceinline Value handle_oper( Location const& location, Value const& left, const OperatorType op_type, Value const& right )
     {
-        auto& op_left_ids = operators[(Int) op_type];
+        auto& op_left_ids = global.operators[(Int) op_type];
         auto* op_right_ids = op_left_ids.get( left.type_id() );
         if ( !op_right_ids )
             ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "]" );
@@ -266,7 +272,7 @@ __forceinline Value create_default_value( Engine* engine, ID typeid_, Location c
     else if ( typeid_ == _id_array )
         return Value{ ArrayValue{}, location };
 
-    else if ( auto* enum_ptr = engine->enums.get( typeid_ ) )
+    else if ( auto* enum_ptr = engine->global.enums.get( typeid_ ) )
     {
         auto& entry = *enum_ptr->entries.begin();
         EnumNode node{ location };
@@ -275,7 +281,7 @@ __forceinline Value create_default_value( Engine* engine, ID typeid_, Location c
         return engine->handle_enum_node( node );
     }
 
-    else if ( auto* struct_ptr = engine->structs.get( typeid_ ) )
+    else if ( auto* struct_ptr = engine->global.structs.get( typeid_ ) )
     {
         StructNode node{ location };
         node.type_id = typeid_;

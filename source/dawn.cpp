@@ -88,10 +88,10 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* arg
 
 void dawn::Dawn::add_gvar( StringRef const& name, Value const& value ) noexcept
 {
-    engine.globals.set( IDSystem::get( name ), value );
+    global.values.set( IDSystem::get( name ), value );
 }
 
 dawn::Value* dawn::Dawn::get_gvar( StringRef const& name ) noexcept
 {
-    return engine.globals.get( IDSystem::get( name ) );
+    return global.values.get( IDSystem::get( name ) );
 }

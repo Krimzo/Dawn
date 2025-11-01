@@ -5,26 +5,26 @@
 void dawn::Frame::reset( RegisterRef<Frame> const& parent )
 {
     m_parent = parent;
-    m_locals.clear();
+    m_local_values.clear();
 }
 
 dawn::Value& dawn::Frame::set( ID id, Value const& value )
 {
-    return m_locals.set( id, value );
+    return m_local_values.set( id, value );
 }
 
-dawn::Value* dawn::Frame::get( ID id, Globals& globals )
+dawn::Value* dawn::Frame::get( ID id, GlobalStorage<Value>& global_values )
 {
-    if ( Value* ptr = m_locals.get( id ) )
+    if ( Value* ptr = m_local_values.get( id ) )
         return ptr;
     else if ( m_parent )
-        return m_parent->get( id, globals );
+        return m_parent->get( id, global_values );
     else
-        return globals.get( id );
+        return global_values.get( id );
 }
 
-dawn::Stack::Stack( Globals& globals )
-    : m_globals( globals )
+dawn::Stack::Stack( GlobalStorage<Value>& global_values )
+    : m_global_values( global_values )
 {
     m_frames.reserve( 128 );
 }
@@ -51,7 +51,7 @@ dawn::RegisterRef<dawn::Frame> const& dawn::Stack::peek() const
 dawn::Value& dawn::Stack::set( ID id, Value const& value )
 {
     if ( m_frames.empty() )
-        return m_globals.set( id, value );
+        return m_global_values.set( id, value );
     else
         return m_frames.back()->set( id, value );
 }
@@ -59,9 +59,9 @@ dawn::Value& dawn::Stack::set( ID id, Value const& value )
 dawn::Value* dawn::Stack::get( ID id )
 {
     if ( m_frames.empty() )
-        return m_globals.get( id );
+        return m_global_values.get( id );
     else
-        return m_frames.back()->get( id, m_globals );
+        return m_frames.back()->get( id, m_global_values );
 }
 
 void dawn::Stack::pop()
