@@ -1,61 +1,16 @@
 #pragma once
 
-#include "parser.h"
-#include "stack.h"
+#include "global.h"
 
 
 namespace dawn
 {
-using MemberGenerator = Func<Value( Location const&, Engine&, Value const& )>;
-using MemberFunc = Func<Value( Location const&, Engine&, Value const& )>;
-using MethodFunc = Func<Value( Location const&, Engine&, Value const&, Value const* )>;
-
-struct Global
-{
-    GlobalStorage<Enum> enums;
-    GlobalStorage<Struct> structs;
-    GlobalStorage<Value> values;
-
-    GlobalStorage<GlobalStorage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
-    GlobalStorage<MemberGenerator> member_generators[(Int) ValueType::_COUNT] = {};
-
-    Set<uint64_t> ctime_ops[(Int) OperatorType::_COUNT] = {};
-    Set<ID> ctime_funcs;
-};
-
 struct Engine
 {
-    friend struct Value;
-    friend struct EnumValue;
-    friend struct Optimizer;
-    friend Value create_default_value( Engine* engine, ID typeid_, Location const& location );
-
     Global& global;
     Stack stack;
 
     Engine( Global& global );
-
-    void load_mod( Module const& module );
-    void load_operator( Operator const& entry );
-    void load_function( Function const& entry );
-    void load_enum( Enum const& entry );
-    void load_struct( Struct const& entry );
-    void load_variable( Variable const& entry );
-
-    void bind_oper( ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const, CFunction cfunc );
-
-    void bind_func( ID id, Bool is_ctime, CFunction cfunc );
-    Value call_func( ID id, Value* args, Int arg_count );
-
-    void bind_member( ValueType type, StringRef const& name, MemberFunc const& func );
-    void bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, MethodFunc const& body );
-
-private:
-    void load_standard_operators();
-    void load_standard_functions();
-    void load_standard_members();
-
-    void add_var( Location const& location, VarType const& type, ID id, Value const& value );
 
     void handle_var_node( VariableNode const& node );
     Value const& handle_id_node( IdentifierNode const& node );
@@ -79,6 +34,7 @@ private:
     Value handle_op_node( OperatorNode const& node );
     Value handle_as_node( AssignNode const& node );
 
+    void add_var( Location const& location, VarType const& type, ID id, Value const& value );
     void handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon ); // Should not inline since scope calls instr and instr calls scope.
 
     __forceinline Value handle_oper( Location const& location, Value const& left, const OperatorType op_type, Value const& right )

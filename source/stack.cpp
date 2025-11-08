@@ -26,7 +26,7 @@ dawn::Value* dawn::Frame::get( ID id, GlobalStorage<Value>& global_values )
 dawn::Stack::Stack( GlobalStorage<Value>& global_values )
     : m_global_values( global_values )
 {
-    m_frames.reserve( 128 );
+    m_frames.reserve( 64 );
 }
 
 dawn::PopHandler dawn::Stack::push()
@@ -45,7 +45,13 @@ dawn::PopHandler dawn::Stack::push_from( RegisterRef<Frame> const& parent_frame 
 
 dawn::RegisterRef<dawn::Frame> const& dawn::Stack::peek() const
 {
-    return m_frames.back();
+    if ( !m_frames.empty() )
+        return m_frames.back();
+    else
+    {
+        static const RegisterRef<Frame> empty{};
+        return empty;
+    }
 }
 
 dawn::Value& dawn::Stack::set( ID id, Value const& value )

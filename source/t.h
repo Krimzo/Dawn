@@ -22,6 +22,8 @@
 #include <random>
 #include <chrono>
 #include <filesystem>
+#include <execution>
+#include <syncstream>
 
 // Namespace.
 namespace dawn

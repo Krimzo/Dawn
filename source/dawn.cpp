@@ -37,7 +37,7 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, StringSet& impor
             if ( auto error = eval( Source::from_file( path ), imported ) )
                 return error;
         }
-        engine.load_mod( module );
+        global.load_mod( engine, module );
     }
     catch ( String const& msg )
     {
@@ -48,7 +48,7 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, StringSet& impor
 
 void dawn::Dawn::bind_func( StringRef const& name, Bool is_ctime, CFunction cfunc ) noexcept
 {
-    engine.bind_func( IDSystem::get( name ), is_ctime, std::move( cfunc ) );
+    global.bind_func( IDSystem::get( name ), is_ctime, std::move( cfunc ) );
 }
 
 dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name ) noexcept
@@ -71,9 +71,9 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* arg
     try
     {
         if ( retval )
-            *retval = engine.call_func( IDSystem::get( name ), args, arg_count );
+            *retval = global.call_func( engine, IDSystem::get( name ), args, arg_count );
         else
-            engine.call_func( IDSystem::get( name ), args, arg_count );
+            global.call_func( engine, IDSystem::get( name ), args, arg_count );
     }
     catch ( String const& msg )
     {

@@ -5,166 +5,6 @@ dawn::Engine::Engine( Global& global )
     : global{ global }
     , stack{ global.values }
 {
-    load_standard_operators();
-    load_standard_functions();
-    load_standard_members();
-}
-
-void dawn::Engine::load_mod( Module const& module )
-{
-    for ( auto& entry : module.operators )
-        load_operator( entry );
-
-    for ( auto& entry : module.functions )
-        load_function( entry );
-
-    for ( auto& entry : module.enums )
-        load_enum( entry );
-
-    for ( auto& entry : module.structs )
-        load_struct( entry );
-
-    for ( auto& entry : module.variables )
-        load_variable( entry );
-}
-
-void dawn::Engine::load_operator( Operator const& entry )
-{
-    if ( entry.args.size() != 2 )
-        ENGINE_PANIC( LOCATION_NONE, "operators must have 2 arguments" );
-
-    auto const& left = entry.args[0];
-    auto const& right = entry.args[1];
-
-    auto& left_types = global.operators[(Int) entry.type];
-
-    auto* right_types = left_types.get( left.type.type_id );
-    if ( !right_types )
-        right_types = &left_types.set( left.type.type_id, {} );
-
-    auto* op = right_types->get( right.type.type_id );
-    if ( op )
-        ENGINE_PANIC( LOCATION_NONE, "operator [", entry.type, "] with left type [", IDSystem::get( left.type.type_id ), "] and right type [", IDSystem::get( right.type.type_id ), "] already defined" );
-    right_types->set( right.type.type_id, {} ).as_global().func.emplace<DFunction>( entry.args, entry.body );
-}
-
-void dawn::Engine::load_function( Function const& entry )
-{
-    if ( global.values.get( entry.id ) )
-        ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( entry.id ), "] already exists" );
-
-    FunctionValue fv{};
-    auto& as_global = fv.data.emplace<FunctionValue::AsGlobal>();
-    as_global.id = entry.id;
-    as_global.func = DFunction{ entry.args, entry.body };
-    global.values.set( entry.id, Value{ fv, LOCATION_NONE } );
-}
-
-void dawn::Engine::load_enum( Enum const& entry )
-{
-    Enum enu = entry;
-    for ( auto& entry : enu.entries )
-    {
-        if ( auto* expr_refptr = std::get_if<NodeRef>( &entry.expr ) )
-            *entry.expr.emplace<Holder<Value>>() = handle_expr( **expr_refptr );
-    }
-    global.enums.set( enu.id, enu );
-}
-
-void dawn::Engine::load_struct( Struct const& entry )
-{
-    global.structs.set( entry.id, entry );
-}
-
-void dawn::Engine::load_variable( Variable const& entry )
-{
-    auto const& expr = *entry.expr;
-    global.values.set( entry.id, handle_expr( expr ) );
-}
-
-void dawn::Engine::bind_oper( ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const, CFunction cfunc )
-{
-    auto& left_types = global.operators[(Int) op_type];
-
-    auto* right_types = left_types.get( left_type_id );
-    if ( !right_types )
-        right_types = &left_types.set( left_type_id, {} );
-
-    auto* op = right_types->get( right_type_id );
-    if ( op )
-        ENGINE_PANIC( LOCATION_NONE, "operator [", op_type, "] with left type [", IDSystem::get( left_type_id ), "] and right type [", IDSystem::get( right_type_id ), "] already defined" );
-    right_types->set( right_type_id, {} ).as_global().func.emplace<CFunction>( std::move( cfunc ) );
-
-    if ( is_const )
-        global.ctime_ops[(Int) op_type].insert( combine_ids( left_type_id, right_type_id ) );
-}
-
-void dawn::Engine::bind_func( ID id, Bool is_ctime, CFunction cfunc )
-{
-    if ( global.values.get( id ) )
-        ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] already exists" );
-    if ( is_ctime )
-        global.ctime_funcs.insert( id );
-
-    FunctionValue fv{};
-    auto& as_global = fv.data.emplace<FunctionValue::AsGlobal>();
-    as_global.id = id;
-    as_global.func = std::move( cfunc );
-    global.values.set( id, Value{ fv, LOCATION_NONE } );
-}
-
-dawn::Value dawn::Engine::call_func( ID id, Value* args, Int arg_count )
-{
-    Value* value = global.values.get( id );
-    if ( !value )
-        ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] does not exist" );
-
-    if ( value->type() != ValueType::FUNCTION )
-        ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] can not be called" );
-
-    return handle_func( LOCATION_NONE, value->as_function(), args, arg_count );
-}
-
-void dawn::Engine::bind_member( ValueType type, StringRef const& name, MemberFunc const& func )
-{
-    global.member_generators[(Int) type].set( IDSystem::get( name ), [func]( Location const& location, Engine& engine, Value const& self ) -> Value
-        {
-            return func( location, engine, const_cast<Value&>( self ) );
-        } );
-}
-
-void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, MethodFunc const& body )
-{
-    const ID id = IDSystem::get( name );
-    global.member_generators[(Int) type].set( id, [name, is_const, expected_args, body, id]( Location const& location, Engine& __, Value const& self ) -> Value
-        {
-            FunctionValue fv{};
-            auto& method = fv.data.emplace<FunctionValue::AsMethod>();
-            method.id = id;
-            method.func = [name, is_const, expected_args, body, self]( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
-                {
-                    if ( !is_const && self.is_const() )
-                        ENGINE_PANIC( location, "can not call [", name, "] on a const value" );
-                    if ( ( 1 + expected_args ) != arg_count )
-                        ENGINE_PANIC( location, "method [", name, "] expects self + ", expected_args, " arguments" );
-                    return body( location, engine, args[0], args + 1 );
-                };
-            *method.self = self;
-            return Value{ fv, location };
-        } );
-}
-
-void dawn::Engine::add_var( Location const& location, VarType const& type, ID id, Value const& value )
-{
-    if ( type.type_id != value.type_id() )
-        ENGINE_PANIC( location, "can not init variable of type [", IDSystem::get( type.type_id ), "] with type [", IDSystem::get( value.type_id() ), "]" );
-
-    if ( type.kind == VarKind::CONSTANT )
-        stack.set( id, value.clone() );
-    else if ( type.kind == VarKind::VARIABLE )
-        stack.set( id, value.clone().unlock_const() );
-    else
-        stack.set( id, value );
 }
 
 void dawn::Engine::handle_var_node( VariableNode const& node )
@@ -568,6 +408,19 @@ dawn::Value dawn::Engine::handle_as_node( AssignNode const& node )
     default:
         ENGINE_PANIC( node.location, "unknown assign node type: ", (Int) node.type );
     }
+}
+
+void dawn::Engine::add_var( Location const& location, VarType const& type, ID id, Value const& value )
+{
+    if ( type.type_id != value.type_id() )
+        ENGINE_PANIC( location, "can not init variable of type [", IDSystem::get( type.type_id ), "] with type [", IDSystem::get( value.type_id() ), "]" );
+
+    if ( type.kind == VarKind::CONSTANT )
+        stack.set( id, value.clone() );
+    else if ( type.kind == VarKind::VARIABLE )
+        stack.set( id, value.clone().unlock_const() );
+    else
+        stack.set( id, value );
 }
 
 void dawn::Engine::handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon )

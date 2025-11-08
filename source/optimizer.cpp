@@ -4,7 +4,7 @@
 void dawn::Optimizer::optimize( Module& module )
 {
     reset();
-    m_engine->load_mod( module );
+    m_global->load_mod( *m_engine, module );
     optimize_imports( module.imports );
     optimize_variables( module.variables );
     optimize_operators( module.operators );
