@@ -5,6 +5,7 @@
 
 namespace dawn
 {
+#ifndef DAWN_NO_THREADS
 template<typename T>
 struct Register
 {
@@ -32,6 +33,35 @@ private:
     std::atomic<Int> m_count = 0;
     T m_value = {};
 };
+#else
+template<typename T>
+struct Register
+{
+    void incr()
+    {
+        ++m_count;
+    }
+
+    void decr()
+    {
+        --m_count;
+    }
+
+    Int count() const
+    {
+        return m_count;
+    }
+
+    T& value() const
+    {
+        return const_cast<T&>( m_value );
+    }
+
+private:
+    Int m_count = 0;
+    T m_value = {};
+};
+#endif
 
 template<typename T>
 struct RegisterRef

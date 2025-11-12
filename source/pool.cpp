@@ -1,7 +1,11 @@
 #include "pool.h"
 
 
-static thread_local dawn::MemoryPools pools;
+static
+#ifndef DAWN_NO_THREADS
+thread_local
+#endif
+dawn::MemoryPools pools;
 
 dawn::MemoryPools::~MemoryPools() noexcept
 {

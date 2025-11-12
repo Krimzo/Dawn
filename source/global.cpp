@@ -1,7 +1,11 @@
 #include "engine.h"
 
 
-static thread_local std::mt19937_64 RAND_ENGINE = []
+static
+#ifndef DAWN_NO_THREADS
+thread_local
+#endif
+std::mt19937_64 RAND_ENGINE = []
     {
         std::random_device device{};
         std::srand( device() );
