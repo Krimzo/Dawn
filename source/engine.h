@@ -57,32 +57,40 @@ struct Engine
 
     __forceinline Value handle_func( Location const& location, FunctionValue const& func, Value const* args, Int arg_count )
     {
-        if ( auto* dfunc = func.dfunction() )
+        try
         {
-            if ( dfunc->args.size() != arg_count )
+            if ( auto* dfunc = func.dfunction() )
             {
-                if ( func.is_global() )
-                    ENGINE_PANIC( location, "invalid argument count for function [", IDSystem::get( func.as_global().id ), "]" );
-                else if ( func.is_method() )
-                    ENGINE_PANIC( location, "invalid argument count for method [", IDSystem::get( func.as_method().id ), "]" );
-                else
-                    ENGINE_PANIC( location, "invalid argument count for lambda" );
+                if ( dfunc->args.size() != arg_count )
+                {
+                    if ( func.is_global() )
+                        ENGINE_PANIC( location, "invalid argument count for function [", IDSystem::get( func.as_global().id ), "]" );
+                    else if ( func.is_method() )
+                        ENGINE_PANIC( location, "invalid argument count for method [", IDSystem::get( func.as_method().id ), "]" );
+                    else
+                        ENGINE_PANIC( location, "invalid argument count for lambda" );
+                }
+
+                auto pop_handler = stack.push_from(
+                    func.is_lambda() ? func.as_lambda().frame : RegisterRef<Frame>{} );
+
+                for ( Int i = 0; i < arg_count; i++ )
+                    add_var( location, dfunc->args[i].type, dfunc->args[i].id, args[i] );
+
+                Opt<Value> retval;
+                handle_scope( dfunc->body, retval, nullptr, nullptr );
+                return retval ? *retval : Value{};
             }
-
-            auto pop_handler = stack.push_from(
-                func.is_lambda() ? func.as_lambda().frame : RegisterRef<Frame>{} );
-
-            for ( Int i = 0; i < arg_count; i++ )
-                add_var( location, dfunc->args[i].type, dfunc->args[i].id, args[i] );
-
-            Opt<Value> retval;
-            handle_scope( dfunc->body, retval, nullptr, nullptr );
-            return retval ? *retval : Value{};
+            else
+            {
+                auto& cfunc = *func.cfunction();
+                return cfunc( location, *this, args, arg_count );
+            }
         }
-        else
+        catch ( String const& err )
         {
-            auto& cfunc = *func.cfunction();
-            return cfunc( location, *this, args, arg_count );
+            print( err );
+            return {};
         }
     }
 

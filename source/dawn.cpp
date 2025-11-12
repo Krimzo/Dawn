@@ -39,9 +39,9 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, StringSet& impor
         }
         global.load_mod( engine, module );
     }
-    catch ( String const& msg )
+    catch ( String const& err )
     {
-        return msg;
+        return err;
     }
     return std::nullopt;
 }
@@ -75,13 +75,13 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* arg
         else
             global.call_func( engine, IDSystem::get( name ), args, arg_count );
     }
-    catch ( String const& msg )
+    catch ( String const& err )
     {
-        return msg;
+        return err;
     }
-    catch ( Value const& err )
+    catch ( Value const& script_err )
     {
-        return dawn::format( "Uncaught error: ", err.to_string( engine ) );
+        return dawn::format( "Uncaught error: ", script_err.to_string( engine ) );
     }
     return std::nullopt;
 }

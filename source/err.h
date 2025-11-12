@@ -47,7 +47,7 @@ struct EngineError
     explicit EngineError( Location const& location, Args&&... args )
     {
         StringStream stream;
-        stream << ColoredText{ COLOR, "Engine" } << " error at " << location.to_string( COLOR ) << ": ";
+        stream << ColoredText{ COLOR, "Engine" } << " error at " << location.to_string( COLOR ) << " on thread " << std::this_thread::get_id() << ": ";
         stream << ColoredText{ COLOR, args... };
         msg = stream.str();
     }

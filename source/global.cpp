@@ -95,8 +95,7 @@ void dawn::Global::bind_oper( ID left_type_id, OperatorType op_type, ID right_ty
     if ( !right_types )
         right_types = &left_types.set( left_type_id, {} );
 
-    auto* op = right_types->get( right_type_id );
-    if ( op )
+    if ( right_types->get( right_type_id ) )
         ENGINE_PANIC( LOCATION_NONE, "operator [", op_type, "] with left type [", IDSystem::get( left_type_id ), "] and right type [", IDSystem::get( right_type_id ), "] already defined" );
     right_types->set( right_type_id, {} ).as_global().func.emplace<CFunction>( std::move( cfunc ) );
 

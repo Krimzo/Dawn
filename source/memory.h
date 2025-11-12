@@ -10,17 +10,17 @@ struct Register
 {
     void incr()
     {
-        std::atomic_ref<Int>{ m_count }.fetch_add( 1, std::memory_order_relaxed );
+        m_count.fetch_add( 1, std::memory_order_relaxed );
     }
 
     void decr()
     {
-        std::atomic_ref<Int>{ m_count }.fetch_sub( 1, std::memory_order_relaxed );
+        m_count.fetch_sub( 1, std::memory_order_relaxed );
     }
 
     Int count() const
     {
-        return std::atomic_ref<Int>{ const_cast<Int&>( m_count ) }.load( std::memory_order_relaxed );
+        return m_count.load( std::memory_order_relaxed );
     }
 
     T& value() const
@@ -29,7 +29,7 @@ struct Register
     }
 
 private:
-    alignas( std::atomic_ref<Int>::required_alignment ) Int m_count = 0;
+    std::atomic<Int> m_count = 0;
     T m_value = {};
 };
 
