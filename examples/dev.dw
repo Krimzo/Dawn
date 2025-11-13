@@ -1,3 +1,18 @@
-func main()
-{
+func main() {
+    array? data = array("very good")
+    async_for(data, `char& c`{
+        c = upper(c)
+    })
+    print(data)
+}
+
+func upper(char c) {
+    int cint = int(c)
+    if cint >= 97 & cint <= 122 {
+        int diff = int('A') - int('a')
+        return char(cint + diff)
+    }
+    else {
+        return c
+    }
 }

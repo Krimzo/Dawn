@@ -8,11 +8,6 @@ namespace dawn
 template<typename T>
 struct LocalStorage
 {
-    LocalStorage( size_t reserver_size = 0 )
-    {
-        m_data.reserve( reserver_size );
-    }
-
     T& set( ID id, T const& t )
     {
         return m_data.emplace_back( id, t ).second;
@@ -40,11 +35,6 @@ private:
 template<typename T>
 struct GlobalStorage
 {
-    GlobalStorage( size_t initial_size = 0 )
-    {
-        m_data.resize( initial_size );
-    }
-
     T& set( ID id, T const& t )
     {
         if ( m_data.size() <= id.integer() )

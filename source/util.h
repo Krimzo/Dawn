@@ -36,7 +36,7 @@ String format( Args&&... args )
 template<typename... Args>
 void print( Args&&... args )
 {
-    ( std::cout << ... << args ) << '\n';
+    ( std::osyncstream{ std::cout } << ... << args ) << '\n';
 }
 
 Char to_escaping( Char c );

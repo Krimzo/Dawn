@@ -1,7 +1,11 @@
 #include "pool.h"
 
 
-static dawn::MemoryPools pools;
+static
+#ifndef DAWN_NO_THREADS
+thread_local
+#endif
+dawn::MemoryPools pools;
 
 dawn::MemoryPools::~MemoryPools() noexcept
 {
@@ -10,7 +14,7 @@ dawn::MemoryPools::~MemoryPools() noexcept
         for ( auto& chunk : pool.m_chunks )
         {
             for ( auto& regist : chunk.m_space )
-                regist.value = T{};
+                regist.value() = T{};
         }
     };
 

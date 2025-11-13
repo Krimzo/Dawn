@@ -37,18 +37,18 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, StringSet& impor
             if ( auto error = eval( Source::from_file( path ), imported ) )
                 return error;
         }
-        engine.load_mod( module );
+        global.load_mod( engine, module );
     }
-    catch ( String const& msg )
+    catch ( String const& err )
     {
-        return msg;
+        return err;
     }
     return std::nullopt;
 }
 
 void dawn::Dawn::bind_func( StringRef const& name, Bool is_ctime, CFunction cfunc ) noexcept
 {
-    engine.bind_func( IDSystem::get( name ), is_ctime, std::move( cfunc ) );
+    global.bind_func( IDSystem::get( name ), is_ctime, std::move( cfunc ) );
 }
 
 dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name ) noexcept
@@ -71,27 +71,27 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* arg
     try
     {
         if ( retval )
-            *retval = engine.call_func( IDSystem::get( name ), args, arg_count );
+            *retval = global.call_func( engine, IDSystem::get( name ), args, arg_count );
         else
-            engine.call_func( IDSystem::get( name ), args, arg_count );
+            global.call_func( engine, IDSystem::get( name ), args, arg_count );
     }
-    catch ( String const& msg )
+    catch ( String const& err )
     {
-        return msg;
+        return err;
     }
-    catch ( Value const& err )
+    catch ( Value const& script_err )
     {
-        return dawn::format( "Uncaught error: ", err.to_string( engine ) );
+        return dawn::format( "Uncaught error: ", script_err.to_string( engine ) );
     }
     return std::nullopt;
 }
 
-void dawn::Dawn::add_var( Location const& location, VarType const& type, StringRef const& name, Value const& value ) noexcept
+void dawn::Dawn::add_gvar( StringRef const& name, Value const& value ) noexcept
 {
-    engine.add_var( location, type, IDSystem::get( name ), value );
+    global.values.set( IDSystem::get( name ), value );
 }
 
-dawn::Value* dawn::Dawn::get_var( StringRef const& name ) noexcept
+dawn::Value* dawn::Dawn::get_gvar( StringRef const& name ) noexcept
 {
-    return engine.get_var( IDSystem::get( name ) );
+    return global.values.get( IDSystem::get( name ) );
 }

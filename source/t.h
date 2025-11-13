@@ -14,12 +14,16 @@
 #include <unordered_map>
 #include <map>
 #include <optional>
+#include <thread>
+#include <mutex>
 #include <memory>
 #include <variant>
 #include <ranges>
 #include <random>
 #include <chrono>
 #include <filesystem>
+#include <execution>
+#include <syncstream>
 
 // Namespace.
 namespace dawn

@@ -1,55 +1,16 @@
 #pragma once
 
-#include "parser.h"
-#include "stack.h"
+#include "global.h"
 
 
 namespace dawn
 {
 struct Engine
 {
-    using MemberGenerator = Func<Value( Location const&, Engine&, Value const& )>;
-    using CustomMemberFunc = Func<Value( Location const&, Engine&, Value const& )>;
-    using CustomMethodFunc = Func<Value( Location const&, Engine&, Value const&, Value const* )>;
-
-    friend struct Value;
-    friend struct EnumValue;
-    friend struct Optimizer;
-    friend Value create_default_value( Engine* engine, ID typeid_, Location const& location );
-
+    Global& global;
     Stack stack;
-    GlobalStorage<Enum> enums;
-    GlobalStorage<Struct> structs;
-    GlobalStorage<GlobalStorage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
-    GlobalStorage<MemberGenerator> member_generators[(Int) ValueType::_COUNT] = {};
 
-    Engine();
-
-    void load_mod( Module const& module );
-    void load_operator( Operator const& entry );
-    void load_function( Function const& entry );
-    void load_enum( Enum const& entry );
-    void load_struct( Struct const& entry );
-    void load_variable( Variable const& entry );
-
-    void bind_oper( ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const, CFunction cfunc );
-
-    void bind_func( ID id, Bool is_ctime, CFunction cfunc );
-    Value call_func( ID id, Value* args, Int arg_count );
-
-    void add_var( Location const& location, VarType const& type, ID id, Value const& value );
-    Value* get_var( ID id );
-
-    void bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func );
-    void bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body );
-
-private:
-    Set<uint64_t> m_ctime_ops[(Int) OperatorType::_COUNT] = {};
-    Set<ID> m_ctime_funcs;
-
-    void load_standard_operators();
-    void load_standard_functions();
-    void load_standard_members();
+    Engine( Global& global );
 
     void handle_var_node( VariableNode const& node );
     Value const& handle_id_node( IdentifierNode const& node );
@@ -73,11 +34,12 @@ private:
     Value handle_op_node( OperatorNode const& node );
     Value handle_as_node( AssignNode const& node );
 
+    void add_var( Location const& location, VarType const& type, ID id, Value const& value );
     void handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon ); // Should not inline since scope calls instr and instr calls scope.
 
     __forceinline Value handle_oper( Location const& location, Value const& left, const OperatorType op_type, Value const& right )
     {
-        auto& op_left_ids = operators[(Int) op_type];
+        auto& op_left_ids = global.operators[(Int) op_type];
         auto* op_right_ids = op_left_ids.get( left.type_id() );
         if ( !op_right_ids )
             ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "]" );
@@ -95,32 +57,40 @@ private:
 
     __forceinline Value handle_func( Location const& location, FunctionValue const& func, Value const* args, Int arg_count )
     {
-        if ( auto* dfunc = func.dfunction() )
+        try
         {
-            if ( dfunc->args.size() != arg_count )
+            if ( auto* dfunc = func.dfunction() )
             {
-                if ( func.is_global() )
-                    ENGINE_PANIC( location, "invalid argument count for function [", IDSystem::get( func.as_global().id ), "]" );
-                else if ( func.is_method() )
-                    ENGINE_PANIC( location, "invalid argument count for method [", IDSystem::get( func.as_method().id ), "]" );
-                else
-                    ENGINE_PANIC( location, "invalid argument count for lambda" );
+                if ( dfunc->args.size() != arg_count )
+                {
+                    if ( func.is_global() )
+                        ENGINE_PANIC( location, "invalid argument count for function [", IDSystem::get( func.as_global().id ), "]" );
+                    else if ( func.is_method() )
+                        ENGINE_PANIC( location, "invalid argument count for method [", IDSystem::get( func.as_method().id ), "]" );
+                    else
+                        ENGINE_PANIC( location, "invalid argument count for lambda" );
+                }
+
+                auto pop_handler = stack.push_from(
+                    func.is_lambda() ? func.as_lambda().frame : RegisterRef<Frame>{} );
+
+                for ( Int i = 0; i < arg_count; i++ )
+                    add_var( location, dfunc->args[i].type, dfunc->args[i].id, args[i] );
+
+                Opt<Value> retval;
+                handle_scope( dfunc->body, retval, nullptr, nullptr );
+                return retval ? *retval : Value{};
             }
-
-            auto pop_handler = stack.push_from(
-                func.is_lambda() ? func.as_lambda().frame : RegisterRef<Frame>{} );
-
-            for ( Int i = 0; i < arg_count; i++ )
-                add_var( location, dfunc->args[i].type, dfunc->args[i].id, args[i] );
-
-            Opt<Value> retval;
-            handle_scope( dfunc->body, retval, nullptr, nullptr );
-            return retval ? *retval : Value{};
+            else
+            {
+                auto& cfunc = *func.cfunction();
+                return cfunc( location, *this, args, arg_count );
+            }
         }
-        else
+        catch ( String const& err )
         {
-            auto& cfunc = *func.cfunction();
-            return cfunc( location, *this, args, arg_count );
+            print( err );
+            return {};
         }
     }
 
@@ -266,7 +236,7 @@ __forceinline Value create_default_value( Engine* engine, ID typeid_, Location c
     else if ( typeid_ == _id_array )
         return Value{ ArrayValue{}, location };
 
-    else if ( auto* enum_ptr = engine->enums.get( typeid_ ) )
+    else if ( auto* enum_ptr = engine->global.enums.get( typeid_ ) )
     {
         auto& entry = *enum_ptr->entries.begin();
         EnumNode node{ location };
@@ -275,7 +245,7 @@ __forceinline Value create_default_value( Engine* engine, ID typeid_, Location c
         return engine->handle_enum_node( node );
     }
 
-    else if ( auto* struct_ptr = engine->structs.get( typeid_ ) )
+    else if ( auto* struct_ptr = engine->global.structs.get( typeid_ ) )
     {
         StructNode node{ location };
         node.type_id = typeid_;

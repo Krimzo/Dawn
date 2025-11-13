@@ -14,7 +14,8 @@ struct Dawn
     Lexer lexer;
     Parser parser;
     Optimizer optimizer;
-    Engine engine;
+    Global global;
+    Engine engine{ global };
 
     Opt<String> eval( Source const& source ) noexcept;
     Opt<String> eval( Source const& source, StringSet& imported ) noexcept;
@@ -25,7 +26,7 @@ struct Dawn
     Opt<String> call_func( StringRef const& name, std::initializer_list<Value> const& args, Value* retval = nullptr ) noexcept;
     Opt<String> call_func( StringRef const& name, Value* args, Int arg_count, Value* retval = nullptr ) noexcept;
 
-    void add_var( Location const& location, VarType const& type, StringRef const& name, Value const& value ) noexcept;
-    Value* get_var( StringRef const& name ) noexcept;
+    void add_gvar( StringRef const& name, Value const& value ) noexcept;
+    Value* get_gvar( StringRef const& name ) noexcept;
 };
 }
