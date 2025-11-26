@@ -36,6 +36,8 @@ void dawn::Frame::reset( RegisterRef<Frame> const& parent )
 {
     if ( auto* local_frame = std::get_if<LocalFrame>( &m_frame ) )
         local_frame->clear();
+    else
+        std::get<GlobalFrame>( m_frame ).clear();
     m_parent = parent;
 }
 
