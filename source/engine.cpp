@@ -129,12 +129,20 @@ void dawn::Engine::add_var( Location const& location, VarType const& type, ID id
     if ( type.type_id != value.type_id() )
         ENGINE_PANIC( location, "can not init variable of type [", IDSystem::get( type.type_id ), "] with type [", IDSystem::get( value.type_id() ), "]" );
 
-    if ( type.kind == VarKind::CONSTANT )
+    switch ( type.kind )
+    {
+    case VarKind::CONSTANT:
         stack.current().set( id, value.clone() );
-    else if ( type.kind == VarKind::VARIABLE )
+        break;
+
+    case VarKind::VARIABLE:
         stack.current().set( id, value.clone().unlock_const() );
-    else
+        break;
+
+    default:
         stack.current().set( id, value );
+        break;
+    }
 }
 
 dawn::Value* dawn::Engine::get_var( ID id )
@@ -212,8 +220,8 @@ dawn::Value dawn::Engine::handle_call_node( CallNode const& node )
 
 dawn::Value dawn::Engine::handle_index_node( IndexNode const& node )
 {
-    Value left = handle_expr( *node.left_expr );
-    Int index = handle_expr( *node.expr ).as_int();
+    const Value left = handle_expr( *node.left_expr );
+    const Int index = handle_expr( *node.expr ).as_int();
 
     if ( left.type() == ValueType::STRING )
     {
@@ -439,10 +447,9 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
         struc_value.members[field.id] = { .value = create_default_value( this, field.type_id, node.location ), .type = MemberType::FIELD };
 
     // Structure argument initialization.
-    if ( std::holds_alternative<StructNode::NamedInit>( node.init ) )
+    if ( auto* named_init = std::get_if<StructNode::NamedInit>( &node.init ) )
     {
-        auto& args = std::get<StructNode::NamedInit>( node.init ).args;
-        for ( auto& [id, arg_node] : args )
+        for ( auto& [id, arg_node] : named_init->args )
         {
             auto field_it = struc_value.members.find( id );
             if ( field_it == struc_value.members.end() ) // Only fields are stored at this stage.
@@ -516,7 +523,7 @@ dawn::Value dawn::Engine::handle_ac_node( AccessNode const& node )
     if ( left.type() == ValueType::STRUCT )
     {
         auto& left_struct = left.as_struct();
-        auto it = left_struct.members.find( node.right_id );
+        const auto it = left_struct.members.find( node.right_id );
         if ( it == left_struct.members.end() )
             ENGINE_PANIC( node.location, "struct [", IDSystem::get( left_struct.parent_id ), "] does not have member [", IDSystem::get( node.right_id ), "]" );
         return it->second.value;
