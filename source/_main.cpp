@@ -2,6 +2,10 @@
 
 using namespace dawn; // Only in this case since it is not a header file.
 
+#define DEBUG_TESTS 0
+
+#ifndef DAWN_SHIP
+
 struct Stopwatch
 {
     using Clock = ch::high_resolution_clock;
@@ -15,26 +19,14 @@ struct Stopwatch
     }
 };
 
-int _dev_main( int argc, char** argv );
-int _shp_main( int argc, char** argv );
-
 int main( int argc, char** argv )
-{
-#ifdef DAWN_SHIP
-    return _shp_main( argc, argv );
-#else
-    return _dev_main( argc, argv );
-#endif
-}
-
-int _dev_main( int argc, char** argv )
 {
     Stopwatch stopwatch;
     Dawn dawn;
 
     if ( auto error = dawn.eval( Source::from_file(
 #if _DEBUG
-#if 0
+#if DEBUG_TESTS
         "examples/tests.dw"
 #else
         "examples/dev.dw"
@@ -56,7 +48,9 @@ int _dev_main( int argc, char** argv )
     return 0;
 }
 
-int _shp_main( int argc, char** argv )
+#else
+
+int main( int argc, char** argv )
 {
     if ( argc < 2 )
     {
@@ -83,3 +77,5 @@ int _shp_main( int argc, char** argv )
     }
     return (int) retval.to_int( dawn.engine );
 }
+
+#endif
