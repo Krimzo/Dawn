@@ -49,3 +49,8 @@ dawn::Bool dawn::Function::is_extension() const
 {
     return type_id.valid();
 }
+
+dawn::Bool dawn::VarType::is_typeless() const
+{
+    return !type_id.valid();
+}

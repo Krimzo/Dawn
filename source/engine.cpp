@@ -159,7 +159,7 @@ dawn::Value dawn::Engine::call_func( ID id, Value* args, Int arg_count )
 
 void dawn::Engine::add_var( Location const& location, VarType const& type, ID id, Value const& value )
 {
-    if ( type.type_id != value.type_id() )
+    if ( type.type_id.valid() && type.type_id != value.type_id() )
         ENGINE_PANIC( location, "can not init variable of type [", IDSystem::get( type.type_id ), "] with type [", IDSystem::get( value.type_id() ), "]" );
 
     switch ( type.kind )

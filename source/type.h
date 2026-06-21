@@ -13,6 +13,8 @@ struct VarType
 {
     ID type_id;
     VarKind kind{};
+
+    Bool is_typeless() const;
 };
 
 struct Variable
