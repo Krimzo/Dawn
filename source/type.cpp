@@ -44,3 +44,8 @@ std::ostream& dawn::operator<<( std::ostream& stream, VarType const& type )
     stream << IDSystem::get( type.type_id ) << type.kind;
     return stream;
 }
+
+dawn::Bool dawn::Function::is_extension() const
+{
+    return type_id.valid();
+}
