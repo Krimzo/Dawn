@@ -285,4 +285,25 @@ __forceinline Value create_default_value( Engine* engine, ID typeid_, Location c
     else
         ENGINE_PANIC( location, "type [", IDSystem::get( typeid_ ), "] does not exist" );
 }
+
+__forceinline Opt<ValueType> builtin_type( ID id )
+{
+    static const ID ids[] = {
+        IDSystem::get( tp_void ),
+        IDSystem::get( tp_bool ),
+        IDSystem::get( tp_int ),
+        IDSystem::get( tp_float ),
+        IDSystem::get( tp_char ),
+        IDSystem::get( tp_string ),
+        IDSystem::get( tp_range ),
+        IDSystem::get( tp_function ),
+        IDSystem::get( tp_array ),
+    };
+    for ( int i = 0; i < (int) std::size( ids ); i++ )
+    {
+        if ( ids[i] == id )
+            return ValueType( i );
+    }
+    return std::nullopt;
+}
 }

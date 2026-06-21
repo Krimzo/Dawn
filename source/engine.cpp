@@ -14,13 +14,18 @@ void dawn::Engine::load_mod( Module const& module )
         load_operator( entry );
 
     for ( auto& entry : module.functions )
-        load_function( entry );
+        if ( !entry.is_extension() )
+            load_function( entry );
 
     for ( auto& entry : module.enums )
         load_enum( entry );
 
     for ( auto& entry : module.structs )
         load_struct( entry );
+
+    for ( auto& entry : module.functions )
+        if ( entry.is_extension() )
+            load_function( entry );
 
     for ( auto& entry : module.variables )
         load_variable( entry );
@@ -48,15 +53,43 @@ void dawn::Engine::load_operator( Operator const& entry )
 
 void dawn::Engine::load_function( Function const& entry )
 {
-    if ( stack.root().get( entry.id ) )
-        ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( entry.id ), "] already exists" );
+    if ( entry.is_extension() )
+    {
+        if ( Opt<ValueType> value_type = builtin_type( entry.type_id ) )
+        {
+            if ( member_generators[(Int) *value_type].get( entry.id ) )
+                ENGINE_PANIC( LOCATION_NONE, "method [", IDSystem::get( entry.id ), "] already defined for type [", IDSystem::get( entry.type_id ), "]" );
+            member_generators[(Int) *value_type].set( entry.id, [entry]( Location const& location, Engine& engine, Value const& self ) -> Value
+                {
+                    FunctionValue fv{};
+                    auto& method = fv.data.emplace<FunctionValue::AsMethod>();
+                    method.id = entry.id;
+                    method.func = DFunction{ entry.args, entry.body };
+                    *method.self = self;
+                    return Value{ fv, location };
+                } );
+        }
+        else if ( Struct* struc = structs.get( entry.type_id ) )
+        {
+            if ( struc->contains( entry.id ) )
+                ENGINE_PANIC( LOCATION_NONE, "method [", IDSystem::get( entry.id ), "] already defined for struct [", IDSystem::get( entry.type_id ), "]" );
+            struc->methods.push_back( entry );
+        }
+        else
+            ENGINE_PANIC( LOCATION_NONE, "type [", IDSystem::get( entry.type_id ), "] does not exist or support function extensions" );
+    }
+    else
+    {
+        if ( stack.root().get( entry.id ) )
+            ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( entry.id ), "] already exists" );
 
-    FunctionValue fv{};
-    auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
-    global.id = entry.id;
-    global.func = DFunction{ entry.args, entry.body };
+        FunctionValue fv{};
+        auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
+        global.id = entry.id;
+        global.func = DFunction{ entry.args, entry.body };
 
-    stack.root().set( entry.id, Value{ fv, LOCATION_NONE } );
+        stack.root().set( entry.id, Value{ fv, LOCATION_NONE } );
+    }
 }
 
 void dawn::Engine::load_enum( Enum const& entry )
@@ -161,7 +194,7 @@ void dawn::Engine::bind_member( ValueType type, StringRef const& name, CustomMem
 void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body )
 {
     const ID id = IDSystem::get( name );
-    member_generators[(Int) type].set( id, [name, is_const, expected_args, body, id]( Location const& location, Engine& __, Value const& self ) -> Value
+    member_generators[(Int) type].set( id, [name, is_const, expected_args, body, id]( Location const& location, Engine& _, Value const& self ) -> Value
         {
             FunctionValue fv{};
             auto& method = fv.data.emplace<FunctionValue::AsMethod>();

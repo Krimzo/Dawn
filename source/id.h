@@ -16,6 +16,11 @@ struct ID
         return m_id;
     }
 
+    constexpr auto valid() const
+    {
+        return m_id != 0;
+    }
+
     constexpr auto operator==( const ID other ) const
     {
         return m_id == other.m_id;
@@ -31,8 +36,7 @@ private:
 
     constexpr ID( const uint32_t id )
         : m_id( id )
-    {
-    }
+    {}
 };
 
 struct IDSystem

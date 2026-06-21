@@ -159,7 +159,7 @@ void dawn::Parser::parse_global_function( TokenIterator& it, Module& module )
     Function function;
     parse_function( it, function );
 
-    if ( module.contains_id( function.id ) )
+    if ( !function.is_extension() && module.contains_id( function.id ) )
         PARSER_PANIC( *first_it, "name [", IDSystem::get( function.id ), "] already in use" );
 
     module.functions.push_back( function );
@@ -380,6 +380,20 @@ void dawn::Parser::parse_function( TokenIterator& it, Function& function )
     if ( it->value != kw_func )
         PARSER_PANIC( *it, "expected function" );
     ++it;
+
+    if ( it->type == TokenType::TYPE )
+    {
+        function.type_id = IDSystem::get( it->value );
+        ++it;
+        if ( it->value != op_access )
+            PARSER_PANIC( *it, "expected access operator" );
+        ++it;
+
+        auto& self_var = function.args.emplace_back();
+        self_var.type.type_id = function.type_id;
+        self_var.type.kind = VarKind::REFERENCE;
+        self_var.id = IDSystem::get( kw_self );
+    }
 
     if ( it->type != TokenType::NAME )
         PARSER_PANIC( *it, "expected function name" );

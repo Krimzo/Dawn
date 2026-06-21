@@ -149,6 +149,16 @@ func some_fun(int arg0, bool& arg2) {
 some_fun(5, false)
 ```
 
+# Extensions
+```dawn
+func array.forEach(function& f) {
+    for v : self {
+        f(v)
+    }
+}
+[1, 2.3, "4", [5]].forEach(print)
+```
+
 # Lambdas
 ```dawn
 function sub = `int a, int b`{

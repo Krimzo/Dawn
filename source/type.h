@@ -42,9 +42,12 @@ struct Operator
 
 struct Function
 {
+    ID type_id;
     ID id;
     Vector<Arg> args;
     Scope body;
+
+    Bool is_extension() const;
 };
 
 struct Enum
