@@ -32,7 +32,7 @@ std::ostream& dawn::operator<<( std::ostream& stream, VarKind kind )
 {
     switch ( kind )
     {
-    case VarKind::CONSTANT: stream << ""; break;
+    case VarKind::CONSTANT: stream << vr_constant; break;
     case VarKind::VARIABLE: stream << vr_variable; break;
     case VarKind::REFERENCE: stream << vr_reference; break;
     }
@@ -48,4 +48,9 @@ std::ostream& dawn::operator<<( std::ostream& stream, VarType const& type )
 dawn::Bool dawn::Function::is_extension() const
 {
     return type_id.valid();
+}
+
+dawn::Bool dawn::VarType::is_typeless() const
+{
+    return !type_id.valid();
 }

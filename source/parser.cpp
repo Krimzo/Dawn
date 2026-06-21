@@ -105,6 +105,8 @@ void dawn::Parser::parse( Token const* token_ptr, Int token_count, Module& modul
 
 dawn::Bool dawn::Parser::is_variable( TokenIterator const& it )
 {
+    if ( it->value == vr_reference )
+        return true;
     if ( it->type != TokenType::TYPE )
         return false;
     TokenIterator next = it;
@@ -182,7 +184,7 @@ void dawn::Parser::parse_global_variable( TokenIterator& it, Module& module )
     Variable variable;
     parse_variable( it, variable );
 
-    if ( variable.type.kind != VarKind::CONSTANT )
+    if ( !variable.type.is_typeless() && variable.type.kind != VarKind::CONSTANT )
         PARSER_PANIC( *first_it, "global variables must be const" );
 
     if ( module.contains_id( variable.id ) )
@@ -409,23 +411,32 @@ void dawn::Parser::parse_function( TokenIterator& it, Function& function )
     {
         auto& arg = function.args.emplace_back();
 
-        if ( it->type != TokenType::TYPE )
-            PARSER_PANIC( *it, "expected argument type" );
-        arg.type.type_id = IDSystem::get( it->value );
-        ++it;
-
-        if ( it->value == vr_variable )
+        if ( it->value == vr_reference )
         {
-            arg.type.kind = VarKind::VARIABLE;
-            ++it;
-        }
-        else if ( it->value == vr_reference )
-        {
+            arg.type.type_id = {};
             arg.type.kind = VarKind::REFERENCE;
             ++it;
         }
         else
-            arg.type.kind = VarKind::CONSTANT;
+        {
+            if ( it->type != TokenType::TYPE )
+                PARSER_PANIC( *it, "expected argument type" );
+            arg.type.type_id = IDSystem::get( it->value );
+            ++it;
+
+            if ( it->value == vr_variable )
+            {
+                arg.type.kind = VarKind::VARIABLE;
+                ++it;
+            }
+            else if ( it->value == vr_reference )
+            {
+                arg.type.kind = VarKind::REFERENCE;
+                ++it;
+            }
+            else
+                arg.type.kind = VarKind::CONSTANT;
+        }
 
         if ( it->type != TokenType::NAME )
             PARSER_PANIC( *it, "expected arg name" );
@@ -472,24 +483,34 @@ void dawn::Parser::parse_cast( TokenIterator& it, Function& function )
 
 void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable )
 {
-    if ( it->type != TokenType::TYPE )
-        PARSER_PANIC( *it, "expected variable type" );
-    const Bool is_custom_type = dawn::is_custom_type( it->value );
-    variable.type.type_id = IDSystem::get( it->value );
-    ++it;
-
-    if ( it->value == vr_variable )
+    Bool is_custom_type = false;
+    if ( it->value == vr_reference )
     {
-        variable.type.kind = VarKind::VARIABLE;
-        ++it;
-    }
-    else if ( it->value == vr_reference )
-    {
+        variable.type.type_id = {};
         variable.type.kind = VarKind::REFERENCE;
         ++it;
     }
     else
-        variable.type.kind = VarKind::CONSTANT;
+    {
+        if ( it->type != TokenType::TYPE )
+            PARSER_PANIC( *it, "expected variable type" );
+        is_custom_type = dawn::is_custom_type( it->value );
+        variable.type.type_id = IDSystem::get( it->value );
+        ++it;
+
+        if ( it->value == vr_variable )
+        {
+            variable.type.kind = VarKind::VARIABLE;
+            ++it;
+        }
+        else if ( it->value == vr_reference )
+        {
+            variable.type.kind = VarKind::REFERENCE;
+            ++it;
+        }
+        else
+            variable.type.kind = VarKind::CONSTANT;
+    }
 
     if ( it->type != TokenType::NAME )
         PARSER_PANIC( *it, "expected variable name" );
@@ -503,10 +524,12 @@ void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable )
         ++it;
         parse_expression( ExtractType::NEW_LINE, it, *variable.expr );
     }
-    else if ( !is_custom_type )
-        variable.expr->emplace<Value>( create_default_value( nullptr, variable.type.type_id, var_location ) );
-    else
+    else if ( is_custom_type )
         PARSER_PANIC( *it, "custom type variable must be initialized" );
+    else if ( variable.type.is_typeless() )
+        PARSER_PANIC( *it, "typeless variable must be initialized" );
+    else
+        variable.expr->emplace<Value>( create_default_value( nullptr, variable.type.type_id, var_location ) );
 }
 
 void dawn::Parser::parse_expression( ExtractType type, TokenIterator& it, Node& tree )
@@ -751,23 +774,32 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
         {
             auto& arg = func.args.emplace_back();
 
-            if ( left_it->type != TokenType::TYPE )
-                PARSER_PANIC( *left_it, "expected argument type" );
-            arg.type.type_id = IDSystem::get( left_it->value );
-            ++left_it;
-
-            if ( left_it->value == vr_variable )
+            if ( left_it->value == vr_reference )
             {
-                arg.type.kind = VarKind::VARIABLE;
-                ++left_it;
-            }
-            else if ( left_it->value == vr_reference )
-            {
+                arg.type.type_id = {};
                 arg.type.kind = VarKind::REFERENCE;
                 ++left_it;
             }
             else
-                arg.type.kind = VarKind::CONSTANT;
+            {
+                if ( left_it->type != TokenType::TYPE )
+                    PARSER_PANIC( *left_it, "expected argument type" );
+                arg.type.type_id = IDSystem::get( left_it->value );
+                ++left_it;
+
+                if ( left_it->value == vr_variable )
+                {
+                    arg.type.kind = VarKind::VARIABLE;
+                    ++left_it;
+                }
+                else if ( left_it->value == vr_reference )
+                {
+                    arg.type.kind = VarKind::REFERENCE;
+                    ++left_it;
+                }
+                else
+                    arg.type.kind = VarKind::CONSTANT;
+            }
 
             if ( left_it->type != TokenType::NAME )
                 PARSER_PANIC( *left_it, "expected arg name" );

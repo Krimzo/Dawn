@@ -40,6 +40,7 @@ inline constexpr StringRef tp_range = "range";
 inline constexpr StringRef tp_function = "function";
 inline constexpr StringRef tp_array = "array";
 
+inline constexpr StringRef vr_constant = "";
 inline constexpr StringRef vr_variable = "?";
 inline constexpr StringRef vr_reference = "&";
 

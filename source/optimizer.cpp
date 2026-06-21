@@ -108,8 +108,12 @@ void dawn::Optimizer::optimize_instr( Vector<Node>& scope )
     {
         auto& instr = scope[i];
         optimize_expr( instr );
-        if ( instr.type() == NodeType::VARIABLE )
-            inline_var( std::get<VariableNode>( instr ).var, scope, i );
+        if ( instr.type() != NodeType::VARIABLE )
+            continue;
+        auto& var = std::get<VariableNode>( instr ).var;
+        if ( var.type.is_typeless() )
+            continue;
+        inline_var( var, scope, i );
     }
 }
 

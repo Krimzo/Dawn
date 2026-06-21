@@ -1,57 +1,27 @@
-func main() {
-    array data = ["nice", string(5.1), "more strings"]
-    data.forEach(`string& val`{
-        print("value: {val}")
+func main()
+{
+    array data = ["nice", 5.1, [3, 2]]
+    data.forEach(`& val`{
+        print("value: {val}, with type: {typename(val)}")
     })
-
-    Counter? counter = Counter("My Counter")
-    counter.incr()
-    counter.decr().decr()
-    print(counter)
-
-    for v : [(), 2.3, "yeah"] {
-        v.who()
-    }
+    my_print(3)
+    my_print("wasd")
+    & a = 5
+    & b = 2.3
+    print(a + b)
+    print(yeah / (a + b - .3))
 }
 
-func array.forEach(function& f) {
+& yeah = 22
+
+func array.forEach(function& f)
+{
     for v : self {
         f(v)
     }
 }
 
-func Counter.decr()
+func my_print(& val)
 {
-    self.value -= 1
-    return self
-}
-
-struct Counter
-{
-    name : string
-    value : int
-
-    cast string {
-        return "Counter [{self.name}] Value: {self.value}"
-    }
-
-    func incr()
-    {
-        self.value += 1
-    }
-}
-
-func void.who()
-{
-    print("i am void :(")
-}
-
-func float.who()
-{
-    print("im a float")
-}
-
-func string.who()
-{
-    print("im a string!!")
+    print("my print: {val}")
 }

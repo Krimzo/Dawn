@@ -12,6 +12,7 @@ func main(array& args) {
 int a = 7  // constant
 int? b = 9 // variable
 int& p = b // reference
+& t = 2.1  // typeless reference (accepts any type as init)
 ```
 
 # Types
