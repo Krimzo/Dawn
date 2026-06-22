@@ -1,19 +1,17 @@
 func main()
 {
-	Animal animal1 = Animal{
-		age = 12.1,
-		type = "lion"
-	}
-	Animal animal2 = Animal{
-		age: animal1.age / 2,
-		type: "cat",
-	}
-	print(animal1)
-	print(animal2)
+	test_loop(0>>5)
+	test_loop(>>5)
+	test_loop(range(5))
+	test_loop(5 @ range)
+	test_loop(4 >> -1)
 }
 
-struct Animal
+func test_loop(range& value)
 {
-	type: string
-	age: float
+	array? data
+	for i : value {
+		data.push(i)
+	}
+	print(data)
 }

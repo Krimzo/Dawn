@@ -14,7 +14,7 @@ struct RangeValue
 
     constexpr Bool empty() const
     {
-        return start_incl >= end_excl;
+        return start_incl == end_excl;
     }
 };
 

@@ -405,16 +405,26 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
     {
         auto& value_rng = loop_value.as_range();
 
-        Bool didbrk = false, didcon = false;
-        for ( Int i = value_rng.start_incl; i < value_rng.end_excl; ++i )
-        {
-            if ( retval || didbrk )
-                break;
-            didcon = false;
+#define FOR_LOOP_RANGE_BODY\
+        {\
+            if ( retval || didbrk )\
+                break;\
+            didcon = false;\
+            auto pop_handler = stack.push();\
+            stack.current().set( node.var_id, Value{ i, node.location } );\
+            handle_scope( node.scope, retval, &didbrk, &didcon );\
+        }\
 
-            auto pop_handler = stack.push();
-            stack.current().set( node.var_id, Value{ i, node.location } );
-            handle_scope( node.scope, retval, &didbrk, &didcon );
+        Bool didbrk = false, didcon = false;
+        if ( value_rng.start_incl < value_rng.end_excl )
+        {
+            for ( Int i = value_rng.start_incl; i < value_rng.end_excl; ++i )
+                FOR_LOOP_RANGE_BODY
+        }
+        else
+        {
+            for ( Int i = value_rng.start_incl; i > value_rng.end_excl; --i )
+                FOR_LOOP_RANGE_BODY
         }
     }
     else if ( value_type == ValueType::ARRAY )

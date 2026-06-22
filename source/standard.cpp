@@ -424,6 +424,12 @@ void dawn::Engine::load_standard_operators()
             auto& left = args[0]; auto& right = args[1];
             return Value{ RangeValue{ .start_incl = left.as_int(), .end_excl = right.as_int() }, location };
         } );
+
+    bind_oper( id_void, OperatorType::RANGE, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto const& right = args[1];
+            return Value{ RangeValue{ .start_incl = 0, .end_excl = right.as_int() }, location };
+        } );
 }
 
 void dawn::Engine::load_standard_functions()
