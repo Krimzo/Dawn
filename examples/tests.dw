@@ -134,7 +134,7 @@ func enum_test()
 struct SomeStruct
 {
 	name : string
-	age : int
+	value : int
 
 	func who()
 	{
@@ -143,13 +143,13 @@ struct SomeStruct
 
 	cast string
 	{
-		return "SomeStruct: {self.name} is {self.age} years old"
+		return "SomeStruct: {self.name} is {self.value}"
 	}
 }
 
 oper +(SomeStruct& left, int right)
 {
-	left.age += right
+	left.value += right
 	return left
 }
 
@@ -159,11 +159,10 @@ func struct_test()
 	SomeStruct? some_val2 = SomeStruct{ name =
 		"really "
 		+
-		"cool", age =
-		2 }
+		"cool", value = 2 }
 
 	some_val1.who()
-	assert(string(some_val2 + some_val1.age) == string(some_val2), "structs are bad")
+	assert(string(some_val2 + some_val1.value) == string(some_val2), "structs are bad")
 }
 
 func array_test()
@@ -172,7 +171,7 @@ func array_test()
 	data += [ int[2] + float[2 + 1] ]
 	data += [SomeStruct[2]]
 
-	data[data.count - 1][1].age = 17
+	data[data.count - 1][1].value = 17
 	print(data)
 
 	string str_val = string( data[data.count - 1][1] )
