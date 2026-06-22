@@ -24,8 +24,7 @@ private:
 
         constexpr InlineDropper( Vector<Inlineable>& inline_storage )
             : inline_storage( inline_storage ), initial_size( inline_storage.size() )
-        {
-        }
+        {}
 
         constexpr ~InlineDropper()
         {
@@ -80,5 +79,6 @@ private:
     void optimize_expr_ac( AccessNode& node, Node& out_node );
     void optimize_expr_op( OperatorNode& node, Node& out_node );
     void optimize_expr_as( AssignNode& node, Node& out_node );
+    void optimize_expr_cast( CastNode& node, Node& out_node );
 };
 }

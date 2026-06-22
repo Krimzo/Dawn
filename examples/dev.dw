@@ -1,13 +1,7 @@
-func main() {
-    for c : Da() @ string @ array {
-        print(c)
-    }
-    print(Da()@void)
-}
-
-struct Da {
-    cast void {
-        print("casting {self} to void")
-        return 2@void
-    }
+func main()
+{
+	string value = "nice"
+	print(value)
+	print(value @ array)
+	print(array(value))
 }

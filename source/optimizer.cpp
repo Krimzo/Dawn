@@ -145,6 +145,8 @@ void dawn::Optimizer::optimize_expr( Node& node )
     case NodeType::ACCESS: optimize_expr_ac( std::get<AccessNode>( node ), node ); break;
     case NodeType::OPERATOR: optimize_expr_op( std::get<OperatorNode>( node ), node ); break;
     case NodeType::ASSIGN: optimize_expr_as( std::get<AssignNode>( node ), node ); break;
+    case NodeType::CAST: optimize_expr_cast( std::get<CastNode>( node ), node ); break;
+    default: ENGINE_PANIC( node.location(), "unknown optimizer node type [", node.type(), "]" ); break;
     }
 }
 
@@ -495,4 +497,17 @@ void dawn::Optimizer::optimize_expr_as( AssignNode& node, Node& out_node )
 {
     for ( auto& side : node.sides )
         optimize_expr( side );
+}
+
+void dawn::Optimizer::optimize_expr_cast( CastNode& node, Node& out_node )
+{
+    optimize_expr( *node.left_expr );
+    if ( node.left_expr->type() != NodeType::VALUE )
+        return;
+
+    auto& left_value = std::get<Value>( *node.left_expr );
+    if ( left_value.type() == ValueType::STRUCT )
+        return;
+
+    out_node.emplace<Value>( m_engine.handle_cast_node( node ) );
 }
