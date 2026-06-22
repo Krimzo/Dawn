@@ -22,8 +22,7 @@ struct TokenIterator
 {
     constexpr TokenIterator( Token const* ptr, Token const* end )
         : m_ptr( ptr ), m_start( ptr ), m_end( end )
-    {
-    }
+    {}
 
     Bool valid() const;
     Token const& operator*() const;

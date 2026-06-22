@@ -614,6 +614,31 @@ dawn::Value dawn::Engine::handle_as_node( AssignNode const& node )
     }
 }
 
+dawn::Value dawn::Engine::handle_cast_node( CastNode const& node )
+{
+    const Value left_value = handle_expr( *node.left_expr );
+    if ( node.right_type_id == id_void )
+        return Value{};
+    else if ( node.right_type_id == id_bool )
+        return Value{ left_value.to_bool( *this ), node.location };
+    else if ( node.right_type_id == id_int )
+        return Value{ left_value.to_int( *this ), node.location };
+    else if ( node.right_type_id == id_float )
+        return Value{ left_value.to_float( *this ), node.location };
+    else if ( node.right_type_id == id_char )
+        return Value{ left_value.to_char( *this ), node.location };
+    else if ( node.right_type_id == id_string )
+        return Value{ left_value.to_string( *this ), node.location };
+    else if ( node.right_type_id == id_range )
+        return Value{ left_value.to_range( *this ), node.location };
+    else if ( node.right_type_id == id_function )
+        return Value{ left_value.to_function( *this ), node.location };
+    else if ( node.right_type_id == id_array )
+        return Value{ left_value.to_array( *this ), node.location };
+    else
+        ENGINE_PANIC( node.location, "unknown cast type: ", IDSystem::get( node.right_type_id ) );
+}
+
 void dawn::Engine::handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
 {
     for ( auto& instr : scope.instr )

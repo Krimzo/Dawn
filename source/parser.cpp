@@ -369,7 +369,7 @@ void dawn::Parser::parse_operator( TokenIterator& it, Operator& oper )
     if ( oper.args.size() == 1 )
     {
         auto& arg = *oper.args.emplace( oper.args.begin() );
-        arg.type = VarType{ .type_id = IDSystem::get( tp_void ), .kind = VarKind::CONSTANT };
+        arg.type = VarType{ .type_id = id_void, .kind = VarKind::CONSTANT };
     }
     else if ( oper.args.size() != 2 )
         PARSER_PANIC( *it, "operator must have either 1 or 2 arguments" );
@@ -626,8 +626,7 @@ void dawn::Parser::expression_extract( ExtractType type, TokenIterator& it, Vect
 
                     TokenIterator it_before = it;
                     --it_before;
-                    if ( it_before->value != op_lambda &&
-                        it_before->type != TokenType::TYPE )
+                    if ( it_before->value != op_lambda && !is_custom_type( it_before->value ) )
                         break;
                 }
             }
@@ -923,6 +922,16 @@ void dawn::Parser::expression_complex_default( Vector<Token>& left, Token op, Ve
         ac_node.left_expr = node_pool().new_register();
         *ac_node.left_expr = left_expr;
         ac_node.right_id = IDSystem::get( right.front().value );
+    }
+    else if ( op.value == op_cast )
+    {
+        if ( right.size() != 1 || right.front().type != TokenType::TYPE )
+            PARSER_PANIC( op, "cast operator expects type on the right" );
+
+        auto& cast_node = tree.emplace<CastNode>( op.location );
+        cast_node.left_expr = node_pool().new_register();
+        *cast_node.left_expr = left_expr;
+        cast_node.right_type_id = IDSystem::get( right.front().value );
     }
     else if ( is_op( op.value ) )
     {

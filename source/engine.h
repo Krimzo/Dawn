@@ -72,6 +72,7 @@ private:
     Value handle_ac_node( AccessNode const& node );
     Value handle_op_node( OperatorNode const& node );
     Value handle_as_node( AssignNode const& node );
+    Value handle_cast_node( CastNode const& node );
 
     void handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon ); // Should not inline since scope calls instr and instr calls scope.
 
@@ -221,6 +222,9 @@ private:
         case NodeType::ASSIGN:
             return handle_as_node( std::get<AssignNode>( node ) );
 
+        case NodeType::CAST:
+            return handle_cast_node( std::get<CastNode>( node ) );
+
         default:
             ENGINE_PANIC( node.location(), "unknown expr node type: ", (Int) node.type() );
         }
@@ -229,41 +233,31 @@ private:
 
 __forceinline Value create_default_value( Engine* engine, ID typeid_, Location const& location )
 {
-    static const ID _id_void = IDSystem::get( tp_void );
-    static const ID _id_bool = IDSystem::get( tp_bool );
-    static const ID _id_int = IDSystem::get( tp_int );
-    static const ID _id_float = IDSystem::get( tp_float );
-    static const ID _id_char = IDSystem::get( tp_char );
-    static const ID _id_string = IDSystem::get( tp_string );
-    static const ID _id_range = IDSystem::get( tp_range );
-    static const ID _id_function = IDSystem::get( tp_function );
-    static const ID _id_array = IDSystem::get( tp_array );
-
-    if ( typeid_ == _id_void )
+    if ( typeid_ == id_void )
         return Value{};
 
-    else if ( typeid_ == _id_bool )
+    else if ( typeid_ == id_bool )
         return Value{ Bool{}, location };
 
-    else if ( typeid_ == _id_int )
+    else if ( typeid_ == id_int )
         return Value{ Int{}, location };
 
-    else if ( typeid_ == _id_float )
+    else if ( typeid_ == id_float )
         return Value{ Float{}, location };
 
-    else if ( typeid_ == _id_char )
+    else if ( typeid_ == id_char )
         return Value{ Char{}, location };
 
-    else if ( typeid_ == _id_string )
+    else if ( typeid_ == id_string )
         return Value{ StringRef{}, location };
 
-    else if ( typeid_ == _id_range )
+    else if ( typeid_ == id_range )
         return Value{ RangeValue{}, location };
 
-    else if ( typeid_ == _id_function )
+    else if ( typeid_ == id_function )
         return Value{ FunctionValue{}, location };
 
-    else if ( typeid_ == _id_array )
+    else if ( typeid_ == id_array )
         return Value{ ArrayValue{}, location };
 
     else if ( auto* enum_ptr = engine->enums.get( typeid_ ) )
@@ -289,15 +283,15 @@ __forceinline Value create_default_value( Engine* engine, ID typeid_, Location c
 __forceinline Opt<ValueType> builtin_type( ID id )
 {
     static const ID ids[] = {
-        IDSystem::get( tp_void ),
-        IDSystem::get( tp_bool ),
-        IDSystem::get( tp_int ),
-        IDSystem::get( tp_float ),
-        IDSystem::get( tp_char ),
-        IDSystem::get( tp_string ),
-        IDSystem::get( tp_range ),
-        IDSystem::get( tp_function ),
-        IDSystem::get( tp_array ),
+        id_void,
+        id_bool,
+        id_int,
+        id_float,
+        id_char,
+        id_string,
+        id_range,
+        id_function,
+        id_array,
     };
     for ( int i = 0; i < (int) std::size( ids ); i++ )
     {

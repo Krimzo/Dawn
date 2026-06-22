@@ -10,16 +10,6 @@ static thread_local std::mt19937_64 RAND_ENGINE = []
 
 void dawn::Engine::load_standard_operators()
 {
-    static const ID id_void = IDSystem::get( tp_void );
-    static const ID id_bool = IDSystem::get( tp_bool );
-    static const ID id_int = IDSystem::get( tp_int );
-    static const ID id_float = IDSystem::get( tp_float );
-    static const ID id_char = IDSystem::get( tp_char );
-    static const ID id_string = IDSystem::get( tp_string );
-    static const ID id_range = IDSystem::get( tp_range );
-    static const ID id_func = IDSystem::get( tp_function );
-    static const ID id_array = IDSystem::get( tp_array );
-
     // op add
     bind_oper( id_void, OperatorType::ADD, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
@@ -453,97 +443,6 @@ void dawn::Engine::load_standard_functions()
                 return Value{ IDSystem::get( args[0].type_id() ), location };
             else
                 ENGINE_PANIC( location, "typename expected 1 argument, but got ", arg_count );
-        } );
-
-    /* CAST */
-    bind_func( IDSystem::get( tp_void ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
-        {
-            if ( arg_count == 1 )
-                return Value{};
-            else if ( arg_count == 0 )
-                return Value{};
-            else
-                ENGINE_PANIC( location, tp_void, "() expects 1 or 0 arguments, but got ", arg_count );
-        } );
-
-    bind_func( IDSystem::get( tp_bool ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
-        {
-            if ( arg_count == 1 )
-                return Value{ args[0].to_bool( engine ), location };
-            else if ( arg_count == 0 )
-                return Value{ Bool{}, location };
-            else
-                ENGINE_PANIC( location, tp_bool, "() expects 1 or 0 arguments, but got ", arg_count );
-        } );
-
-    bind_func( IDSystem::get( tp_int ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
-        {
-            if ( arg_count == 1 )
-                return Value{ args[0].to_int( engine ), location };
-            else if ( arg_count == 0 )
-                return Value{ Int{}, location };
-            else
-                ENGINE_PANIC( location, tp_int, "() expects 1 or 0 arguments, but got ", arg_count );
-        } );
-
-    bind_func( IDSystem::get( tp_float ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
-        {
-            if ( arg_count == 1 )
-                return Value{ args[0].to_float( engine ), location };
-            else if ( arg_count == 0 )
-                return Value{ Float{}, location };
-            else
-                ENGINE_PANIC( location, tp_float, "() expects 1 or 0 arguments, but got ", arg_count );
-        } );
-
-    bind_func( IDSystem::get( tp_char ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
-        {
-            if ( arg_count == 1 )
-                return Value{ args[0].to_char( engine ), location };
-            else if ( arg_count == 0 )
-                return Value{ Char{}, location };
-            else
-                ENGINE_PANIC( location, tp_char, "() expects 1 or 0 arguments, but got ", arg_count );
-        } );
-
-    bind_func( IDSystem::get( tp_string ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
-        {
-            if ( arg_count == 1 )
-                return Value{ args[0].to_string( engine ), location };
-            else if ( arg_count == 0 )
-                return Value{ StringRef{}, location };
-            else
-                ENGINE_PANIC( location, tp_string, "() expects 1 or 0 arguments, but got ", arg_count );
-        } );
-
-    bind_func( IDSystem::get( tp_range ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
-        {
-            if ( arg_count == 1 )
-                return Value{ args[0].to_range( engine ), location };
-            else if ( arg_count == 0 )
-                return Value{ RangeValue{}, location };
-            else
-                ENGINE_PANIC( location, tp_range, "() expects 1 or 0 arguments, but got ", arg_count );
-        } );
-
-    bind_func( IDSystem::get( tp_function ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
-        {
-            if ( arg_count == 1 )
-                return Value{ args[0].to_function( engine ), location };
-            else if ( arg_count == 0 )
-                return Value{ FunctionValue{}, location };
-            else
-                ENGINE_PANIC( location, tp_function, "() expects 1 or 0 arguments, but got ", arg_count );
-        } );
-
-    bind_func( IDSystem::get( tp_array ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
-        {
-            if ( arg_count == 1 )
-                return Value{ args[0].to_array( engine ), location };
-            else if ( arg_count == 0 )
-                return Value{ ArrayValue{}, location };
-            else
-                ENGINE_PANIC( location, tp_array, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
     /* SYSTEM */

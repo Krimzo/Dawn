@@ -87,6 +87,7 @@ enum struct NodeType : uint8_t
     ACCESS,
     OPERATOR,
     ASSIGN,
+    CAST,
 };
 
 enum struct ValueType : uint8_t
