@@ -7,7 +7,7 @@ func main(array& args) {
 }
 ```
 
-# Importing
+# Imports
 ```dawn
 import "path..." // importing modules (uses relative path from the source file)
 ```
