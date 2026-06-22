@@ -988,6 +988,9 @@ void dawn::Parser::expression_single( Token const& token, Node& tree )
 
     case TokenType::OPERATOR:
         PARSER_PANIC( token, "single operator is not an expression" );
+
+    default:
+        PARSER_PANIC( token, "unknown token type [", token.type, "]" );
     }
 }
 
