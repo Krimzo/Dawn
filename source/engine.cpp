@@ -618,7 +618,10 @@ dawn::Value dawn::Engine::handle_cast_node( CastNode const& node )
 {
     const Value left_value = handle_expr( *node.left_expr );
     if ( node.right_type_id == id_void )
+    {
+        left_value.to_void( *this );
         return Value{};
+    }
     else if ( node.right_type_id == id_bool )
         return Value{ left_value.to_bool( *this ), node.location };
     else if ( node.right_type_id == id_int )

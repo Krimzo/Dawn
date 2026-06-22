@@ -2,11 +2,12 @@ func main() {
     for c : Da() @ string @ array {
         print(c)
     }
-    Da() @ void
+    print(Da()@void)
 }
 
 struct Da {
     cast void {
-        print("casting to void")
+        print("casting {self} to void")
+        return 2@void
     }
 }
