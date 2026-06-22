@@ -1,27 +1,7 @@
 func main()
 {
-    array data = ["nice", 5.1, [3, 2]]
-    data.forEach(`& val`{
-        print("value: {val}, with type: {typename(val)}")
-    })
-    my_print(3)
-    my_print("wasd")
-    & a = 5
-    & b = 2.3
-    print(a + b)
-    print(yeah / (a + b - .3))
-}
-
-& yeah = 22
-
-func array.forEach(function& f)
-{
-    for v : self {
-        f(v)
-    }
-}
-
-func my_print(& val)
-{
-    print("my print: {val}")
+	string value = "nice"
+	print(value)
+	print(value @ array)
+	print(array(value))
 }

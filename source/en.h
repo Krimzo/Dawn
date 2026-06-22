@@ -87,6 +87,7 @@ enum struct NodeType : uint8_t
     ACCESS,
     OPERATOR,
     ASSIGN,
+    CAST,
 };
 
 enum struct ValueType : uint8_t
@@ -126,5 +127,6 @@ enum struct FrameType : uint8_t
 
 std::ostream& operator<<( std::ostream& stream, TokenType type );
 std::ostream& operator<<( std::ostream& stream, OperatorType type );
+std::ostream& operator<<( std::ostream& stream, NodeType type );
 std::ostream& operator<<( std::ostream& stream, ValueType type );
 }

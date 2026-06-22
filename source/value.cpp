@@ -3,21 +3,6 @@
 #include "engine.h"
 
 
-#define ID_HELPER(id) static const ID _##id = IDSystem::get( #id )
-
-namespace dawn
-{
-ID_HELPER( void );
-ID_HELPER( bool );
-ID_HELPER( int );
-ID_HELPER( float );
-ID_HELPER( char );
-ID_HELPER( string );
-ID_HELPER( function );
-ID_HELPER( array );
-ID_HELPER( range );
-}
-
 dawn::Bool dawn::FunctionValue::is_global() const
 {
     return std::holds_alternative<AsGlobal>( data );
@@ -118,8 +103,7 @@ dawn::StructValue& dawn::StructValue::operator=( StructValue const& other )
 dawn::StructValue::StructValue( StructValue&& other ) noexcept
     : parent_id( std::move( other.parent_id ) )
     , members( std::move( other.members ) )
-{
-}
+{}
 
 dawn::StructValue& dawn::StructValue::operator=( StructValue&& other ) noexcept
 {
@@ -178,8 +162,7 @@ dawn::ArrayValue& dawn::ArrayValue::operator=( ArrayValue const& other )
 
 dawn::ArrayValue::ArrayValue( ArrayValue&& other ) noexcept
     : data( std::move( other.data ) )
-{
-}
+{}
 
 dawn::ArrayValue& dawn::ArrayValue::operator=( ArrayValue&& other ) noexcept
 {
@@ -193,7 +176,7 @@ dawn::Value::Value( Bool value, Location const& location )
 {
     auto& storage = *m_regref.as<ValueStorage<Bool>>();
     storage.info.location = location;
-    storage.info.type_id = _bool;
+    storage.info.type_id = id_bool;
     storage.info.type = ValueType::BOOL;
     storage.info.is_const = true;
     storage.value = value;
@@ -204,7 +187,7 @@ dawn::Value::Value( Int value, Location const& location )
 {
     auto& storage = *m_regref.as<ValueStorage<Int>>();
     storage.info.location = location;
-    storage.info.type_id = _int;
+    storage.info.type_id = id_int;
     storage.info.type = ValueType::INT;
     storage.info.is_const = true;
     storage.value = value;
@@ -215,7 +198,7 @@ dawn::Value::Value( Float value, Location const& location )
 {
     auto& storage = *m_regref.as<ValueStorage<Float>>();
     storage.info.location = location;
-    storage.info.type_id = _float;
+    storage.info.type_id = id_float;
     storage.info.type = ValueType::FLOAT;
     storage.info.is_const = true;
     storage.value = value;
@@ -226,7 +209,7 @@ dawn::Value::Value( Char value, Location const& location )
 {
     auto& storage = *m_regref.as<ValueStorage<Char>>();
     storage.info.location = location;
-    storage.info.type_id = _char;
+    storage.info.type_id = id_char;
     storage.info.type = ValueType::CHAR;
     storage.info.is_const = true;
     storage.value = value;
@@ -237,7 +220,7 @@ dawn::Value::Value( StringRef const& value, Location const& location )
 {
     auto& storage = *m_regref.as<ValueStorage<String>>();
     storage.info.location = location;
-    storage.info.type_id = _string;
+    storage.info.type_id = id_string;
     storage.info.type = ValueType::STRING;
     storage.info.is_const = true;
     storage.value = value;
@@ -248,7 +231,7 @@ dawn::Value::Value( RangeValue const& value, Location const& location )
 {
     auto& storage = *m_regref.as<ValueStorage<RangeValue>>();
     storage.info.location = location;
-    storage.info.type_id = _range;
+    storage.info.type_id = id_range;
     storage.info.type = ValueType::RANGE;
     storage.info.is_const = true;
     storage.value = value;
@@ -259,7 +242,7 @@ dawn::Value::Value( FunctionValue const& value, Location const& location )
 {
     auto& storage = *m_regref.as<ValueStorage<FunctionValue>>();
     storage.info.location = location;
-    storage.info.type_id = _function;
+    storage.info.type_id = id_function;
     storage.info.type = ValueType::FUNCTION;
     storage.info.is_const = true;
     storage.value = value;
@@ -270,7 +253,7 @@ dawn::Value::Value( ArrayValue const& value, Location const& location )
 {
     auto& storage = *m_regref.as<ValueStorage<ArrayValue>>();
     storage.info.location = location;
-    storage.info.type_id = _array;
+    storage.info.type_id = id_array;
     storage.info.type = ValueType::ARRAY;
     storage.info.is_const = true;
     storage.value = value;
@@ -296,6 +279,12 @@ dawn::Value::Value( StructValue const& value, Location const& location )
     storage.info.type = ValueType::STRUCT;
     storage.info.is_const = true;
     storage.value = value;
+}
+
+void dawn::Value::as_void() const
+{
+    if ( type() != ValueType::VOID )
+        ENGINE_PANIC( location(), "expected [", ValueType::VOID, "] but got [", type(), "]" );
 }
 
 dawn::Bool& dawn::Value::as_bool() const
@@ -380,7 +369,7 @@ dawn::ValueType dawn::Value::type() const
 
 dawn::ID dawn::Value::type_id() const
 {
-    return m_regref ? m_regref->type_id : _void;
+    return m_regref ? m_regref->type_id : id_void;
 }
 
 void dawn::Value::assign( Value const& other )
@@ -523,6 +512,18 @@ dawn::Value& dawn::Value::unlock_const()
     return *this;
 }
 
+void dawn::Value::to_void( Engine& engine ) const
+{
+    if ( type() != ValueType::STRUCT )
+        return;
+
+    auto& left = as_struct();
+    auto* method = left.get_method( id_void );
+    if ( !method )
+        ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to void" );
+    return engine.handle_func( location(), *method, this, 1 ).as_void();
+}
+
 dawn::Bool dawn::Value::to_bool( Engine& engine ) const
 {
     switch ( type() )
@@ -548,7 +549,7 @@ dawn::Bool dawn::Value::to_bool( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _bool );
+        auto* method = left.get_method( id_bool );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to bool" );
         return engine.handle_func( location(), *method, this, 1 ).as_bool();
@@ -588,7 +589,7 @@ dawn::Int dawn::Value::to_int( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _int );
+        auto* method = left.get_method( id_int );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to int" );
         return engine.handle_func( location(), *method, this, 1 ).as_int();
@@ -628,7 +629,7 @@ dawn::Float dawn::Value::to_float( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _float );
+        auto* method = left.get_method( id_float );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to float" );
         return engine.handle_func( location(), *method, this, 1 ).as_float();
@@ -669,7 +670,7 @@ dawn::Char dawn::Value::to_char( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _char );
+        auto* method = left.get_method( id_char );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to char" );
         return engine.handle_func( location(), *method, this, 1 ).as_char();
@@ -766,7 +767,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        if ( auto* method = left.get_method( _string ) )
+        if ( auto* method = left.get_method( id_string ) )
         {
             return engine.handle_func( location(), *method, this, 1 ).as_string();
         }
@@ -810,7 +811,7 @@ dawn::RangeValue dawn::Value::to_range( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _range );
+        auto* method = left.get_method( id_range );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to range" );
         return engine.handle_func( location(), *method, this, 1 ).as_range();
@@ -831,7 +832,7 @@ dawn::FunctionValue dawn::Value::to_function( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _function );
+        auto* method = left.get_method( id_function );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to function" );
         return engine.handle_func( location(), *method, this, 1 ).as_function();
@@ -865,7 +866,7 @@ dawn::ArrayValue dawn::Value::to_array( Engine& engine ) const
     case ValueType::STRUCT:
     {
         auto& left = as_struct();
-        auto* method = left.get_method( _array );
+        auto* method = left.get_method( id_array );
         if ( !method )
             ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to array" );
         return engine.handle_func( location(), *method, this, 1 ).as_array();

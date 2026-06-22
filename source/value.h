@@ -100,8 +100,7 @@ struct StructValue
 
     StructValue( ID parent_id = {} )
         : parent_id( parent_id )
-    {
-    }
+    {}
 
     StructValue( StructValue const& other );
     StructValue& operator=( StructValue const& other );
@@ -142,6 +141,7 @@ struct Value
     explicit Value( EnumValue const& value, Location const& location );
     explicit Value( StructValue const& value, Location const& location );
 
+    void as_void() const;
     Bool& as_bool() const;
     Int& as_int() const;
     Float& as_float() const;
@@ -163,6 +163,7 @@ struct Value
     Bool is_const() const;
     Value& unlock_const();
 
+    void to_void( Engine& engine ) const;
     Bool to_bool( Engine& engine ) const;
     Int to_int( Engine& engine ) const;
     Float to_float( Engine& engine ) const;

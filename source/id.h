@@ -47,8 +47,8 @@ struct IDSystem
     static String const& get( ID id );
 
 private:
-    static Vector<String> m_id_str;
-    static StringMap<ID> m_str_id;
+    static inline Vector<String> m_id_str = {};
+    static inline StringMap<ID> m_str_id = {};
 };
 
 constexpr uint64_t combine_ids( ID left, ID right )

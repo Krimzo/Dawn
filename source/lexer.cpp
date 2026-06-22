@@ -69,6 +69,7 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String) op_link,
         (String) op_access,
         (String) op_range,
+        (String) op_cast,
         (String) op_set,
         (String) op_split,
         (String) op_lambda,

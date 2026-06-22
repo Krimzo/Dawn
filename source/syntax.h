@@ -60,6 +60,7 @@ inline constexpr StringRef op_not = "!";
 inline constexpr StringRef op_and = "&";
 inline constexpr StringRef op_or = "|";
 inline constexpr StringRef op_range = ">>";
+inline constexpr StringRef op_cast = "@";
 
 inline constexpr StringRef op_assign = "=";
 inline constexpr StringRef op_addas = "+=";
@@ -94,33 +95,46 @@ inline constexpr StringRef prec_unary = "_unary";
 inline const StringMap<Int> precedences
 {
     { (String) op_link, 1 },
+
     { (String) op_access, 2 },
     { (String) op_expr_opn, 2 },
     { (String) op_scope_opn, 2 },
     { (String) op_array_opn, 2 },
+
     { (String) prec_unary, 3 },
     { (String) op_not, 3 },
-    { (String) op_pow, 4 },
-    { (String) op_mod, 4 },
-    { (String) op_mul, 5 },
-    { (String) op_div, 5 },
-    { (String) op_add, 6 },
-    { (String) op_sub, 6 },
-    { (String) op_less, 7 },
-    { (String) op_great, 7 },
-    { (String) op_lesseq, 7 },
-    { (String) op_greateq, 7 },
-    { (String) op_eq, 8 },
-    { (String) op_neq, 8 },
-    { (String) op_and, 9 },
-    { (String) op_or, 10 },
-    { (String) op_range, 11 },
-    { (String) op_assign, 12 },
-    { (String) op_addas, 12 },
-    { (String) op_subas, 12 },
-    { (String) op_mulas, 12 },
-    { (String) op_divas, 12 },
-    { (String) op_powas, 12 },
-    { (String) op_modas, 12 },
+
+    { (String) op_cast, 4 },
+
+    { (String) op_pow, 5 },
+    { (String) op_mod, 5 },
+
+    { (String) op_mul, 6 },
+    { (String) op_div, 6 },
+
+    { (String) op_add, 7 },
+    { (String) op_sub, 7 },
+
+    { (String) op_less, 8 },
+    { (String) op_great, 8 },
+    { (String) op_lesseq, 8 },
+    { (String) op_greateq, 8 },
+
+    { (String) op_eq, 9 },
+    { (String) op_neq, 9 },
+
+    { (String) op_and, 10 },
+
+    { (String) op_or, 11 },
+
+    { (String) op_range, 12 },
+
+    { (String) op_assign, 13 },
+    { (String) op_addas, 13 },
+    { (String) op_subas, 13 },
+    { (String) op_mulas, 13 },
+    { (String) op_divas, 13 },
+    { (String) op_powas, 13 },
+    { (String) op_modas, 13 },
 };
 }

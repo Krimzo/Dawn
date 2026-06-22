@@ -11,8 +11,7 @@ struct LocationHolder
 
     explicit constexpr LocationHolder( Location const& location )
         : location( location )
-    {
-    }
+    {}
 };
 
 struct None
@@ -26,8 +25,7 @@ struct VariableNode : LocationHolder
 
     constexpr VariableNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct IdentifierNode : LocationHolder
@@ -36,8 +34,7 @@ struct IdentifierNode : LocationHolder
 
     constexpr IdentifierNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct CallNode : LocationHolder
@@ -47,8 +44,7 @@ struct CallNode : LocationHolder
 
     constexpr CallNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct IndexNode : LocationHolder
@@ -58,8 +54,7 @@ struct IndexNode : LocationHolder
 
     constexpr IndexNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct ReturnNode : LocationHolder
@@ -68,24 +63,21 @@ struct ReturnNode : LocationHolder
 
     constexpr ReturnNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct BreakNode : LocationHolder
 {
     constexpr BreakNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct ContinueNode : LocationHolder
 {
     constexpr ContinueNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct ThrowNode : LocationHolder
@@ -94,8 +86,7 @@ struct ThrowNode : LocationHolder
 
     constexpr ThrowNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct TryNode : LocationHolder
@@ -106,8 +97,7 @@ struct TryNode : LocationHolder
 
     constexpr TryNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct IfNode : LocationHolder
@@ -123,8 +113,7 @@ struct IfNode : LocationHolder
 
     constexpr IfNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct SwitchNode : LocationHolder
@@ -141,8 +130,7 @@ struct SwitchNode : LocationHolder
 
     constexpr SwitchNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct LoopNode : LocationHolder
@@ -151,8 +139,7 @@ struct LoopNode : LocationHolder
 
     constexpr LoopNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct WhileNode : LocationHolder
@@ -162,8 +149,7 @@ struct WhileNode : LocationHolder
 
     constexpr WhileNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct ForNode : LocationHolder
@@ -174,8 +160,7 @@ struct ForNode : LocationHolder
 
     constexpr ForNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct LambdaNode : LocationHolder
@@ -184,8 +169,7 @@ struct LambdaNode : LocationHolder
 
     constexpr LambdaNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct EnumNode : LocationHolder
@@ -195,8 +179,7 @@ struct EnumNode : LocationHolder
 
     constexpr EnumNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct StructNode : LocationHolder
@@ -216,8 +199,7 @@ struct StructNode : LocationHolder
 
     constexpr StructNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct ArrayNode : LocationHolder
@@ -237,8 +219,7 @@ struct ArrayNode : LocationHolder
 
     constexpr ArrayNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct AccessNode : LocationHolder
@@ -248,8 +229,17 @@ struct AccessNode : LocationHolder
 
     constexpr AccessNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
+};
+
+struct CastNode : LocationHolder
+{
+    NodeRef left_expr;
+    ID right_type_id;
+
+    constexpr CastNode( Location const& location )
+        : LocationHolder( location )
+    {}
 };
 
 struct OperatorNode : LocationHolder
@@ -259,8 +249,7 @@ struct OperatorNode : LocationHolder
 
     constexpr OperatorNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct AssignNode : LocationHolder
@@ -270,8 +259,7 @@ struct AssignNode : LocationHolder
 
     constexpr AssignNode( Location const& location )
         : LocationHolder( location )
-    {
-    }
+    {}
 };
 
 struct Node : Variant <
@@ -298,7 +286,8 @@ struct Node : Variant <
     ArrayNode,
     AccessNode,
     OperatorNode,
-    AssignNode >
+    AssignNode,
+    CastNode >
 {
     constexpr NodeType type() const noexcept
     {
@@ -338,6 +327,7 @@ struct Node : Variant <
         case NodeType::ACCESS:
         case NodeType::OPERATOR:
         case NodeType::ASSIGN:
+        case NodeType::CAST:
             return reinterpret_cast<LocationHolder const*>( this )->location;
         }
     }

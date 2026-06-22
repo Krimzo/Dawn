@@ -3,9 +3,6 @@
 
 static constexpr auto RESERVE_SIZE = 256;
 
-dawn::Vector<dawn::String> dawn::IDSystem::m_id_str = {};
-dawn::StringMap<dawn::ID> dawn::IDSystem::m_str_id = {};
-
 dawn::ID dawn::IDSystem::get( StringRef const& str )
 {
     static const auto _ = [] {

@@ -10,16 +10,6 @@ static thread_local std::mt19937_64 RAND_ENGINE = []
 
 void dawn::Engine::load_standard_operators()
 {
-    static const ID id_void = IDSystem::get( tp_void );
-    static const ID id_bool = IDSystem::get( tp_bool );
-    static const ID id_int = IDSystem::get( tp_int );
-    static const ID id_float = IDSystem::get( tp_float );
-    static const ID id_char = IDSystem::get( tp_char );
-    static const ID id_string = IDSystem::get( tp_string );
-    static const ID id_range = IDSystem::get( tp_range );
-    static const ID id_func = IDSystem::get( tp_function );
-    static const ID id_array = IDSystem::get( tp_array );
-
     // op add
     bind_oper( id_void, OperatorType::ADD, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
@@ -456,17 +446,20 @@ void dawn::Engine::load_standard_functions()
         } );
 
     /* CAST */
-    bind_func( IDSystem::get( tp_void ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( id_void, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
+            {
+                args[0].to_void( engine );
                 return Value{};
+            }
             else if ( arg_count == 0 )
                 return Value{};
             else
                 ENGINE_PANIC( location, tp_void, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( tp_bool ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( id_bool, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{ args[0].to_bool( engine ), location };
@@ -476,7 +469,7 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, tp_bool, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( tp_int ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{ args[0].to_int( engine ), location };
@@ -486,7 +479,7 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, tp_int, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( tp_float ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( id_float, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{ args[0].to_float( engine ), location };
@@ -496,7 +489,7 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, tp_float, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( tp_char ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( id_char, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{ args[0].to_char( engine ), location };
@@ -506,7 +499,7 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, tp_char, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( tp_string ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( id_string, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{ args[0].to_string( engine ), location };
@@ -516,7 +509,7 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, tp_string, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( tp_range ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( id_range, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{ args[0].to_range( engine ), location };
@@ -526,7 +519,7 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, tp_range, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( tp_function ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( id_function, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{ args[0].to_function( engine ), location };
@@ -536,7 +529,7 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, tp_function, "() expects 1 or 0 arguments, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( tp_array ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( id_array, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{ args[0].to_array( engine ), location };

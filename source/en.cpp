@@ -42,6 +42,39 @@ std::ostream& dawn::operator<<( std::ostream& stream, OperatorType type )
     return stream;
 }
 
+std::ostream& dawn::operator<<( std::ostream& stream, NodeType type )
+{
+    switch ( type )
+    {
+    case NodeType::NONE: stream << "None"; break;
+    case NodeType::SCOPE: stream << "Scope"; break;
+    case NodeType::VARIABLE: stream << "Variable"; break;
+    case NodeType::RETURN: stream << "Return"; break;
+    case NodeType::BREAK: stream << "Break"; break;
+    case NodeType::CONTINUE: stream << "Continue"; break;
+    case NodeType::THROW: stream << "Throw"; break;
+    case NodeType::TRY: stream << "Try"; break;
+    case NodeType::IF: stream << "If"; break;
+    case NodeType::SWITCH: stream << "Switch"; break;
+    case NodeType::LOOP: stream << "Loop"; break;
+    case NodeType::WHILE: stream << "While"; break;
+    case NodeType::FOR: stream << "For"; break;
+    case NodeType::VALUE: stream << "Value"; break;
+    case NodeType::IDENTIFIER: stream << "Identifier"; break;
+    case NodeType::CALL: stream << "Call"; break;
+    case NodeType::INDEX: stream << "Index"; break;
+    case NodeType::LAMBDA: stream << "Lambda"; break;
+    case NodeType::ENUM: stream << "Enum"; break;
+    case NodeType::STRUCT: stream << "Struct"; break;
+    case NodeType::ARRAY: stream << "Array"; break;
+    case NodeType::ACCESS: stream << "Access"; break;
+    case NodeType::OPERATOR: stream << "Operator"; break;
+    case NodeType::ASSIGN: stream << "Assign"; break;
+    case NodeType::CAST: stream << "Cast"; break;
+    }
+    return stream;
+}
+
 std::ostream& dawn::operator<<( std::ostream& stream, ValueType type )
 {
     switch ( type )
