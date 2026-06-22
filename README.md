@@ -7,6 +7,11 @@ func main(array& args) {
 }
 ```
 
+# Importing
+```dawn
+import "path..." // importing modules (uses relative path from the source file)
+```
+
 # Variables
 ```dawn
 int a = 7  // constant
@@ -28,6 +33,12 @@ function fn = ``{}                // function
 array a = []                      // array
 SomeEnum se = SomeEnum::something // enum
 SomeStruct ss = SomeStruct{}      // struct
+```
+
+# Casting
+```dawn
+int i = int(3.14)        // functional type cast
+float f = "27.3" @ float // operator type cast
 ```
 
 # Strings
@@ -179,12 +190,6 @@ catch err { // caught by reference
     err += 7
 }
 print(a)
-```
-
-# Misc
-```dawn
-import "path..." // importing modules (uses relative path from the source file)
-int i = int(...) // casting basic types [bool, int, float, char, string] (use standard.cpp for more functions)
 ```
 
 # C++
