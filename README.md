@@ -68,9 +68,9 @@ int value = animal.value
 # Structs
 ```dawn
 struct Person {
-    not_important : void
-    name : string
-    age : int
+    not_important: void
+    name: string
+    age: int
 
     func who() {
         print("{self.name} is {self.age} years old")
@@ -80,8 +80,8 @@ struct Person {
         return "Person({self.name}, {self.age})"
     }
 }
-Person person1 = Person{ name="Krim", age=24 }
-Person? person2 = Person((), "Krim", 22)
+Person person1 = Person{ name="Krim", age: 24 } // both = and : are allowed when assigning a value
+Person? person2 = Person((), "Krim", 22)        // assigning values by order
 person2.age += 2
 person1.who()
 person2.who()

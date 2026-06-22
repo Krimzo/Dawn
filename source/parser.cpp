@@ -745,8 +745,8 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
                 PARSER_PANIC( *right_it, "argument [", right_it->value, "] already passed" );
             ++right_it;
 
-            if ( right_it->value != op_assign )
-                PARSER_PANIC( *right_it, "expected assign operator" );
+            if ( right_it->value != op_assign && right_it->value != op_set )
+                PARSER_PANIC( *right_it, "expected assign or set operator" );
             ++right_it;
 
             auto& arg = struct_args[name_id];

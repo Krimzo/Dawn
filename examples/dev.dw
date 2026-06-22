@@ -1,7 +1,19 @@
 func main()
 {
-	string value = "nice"
-	print(value)
-	print(value @ array)
-	print(array(value))
+	Animal animal1 = Animal{
+		age = 12.1,
+		type = "lion"
+	}
+	Animal animal2 = Animal{
+		age: animal1.age / 2,
+		type: "cat",
+	}
+	print(animal1)
+	print(animal2)
+}
+
+struct Animal
+{
+	type: string
+	age: float
 }
