@@ -54,6 +54,13 @@ array? a1 = [4, "cool", false] // array of 3 elements
 a1[1] += " stuff"              // access of the second element
 ```
 
+# Ranges
+```dawn
+range first = 0 >> 5  // [0, 1, 2, 3, 4]
+range second = >>5    // [0, 1, 2, 3, 4]
+range third = 4 >> -1 // [4, 3, 2, 1, 0]
+```
+
 # Enums
 ```dawn
 enum Animal {
