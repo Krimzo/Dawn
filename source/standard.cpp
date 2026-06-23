@@ -723,6 +723,7 @@ void dawn::Engine::load_standard_members()
             if ( args[0].type() != ValueType::INT )
                 ENGINE_PANIC( location, "range.set_start() expects an int" );
             self.as_range().start = args[0].as_int();
+            return self;
         } );
 
     bind_member( ValueType::RANGE, "end", []( Location const& location, Engine& engine, Value const& self ) -> Value
@@ -735,6 +736,7 @@ void dawn::Engine::load_standard_members()
             if ( args[0].type() != ValueType::INT )
                 ENGINE_PANIC( location, "range.set_end() expects an int" );
             self.as_range().end = args[0].as_int();
+            return self;
         } );
 
     bind_member( ValueType::RANGE, "inclusive", []( Location const& location, Engine& engine, Value const& self ) -> Value
@@ -747,6 +749,7 @@ void dawn::Engine::load_standard_members()
             if ( args[0].type() != ValueType::BOOL )
                 ENGINE_PANIC( location, "range.set_inclusive() expects a bool" );
             self.as_range().inclusive = args[0].as_bool();
+            return self;
         } );
 
     // Enums.
