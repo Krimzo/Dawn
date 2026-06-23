@@ -162,7 +162,7 @@ for val : [1, 4.2, ["other", " array"]] {
 ```
 
 # Operators
-```
+```dawn
 oper *(Float2& left, float right) {
     return Float2(left.x * right, left.y * right)
 }
