@@ -56,9 +56,12 @@ a1[1] += " stuff"              // access of the second element
 
 # Ranges
 ```dawn
-range first = 0 >> 5  // [0, 1, 2, 3, 4]
-range second = >>5    // [0, 1, 2, 3, 4]
-range third = 4 >> -1 // [4, 3, 2, 1, 0]
+range increasing_exclusive = 0 >> 5    // [0, 1, 2, 3, 4]
+range increasing_inclusive = 0 => 5    // [0, 1, 2, 3, 4, 5]
+range decreasing_exclusive = 5 >> 0    // [5, 4, 3, 2, 1]
+range decreasing_inclusive = 5 => 0    // [5, 4, 3, 2, 1, 0]
+range increasing_exclusive_unary = >>5 // [0, 1, 2, 3, 4]    // when using unary start is set to 0
+range increasing_inclusive_unary = =>5 // [0, 1, 2, 3, 4, 5]
 ```
 
 # Enums
