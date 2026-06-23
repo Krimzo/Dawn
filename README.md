@@ -141,12 +141,16 @@ while i < 5 {
     i += 1
 }
 
-/* for can loop:
+/* for can iterate through:
     ranges ( start_incl >> end_excl )
+    inclusive ranges ( start_incl => end_incl )
     strings ( "some_string" )
     arrays ( [elem1, elem2] )
     */
-for i : 0 >> 5 {
+for i : 0>>5 {
+    print(i)
+}
+for i : 0=>5 {
     print(i)
 }
 for c : "stuff" {
