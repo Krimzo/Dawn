@@ -9,12 +9,16 @@ namespace dawn
 {
 struct RangeValue
 {
-    Int start_incl = 0;
-    Int end_excl = 0;
+    Int start = 0;
+    Int end = 0;
+    Bool inclusive = false;
 
     constexpr Bool empty() const
     {
-        return start_incl == end_excl;
+        if ( inclusive )
+            return false;
+        else
+            return start == end;
     }
 };
 

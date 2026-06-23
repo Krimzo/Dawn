@@ -112,6 +112,7 @@ __forceinline Bool is_op( StringRef const& value )
         (String) op_and,
         (String) op_or,
         (String) op_range,
+        (String) op_range_incl,
     };
     return OPS.contains( value );
 }
@@ -165,6 +166,9 @@ __forceinline OperatorType get_op( StringRef const& value )
 
     else if ( value == op_range )
         return OperatorType::RANGE;
+
+    else if ( value == op_range_incl )
+        return OperatorType::RANGE_INCL;
 
     else
         PARSER_PANIC( {}, "unknown operator [", value, "]" );

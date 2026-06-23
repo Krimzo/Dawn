@@ -416,15 +416,31 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
         }\
 
         Bool didbrk = false, didcon = false;
-        if ( value_rng.start_incl < value_rng.end_excl )
+        if ( value_rng.start <= value_rng.end )
         {
-            for ( Int i = value_rng.start_incl; i < value_rng.end_excl; ++i )
-                FOR_LOOP_RANGE_BODY
+            if ( value_rng.inclusive )
+            {
+                for ( Int i = value_rng.start; i <= value_rng.end; ++i )
+                    FOR_LOOP_RANGE_BODY
+            }
+            else
+            {
+                for ( Int i = value_rng.start; i < value_rng.end; ++i )
+                    FOR_LOOP_RANGE_BODY
+            }
         }
         else
         {
-            for ( Int i = value_rng.start_incl; i > value_rng.end_excl; --i )
-                FOR_LOOP_RANGE_BODY
+            if ( value_rng.inclusive )
+            {
+                for ( Int i = value_rng.start; i >= value_rng.end; --i )
+                    FOR_LOOP_RANGE_BODY
+            }
+            else
+            {
+                for ( Int i = value_rng.start; i > value_rng.end; --i )
+                    FOR_LOOP_RANGE_BODY
+            }
         }
     }
     else if ( value_type == ValueType::ARRAY )

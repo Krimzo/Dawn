@@ -60,6 +60,7 @@ inline constexpr StringRef op_not = "!";
 inline constexpr StringRef op_and = "&";
 inline constexpr StringRef op_or = "|";
 inline constexpr StringRef op_range = ">>";
+inline constexpr StringRef op_range_incl = "=>";
 inline constexpr StringRef op_cast = "@";
 
 inline constexpr StringRef op_assign = "=";
@@ -128,6 +129,7 @@ inline const StringMap<Int> precedences
     { (String) op_or, 11 },
 
     { (String) op_range, 12 },
+    { (String) op_range_incl, 12 },
 
     { (String) op_assign, 13 },
     { (String) op_addas, 13 },

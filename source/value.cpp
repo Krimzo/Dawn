@@ -706,7 +706,10 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
     case ValueType::RANGE:
     {
         auto& value = as_range();
-        return format( op_array_opn, value.start_incl, op_split, ' ', value.end_excl, op_expr_cls );
+        if ( value.inclusive )
+            return format( op_array_opn, value.start, " -> ", value.end, op_array_cls );
+        else
+            return format( op_array_opn, value.start, " -> ", value.end, op_expr_cls );
     }
 
     case ValueType::FUNCTION:
