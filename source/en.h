@@ -43,6 +43,7 @@ enum struct OperatorType : uint8_t
     AND,
     OR,
     RANGE,
+    RANGE_INCL,
     _COUNT,
 };
 

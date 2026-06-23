@@ -422,13 +422,26 @@ void dawn::Engine::load_standard_operators()
     bind_oper( id_int, OperatorType::RANGE, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             auto& left = args[0]; auto& right = args[1];
-            return Value{ RangeValue{ .start_incl = left.as_int(), .end_excl = right.as_int() }, location };
+            return Value{ RangeValue{ .start = left.as_int(), .end = right.as_int(), .inclusive = false }, location };
         } );
 
     bind_oper( id_void, OperatorType::RANGE, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             auto const& right = args[1];
-            return Value{ RangeValue{ .start_incl = 0, .end_excl = right.as_int() }, location };
+            return Value{ RangeValue{ .start = 0, .end = right.as_int(), .inclusive = false }, location };
+        } );
+
+    // op range_incl
+    bind_oper( id_int, OperatorType::RANGE_INCL, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto& left = args[0]; auto& right = args[1];
+            return Value{ RangeValue{ .start = left.as_int(), .end = right.as_int(), .inclusive = true }, location };
+        } );
+
+    bind_oper( id_void, OperatorType::RANGE_INCL, id_int, true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            auto const& right = args[1];
+            return Value{ RangeValue{ .start = 0, .end = right.as_int(), .inclusive = true }, location };
         } );
 }
 
@@ -691,7 +704,7 @@ void dawn::Engine::load_standard_members()
         {
             const Int index = args[0].as_int();
             if ( index < 0 )
-                ENGINE_PANIC( location, "string->set() index must be positive" );
+                ENGINE_PANIC( location, "string.set() index must be positive" );
             const String str = args[1].as_string();
             auto& self_str = self.as_string();
             self_str.resize( std::max( index + str.size(), self_str.size() ) );
@@ -702,12 +715,38 @@ void dawn::Engine::load_standard_members()
     // Ranges.
     bind_member( ValueType::RANGE, "start", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
-            return Value{ self.as_range().start_incl, location };
+            return Value{ self.as_range().start, location };
+        } );
+
+    bind_method( ValueType::RANGE, "set_start", false, 1, []( Location const& location, Engine& engine, Value const& self, Value const* args ) -> Value
+        {
+            if ( args[0].type() != ValueType::INT )
+                ENGINE_PANIC( location, "range.set_start() expects an int" );
+            self.as_range().start = args[0].as_int();
         } );
 
     bind_member( ValueType::RANGE, "end", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
-            return Value{ self.as_range().end_excl, location };
+            return Value{ self.as_range().end, location };
+        } );
+
+    bind_method( ValueType::RANGE, "set_end", false, 1, []( Location const& location, Engine& engine, Value const& self, Value const* args ) -> Value
+        {
+            if ( args[0].type() != ValueType::INT )
+                ENGINE_PANIC( location, "range.set_end() expects an int" );
+            self.as_range().end = args[0].as_int();
+        } );
+
+    bind_member( ValueType::RANGE, "inclusive", []( Location const& location, Engine& engine, Value const& self ) -> Value
+        {
+            return Value{ self.as_range().inclusive, location };
+        } );
+
+    bind_method( ValueType::RANGE, "set_inclusive", false, 1, []( Location const& location, Engine& engine, Value const& self, Value const* args ) -> Value
+        {
+            if ( args[0].type() != ValueType::BOOL )
+                ENGINE_PANIC( location, "range.set_inclusive() expects a bool" );
+            self.as_range().inclusive = args[0].as_bool();
         } );
 
     // Enums.
