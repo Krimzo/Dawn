@@ -3,19 +3,13 @@
 
 dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source ) noexcept
 {
-    StringSet imports;
-    return eval( source, imports );
-}
-
-dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, StringSet& imported ) noexcept
-{
     try
     {
         if ( source.path )
         {
-            if ( imported.contains( *source.path ) )
+            if ( imports.contains( *source.path ) )
                 return std::nullopt;
-            imported.insert( *source.path );
+            imports.insert( *source.path );
         }
 
         Vector<Token> tokens;
@@ -23,20 +17,20 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source, StringSet& impor
 
         Module module;
         parser.parse( tokens, module );
-        optimizer.optimize( module );
 
-        for ( auto& import_path : module.imports )
+        for ( String path : module.imports )
         {
-            String path = import_path;
             if ( fs::path{ path }.is_relative() )
             {
                 if ( !source.path )
                     throw String( "import can only be used inside dawn files" );
                 path = fs::path{ *source.path }.parent_path().string() + "/" + path;
             }
-            if ( auto error = eval( Source::from_file( path ), imported ) )
+            if ( auto error = eval( Source::from_file( path ) ) )
                 return error;
         }
+
+        optimizer.optimize( module );
         engine.load_mod( module );
     }
     catch ( String const& msg )
