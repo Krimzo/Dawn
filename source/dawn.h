@@ -11,13 +11,13 @@ namespace dawn
 {
 struct Dawn
 {
+    StringSet imports;
     Lexer lexer;
     Parser parser;
     Optimizer optimizer;
     Engine engine;
 
     Opt<String> eval( Source const& source ) noexcept;
-    Opt<String> eval( Source const& source, StringSet& imported ) noexcept;
 
     void bind_func( StringRef const& name, Bool is_ctime, CFunction cfunc ) noexcept;
     Opt<String> call_func( StringRef const& name ) noexcept;

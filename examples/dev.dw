@@ -1,25 +1,6 @@
+import "dev_libs.dw"
+
 func main()
 {
-	test_loop(0 >> 5)
-	test_loop(0 => 5)
-	test_loop(5 >> 0)
-	test_loop(5 => 0)
-
-	range? r = 0 => 2
-	print(r)
-	r.set_start(r.start + 1)
-	r.set_end(-r.end)
-	r.set_inclusive(false)
-	print(r)
-
-	test_loop(r)
-}
-
-func test_loop(range& value)
-{
-	array? data
-	for i : value {
-		data.push(i)
-	}
-	print(data)
+	print(MyStruct("nice"))
 }

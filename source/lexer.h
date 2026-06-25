@@ -46,18 +46,8 @@ struct Source
     const Opt<String> path;
     const String source;
 
-    static Source from_text( StringRef const& str )
-    {
-        return Source{ std::nullopt, String{ str } };
-    }
-
-    static Source from_file( StringRef const& path )
-    {
-        const String abs_path = fs::canonical( path ).generic_string();
-        if ( const auto opt_str = read_file( abs_path ) )
-            return Source{ abs_path, *opt_str };
-        LEXER_PANIC( Location{}, Char{}, "failed to read file ", abs_path );
-    }
+    static Source from_text( StringRef const& str );
+    static Source from_file( StringRef const& path );
 
     constexpr Char operator[]( Int i ) const
     {
@@ -76,7 +66,8 @@ struct Source
 
 private:
     explicit Source( Opt<String> path, String source )
-        : path( std::move( path ) ), source( std::move( source ) )
+        : path( std::move( path ) )
+        , source( std::move( source ) )
     {}
 };
 

@@ -100,6 +100,23 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
     return result;
 }
 
+dawn::Source dawn::Source::from_text( StringRef const& str )
+{
+    return Source{ std::nullopt, String{ str } };
+}
+
+dawn::Source dawn::Source::from_file( StringRef const& path )
+{
+    std::error_code error{};
+    const String abs_path = fs::canonical( path, error ).generic_string();
+    if ( error )
+        LEXER_PANIC( Location{}, Char{}, "file ", path, " does not exist" );
+    const Opt<String> file_data = read_file( abs_path );
+    if ( !file_data )
+        LEXER_PANIC( Location{}, Char{}, "failed to read file ", abs_path );
+    return Source{ abs_path, *file_data };
+}
+
 void dawn::Lexer::tokenize( Source const& source, Vector<Token>& tokens )
 {
     for ( Index index; index.index() < source.size(); index.incr() )
