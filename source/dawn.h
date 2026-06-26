@@ -9,8 +9,30 @@
 
 namespace dawn
 {
+struct Flags
+{
+    static constexpr StringRef _PREFIX = "-";
+    static constexpr StringRef _CONFIG_MAIN_FILE = "main";
+    static constexpr StringRef _CONFIG_ARGS_TO_PASS = "args";
+    static constexpr StringRef DISABLE_OPTIMIZATIONS = "disopt";
+};
+
+struct Config
+{
+    String input_file;
+    Vector<String> args_to_pass;
+    StringMap<Bool> flags = {
+        { (String) Flags::DISABLE_OPTIMIZATIONS, false }
+    };
+
+    Opt<String> from_args( char const* const* args, int count ) noexcept;
+    Opt<String> from_file( StringRef const& path ) noexcept;
+    Bool flag_status( StringRef const& flag ) const;
+};
+
 struct Dawn
 {
+    Config config{};
     StringSet imports;
     Lexer lexer;
     Parser parser;

@@ -1,4 +1,4 @@
-func main()
+func main(array& args)
 {
     int result = fib(30)
     print(result)

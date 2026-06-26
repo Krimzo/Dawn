@@ -1,6 +1,82 @@
 #include "dawn.h"
 
 
+dawn::Opt<dawn::String> dawn::Config::from_args( char const* const* args, int count ) noexcept
+{
+    for ( int i = 0; i < count; i++ )
+    {
+        const std::string_view arg = args[i];
+        if ( arg.starts_with( Flags::_PREFIX ) )
+        {
+            if ( arg.size() < Flags::_PREFIX.size() + 1 )
+                return format( "invalid argument: ", arg );
+            const std::string_view arg_value = arg.substr( Flags::_PREFIX.size() );
+            const auto it = flags.find( arg_value );
+            if ( it != flags.end() )
+                it->second = true;
+            else
+                args_to_pass.emplace_back( arg );
+        }
+        else if ( input_file.empty() )
+            input_file = arg;
+        else
+            args_to_pass.emplace_back( arg );
+    }
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::String> dawn::Config::from_file( StringRef const& path ) noexcept
+{
+    const Opt<String> file_data = read_file( path );
+    if ( !file_data )
+        return format( "failed to read file: ", path );
+    Bool has_main = false;
+    for ( String const& line : split( *file_data, "\n" ) )
+    {
+        const Vector<String> parts = split( line, "=" );
+        if ( parts.empty() )
+            continue;
+        if ( parts.size() != 2 )
+            return format( "invalid line: ", line );
+        if ( parts[0] == Flags::_CONFIG_MAIN_FILE )
+        {
+            std::error_code error;
+            const fs::path abs_path = fs::path{ path }.parent_path() / parts[1];
+            input_file = fs::canonical( abs_path, error ).generic_string();
+            if ( error )
+                return format( "main file ", abs_path, " does not exist" );
+            has_main = true;
+        }
+        else if ( parts[0] == Flags::_CONFIG_ARGS_TO_PASS )
+        {
+            for ( auto& arg : split( parts[1], " " ) )
+            {
+                if ( arg.empty() )
+                    continue;
+                args_to_pass.emplace_back( arg );
+            }
+        }
+        else
+        {
+            const auto it = flags.find( parts[0] );
+            if ( it == flags.end() )
+                return format( "unknown config flag: ", parts[0] );
+            it->second = ( parts[1] == "true" );
+        }
+    }
+    if ( !has_main )
+        return format( "missing config flag: ", Flags::_CONFIG_MAIN_FILE );
+    return std::nullopt;
+}
+
+dawn::Bool dawn::Config::flag_status( StringRef const& flag ) const
+{
+    const auto it = flags.find( flag );
+    if ( it == flags.end() )
+        return false;
+    return it->second;
+}
+
 dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source ) noexcept
 {
     try
@@ -30,7 +106,8 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source ) noexcept
                 return error;
         }
 
-        optimizer.optimize( module );
+        if ( !config.flag_status( Flags::DISABLE_OPTIMIZATIONS ) )
+            optimizer.optimize( module );
         engine.load_mod( module );
     }
     catch ( String const& msg )

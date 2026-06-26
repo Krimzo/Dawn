@@ -1,4 +1,4 @@
-func main()
+func main(array& args)
 {
 	var_test()
 	branch_test()

@@ -1,6 +1,6 @@
 import "dev_libs.dw"
 
-func main()
+func main(array& args)
 {
 	print(MyStruct("nice"))
 }

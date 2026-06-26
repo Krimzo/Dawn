@@ -22,7 +22,7 @@ int& p = b // reference
 
 # Types
 ```dawn
-void n = ()                       // void (0 bytes)
+void n = ()                       // void
 bool b = false                    // bool (1 byte)
 int i = -10                       // integer (8 bytes)
 float f = 6.0                     // float (8 bytes)
