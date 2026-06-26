@@ -78,19 +78,27 @@ int main( int argc, char** argv )
             return -2;
         }
     }
+    else if ( fs::path{ dawn.config.input_file }.filename().string() == DIR_CONFIG_FILENAME )
+    {
+        if ( auto error = dawn.config.from_file( dawn.config.input_file ) )
+        {
+            print( error.value() );
+            return -3;
+        }
+    }
 
     try {
         const Source source = Source::from_file( dawn.config.input_file );
         if ( auto error = dawn.eval( source ) )
         {
             print( error.value() );
-            return -4;
+            return -5;
         }
     }
     catch ( String const& error )
     {
         print( error );
-        return -3;
+        return -4;
     }
 
     ArrayValue args;
@@ -101,7 +109,7 @@ int main( int argc, char** argv )
     if ( auto error = dawn.call_func( "main", { Value{ args, LOCATION_NONE } }, &retval ) )
     {
         print( error.value() );
-        return -5;
+        return -6;
     }
     return (int) retval.to_int( dawn.engine );
 }

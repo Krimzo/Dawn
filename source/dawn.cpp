@@ -40,7 +40,11 @@ dawn::Opt<dawn::String> dawn::Config::from_file( StringRef const& path ) noexcep
             return format( "invalid line: ", line );
         if ( parts[0] == Flags::_CONFIG_MAIN_FILE )
         {
-            input_file = parts[1];
+            std::error_code error;
+            const fs::path abs_path = fs::path{ path }.parent_path() / parts[1];
+            input_file = fs::canonical( abs_path, error ).generic_string();
+            if ( error )
+                return format( "main file ", abs_path, " does not exist" );
             has_main = true;
         }
         else if ( parts[0] == Flags::_CONFIG_ARGS_TO_PASS )
