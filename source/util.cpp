@@ -47,6 +47,14 @@ dawn::Opt<dawn::String> dawn::read_file( StringRef const& path )
     return { ( StringStream{} << file.rdbuf() ).str() };
 }
 
+dawn::Vector<dawn::String> dawn::split( StringRef const& data, StringRef const& delim )
+{
+    std::vector<std::string> parts;
+    for ( auto const& part : std::views::split( data, delim ) )
+        parts.emplace_back( part.begin(), part.end() );
+    return parts;
+}
+
 dawn::Opt<dawn::Int> dawn::parse_int( StringRef const& data )
 {
     if ( data.empty() )

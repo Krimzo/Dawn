@@ -21,8 +21,37 @@ dawn::Opt<dawn::String> dawn::Config::from_args( char const* const* args, int co
         else
             return format( "input file already provided, error: ", arg );
     }
-    if ( input_file.empty() )
-        return "input file not provided";
+    return std::nullopt;
+}
+
+dawn::Opt<dawn::String> dawn::Config::from_file( StringRef const& path ) noexcept
+{
+    const Opt<String> file_data = read_file( path );
+    if ( !file_data )
+        return format( "failed to read file: ", path );
+    Bool has_main = false;
+    for ( String const& line : split( *file_data, "\n" ) )
+    {
+        const Vector<String> parts = split( line, "=" );
+        if ( parts.empty() )
+            continue;
+        if ( parts.size() != 2 )
+            return format( "invalid line: ", line );
+        if ( parts[0] == Flags::_CONFIG_MAIN_FILE )
+        {
+            input_file = parts[1];
+            has_main = true;
+        }
+        else
+        {
+            const auto it = flags.find( parts[0] );
+            if ( it == flags.end() )
+                return format( "unknown config flag: ", parts[0] );
+            it->second = ( parts[1] == "true" );
+        }
+    }
+    if ( !has_main )
+        return format( "missing config flag: ", Flags::_CONFIG_MAIN_FILE );
     return std::nullopt;
 }
 

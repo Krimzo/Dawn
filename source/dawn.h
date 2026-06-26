@@ -12,6 +12,7 @@ namespace dawn
 struct Flags
 {
     static constexpr StringRef _PREFIX = "-";
+    static constexpr StringRef _CONFIG_MAIN_FILE = "main";
     static constexpr StringRef DISABLE_OPTIMIZATIONS = "disopt";
 };
 
@@ -23,6 +24,7 @@ struct Config
     };
 
     Opt<String> from_args( char const* const* args, int count ) noexcept;
+    Opt<String> from_file( StringRef const& path ) noexcept;
     Bool flag_status( StringRef const& flag ) const;
 };
 

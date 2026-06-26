@@ -1,8 +1,11 @@
 #include "dawn.h"
 
+#define DEBUG_TESTS 0
+
 using namespace dawn; // Only in this case since it is not a header file.
 
-#define DEBUG_TESTS 0
+static constexpr StringRef DEFAULT_INPUT = ".";
+static constexpr StringRef DIR_CONFIG_FILENAME = "dawn.ini";
 
 #ifndef DAWN_SHIP
 
@@ -19,7 +22,7 @@ struct Stopwatch
     }
 };
 
-int main()
+int main( int argc, char** argv )
 {
     Stopwatch stopwatch;
     Dawn dawn;
@@ -40,12 +43,17 @@ int main()
         return -1;
     }
 
-    if ( auto error = dawn.call_func( "main" ) )
+    ArrayValue args;
+    for ( int i = 0; i < argc; i++ )
+        args.data.emplace_back( String{ argv[i] }, LOCATION_NONE );
+
+    Value retval{ Int(), LOCATION_NONE };
+    if ( auto error = dawn.call_func( "main", { Value{ args, LOCATION_NONE } }, &retval ) )
     {
         print( error.value() );
         return -2;
     }
-    return 0;
+    return (int) retval.to_int( dawn.engine );
 }
 
 #else
@@ -59,29 +67,41 @@ int main( int argc, char** argv )
         return -1;
     }
 
+    if ( dawn.config.input_file.empty() )
+        dawn.config.input_file = DEFAULT_INPUT;
+
+    if ( fs::is_directory( dawn.config.input_file ) )
+    {
+        if ( auto error = dawn.config.from_file( format( dawn.config.input_file, "/", DIR_CONFIG_FILENAME ) ) )
+        {
+            print( error.value() );
+            return -2;
+        }
+    }
+
     try {
         const Source source = Source::from_file( dawn.config.input_file );
         if ( auto error = dawn.eval( source ) )
         {
             print( error.value() );
-            return -3;
+            return -4;
         }
     }
     catch ( String const& error )
     {
         print( error );
-        return -2;
+        return -3;
     }
 
     ArrayValue args;
-    for ( int i = 2; i < argc; i++ )
+    for ( int i = 0; i < argc; i++ )
         args.data.emplace_back( String{ argv[i] }, LOCATION_NONE );
 
     Value retval{ Int(), LOCATION_NONE };
     if ( auto error = dawn.call_func( "main", { Value{ args, LOCATION_NONE } }, &retval ) )
     {
         print( error.value() );
-        return -4;
+        return -5;
     }
     return (int) retval.to_int( dawn.engine );
 }

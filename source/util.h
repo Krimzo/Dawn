@@ -41,7 +41,9 @@ void print( Args&&... args )
 
 Char to_escaping( Char c );
 String from_escaping( Char c );
+
 Opt<String> read_file( StringRef const& path );
+Vector<String> split( StringRef const& data, StringRef const& delim );
 
 Opt<Int> parse_int( StringRef const& data );
 Opt<Float> parse_float( StringRef const& data );
