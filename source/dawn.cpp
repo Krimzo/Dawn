@@ -1,6 +1,39 @@
 #include "dawn.h"
 
 
+dawn::Opt<dawn::String> dawn::Config::from_args( char const* const* args, int count ) noexcept
+{
+    for ( int i = 0; i < count; i++ )
+    {
+        const std::string_view arg = args[i];
+        if ( arg.starts_with( Flags::_PREFIX ) )
+        {
+            if ( arg.size() < Flags::_PREFIX.size() + 1 )
+                return format( "invalid argument: ", arg );
+            const std::string_view arg_value = arg.substr( Flags::_PREFIX.size() );
+            const auto it = flags.find( arg_value );
+            if ( it == flags.end() )
+                return format( "unknown flag: ", arg );
+            it->second = true;
+        }
+        else if ( input_file.empty() )
+            input_file = arg;
+        else
+            return format( "input file already provided, error: ", arg );
+    }
+    if ( input_file.empty() )
+        return "input file not provided";
+    return std::nullopt;
+}
+
+dawn::Bool dawn::Config::flag_status( StringRef const& flag ) const
+{
+    const auto it = flags.find( flag );
+    if ( it == flags.end() )
+        return false;
+    return it->second;
+}
+
 dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source ) noexcept
 {
     try
@@ -30,7 +63,8 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source ) noexcept
                 return error;
         }
 
-        optimizer.optimize( module );
+        if ( !config.flag_status( Flags::DISABLE_OPTIMIZATIONS ) )
+            optimizer.optimize( module );
         engine.load_mod( module );
     }
     catch ( String const& msg )
