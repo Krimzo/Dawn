@@ -13,12 +13,14 @@ struct Flags
 {
     static constexpr StringRef _PREFIX = "-";
     static constexpr StringRef _CONFIG_MAIN_FILE = "main";
+    static constexpr StringRef _CONFIG_ARGS_TO_PASS = "args";
     static constexpr StringRef DISABLE_OPTIMIZATIONS = "disopt";
 };
 
 struct Config
 {
     String input_file;
+    Vector<String> args_to_pass;
     StringMap<Bool> flags = {
         { (String) Flags::DISABLE_OPTIMIZATIONS, false }
     };

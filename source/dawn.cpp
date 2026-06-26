@@ -12,14 +12,15 @@ dawn::Opt<dawn::String> dawn::Config::from_args( char const* const* args, int co
                 return format( "invalid argument: ", arg );
             const std::string_view arg_value = arg.substr( Flags::_PREFIX.size() );
             const auto it = flags.find( arg_value );
-            if ( it == flags.end() )
-                return format( "unknown flag: ", arg );
-            it->second = true;
+            if ( it != flags.end() )
+                it->second = true;
+            else
+                args_to_pass.emplace_back( arg );
         }
         else if ( input_file.empty() )
             input_file = arg;
         else
-            return format( "input file already provided, error: ", arg );
+            args_to_pass.emplace_back( arg );
     }
     return std::nullopt;
 }
@@ -41,6 +42,15 @@ dawn::Opt<dawn::String> dawn::Config::from_file( StringRef const& path ) noexcep
         {
             input_file = parts[1];
             has_main = true;
+        }
+        else if ( parts[0] == Flags::_CONFIG_ARGS_TO_PASS )
+        {
+            for ( auto& arg : split( parts[1], " " ) )
+            {
+                if ( arg.empty() )
+                    continue;
+                args_to_pass.emplace_back( arg );
+            }
         }
         else
         {

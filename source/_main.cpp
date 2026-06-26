@@ -94,8 +94,8 @@ int main( int argc, char** argv )
     }
 
     ArrayValue args;
-    for ( int i = 0; i < argc; i++ )
-        args.data.emplace_back( String{ argv[i] }, LOCATION_NONE );
+    for ( auto& arg : dawn.config.args_to_pass )
+        args.data.emplace_back( String{ arg }, LOCATION_NONE );
 
     Value retval{ Int(), LOCATION_NONE };
     if ( auto error = dawn.call_func( "main", { Value{ args, LOCATION_NONE } }, &retval ) )
