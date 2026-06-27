@@ -122,28 +122,33 @@ struct ValueInfo
     ID type_id;
     ValueType type = ValueType::VOID;
     Bool is_const = true;
+    Bool is_ptr = false;
 };
 
 template<typename T>
 struct ValueStorage
 {
     ValueInfo info{};
-    Variant<T, T*> value{};
+    T value{};
 
     constexpr T& get()
     {
-        if ( T* ptr = std::get_if<T>( &value ) )
-            return *ptr;
+        if ( info.is_ptr )
+            return *static_cast<T*>(
+                reinterpret_cast<ValueStorage<Ptr>*>( this )->value
+                );
         else
-            return *std::get<T*>( value );
+            return value;
     }
 
     constexpr T const& get() const
     {
-        if ( T const* ptr = std::get_if<T>( &value ) )
-            return *ptr;
+        if ( info.is_ptr )
+            return *static_cast<T const*>(
+                reinterpret_cast<ValueStorage<Ptr> const*>( this )->value
+                );
         else
-            return *std::get<T*>( value );
+            return value;
     }
 };
 
