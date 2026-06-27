@@ -34,7 +34,7 @@ void dawn::Engine::load_mod( Module const& module )
 void dawn::Engine::load_operator( Operator const& entry )
 {
     if ( entry.args.size() != 2 )
-        ENGINE_PANIC( LOCATION_NONE, "operators must have 2 arguments" );
+        ENGINE_PANIC( {}, "operators must have 2 arguments" );
 
     auto const& left = entry.args[0];
     auto const& right = entry.args[1];
@@ -47,7 +47,7 @@ void dawn::Engine::load_operator( Operator const& entry )
 
     auto* op = right_types->get( right.type.type_id );
     if ( op )
-        ENGINE_PANIC( LOCATION_NONE, "operator [", entry.type, "] with left type [", IDSystem::get( left.type.type_id ), "] and right type [", IDSystem::get( right.type.type_id ), "] already defined" );
+        ENGINE_PANIC( {}, "operator [", entry.type, "] with left type [", IDSystem::get( left.type.type_id ), "] and right type [", IDSystem::get( right.type.type_id ), "] already defined" );
     right_types->set( right.type.type_id, {} ).as_global().func.emplace<DFunction>( entry.args, entry.body );
 }
 
@@ -58,7 +58,7 @@ void dawn::Engine::load_function( Function const& entry )
         if ( Opt<ValueType> value_type = builtin_type( entry.type_id ) )
         {
             if ( member_generators[(Int) *value_type].get( entry.id ) )
-                ENGINE_PANIC( LOCATION_NONE, "method [", IDSystem::get( entry.id ), "] already defined for type [", IDSystem::get( entry.type_id ), "]" );
+                ENGINE_PANIC( {}, "method [", IDSystem::get( entry.id ), "] already defined for type [", IDSystem::get( entry.type_id ), "]" );
             member_generators[(Int) *value_type].set( entry.id, [entry]( Location const& location, Engine& engine, Value const& self ) -> Value
                 {
                     FunctionValue fv{};
@@ -72,23 +72,23 @@ void dawn::Engine::load_function( Function const& entry )
         else if ( Struct* struc = structs.get( entry.type_id ) )
         {
             if ( struc->contains( entry.id ) )
-                ENGINE_PANIC( LOCATION_NONE, "method [", IDSystem::get( entry.id ), "] already defined for struct [", IDSystem::get( entry.type_id ), "]" );
+                ENGINE_PANIC( {}, "method [", IDSystem::get( entry.id ), "] already defined for struct [", IDSystem::get( entry.type_id ), "]" );
             struc->methods.push_back( entry );
         }
         else
-            ENGINE_PANIC( LOCATION_NONE, "type [", IDSystem::get( entry.type_id ), "] does not exist or support function extensions" );
+            ENGINE_PANIC( {}, "type [", IDSystem::get( entry.type_id ), "] does not exist or support function extensions" );
     }
     else
     {
         if ( stack.root().get( entry.id ) )
-            ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( entry.id ), "] already exists" );
+            ENGINE_PANIC( {}, "object [", IDSystem::get( entry.id ), "] already exists" );
 
         FunctionValue fv{};
         auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
         global.id = entry.id;
         global.func = DFunction{ entry.args, entry.body };
 
-        stack.root().set( entry.id, Value{ fv, LOCATION_NONE } );
+        stack.root().set( entry.id, Value{ fv } );
     }
 }
 
@@ -124,7 +124,7 @@ void dawn::Engine::bind_oper( ID left_type_id, OperatorType op_type, ID right_ty
 
     auto* op = right_types->get( right_type_id );
     if ( op )
-        ENGINE_PANIC( LOCATION_NONE, "operator [", op_type, "] with left type [", IDSystem::get( left_type_id ), "] and right type [", IDSystem::get( right_type_id ), "] already defined" );
+        ENGINE_PANIC( {}, "operator [", op_type, "] with left type [", IDSystem::get( left_type_id ), "] and right type [", IDSystem::get( right_type_id ), "] already defined" );
     right_types->set( right_type_id, {} ).as_global().func.emplace<CFunction>( std::move( cfunc ) );
 
     if ( is_const )
@@ -134,7 +134,7 @@ void dawn::Engine::bind_oper( ID left_type_id, OperatorType op_type, ID right_ty
 void dawn::Engine::bind_func( ID id, Bool is_ctime, CFunction cfunc )
 {
     if ( stack.root().get( id ) )
-        ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] already exists" );
+        ENGINE_PANIC( {}, "object [", IDSystem::get( id ), "] already exists" );
     if ( is_ctime )
         m_ctime_funcs.insert( id );
 
@@ -142,19 +142,19 @@ void dawn::Engine::bind_func( ID id, Bool is_ctime, CFunction cfunc )
     auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
     global.id = id;
     global.func = std::move( cfunc );
-    stack.root().set( id, Value{ fv, LOCATION_NONE } );
+    stack.root().set( id, Value{ fv } );
 }
 
 dawn::Value dawn::Engine::call_func( ID id, Value* args, Int arg_count )
 {
     Value* value = stack.root().get( id );
     if ( !value )
-        ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] does not exist" );
+        ENGINE_PANIC( {}, "object [", IDSystem::get( id ), "] does not exist" );
 
     if ( value->type() != ValueType::FUNCTION )
-        ENGINE_PANIC( LOCATION_NONE, "object [", IDSystem::get( id ), "] can not be called" );
+        ENGINE_PANIC( {}, "object [", IDSystem::get( id ), "] can not be called" );
 
-    return handle_func( LOCATION_NONE, value->as_function(), args, arg_count );
+    return handle_func( {}, value->as_function(), args, arg_count );
 }
 
 void dawn::Engine::add_var( Location const& location, VarType const& type, ID id, Value const& value )

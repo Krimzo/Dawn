@@ -820,13 +820,11 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
         Token left_scope;
         left_scope.value = op_scope_opn;
         left_scope.type = TokenType::OPERATOR;
-        left_scope.location = LOCATION_NONE;
         right.insert( right.begin(), left_scope );
 
         Token right_scope;
         right_scope.value = op_scope_cls;
         right_scope.type = TokenType::OPERATOR;
-        right_scope.location = LOCATION_NONE;
         right.push_back( right_scope );
 
         TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };

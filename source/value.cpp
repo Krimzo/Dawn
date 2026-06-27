@@ -359,7 +359,8 @@ dawn::StructValue const& dawn::Value::as_struct() const
 
 dawn::Location const& dawn::Value::location() const
 {
-    return m_regref ? m_regref->location : LOCATION_NONE;
+    static constexpr Location l{};
+    return m_regref ? m_regref->location : l;
 }
 
 dawn::ValueType dawn::Value::type() const
@@ -475,7 +476,7 @@ dawn::Value dawn::Value::clone() const
     }
 
     default:
-        ENGINE_PANIC( LOCATION_NONE, "can not clone type [", (Int) type(), "]" );
+        ENGINE_PANIC( {}, "can not clone type [", (Int) type(), "]" );
     }
 }
 

@@ -134,16 +134,16 @@ struct ValueStorage
 struct Value
 {
     constexpr Value() = default;
-    explicit Value( Bool value, Location const& location );
-    explicit Value( Int value, Location const& location );
-    explicit Value( Float value, Location const& location );
-    explicit Value( Char value, Location const& location );
-    explicit Value( StringRef const& value, Location const& location );
-    explicit Value( RangeValue const& value, Location const& location );
-    explicit Value( FunctionValue const& value, Location const& location );
-    explicit Value( ArrayValue const& value, Location const& location );
-    explicit Value( EnumValue const& value, Location const& location );
-    explicit Value( StructValue const& value, Location const& location );
+    explicit Value( Bool value, Location const& location = {} );
+    explicit Value( Int value, Location const& location = {} );
+    explicit Value( Float value, Location const& location = {} );
+    explicit Value( Char value, Location const& location = {} );
+    explicit Value( StringRef const& value, Location const& location = {} );
+    explicit Value( RangeValue const& value, Location const& location = {} );
+    explicit Value( FunctionValue const& value, Location const& location = {} );
+    explicit Value( ArrayValue const& value, Location const& location = {} );
+    explicit Value( EnumValue const& value, Location const& location = {} );
+    explicit Value( StructValue const& value, Location const& location = {} );
 
     void as_void() const;
     Bool& as_bool() const;

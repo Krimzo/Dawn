@@ -301,7 +301,7 @@ struct Node : Variant <
         case NodeType::NONE:
         case NodeType::SCOPE:
         default:
-            return LOCATION_NONE;
+            return DEFAULT_LOCATION;
 
         case NodeType::VALUE:
             return std::get<Value>( *this ).location();
@@ -331,5 +331,8 @@ struct Node : Variant <
             return reinterpret_cast<LocationHolder const*>( this )->location;
         }
     }
+
+private:
+    static constexpr Location DEFAULT_LOCATION{};
 };
 }
