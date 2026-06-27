@@ -117,13 +117,13 @@ dawn::Source dawn::Source::from_file( StringRef const& path )
     return Source{ abs_path, *file_data };
 }
 
-void dawn::Lexer::tokenize( Source const& source, Vector<Token>& tokens )
+void dawn::Lexer::tokenize( Source const& source, Vector<Token>& tokens ) const
 {
     for ( Index index; index.index() < source.size(); index.incr() )
         tokenize_at( source, tokens, index );
 }
 
-void dawn::Lexer::tokenize_at( Source const& source, Vector<Token>& tokens, Index& index )
+void dawn::Lexer::tokenize_at( Source const& source, Vector<Token>& tokens, Index& index ) const
 {
     if ( is_space( source, index.index() ) )
     {
@@ -161,12 +161,12 @@ void dawn::Lexer::tokenize_at( Source const& source, Vector<Token>& tokens, Inde
         LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "unexpected character" );
 }
 
-dawn::Bool dawn::Lexer::is_space( Source const& source, Int i )
+dawn::Bool dawn::Lexer::is_space( Source const& source, Int i ) const
 {
     return isspace( source[i] );
 }
 
-void dawn::Lexer::extract_space( Source const& source, Vector<Token>& tokens, Index& index )
+void dawn::Lexer::extract_space( Source const& source, Vector<Token>& tokens, Index& index ) const
 {
     for ( ; index.index() < source.size(); index.incr() )
     {
@@ -181,12 +181,12 @@ void dawn::Lexer::extract_space( Source const& source, Vector<Token>& tokens, In
     }
 }
 
-dawn::Bool dawn::Lexer::is_comment( Source const& source, Int i )
+dawn::Bool dawn::Lexer::is_comment( Source const& source, Int i ) const
 {
     return source.substr( i ).starts_with( lang_def.comment_line );
 }
 
-void dawn::Lexer::extract_comment( Source const& source, Vector<Token>& tokens, Index& index )
+void dawn::Lexer::extract_comment( Source const& source, Vector<Token>& tokens, Index& index ) const
 {
     for ( ; index.index() < source.size(); index.incr() )
     {
@@ -198,12 +198,12 @@ void dawn::Lexer::extract_comment( Source const& source, Vector<Token>& tokens, 
     }
 }
 
-dawn::Bool dawn::Lexer::is_mlcomment( Source const& source, Int i )
+dawn::Bool dawn::Lexer::is_mlcomment( Source const& source, Int i ) const
 {
     return source.substr( i ).starts_with( lang_def.comment_multiline.first );
 }
 
-void dawn::Lexer::extract_mlcomment( Source const& source, Vector<Token>& tokens, Index& index )
+void dawn::Lexer::extract_mlcomment( Source const& source, Vector<Token>& tokens, Index& index ) const
 {
     for ( ; index.index() < source.size(); index.incr() )
     {
@@ -218,12 +218,12 @@ void dawn::Lexer::extract_mlcomment( Source const& source, Vector<Token>& tokens
     }
 }
 
-dawn::Bool dawn::Lexer::is_word( Source const& source, Int i )
+dawn::Bool dawn::Lexer::is_word( Source const& source, Int i ) const
 {
     return source.substr( i ).starts_with( lang_def.separator_identifier ) || isalpha( source[i] );
 }
 
-void dawn::Lexer::extract_word( Source const& source, Vector<Token>& tokens, Index& index )
+void dawn::Lexer::extract_word( Source const& source, Vector<Token>& tokens, Index& index ) const
 {
     String buffer;
     for ( ; index.index() < source.size(); index.incr() )
@@ -250,13 +250,13 @@ void dawn::Lexer::extract_word( Source const& source, Vector<Token>& tokens, Ind
     token.location = Location{ source.path.value_or( {} ), index };
 }
 
-dawn::Bool dawn::Lexer::is_number( Source const& source, Int i )
+dawn::Bool dawn::Lexer::is_number( Source const& source, Int i ) const
 {
     return isdigit( source[i] ) ||
         ( source.substr( i ).starts_with( lang_def.separator_number ) && source.size() > ( i + 1 ) && isdigit( source[i + 1] ) );
 }
 
-void dawn::Lexer::extract_number( Source const& source, Vector<Token>& tokens, Index& index )
+void dawn::Lexer::extract_number( Source const& source, Vector<Token>& tokens, Index& index ) const
 {
     String buffer;
     Bool is_float = false, is_scientific = false;
@@ -300,12 +300,12 @@ void dawn::Lexer::extract_number( Source const& source, Vector<Token>& tokens, I
     token.location = Location{ source.path.value_or( {} ), index };
 }
 
-dawn::Bool dawn::Lexer::is_char( Source const& source, Int i )
+dawn::Bool dawn::Lexer::is_char( Source const& source, Int i ) const
 {
     return source.substr( i ).starts_with( lang_def.literal_char );
 }
 
-void dawn::Lexer::extract_char( Source const& source, Vector<Token>& tokens, Index& index )
+void dawn::Lexer::extract_char( Source const& source, Vector<Token>& tokens, Index& index ) const
 {
     if ( source.substr( index.index() ).size() < 3 )
         LEXER_PANIC( Location{ source.path.value_or( {} ), index }, source[index.index()], "char literal too short" );
@@ -339,12 +339,12 @@ void dawn::Lexer::extract_char( Source const& source, Vector<Token>& tokens, Ind
     token.location = Location{ source.path.value_or( {} ), index };
 }
 
-dawn::Bool dawn::Lexer::is_string( Source const& source, Int i )
+dawn::Bool dawn::Lexer::is_string( Source const& source, Int i ) const
 {
     return source.substr( i ).starts_with( lang_def.literal_string );
 }
 
-void dawn::Lexer::extract_string( Source const& source, Vector<Token>& tokens, Index& index )
+void dawn::Lexer::extract_string( Source const& source, Vector<Token>& tokens, Index& index ) const
 {
     const auto add_value_token = [&]( TokenType type, StringRef const& str )
         {
@@ -446,7 +446,7 @@ void dawn::Lexer::extract_string( Source const& source, Vector<Token>& tokens, I
     }
 }
 
-dawn::Bool dawn::Lexer::is_operator( Source const& source, Int i )
+dawn::Bool dawn::Lexer::is_operator( Source const& source, Int i ) const
 {
     for ( auto& op : lang_def.operators )
     {
@@ -456,7 +456,7 @@ dawn::Bool dawn::Lexer::is_operator( Source const& source, Int i )
     return false;
 }
 
-void dawn::Lexer::extract_operator( Source const& source, Vector<Token>& tokens, Index& index )
+void dawn::Lexer::extract_operator( Source const& source, Vector<Token>& tokens, Index& index ) const
 {
     Int op_size = 0;
     Opt<String> closest_op;

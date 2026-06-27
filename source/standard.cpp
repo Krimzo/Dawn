@@ -447,6 +447,34 @@ void dawn::Engine::load_standard_operators()
 
 void dawn::Engine::load_standard_functions()
 {
+    static const Lexer _lexer{};
+    static constexpr Parser _parser{};
+
+    /* DAWN */
+    bind_func( IDSystem::get( "lex" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            if ( arg_count != 1 )
+                ENGINE_PANIC( location, "lex expected 1 argument, but got ", arg_count );
+            Vector<Token> tokens;
+            _lexer.tokenize( Source::from_text( args[0].as_string() ), tokens );
+            ArrayValue array;
+            for ( auto& token : tokens )
+                array.data.emplace_back( token.any_value(), token.location );
+            return Value{ array, location };
+        } );
+
+    bind_func( IDSystem::get( "eval" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            if ( arg_count != 1 )
+                ENGINE_PANIC( location, "eval expected 1 argument, but got ", arg_count );
+            Vector<Token> tokens;
+            _lexer.tokenize( Source::from_text( args[0].as_string() ), tokens );
+            TokenIterator it{ tokens.data(), tokens.data() + tokens.size() };
+            Node node;
+            _parser.parse_expression( ExtractType::DEFAULT, it, node );
+            return engine.handle_expr( node );
+        } );
+
     /* TYPE */
     bind_func( IDSystem::get( "typeid" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
@@ -676,6 +704,18 @@ void dawn::Engine::load_standard_functions()
 void dawn::Engine::load_standard_members()
 {
     // Strings.
+    bind_method( ValueType::STRING, "for_each", true, 1, []( Location const& location, Engine& engine, Value const& self, Value const* args ) -> Value
+        {
+            auto& func = args[0].as_function();
+            Value arg;
+            for ( auto& c : self.as_string() )
+            {
+                arg = Value{ c, location };
+                engine.handle_func( location, func, &arg, 1 );
+            }
+            return Value{};
+        } );
+
     bind_member( ValueType::STRING, "count", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return Value{ (Int) self.as_string().size(), location };
@@ -769,6 +809,14 @@ void dawn::Engine::load_standard_members()
         } );
 
     // Arrays.
+    bind_method( ValueType::ARRAY, "for_each", true, 1, []( Location const& location, Engine& engine, Value const& self, Value const* args )->Value
+        {
+            auto& func = args[0].as_function();
+            for ( auto& v : self.as_array().data )
+                engine.handle_func( location, func, &v, 1 );
+            return Value{};
+        } );
+
     bind_member( ValueType::ARRAY, "count", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return Value{ (Int) self.as_array().data.size(), location };

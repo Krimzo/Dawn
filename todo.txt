@@ -1,2 +1,3 @@
 add compilation of a .dw into a .cdw file (optimize module and serialize)
-add eval func or keyword
+values should be able to store pointers too instead of direct data
+value constructor should have default location value

@@ -75,32 +75,32 @@ struct Lexer
 {
     LanguageDef lang_def = LanguageDef::dawn();
 
-    void tokenize( Source const& source, Vector<Token>& tokens );
-    void tokenize_at( Source const& source, Vector<Token>& tokens, Index& index );
+    void tokenize( Source const& source, Vector<Token>& tokens ) const;
+    void tokenize_at( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
 private:
-    Bool is_space( Source const& source, Int i );
-    void extract_space( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_space( Source const& source, Int i ) const;
+    void extract_space( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_comment( Source const& source, Int i );
-    void extract_comment( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_comment( Source const& source, Int i ) const;
+    void extract_comment( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_mlcomment( Source const& source, Int i );
-    void extract_mlcomment( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_mlcomment( Source const& source, Int i ) const;
+    void extract_mlcomment( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_word( Source const& source, Int i );
-    void extract_word( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_word( Source const& source, Int i ) const;
+    void extract_word( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_number( Source const& source, Int i );
-    void extract_number( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_number( Source const& source, Int i ) const;
+    void extract_number( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_char( Source const& source, Int i );
-    void extract_char( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_char( Source const& source, Int i ) const;
+    void extract_char( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_string( Source const& source, Int i );
-    void extract_string( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_string( Source const& source, Int i ) const;
+    void extract_string( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_operator( Source const& source, Int i );
-    void extract_operator( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_operator( Source const& source, Int i ) const;
+    void extract_operator( Source const& source, Vector<Token>& tokens, Index& index ) const;
 };
 }

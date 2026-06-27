@@ -2,5 +2,6 @@ import "dev_libs.dw"
 
 func main(array& args)
 {
-	print(MyStruct("nice"))
+	"nice".for_each(print)
+	lex("``\{ return \"very nice\" }").for_each(print)
 }
