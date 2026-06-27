@@ -1,11 +1,8 @@
 #include "dawn.h"
 
+using namespace dawn; // Not in a header file, it's fine.
+
 #define DEBUG_TESTS 0
-
-using namespace dawn; // Only in this case since it is not a header file.
-
-static constexpr StringRef DEFAULT_INPUT = ".";
-static constexpr StringRef DIR_CONFIG_FILENAME = "dawn.ini";
 
 #ifndef DAWN_SHIP
 
@@ -57,6 +54,9 @@ int main( int argc, char** argv )
 }
 
 #else
+
+static constexpr StringRef DEFAULT_INPUT = ".";
+static constexpr StringRef DIR_CONFIG_FILENAME = "dawn.ini";
 
 int main( int argc, char** argv )
 {
