@@ -128,22 +128,48 @@ template<typename T>
 struct ValueStorage
 {
     ValueInfo info{};
-    T value{};
+    Variant<T, T*> value{};
+
+    constexpr T& get()
+    {
+        if ( T* ptr = std::get_if<T>( &value ) )
+            return *ptr;
+        else
+            return *std::get<T*>( value );
+    }
+
+    constexpr T const& get() const
+    {
+        if ( T const* ptr = std::get_if<T>( &value ) )
+            return *ptr;
+        else
+            return *std::get<T*>( value );
+    }
 };
 
 struct Value
 {
     constexpr Value() = default;
     explicit Value( Bool value, Location const& location = {} );
+    explicit Value( Bool* value, Bool is_const, Location const& location = {} );
     explicit Value( Int value, Location const& location = {} );
+    explicit Value( Int* value, Bool is_const, Location const& location = {} );
     explicit Value( Float value, Location const& location = {} );
+    explicit Value( Float* value, Bool is_const, Location const& location = {} );
     explicit Value( Char value, Location const& location = {} );
+    explicit Value( Char* value, Bool is_const, Location const& location = {} );
     explicit Value( StringRef const& value, Location const& location = {} );
+    explicit Value( String* value, Bool is_const, Location const& location = {} );
     explicit Value( RangeValue const& value, Location const& location = {} );
+    explicit Value( RangeValue* value, Bool is_const, Location const& location = {} );
     explicit Value( FunctionValue const& value, Location const& location = {} );
+    explicit Value( FunctionValue* value, Bool is_const, Location const& location = {} );
     explicit Value( ArrayValue const& value, Location const& location = {} );
+    explicit Value( ArrayValue* value, Bool is_const, Location const& location = {} );
     explicit Value( EnumValue const& value, Location const& location = {} );
+    explicit Value( EnumValue* value, Bool is_const, Location const& location = {} );
     explicit Value( StructValue const& value, Location const& location = {} );
+    explicit Value( StructValue* value, Bool is_const, Location const& location = {} );
 
     void as_void() const;
     Bool& as_bool() const;

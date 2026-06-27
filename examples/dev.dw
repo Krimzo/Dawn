@@ -2,6 +2,17 @@ import "dev_libs.dw"
 
 func main(array& args)
 {
-	"nice".for_each(print)
-	lex("``\{ return \"very nice\" }").for_each(print)
+	string? a = "some nice text"
+	print(a)
+	offset_string(a, 5)
+	print(a)
+	offset_string(a, -5)
+	print(a)
+}
+
+func offset_string(string& str, int& offset)
+{
+	for c : str {
+		c = char(int(c) + offset)
+	}
 }

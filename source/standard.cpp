@@ -707,10 +707,9 @@ void dawn::Engine::load_standard_members()
     bind_method( ValueType::STRING, "for_each", true, 1, []( Location const& location, Engine& engine, Value const& self, Value const* args ) -> Value
         {
             auto& func = args[0].as_function();
-            Value arg;
-            for ( auto& c : self.as_string() )
+            for ( Char& c : self.as_string() )
             {
-                arg = Value{ c, location };
+                Value arg{ &c, self.is_const(), location };
                 engine.handle_func( location, func, &arg, 1 );
             }
             return Value{};
@@ -740,56 +739,20 @@ void dawn::Engine::load_standard_members()
             return Value{ Int( index ), location };
         } );
 
-    bind_method( ValueType::STRING, "set", false, 2, []( Location const& location, Engine& engine, Value const& self, Value const* args ) -> Value
-        {
-            const Int index = args[0].as_int();
-            if ( index < 0 )
-                ENGINE_PANIC( location, "string.set() index must be positive" );
-            const String str = args[1].as_string();
-            auto& self_str = self.as_string();
-            self_str.resize( std::max( index + str.size(), self_str.size() ) );
-            std::memcpy( &self_str[index], str.c_str(), str.size() * sizeof( Char ) );
-            return self;
-        } );
-
     // Ranges.
     bind_member( ValueType::RANGE, "start", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
-            return Value{ self.as_range().start, location };
-        } );
-
-    bind_method( ValueType::RANGE, "set_start", false, 1, []( Location const& location, Engine& engine, Value const& self, Value const* args ) -> Value
-        {
-            if ( args[0].type() != ValueType::INT )
-                ENGINE_PANIC( location, "range.set_start() expects an int" );
-            self.as_range().start = args[0].as_int();
-            return self;
+            return Value{ &self.as_range().start, self.is_const(), location };
         } );
 
     bind_member( ValueType::RANGE, "end", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
-            return Value{ self.as_range().end, location };
-        } );
-
-    bind_method( ValueType::RANGE, "set_end", false, 1, []( Location const& location, Engine& engine, Value const& self, Value const* args ) -> Value
-        {
-            if ( args[0].type() != ValueType::INT )
-                ENGINE_PANIC( location, "range.set_end() expects an int" );
-            self.as_range().end = args[0].as_int();
-            return self;
+            return Value{ &self.as_range().end, self.is_const(), location };
         } );
 
     bind_member( ValueType::RANGE, "inclusive", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
-            return Value{ self.as_range().inclusive, location };
-        } );
-
-    bind_method( ValueType::RANGE, "set_inclusive", false, 1, []( Location const& location, Engine& engine, Value const& self, Value const* args ) -> Value
-        {
-            if ( args[0].type() != ValueType::BOOL )
-                ENGINE_PANIC( location, "range.set_inclusive() expects a bool" );
-            self.as_range().inclusive = args[0].as_bool();
-            return self;
+            return Value{ &self.as_range().inclusive, self.is_const(), location };
         } );
 
     // Enums.
@@ -812,7 +775,7 @@ void dawn::Engine::load_standard_members()
     bind_method( ValueType::ARRAY, "for_each", true, 1, []( Location const& location, Engine& engine, Value const& self, Value const* args )->Value
         {
             auto& func = args[0].as_function();
-            for ( auto& v : self.as_array().data )
+            for ( Value const& v : self.as_array().data )
                 engine.handle_func( location, func, &v, 1 );
             return Value{};
         } );

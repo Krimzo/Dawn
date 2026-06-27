@@ -261,7 +261,7 @@ dawn::Value dawn::Engine::handle_index_node( IndexNode const& node )
         auto& value = left.as_string();
         if ( index < 0 || index >= (Int) value.size() )
             ENGINE_PANIC( node.location, "string access [", index, "] out of bounds" );
-        return Value{ value[index], node.location };
+        return Value{ &value[index], left.is_const(), node.location };
     }
     else if ( left.type() == ValueType::ARRAY )
     {
@@ -390,14 +390,14 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
         auto& value_str = loop_value.as_string();
 
         Bool didbrk = false, didcon = false;
-        for ( Char c : value_str )
+        for ( Char& c : value_str )
         {
             if ( retval || didbrk )
                 break;
             didcon = false;
 
             auto pop_handler = stack.push();
-            stack.current().set( node.var_id, Value{ c, node.location } );
+            stack.current().set( node.var_id, Value{ &c, loop_value.is_const(), node.location } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }

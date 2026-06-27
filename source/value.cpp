@@ -179,7 +179,18 @@ dawn::Value::Value( Bool value, Location const& location )
     storage.info.type_id = id_bool;
     storage.info.type = ValueType::BOOL;
     storage.info.is_const = true;
-    storage.value = value;
+    storage.value.emplace<Bool>( value );
+}
+
+dawn::Value::Value( Bool* value, Bool is_const, Location const& location )
+    : m_regref( bool_pool().new_register().as<ValueInfo>() )
+{
+    auto& storage = *m_regref.as<ValueStorage<Bool>>();
+    storage.info.location = location;
+    storage.info.type_id = id_bool;
+    storage.info.type = ValueType::BOOL;
+    storage.info.is_const = is_const;
+    storage.value.emplace<Bool*>( value );
 }
 
 dawn::Value::Value( Int value, Location const& location )
@@ -190,7 +201,18 @@ dawn::Value::Value( Int value, Location const& location )
     storage.info.type_id = id_int;
     storage.info.type = ValueType::INT;
     storage.info.is_const = true;
-    storage.value = value;
+    storage.value.emplace<Int>( value );
+}
+
+dawn::Value::Value( Int* value, Bool is_const, Location const& location )
+    : m_regref( int_pool().new_register().as<ValueInfo>() )
+{
+    auto& storage = *m_regref.as<ValueStorage<Int>>();
+    storage.info.location = location;
+    storage.info.type_id = id_int;
+    storage.info.type = ValueType::INT;
+    storage.info.is_const = is_const;
+    storage.value.emplace<Int*>( value );
 }
 
 dawn::Value::Value( Float value, Location const& location )
@@ -201,7 +223,18 @@ dawn::Value::Value( Float value, Location const& location )
     storage.info.type_id = id_float;
     storage.info.type = ValueType::FLOAT;
     storage.info.is_const = true;
-    storage.value = value;
+    storage.value.emplace<Float>( value );
+}
+
+dawn::Value::Value( Float* value, Bool is_const, Location const& location )
+    : m_regref( float_pool().new_register().as<ValueInfo>() )
+{
+    auto& storage = *m_regref.as<ValueStorage<Float>>();
+    storage.info.location = location;
+    storage.info.type_id = id_float;
+    storage.info.type = ValueType::FLOAT;
+    storage.info.is_const = is_const;
+    storage.value.emplace<Float*>( value );
 }
 
 dawn::Value::Value( Char value, Location const& location )
@@ -212,7 +245,18 @@ dawn::Value::Value( Char value, Location const& location )
     storage.info.type_id = id_char;
     storage.info.type = ValueType::CHAR;
     storage.info.is_const = true;
-    storage.value = value;
+    storage.value.emplace<Char>( value );
+}
+
+dawn::Value::Value( Char* value, Bool is_const, Location const& location )
+    : m_regref( char_pool().new_register().as<ValueInfo>() )
+{
+    auto& storage = *m_regref.as<ValueStorage<Char>>();
+    storage.info.location = location;
+    storage.info.type_id = id_char;
+    storage.info.type = ValueType::CHAR;
+    storage.info.is_const = is_const;
+    storage.value.emplace<Char*>( value );
 }
 
 dawn::Value::Value( StringRef const& value, Location const& location )
@@ -223,7 +267,18 @@ dawn::Value::Value( StringRef const& value, Location const& location )
     storage.info.type_id = id_string;
     storage.info.type = ValueType::STRING;
     storage.info.is_const = true;
-    storage.value = value;
+    storage.value.emplace<String>( value );
+}
+
+dawn::Value::Value( String* value, Bool is_const, Location const& location )
+    : m_regref( string_pool().new_register().as<ValueInfo>() )
+{
+    auto& storage = *m_regref.as<ValueStorage<String>>();
+    storage.info.location = location;
+    storage.info.type_id = id_string;
+    storage.info.type = ValueType::STRING;
+    storage.info.is_const = is_const;
+    storage.value.emplace<String*>( value );
 }
 
 dawn::Value::Value( RangeValue const& value, Location const& location )
@@ -234,7 +289,18 @@ dawn::Value::Value( RangeValue const& value, Location const& location )
     storage.info.type_id = id_range;
     storage.info.type = ValueType::RANGE;
     storage.info.is_const = true;
-    storage.value = value;
+    storage.value.emplace<RangeValue>( value );
+}
+
+dawn::Value::Value( RangeValue* value, Bool is_const, Location const& location )
+    : m_regref( range_pool().new_register().as<ValueInfo>() )
+{
+    auto& storage = *m_regref.as<ValueStorage<RangeValue>>();
+    storage.info.location = location;
+    storage.info.type_id = id_range;
+    storage.info.type = ValueType::RANGE;
+    storage.info.is_const = is_const;
+    storage.value.emplace<RangeValue*>( value );
 }
 
 dawn::Value::Value( FunctionValue const& value, Location const& location )
@@ -245,7 +311,18 @@ dawn::Value::Value( FunctionValue const& value, Location const& location )
     storage.info.type_id = id_function;
     storage.info.type = ValueType::FUNCTION;
     storage.info.is_const = true;
-    storage.value = value;
+    storage.value.emplace<FunctionValue>( value );
+}
+
+dawn::Value::Value( FunctionValue* value, Bool is_const, Location const& location )
+    : m_regref( function_pool().new_register().as<ValueInfo>() )
+{
+    auto& storage = *m_regref.as<ValueStorage<FunctionValue>>();
+    storage.info.location = location;
+    storage.info.type_id = id_function;
+    storage.info.type = ValueType::FUNCTION;
+    storage.info.is_const = is_const;
+    storage.value.emplace<FunctionValue*>( value );
 }
 
 dawn::Value::Value( ArrayValue const& value, Location const& location )
@@ -256,7 +333,18 @@ dawn::Value::Value( ArrayValue const& value, Location const& location )
     storage.info.type_id = id_array;
     storage.info.type = ValueType::ARRAY;
     storage.info.is_const = true;
-    storage.value = value;
+    storage.value.emplace<ArrayValue>( value );
+}
+
+dawn::Value::Value( ArrayValue* value, Bool is_const, Location const& location )
+    : m_regref( array_pool().new_register().as<ValueInfo>() )
+{
+    auto& storage = *m_regref.as<ValueStorage<ArrayValue>>();
+    storage.info.location = location;
+    storage.info.type_id = id_array;
+    storage.info.type = ValueType::ARRAY;
+    storage.info.is_const = is_const;
+    storage.value.emplace<ArrayValue*>( value );
 }
 
 dawn::Value::Value( EnumValue const& value, Location const& location )
@@ -267,7 +355,18 @@ dawn::Value::Value( EnumValue const& value, Location const& location )
     storage.info.type_id = value.parent_id;
     storage.info.type = ValueType::ENUM;
     storage.info.is_const = true;
-    storage.value = value;
+    storage.value.emplace<EnumValue>( value );
+}
+
+dawn::Value::Value( EnumValue* value, Bool is_const, Location const& location )
+    : m_regref( enum_pool().new_register().as<ValueInfo>() )
+{
+    auto& storage = *m_regref.as<ValueStorage<EnumValue>>();
+    storage.info.location = location;
+    storage.info.type_id = value->parent_id;
+    storage.info.type = ValueType::ENUM;
+    storage.info.is_const = is_const;
+    storage.value.emplace<EnumValue*>( value );
 }
 
 dawn::Value::Value( StructValue const& value, Location const& location )
@@ -278,7 +377,18 @@ dawn::Value::Value( StructValue const& value, Location const& location )
     storage.info.type_id = value.parent_id;
     storage.info.type = ValueType::STRUCT;
     storage.info.is_const = true;
-    storage.value = value;
+    storage.value.emplace<StructValue>( value );
+}
+
+dawn::Value::Value( StructValue* value, Bool is_const, Location const& location )
+    : m_regref( struct_pool().new_register().as<ValueInfo>() )
+{
+    auto& storage = *m_regref.as<ValueStorage<StructValue>>();
+    storage.info.location = location;
+    storage.info.type_id = value->parent_id;
+    storage.info.type = ValueType::STRUCT;
+    storage.info.is_const = is_const;
+    storage.value.emplace<StructValue*>( value );
 }
 
 void dawn::Value::as_void() const
@@ -291,70 +401,70 @@ dawn::Bool& dawn::Value::as_bool() const
 {
     if ( type() != ValueType::BOOL )
         ENGINE_PANIC( location(), "expected [", ValueType::BOOL, "] but got [", type(), "]" );
-    return m_regref.as<ValueStorage<Bool>>()->value;
+    return m_regref.as<ValueStorage<Bool>>()->get();
 }
 
 dawn::Int& dawn::Value::as_int() const
 {
     if ( type() != ValueType::INT )
         ENGINE_PANIC( location(), "expected [", ValueType::INT, "] but got [", type(), "]" );
-    return m_regref.as<ValueStorage<Int>>()->value;
+    return m_regref.as<ValueStorage<Int>>()->get();
 }
 
 dawn::Float& dawn::Value::as_float() const
 {
     if ( type() != ValueType::FLOAT )
         ENGINE_PANIC( location(), "expected [", ValueType::FLOAT, "] but got [", type(), "]" );
-    return m_regref.as<ValueStorage<Float>>()->value;
+    return m_regref.as<ValueStorage<Float>>()->get();
 }
 
 dawn::Char& dawn::Value::as_char() const
 {
     if ( type() != ValueType::CHAR )
         ENGINE_PANIC( location(), "expected [", ValueType::CHAR, "] but got [", type(), "]" );
-    return m_regref.as<ValueStorage<Char>>()->value;
+    return m_regref.as<ValueStorage<Char>>()->get();
 }
 
 dawn::String& dawn::Value::as_string() const
 {
     if ( type() != ValueType::STRING )
         ENGINE_PANIC( location(), "expected [", ValueType::STRING, "] but got [", type(), "]" );
-    return m_regref.as<ValueStorage<String>>()->value;
+    return m_regref.as<ValueStorage<String>>()->get();
 }
 
 dawn::RangeValue& dawn::Value::as_range() const
 {
     if ( type() != ValueType::RANGE )
         ENGINE_PANIC( location(), "expected [", ValueType::RANGE, "] but got [", type(), "]" );
-    return m_regref.as<ValueStorage<RangeValue>>()->value;
+    return m_regref.as<ValueStorage<RangeValue>>()->get();
 }
 
 dawn::FunctionValue& dawn::Value::as_function() const
 {
     if ( type() != ValueType::FUNCTION )
         ENGINE_PANIC( location(), "expected [", ValueType::FUNCTION, "] but got [", type(), "]" );
-    return m_regref.as<ValueStorage<FunctionValue>>()->value;
+    return m_regref.as<ValueStorage<FunctionValue>>()->get();
 }
 
 dawn::ArrayValue& dawn::Value::as_array() const
 {
     if ( type() != ValueType::ARRAY )
         ENGINE_PANIC( location(), "expected [", ValueType::ARRAY, "] but got [", type(), "]" );
-    return m_regref.as<ValueStorage<ArrayValue>>()->value;
+    return m_regref.as<ValueStorage<ArrayValue>>()->get();
 }
 
 dawn::EnumValue const& dawn::Value::as_enum() const
 {
     if ( type() != ValueType::ENUM )
         ENGINE_PANIC( location(), "expected [", ValueType::ENUM, "] but got [", type(), "]" );
-    return m_regref.as<ValueStorage<EnumValue>>()->value;
+    return m_regref.as<ValueStorage<EnumValue>>()->get();
 }
 
 dawn::StructValue const& dawn::Value::as_struct() const
 {
     if ( type() != ValueType::STRUCT )
         ENGINE_PANIC( location(), "expected [", ValueType::STRUCT, "] but got [", type(), "]" );
-    return m_regref.as<ValueStorage<StructValue>>()->value;
+    return m_regref.as<ValueStorage<StructValue>>()->get();
 }
 
 dawn::Location const& dawn::Value::location() const
