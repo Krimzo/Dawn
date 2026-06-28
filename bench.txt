@@ -47,6 +47,7 @@
 46.  190906us make handle_id_node return const ref
 47.  192738us fix global storage clear
 48.  256312us add pointer storage inside value
+49.  201981us improve pointer storage 
 
 // linear fib(30)
 01.    9871us
