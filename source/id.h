@@ -12,15 +12,22 @@ struct ID
     constexpr ID()
     {}
 
-    inline ID( char const* ptr )
-        : ID( StringRef( ptr ) )
-    {}
+    ID( char const* str )
+    {
+        this->init( str );
+    }
 
-    inline ID( String const& str )
-        : ID( StringRef( str ) )
-    {}
+    ID( String const& str )
+    {
+        this->init( str );
+    }
 
-    inline ID( StringRef const& str )
+    ID( StringRef const& str )
+    {
+        this->init( str );
+    }
+
+    void init( StringRef const& str )
     {
         const auto it = STR_ID.find( str );
         if ( it != STR_ID.end() )
@@ -38,7 +45,7 @@ struct ID
         return m_id;
     }
 
-    inline String const& string() const
+    String const& string() const
     {
         return ID_STR[m_id];
     }
@@ -58,7 +65,7 @@ struct ID
         return m_id <=> other.m_id;
     }
 
-    inline friend std::ostream& operator<<( std::ostream& stream, ID id )
+    friend std::ostream& operator<<( std::ostream& stream, ID id )
     {
         stream << id.string();
         return stream;
