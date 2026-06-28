@@ -1008,7 +1008,7 @@ void dawn::Parser::expression_single_literal( Token const& token, Node& tree ) c
     }
     else if ( token.type == TokenType::STRING )
     {
-        tree.emplace<Value>( (String const&) token.literal, token.location );
+        tree.emplace<Value>( (StringRef) token.literal, token.location );
     }
     else
         PARSER_PANIC( token, "expected literal" );

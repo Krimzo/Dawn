@@ -185,26 +185,35 @@ dawn::Value* dawn::Engine::get_var( ID id )
 
 void dawn::Engine::bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func )
 {
-    member_generators[(Int) type].set( IDSystem::get( name ), [func]( Location const& location, Engine& engine, Value const& self ) -> Value
+    bind_member( type, IDSystem::get( name ), func );
+}
+
+void dawn::Engine::bind_member( ValueType type, ID id, CustomMemberFunc const& func )
+{
+    member_generators[(Int) type].set( id, [func]( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return func( location, engine, const_cast<Value&>( self ) );
         } );
 }
 
-void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body )
+void dawn::Engine::bind_method( ValueType type, StringRef const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body )
 {
-    const ID id = IDSystem::get( name );
-    member_generators[(Int) type].set( id, [name, is_const, expected_args, body, id]( Location const& location, Engine& _, Value const& self ) -> Value
+    bind_method( type, IDSystem::get( name ), is_const, expected_args, body );
+}
+
+void dawn::Engine::bind_method( ValueType type, ID id, Bool is_const, Int expected_args, CustomMethodFunc const& body )
+{
+    member_generators[(Int) type].set( id, [id, is_const, expected_args, body]( Location const& location, Engine& _, Value const& self ) -> Value
         {
             FunctionValue fv{};
             auto& method = fv.data.emplace<FunctionValue::AsMethod>();
             method.id = id;
-            method.func = [name, is_const, expected_args, body]( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+            method.func = [id, is_const, expected_args, body]( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
                 {
                     if ( !is_const && args[0].is_const() )
-                        ENGINE_PANIC( location, "can not call [", name, "] on a const value" );
+                        ENGINE_PANIC( location, "can not call [", IDSystem::get( id ), "] on a const value" );
                     if ( ( 1 + expected_args ) != arg_count )
-                        ENGINE_PANIC( location, "method [", name, "] expects self + ", expected_args, " arguments" );
+                        ENGINE_PANIC( location, "method [", IDSystem::get( id ), "] expects self + ", expected_args, " arguments" );
                     return body( location, engine, args[0], args + 1 );
                 };
             *method.self = self;
