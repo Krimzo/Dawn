@@ -45,7 +45,7 @@ int main( int argc, char** argv )
         args.data.emplace_back<String>( argv[i] );
 
     Value retval{ Int() };
-    if ( auto error = dawn.call_func( "main", { Value{ args } }, &retval ) )
+    if ( auto error = dawn.call_func( "main", { Value{ &args, true } }, &retval ) )
     {
         print( error.value() );
         return -2;
@@ -106,7 +106,7 @@ int main( int argc, char** argv )
         args.data.emplace_back( arg );
 
     Value retval{ Int() };
-    if ( auto error = dawn.call_func( "main", { Value{ args } }, &retval ) )
+    if ( auto error = dawn.call_func( "main", { Value{ &args, true } }, &retval ) )
     {
         print( error.value() );
         return -6;
