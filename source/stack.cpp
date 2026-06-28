@@ -3,6 +3,7 @@
 
 static constexpr auto LOCAL_FRAME_RESERVE_SIZE = 16;
 static constexpr auto GLOBAL_FRAME_SIZE = 1024;
+static constexpr auto FRAMES_RESERVE_SIZE = 128;
 
 dawn::Frame::Frame( FrameType type )
 {
@@ -43,7 +44,7 @@ void dawn::Frame::reset( RegisterRef<Frame> const& parent )
 
 dawn::Stack::Stack()
 {
-    m_frames.reserve( 128 );
+    m_frames.reserve( FRAMES_RESERVE_SIZE );
     *m_frames.emplace_back( frame_pool().new_register() ) = Frame{ FrameType::GLOBAL };
 }
 
@@ -86,5 +87,4 @@ dawn::PopHandler::~PopHandler() noexcept
 
 dawn::PopHandler::PopHandler( Stack& stack )
     : stack( stack )
-{
-}
+{}
