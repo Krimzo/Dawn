@@ -102,9 +102,7 @@ struct StructValue
     ID parent_id;
     Map<ID, Member<Value>> members;
 
-    StructValue( ID parent_id = {} )
-        : parent_id( parent_id )
-    {}
+    StructValue() = default;
 
     StructValue( StructValue const& other );
     StructValue& operator=( StructValue const& other );
@@ -122,6 +120,7 @@ struct ValueInfo
     ID type_id;
     ValueType type = ValueType::VOID;
     Bool is_const = true;
+    Bool is_ptr = false;
 };
 
 template<typename T>
@@ -129,21 +128,51 @@ struct ValueStorage
 {
     ValueInfo info{};
     T value{};
+
+    constexpr T& get()
+    {
+        if ( info.is_ptr )
+            return *static_cast<T*>(
+                reinterpret_cast<ValueStorage<Ptr>*>( this )->value
+                );
+        else
+            return value;
+    }
+
+    constexpr T const& get() const
+    {
+        if ( info.is_ptr )
+            return *static_cast<T const*>(
+                reinterpret_cast<ValueStorage<Ptr> const*>( this )->value
+                );
+        else
+            return value;
+    }
 };
 
 struct Value
 {
     constexpr Value() = default;
-    explicit Value( Bool value, Location const& location );
-    explicit Value( Int value, Location const& location );
-    explicit Value( Float value, Location const& location );
-    explicit Value( Char value, Location const& location );
-    explicit Value( StringRef const& value, Location const& location );
-    explicit Value( RangeValue const& value, Location const& location );
-    explicit Value( FunctionValue const& value, Location const& location );
-    explicit Value( ArrayValue const& value, Location const& location );
-    explicit Value( EnumValue const& value, Location const& location );
-    explicit Value( StructValue const& value, Location const& location );
+    explicit Value( Bool value, Location const& location = {} );
+    explicit Value( Bool* value, Bool is_const, Location const& location = {} );
+    explicit Value( Int value, Location const& location = {} );
+    explicit Value( Int* value, Bool is_const, Location const& location = {} );
+    explicit Value( Float value, Location const& location = {} );
+    explicit Value( Float* value, Bool is_const, Location const& location = {} );
+    explicit Value( Char value, Location const& location = {} );
+    explicit Value( Char* value, Bool is_const, Location const& location = {} );
+    explicit Value( StringRef const& value, Location const& location = {} );
+    explicit Value( String* value, Bool is_const, Location const& location = {} );
+    explicit Value( RangeValue const& value, Location const& location = {} );
+    explicit Value( RangeValue* value, Bool is_const, Location const& location = {} );
+    explicit Value( FunctionValue const& value, Location const& location = {} );
+    explicit Value( FunctionValue* value, Bool is_const, Location const& location = {} );
+    explicit Value( ArrayValue const& value, Location const& location = {} );
+    explicit Value( ArrayValue* value, Bool is_const, Location const& location = {} );
+    explicit Value( EnumValue const& value, Location const& location = {} );
+    explicit Value( EnumValue* value, Bool is_const, Location const& location = {} );
+    explicit Value( StructValue const& value, Location const& location = {} );
+    explicit Value( StructValue* value, Bool is_const, Location const& location = {} );
 
     void as_void() const;
     Bool& as_bool() const;

@@ -31,6 +31,7 @@ namespace fs = std::filesystem;
 // Basic.
 namespace dawn
 {
+using Ptr = void*;
 using Bool = bool;
 using Int = int64_t;
 using Float = double;

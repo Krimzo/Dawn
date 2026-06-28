@@ -41,7 +41,7 @@ std::ostream& dawn::operator<<( std::ostream& stream, VarKind kind )
 
 std::ostream& dawn::operator<<( std::ostream& stream, VarType const& type )
 {
-    stream << IDSystem::get( type.type_id ) << type.kind;
+    stream << type.type_id << type.kind;
     return stream;
 }
 

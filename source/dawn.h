@@ -41,13 +41,13 @@ struct Dawn
 
     Opt<String> eval( Source const& source ) noexcept;
 
-    void bind_func( StringRef const& name, Bool is_ctime, CFunction cfunc ) noexcept;
-    Opt<String> call_func( StringRef const& name ) noexcept;
-    Opt<String> call_func( StringRef const& name, Value* retval ) noexcept;
-    Opt<String> call_func( StringRef const& name, std::initializer_list<Value> const& args, Value* retval = nullptr ) noexcept;
-    Opt<String> call_func( StringRef const& name, Value* args, Int arg_count, Value* retval = nullptr ) noexcept;
+    void bind_func( ID id, Bool is_ctime, CFunction cfunc ) noexcept;
+    Opt<String> call_func( ID id ) noexcept;
+    Opt<String> call_func( ID id, Value* retval ) noexcept;
+    Opt<String> call_func( ID id, std::initializer_list<Value> const& args, Value* retval = nullptr ) noexcept;
+    Opt<String> call_func( ID id, Value* args, Int arg_count, Value* retval = nullptr ) noexcept;
 
-    void add_var( Location const& location, VarType const& type, StringRef const& name, Value const& value ) noexcept;
-    Value* get_var( StringRef const& name ) noexcept;
+    void add_var( VarType const& type, ID id, Value const& value ) noexcept;
+    Value* get_var( ID id ) noexcept;
 };
 }

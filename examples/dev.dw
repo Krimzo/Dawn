@@ -2,5 +2,39 @@ import "dev_libs.dw"
 
 func main(array& args)
 {
-	print(MyStruct("nice"))
+	Da da = Da{
+		ne: Ne{ ne_data: "nice" },
+		da_data: "very"
+	}
+	array? very_nice = "it works!!" @ array // will be optimized away if not const, since using eval() here
+	function out = `&val`{
+		print("out: {val}")
+	}
+	out(eval(da @ string))
+	print(Animal::cat.name)
+}
+
+struct Da
+{
+	da_data : string
+	ne : Ne
+
+	cast string {
+		return "{self.da_data}_{self.ne}"
+	}
+}
+
+struct Ne
+{
+	ne_data : string
+
+	cast string {
+		return self.ne_data
+	}
+}
+
+enum Animal
+{
+	cat
+	dog
 }

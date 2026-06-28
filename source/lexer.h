@@ -6,15 +6,15 @@
 
 namespace dawn
 {
-inline const ID id_void = IDSystem::get( tp_void );
-inline const ID id_bool = IDSystem::get( tp_bool );
-inline const ID id_int = IDSystem::get( tp_int );
-inline const ID id_float = IDSystem::get( tp_float );
-inline const ID id_char = IDSystem::get( tp_char );
-inline const ID id_string = IDSystem::get( tp_string );
-inline const ID id_range = IDSystem::get( tp_range );
-inline const ID id_function = IDSystem::get( tp_function );
-inline const ID id_array = IDSystem::get( tp_array );
+inline const ID id_void = tp_void;
+inline const ID id_bool = tp_bool;
+inline const ID id_int = tp_int;
+inline const ID id_float = tp_float;
+inline const ID id_char = tp_char;
+inline const ID id_string = tp_string;
+inline const ID id_range = tp_range;
+inline const ID id_function = tp_function;
+inline const ID id_array = tp_array;
 
 struct LanguageDef
 {
@@ -75,32 +75,32 @@ struct Lexer
 {
     LanguageDef lang_def = LanguageDef::dawn();
 
-    void tokenize( Source const& source, Vector<Token>& tokens );
-    void tokenize_at( Source const& source, Vector<Token>& tokens, Index& index );
+    void tokenize( Source const& source, Vector<Token>& tokens ) const;
+    void tokenize_at( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
 private:
-    Bool is_space( Source const& source, Int i );
-    void extract_space( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_space( Source const& source, Int i ) const;
+    void extract_space( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_comment( Source const& source, Int i );
-    void extract_comment( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_comment( Source const& source, Int i ) const;
+    void extract_comment( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_mlcomment( Source const& source, Int i );
-    void extract_mlcomment( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_mlcomment( Source const& source, Int i ) const;
+    void extract_mlcomment( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_word( Source const& source, Int i );
-    void extract_word( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_word( Source const& source, Int i ) const;
+    void extract_word( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_number( Source const& source, Int i );
-    void extract_number( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_number( Source const& source, Int i ) const;
+    void extract_number( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_char( Source const& source, Int i );
-    void extract_char( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_char( Source const& source, Int i ) const;
+    void extract_char( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_string( Source const& source, Int i );
-    void extract_string( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_string( Source const& source, Int i ) const;
+    void extract_string( Source const& source, Vector<Token>& tokens, Index& index ) const;
 
-    Bool is_operator( Source const& source, Int i );
-    void extract_operator( Source const& source, Vector<Token>& tokens, Index& index );
+    Bool is_operator( Source const& source, Int i ) const;
+    void extract_operator( Source const& source, Vector<Token>& tokens, Index& index ) const;
 };
 }

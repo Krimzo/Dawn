@@ -40,8 +40,8 @@ struct Engine
     void add_var( Location const& location, VarType const& type, ID id, Value const& value );
     Value* get_var( ID id );
 
-    void bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func );
-    void bind_method( ValueType type, String const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body );
+    void bind_member( ValueType type, ID id, CustomMemberFunc const& func );
+    void bind_method( ValueType type, ID id, Bool is_const, Int expected_args, CustomMethodFunc const& body );
 
 private:
     Set<uint64_t> m_ctime_ops[(Int) OperatorType::_COUNT] = {};
@@ -81,10 +81,10 @@ private:
         auto& op_left_ids = operators[(Int) op_type];
         auto* op_right_ids = op_left_ids.get( left.type_id() );
         if ( !op_right_ids )
-            ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "]" );
+            ENGINE_PANIC( location, "type [", left.type_id(), "] does not support operator [", op_type, "]" );
         auto* func = op_right_ids->get( right.type_id() );
         if ( !func )
-            ENGINE_PANIC( location, "type [", IDSystem::get( left.type_id() ), "] does not support operator [", op_type, "] with right type being [", IDSystem::get( right.type_id() ), "]" );
+            ENGINE_PANIC( location, "type [", left.type_id(), "] does not support operator [", op_type, "] with right type being [", right.type_id(), "]" );
 
         using ProxyArg = uint64_t;
         static_assert( sizeof( ProxyArg ) == sizeof( Value ), "ProxyArg size must be the same as Value" );
@@ -101,9 +101,9 @@ private:
             if ( dfunc->args.size() != arg_count )
             {
                 if ( func.is_global() )
-                    ENGINE_PANIC( location, "invalid argument count for function [", IDSystem::get( func.as_global().id ), "]" );
+                    ENGINE_PANIC( location, "invalid argument count for function [", func.as_global().id, "]" );
                 else if ( func.is_method() )
-                    ENGINE_PANIC( location, "invalid argument count for method [", IDSystem::get( func.as_method().id ), "]" );
+                    ENGINE_PANIC( location, "invalid argument count for method [", func.as_method().id, "]" );
                 else
                     ENGINE_PANIC( location, "invalid argument count for lambda" );
             }
@@ -277,7 +277,7 @@ __forceinline Value create_default_value( Engine* engine, ID typeid_, Location c
     }
 
     else
-        ENGINE_PANIC( location, "type [", IDSystem::get( typeid_ ), "] does not exist" );
+        ENGINE_PANIC( location, "type [", typeid_, "] does not exist" );
 }
 
 __forceinline Opt<ValueType> builtin_type( ID id )

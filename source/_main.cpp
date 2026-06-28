@@ -1,11 +1,8 @@
 #include "dawn.h"
 
+using namespace dawn; // Not in a header file, it's fine.
+
 #define DEBUG_TESTS 0
-
-using namespace dawn; // Only in this case since it is not a header file.
-
-static constexpr StringRef DEFAULT_INPUT = ".";
-static constexpr StringRef DIR_CONFIG_FILENAME = "dawn.ini";
 
 #ifndef DAWN_SHIP
 
@@ -45,10 +42,10 @@ int main( int argc, char** argv )
 
     ArrayValue args;
     for ( int i = 0; i < argc; i++ )
-        args.data.emplace_back( String{ argv[i] }, LOCATION_NONE );
+        args.data.emplace_back<String>( argv[i] );
 
-    Value retval{ Int(), LOCATION_NONE };
-    if ( auto error = dawn.call_func( "main", { Value{ args, LOCATION_NONE } }, &retval ) )
+    Value retval{ Int() };
+    if ( auto error = dawn.call_func( "main", { Value{ &args, true } }, &retval ) )
     {
         print( error.value() );
         return -2;
@@ -57,6 +54,9 @@ int main( int argc, char** argv )
 }
 
 #else
+
+static constexpr StringRef DEFAULT_INPUT = ".";
+static constexpr StringRef DIR_CONFIG_FILENAME = "dawn.ini";
 
 int main( int argc, char** argv )
 {
@@ -102,11 +102,11 @@ int main( int argc, char** argv )
     }
 
     ArrayValue args;
-    for ( auto& arg : dawn.config.args_to_pass )
-        args.data.emplace_back( String{ arg }, LOCATION_NONE );
+    for ( String const& arg : dawn.config.args_to_pass )
+        args.data.emplace_back( arg );
 
-    Value retval{ Int(), LOCATION_NONE };
-    if ( auto error = dawn.call_func( "main", { Value{ args, LOCATION_NONE } }, &retval ) )
+    Value retval{ Int() };
+    if ( auto error = dawn.call_func( "main", { Value{ &args, true } }, &retval ) )
     {
         print( error.value() );
         return -6;
