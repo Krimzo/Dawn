@@ -102,9 +102,7 @@ struct StructValue
     ID parent_id;
     Map<ID, Member<Value>> members;
 
-    StructValue( ID parent_id = {} )
-        : parent_id( parent_id )
-    {}
+    StructValue() = default;
 
     StructValue( StructValue const& other );
     StructValue& operator=( StructValue const& other );

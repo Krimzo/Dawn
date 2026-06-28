@@ -6,15 +6,15 @@
 
 namespace dawn
 {
-inline const ID id_void = IDSystem::get( tp_void );
-inline const ID id_bool = IDSystem::get( tp_bool );
-inline const ID id_int = IDSystem::get( tp_int );
-inline const ID id_float = IDSystem::get( tp_float );
-inline const ID id_char = IDSystem::get( tp_char );
-inline const ID id_string = IDSystem::get( tp_string );
-inline const ID id_range = IDSystem::get( tp_range );
-inline const ID id_function = IDSystem::get( tp_function );
-inline const ID id_array = IDSystem::get( tp_array );
+inline const ID id_void = tp_void;
+inline const ID id_bool = tp_bool;
+inline const ID id_int = tp_int;
+inline const ID id_float = tp_float;
+inline const ID id_char = tp_char;
+inline const ID id_string = tp_string;
+inline const ID id_range = tp_range;
+inline const ID id_function = tp_function;
+inline const ID id_array = tp_array;
 
 struct LanguageDef
 {

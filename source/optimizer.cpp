@@ -172,7 +172,7 @@ void dawn::Optimizer::inline_var( Variable& var, Vector<Node>& scope, Int& i )
     }
 
     if ( value.type_id() != var.type.type_id )
-        ENGINE_PANIC( expr.location(), "optimizer can not inline variable of type [", IDSystem::get( var.type.type_id ), "] because expr is of type [", IDSystem::get( value.type_id() ), "]" );
+        ENGINE_PANIC( expr.location(), "optimizer can not inline variable of type [", var.type.type_id, "] because expr is of type [", value.type_id(), "]" );
 
     m_inline.emplace_back( var.id, value, true );
     scope.erase( scope.begin() + i );

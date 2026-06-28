@@ -7,21 +7,48 @@ namespace dawn
 {
 struct ID
 {
-    friend struct IDSystem;
+    using IntType = uint32_t;
 
-    constexpr ID() = default;
+    constexpr ID()
+    {}
 
-    constexpr auto integer() const
+    inline ID( char const* ptr )
+        : ID( StringRef( ptr ) )
+    {}
+
+    inline ID( String const& str )
+        : ID( StringRef( str ) )
+    {}
+
+    inline ID( StringRef const& str )
+    {
+        const auto it = STR_ID.find( str );
+        if ( it != STR_ID.end() )
+            m_id = it->second;
+        else
+        {
+            ID_STR.emplace_back( str );
+            m_id = (IntType) ID_STR.size() - 1;
+            STR_ID.emplace( str, m_id );
+        }
+    }
+
+    constexpr IntType integer() const
     {
         return m_id;
     }
 
-    constexpr auto valid() const
+    inline String const& string() const
+    {
+        return ID_STR[m_id];
+    }
+
+    constexpr Bool valid() const
     {
         return m_id != 0;
     }
 
-    constexpr auto operator==( const ID other ) const
+    constexpr Bool operator==( const ID other ) const
     {
         return m_id == other.m_id;
     }
@@ -31,24 +58,23 @@ struct ID
         return m_id <=> other.m_id;
     }
 
-private:
-    uint32_t m_id = 0;
-
-    constexpr ID( const uint32_t id )
-        : m_id( id )
-    {}
-};
-
-struct IDSystem
-{
-    IDSystem() = delete;
-
-    static ID get( StringRef const& str );
-    static String const& get( ID id );
+    inline friend std::ostream& operator<<( std::ostream& stream, ID id )
+    {
+        stream << id.string();
+        return stream;
+    }
 
 private:
-    static inline Vector<String> m_id_str = {};
-    static inline StringMap<ID> m_str_id = {};
+    static inline Vector<String> ID_STR = {};
+    static inline StringMap<IntType> STR_ID = {};
+    static constexpr auto RESERVE_SIZE = 256;
+    static inline const auto _ = [] {
+        ID_STR.reserve( RESERVE_SIZE );
+        STR_ID.reserve( RESERVE_SIZE );
+        ID_STR.resize( 1 ); // Because id=0 is not valid.
+        return nullptr;
+        }( );
+    IntType m_id = 0;
 };
 
 constexpr uint64_t combine_ids( ID left, ID right )

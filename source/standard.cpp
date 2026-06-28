@@ -451,7 +451,7 @@ void dawn::Engine::load_standard_functions()
     static constexpr Parser _parser{};
 
     /* DAWN */
-    bind_func( IDSystem::get( "lex" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "lex", true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count != 1 )
                 ENGINE_PANIC( location, "lex expected 1 argument, but got ", arg_count );
@@ -463,7 +463,7 @@ void dawn::Engine::load_standard_functions()
             return Value{ array, location };
         } );
 
-    bind_func( IDSystem::get( "eval" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "eval", true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count != 1 )
                 ENGINE_PANIC( location, "eval expected 1 argument, but got ", arg_count );
@@ -476,7 +476,7 @@ void dawn::Engine::load_standard_functions()
         } );
 
     /* TYPE */
-    bind_func( IDSystem::get( "typeid" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "typeid", true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{ (Int) args[0].type_id().integer(), location };
@@ -484,10 +484,10 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, "typeid expected 1 argument, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( "typename" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "typename", true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
-                return Value{ IDSystem::get( args[0].type_id() ), location };
+                return Value{ args[0].type_id().string(), location };
             else
                 ENGINE_PANIC( location, "typename expected 1 argument, but got ", arg_count );
         } );
@@ -587,7 +587,7 @@ void dawn::Engine::load_standard_functions()
         } );
 
     /* SYSTEM */
-    bind_func( IDSystem::get( "exit" ), false, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "exit", false, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 std::exit( (int) args[0].as_int() );
@@ -597,7 +597,7 @@ void dawn::Engine::load_standard_functions()
         } );
 
     /* UTILITY */
-    bind_func( IDSystem::get( "format" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "format", true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             StringStream stream;
             for ( Int i = 0; i < arg_count; i++ )
@@ -605,7 +605,7 @@ void dawn::Engine::load_standard_functions()
             return Value{ stream.str(), location };
         } );
 
-    bind_func( IDSystem::get( "put" ), false, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "put", false, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             StringStream stream;
             for ( Int i = 0; i < arg_count; i++ )
@@ -614,7 +614,7 @@ void dawn::Engine::load_standard_functions()
             return Value{};
         } );
 
-    bind_func( IDSystem::get( "print" ), false, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "print", false, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             StringStream stream;
             for ( Int i = 0; i < arg_count; i++ )
@@ -623,7 +623,7 @@ void dawn::Engine::load_standard_functions()
             return Value{};
         } );
 
-    bind_func( IDSystem::get( "rand_int" ), false, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "rand_int", false, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{ Int( RAND_ENGINE() % args[0].as_int() ), location };
@@ -631,7 +631,7 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, "rand_int() expects 1 argument, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( "rand_flt" ), false, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "rand_flt", false, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 0 )
                 return Value{ ( (Float) RAND_ENGINE() / UINT64_MAX ), location };
@@ -640,7 +640,7 @@ void dawn::Engine::load_standard_functions()
         } );
 
     /* MATH */
-    bind_func( IDSystem::get( "min" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "min", true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 2 )
             {
@@ -655,7 +655,7 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, "min() expects 2 arguments, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( "max" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "max", true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 2 )
             {
@@ -670,7 +670,7 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, "max() expects 2 arguments, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( "abs" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "abs", true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
             {
@@ -685,7 +685,7 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, "abs() expects 1 argument, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( "sqrt" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "sqrt", true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{ std::sqrt( args[0].as_float() ), location };
@@ -693,7 +693,7 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, "sqrt() expects 1 argument, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( "sin" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "sin", true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{ std::sin( args[0].as_float() ), location };
@@ -701,7 +701,7 @@ void dawn::Engine::load_standard_functions()
                 ENGINE_PANIC( location, "sin() expects 1 argument, but got ", arg_count );
         } );
 
-    bind_func( IDSystem::get( "cos" ), true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+    bind_func( "cos", true, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             if ( arg_count == 1 )
                 return Value{ std::cos( args[0].as_float() ), location };
@@ -772,7 +772,7 @@ void dawn::Engine::load_standard_members()
 
     bind_member( ValueType::ENUM, "name", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
-            return Value{ IDSystem::get( self.as_enum().key_id ), location };
+            return Value{ self.as_enum().key_id.string(), location };
         } );
 
     bind_member( ValueType::ENUM, "value", []( Location const& location, Engine& engine, Value const& self ) -> Value

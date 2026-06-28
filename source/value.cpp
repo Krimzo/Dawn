@@ -496,10 +496,10 @@ dawn::ID dawn::Value::type_id() const
 void dawn::Value::assign( Value const& other )
 {
     if ( is_const() )
-        ENGINE_PANIC( location(), "can not assign [", IDSystem::get( other.type_id() ), "] to a const value" );
+        ENGINE_PANIC( location(), "can not assign [", other.type_id(), "] to a const value" );
 
     if ( type_id() != other.type_id() )
-        ENGINE_PANIC( location(), "can not assign [", IDSystem::get( other.type_id() ), "] to [", IDSystem::get( type_id() ), "]" );
+        ENGINE_PANIC( location(), "can not assign [", other.type_id(), "] to [", type_id(), "]" );
 
     switch ( type() )
     {
@@ -641,7 +641,7 @@ void dawn::Value::to_void( Engine& engine ) const
     auto& left = as_struct();
     auto* method = left.get_method( id_void );
     if ( !method )
-        ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to void" );
+        ENGINE_PANIC( location(), "can not convert struct [", left.parent_id, "] to void" );
     return engine.handle_func( location(), *method, this, 1 ).as_void();
 }
 
@@ -672,7 +672,7 @@ dawn::Bool dawn::Value::to_bool( Engine& engine ) const
         auto& left = as_struct();
         auto* method = left.get_method( id_bool );
         if ( !method )
-            ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to bool" );
+            ENGINE_PANIC( location(), "can not convert struct [", left.parent_id, "] to bool" );
         return engine.handle_func( location(), *method, this, 1 ).as_bool();
     }
 
@@ -712,7 +712,7 @@ dawn::Int dawn::Value::to_int( Engine& engine ) const
         auto& left = as_struct();
         auto* method = left.get_method( id_int );
         if ( !method )
-            ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to int" );
+            ENGINE_PANIC( location(), "can not convert struct [", left.parent_id, "] to int" );
         return engine.handle_func( location(), *method, this, 1 ).as_int();
     }
 
@@ -752,7 +752,7 @@ dawn::Float dawn::Value::to_float( Engine& engine ) const
         auto& left = as_struct();
         auto* method = left.get_method( id_float );
         if ( !method )
-            ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to float" );
+            ENGINE_PANIC( location(), "can not convert struct [", left.parent_id, "] to float" );
         return engine.handle_func( location(), *method, this, 1 ).as_float();
     }
 
@@ -793,7 +793,7 @@ dawn::Char dawn::Value::to_char( Engine& engine ) const
         auto& left = as_struct();
         auto* method = left.get_method( id_char );
         if ( !method )
-            ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to char" );
+            ENGINE_PANIC( location(), "can not convert struct [", left.parent_id, "] to char" );
         return engine.handle_func( location(), *method, this, 1 ).as_char();
     }
 
@@ -841,13 +841,13 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
         if ( func.is_global() )
         {
             auto& global = func.as_global();
-            stream << IDSystem::get( global.id ) << op_expr_opn;
+            stream << global.id << op_expr_opn;
         }
         else if ( func.is_method() )
         {
             auto& method = func.as_method();
-            stream << IDSystem::get( method.self->as_struct().parent_id )
-                << op_access << IDSystem::get( method.id ) << op_expr_opn;
+            stream << method.self->as_struct().parent_id
+                << op_access << method.id << op_expr_opn;
         }
         else
         {
@@ -859,8 +859,8 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
             if ( !dfunc->args.empty() )
             {
                 for ( Int i = 0; i < (Int) dfunc->args.size() - 1; i++ )
-                    stream << dfunc->args[i].type << ' ' << IDSystem::get( dfunc->args[i].id ) << op_split << ' ';
-                stream << dfunc->args.back().type << ' ' << IDSystem::get( dfunc->args.back().id );
+                    stream << dfunc->args[i].type << ' ' << dfunc->args[i].id << op_split << ' ';
+                stream << dfunc->args.back().type << ' ' << dfunc->args.back().id;
             }
         }
 
@@ -885,7 +885,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
     case ValueType::ENUM:
     {
         auto const& value = as_enum();
-        return format( IDSystem::get( value.parent_id ), op_link, IDSystem::get( value.key_id ) );
+        return format( value.parent_id, op_link, value.key_id );
     }
 
     case ValueType::STRUCT:
@@ -898,7 +898,7 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
         else
         {
             StringStream stream;
-            stream << IDSystem::get( left.parent_id );
+            stream << left.parent_id;
             if ( left.members.empty() )
             {
                 stream << op_scope_opn << op_scope_cls;
@@ -908,8 +908,8 @@ dawn::String dawn::Value::to_string( Engine& engine ) const
             auto it = left.members.begin();
             stream << op_scope_opn;
             for ( ; it != --left.members.end(); ++it )
-                stream << IDSystem::get( it->first ) << op_assign << it->second.value.to_string( engine ) << op_split << ' ';
-            stream << IDSystem::get( it->first ) << op_assign << it->second.value.to_string( engine ) << op_scope_cls;
+                stream << it->first << op_assign << it->second.value.to_string( engine ) << op_split << ' ';
+            stream << it->first << op_assign << it->second.value.to_string( engine ) << op_scope_cls;
             return stream.str();
         }
     }
@@ -937,7 +937,7 @@ dawn::RangeValue dawn::Value::to_range( Engine& engine ) const
         auto& left = as_struct();
         auto* method = left.get_method( id_range );
         if ( !method )
-            ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to range" );
+            ENGINE_PANIC( location(), "can not convert struct [", left.parent_id, "] to range" );
         return engine.handle_func( location(), *method, this, 1 ).as_range();
     }
 
@@ -958,7 +958,7 @@ dawn::FunctionValue dawn::Value::to_function( Engine& engine ) const
         auto& left = as_struct();
         auto* method = left.get_method( id_function );
         if ( !method )
-            ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to function" );
+            ENGINE_PANIC( location(), "can not convert struct [", left.parent_id, "] to function" );
         return engine.handle_func( location(), *method, this, 1 ).as_function();
     }
 
@@ -992,7 +992,7 @@ dawn::ArrayValue dawn::Value::to_array( Engine& engine ) const
         auto& left = as_struct();
         auto* method = left.get_method( id_array );
         if ( !method )
-            ENGINE_PANIC( location(), "can not convert struct [", IDSystem::get( left.parent_id ), "] to array" );
+            ENGINE_PANIC( location(), "can not convert struct [", left.parent_id, "] to array" );
         return engine.handle_func( location(), *method, this, 1 ).as_array();
     }
 

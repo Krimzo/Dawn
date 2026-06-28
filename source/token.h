@@ -35,13 +35,13 @@ struct Location
     {}
 
     explicit Location( StringRef const& path, Index const& index )
-        : path_id( IDSystem::get( path ) ), line( (IntType) index.line() ), col( (IntType) index.col() )
+        : path_id( path ), line( (IntType) index.line() ), col( (IntType) index.col() )
     {}
 
     String to_string( Opt<Color> const& color ) const
     {
         StringStream stream;
-        auto& path = IDSystem::get( path_id );
+        String const& path = path_id.string();
         if ( color )
             stream << "(" << ColoredText{ *color, path } << ")<" << ColoredText{ *color, line } << ", " << ColoredText{ *color, col } << ">";
         else

@@ -136,7 +136,7 @@ void dawn::Parser::parse_global_struct( TokenIterator& it, Module& module ) cons
     parse_struct( it, struc );
 
     if ( module.contains_id( struc.id ) )
-        PARSER_PANIC( *first_it, "name [", IDSystem::get( struc.id ), "] already in use" );
+        PARSER_PANIC( *first_it, "name [", struc.id, "] already in use" );
 
     module.structs.push_back( struc );
 }
@@ -149,7 +149,7 @@ void dawn::Parser::parse_global_enum( TokenIterator& it, Module& module ) const
     parse_enum( it, en );
 
     if ( module.contains_id( en.id ) )
-        PARSER_PANIC( *first_it, "name [", IDSystem::get( en.id ), "] already in use" );
+        PARSER_PANIC( *first_it, "name [", en.id, "] already in use" );
 
     module.enums.push_back( en );
 }
@@ -162,7 +162,7 @@ void dawn::Parser::parse_global_function( TokenIterator& it, Module& module ) co
     parse_function( it, function );
 
     if ( !function.is_extension() && module.contains_id( function.id ) )
-        PARSER_PANIC( *first_it, "name [", IDSystem::get( function.id ), "] already in use" );
+        PARSER_PANIC( *first_it, "name [", function.id, "] already in use" );
 
     module.functions.push_back( function );
 }
@@ -188,7 +188,7 @@ void dawn::Parser::parse_global_variable( TokenIterator& it, Module& module ) co
         PARSER_PANIC( *first_it, "global variables must be const" );
 
     if ( module.contains_id( variable.id ) )
-        PARSER_PANIC( *first_it, "name [", IDSystem::get( variable.id ), "] already in use" );
+        PARSER_PANIC( *first_it, "name [", variable.id, "] already in use" );
 
     module.variables.push_back( variable );
 }
@@ -201,7 +201,7 @@ void dawn::Parser::parse_struct( TokenIterator& it, Struct& struc ) const
 
     if ( !is_custom_type( it->value ) )
         PARSER_PANIC( *it, "expected struct name" );
-    struc.id = IDSystem::get( it->value );
+    struc.id = it->value;
     ++it;
 
     if ( it->value != op_scope_opn )
@@ -212,9 +212,9 @@ void dawn::Parser::parse_struct( TokenIterator& it, Struct& struc ) const
     {
         if ( it->type == TokenType::NAME )
         {
-            ID name_id = IDSystem::get( it->value );
+            const ID name_id{ it->value };
             if ( struc.contains( name_id ) )
-                PARSER_PANIC( *it, "struct field [", IDSystem::get( name_id ), "] already defined" );
+                PARSER_PANIC( *it, "struct field [", name_id, "] already defined" );
             ++it;
 
             if ( it->value != op_set )
@@ -223,7 +223,7 @@ void dawn::Parser::parse_struct( TokenIterator& it, Struct& struc ) const
 
             if ( it->type != TokenType::TYPE )
                 PARSER_PANIC( *it, "expected field type" );
-            const ID type_id = IDSystem::get( it->value );
+            const ID type_id{ it->value };
             if ( type_id == struc.id )
                 PARSER_PANIC( *it, "field type can not be the same as the parent struct" );
             struc.fields.emplace_back( name_id, type_id );
@@ -234,12 +234,12 @@ void dawn::Parser::parse_struct( TokenIterator& it, Struct& struc ) const
             Function method;
             parse_function( it, method );
             if ( struc.contains( method.id ) )
-                PARSER_PANIC( *it, "struct method [", IDSystem::get( method.id ), "] already defined" );
+                PARSER_PANIC( *it, "struct method [", method.id, "] already defined" );
 
             auto& self_var = *method.args.emplace( method.args.begin() );
             self_var.type.type_id = struc.id;
             self_var.type.kind = VarKind::REFERENCE;
-            self_var.id = IDSystem::get( kw_self );
+            self_var.id = kw_self;
             struc.methods.push_back( method );
         }
         else if ( it->value == kw_cast )
@@ -247,12 +247,12 @@ void dawn::Parser::parse_struct( TokenIterator& it, Struct& struc ) const
             Function cast;
             parse_cast( it, cast );
             if ( struc.contains( cast.id ) )
-                PARSER_PANIC( *it, "struct cast [", IDSystem::get( cast.id ), "] already defined" );
+                PARSER_PANIC( *it, "struct cast [", cast.id, "] already defined" );
 
             auto& self_var = *cast.args.emplace( cast.args.begin() );
             self_var.type.type_id = struc.id;
             self_var.type.kind = VarKind::REFERENCE;
-            self_var.id = IDSystem::get( kw_self );
+            self_var.id = kw_self;
             struc.methods.push_back( cast );
         }
         else
@@ -271,7 +271,7 @@ void dawn::Parser::parse_enum( TokenIterator& it, Enum& en ) const
 
     if ( !is_custom_type( it->value ) )
         PARSER_PANIC( *it, "expected enum name" );
-    en.id = IDSystem::get( it->value );
+    en.id = it->value;
     ++it;
 
     if ( it->value != op_scope_opn )
@@ -282,7 +282,7 @@ void dawn::Parser::parse_enum( TokenIterator& it, Enum& en ) const
     {
         if ( it->type == TokenType::NAME )
         {
-            ID name_id = IDSystem::get( it->value );
+            const ID name_id{ it->value };
             if ( en.get( name_id ) )
                 PARSER_PANIC( *it, "key [", it->value, "] already in use" );
 
@@ -306,7 +306,7 @@ void dawn::Parser::parse_enum( TokenIterator& it, Enum& en ) const
     ++it;
 
     if ( en.entries.empty() )
-        PARSER_PANIC( *first_it, "enum [", IDSystem::get( en.id ), "] cannot be empty" );
+        PARSER_PANIC( *first_it, "enum [", en.id, "] cannot be empty" );
 }
 
 void dawn::Parser::parse_operator( TokenIterator& it, Operator& oper ) const
@@ -332,7 +332,7 @@ void dawn::Parser::parse_operator( TokenIterator& it, Operator& oper ) const
 
         if ( it->type != TokenType::TYPE )
             PARSER_PANIC( *it, "expected argument type" );
-        arg.type.type_id = IDSystem::get( it->value );
+        arg.type.type_id = it->value;
         ++it;
 
         if ( it->value == vr_variable )
@@ -350,7 +350,7 @@ void dawn::Parser::parse_operator( TokenIterator& it, Operator& oper ) const
 
         if ( it->type != TokenType::NAME )
             PARSER_PANIC( *it, "expected arg name" );
-        arg.id = IDSystem::get( it->value );
+        arg.id = it->value;
 
         if ( arg_set.contains( arg.id ) )
             PARSER_PANIC( *it, "argument [", it->value, "] already defined" );
@@ -385,7 +385,7 @@ void dawn::Parser::parse_function( TokenIterator& it, Function& function ) const
 
     if ( it->type == TokenType::TYPE )
     {
-        function.type_id = IDSystem::get( it->value );
+        function.type_id = it->value;
         ++it;
         if ( it->value != op_access )
             PARSER_PANIC( *it, "expected access operator" );
@@ -394,12 +394,12 @@ void dawn::Parser::parse_function( TokenIterator& it, Function& function ) const
         auto& self_var = function.args.emplace_back();
         self_var.type.type_id = function.type_id;
         self_var.type.kind = VarKind::REFERENCE;
-        self_var.id = IDSystem::get( kw_self );
+        self_var.id = kw_self;
     }
 
     if ( it->type != TokenType::NAME )
         PARSER_PANIC( *it, "expected function name" );
-    function.id = IDSystem::get( it->value );
+    function.id = it->value;
     ++it;
 
     if ( it->value != op_expr_opn )
@@ -421,7 +421,7 @@ void dawn::Parser::parse_function( TokenIterator& it, Function& function ) const
         {
             if ( it->type != TokenType::TYPE )
                 PARSER_PANIC( *it, "expected argument type" );
-            arg.type.type_id = IDSystem::get( it->value );
+            arg.type.type_id = it->value;
             ++it;
 
             if ( it->value == vr_variable )
@@ -440,7 +440,7 @@ void dawn::Parser::parse_function( TokenIterator& it, Function& function ) const
 
         if ( it->type != TokenType::NAME )
             PARSER_PANIC( *it, "expected arg name" );
-        arg.id = IDSystem::get( it->value );
+        arg.id = it->value;
 
         if ( args.contains( arg.id ) )
             PARSER_PANIC( *it, "argument [", it->value, "] already defined" );
@@ -475,7 +475,7 @@ void dawn::Parser::parse_cast( TokenIterator& it, Function& function ) const
         it->value != tp_function &&
         it->value != tp_array )
         PARSER_PANIC( *it, "expected cast type" );
-    function.id = IDSystem::get( it->value );
+    function.id = it->value;
     ++it;
 
     parse_scope( it, function.body );
@@ -495,7 +495,7 @@ void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable ) const
         if ( it->type != TokenType::TYPE )
             PARSER_PANIC( *it, "expected variable type" );
         is_custom_type = dawn::is_custom_type( it->value );
-        variable.type.type_id = IDSystem::get( it->value );
+        variable.type.type_id = it->value;
         ++it;
 
         if ( it->value == vr_variable )
@@ -514,7 +514,7 @@ void dawn::Parser::parse_variable( TokenIterator& it, Variable& variable ) const
 
     if ( it->type != TokenType::NAME )
         PARSER_PANIC( *it, "expected variable name" );
-    variable.id = IDSystem::get( it->value );
+    variable.id = it->value;
     const Location var_location = it->location;
     ++it;
 
@@ -695,7 +695,7 @@ void dawn::Parser::expression_complex_expr( Vector<Token>& left, Token op, Vecto
     if ( left.size() == 1 && is_custom_type( left.front().value ) )
     {
         auto& node = tree.emplace<StructNode>( op.location );
-        node.type_id = IDSystem::get( left.front().value );
+        node.type_id = left.front().value;
         auto& args = node.init.emplace<StructNode::ListInit>().args;
 
         TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
@@ -740,7 +740,7 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
             if ( right_it->type != TokenType::NAME )
                 PARSER_PANIC( *right_it, "expected field init name" );
 
-            ID name_id = IDSystem::get( right_it->value );
+            const ID name_id{ right_it->value };
             if ( struct_args.contains( name_id ) )
                 PARSER_PANIC( *right_it, "argument [", right_it->value, "] already passed" );
             ++right_it;
@@ -754,7 +754,7 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
         }
 
         auto& node = tree.emplace<StructNode>( op.location );
-        node.type_id = IDSystem::get( left.front().value );
+        node.type_id = left.front().value;
         node.init.emplace<StructNode::NamedInit>().args = struct_args;
     }
     else if ( left.size() >= 2 && left.front().value == op_lambda && left.back().value == op_lambda )
@@ -783,7 +783,7 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
             {
                 if ( left_it->type != TokenType::TYPE )
                     PARSER_PANIC( *left_it, "expected argument type" );
-                arg.type.type_id = IDSystem::get( left_it->value );
+                arg.type.type_id = left_it->value;
                 ++left_it;
 
                 if ( left_it->value == vr_variable )
@@ -802,7 +802,7 @@ void dawn::Parser::expression_complex_scope( Vector<Token>& left, Token op, Vect
 
             if ( left_it->type != TokenType::NAME )
                 PARSER_PANIC( *left_it, "expected arg name" );
-            arg.id = IDSystem::get( left_it->value );
+            arg.id = left_it->value;
 
             if ( args.contains( arg.id ) )
                 PARSER_PANIC( *left_it, "argument [", left_it->value, "] already defined" );
@@ -857,7 +857,7 @@ void dawn::Parser::expression_complex_array( Vector<Token>& left, Token op, Vect
     else if ( left.size() == 1 && left.front().type == TokenType::TYPE )
     {
         ArrayNode::SizedInit init{};
-        init.type_id = IDSystem::get( left.front().value );
+        init.type_id = left.front().value;
         init.size_expr = node_pool().new_register();
 
         TokenIterator right_it{ right.begin()._Ptr, right.end()._Ptr };
@@ -897,8 +897,8 @@ void dawn::Parser::expression_complex_link( Vector<Token>& left, Token op, Vecto
         PARSER_PANIC( enum_field, "enum field name expected but got [", enum_field.any_value(), "]" );
 
     auto& node = tree.emplace<EnumNode>( op.location );
-    node.type_id = IDSystem::get( enum_token.value );
-    node.key_id = IDSystem::get( enum_field.value );
+    node.type_id = enum_token.value;
+    node.key_id = enum_field.value;
 }
 
 void dawn::Parser::expression_complex_default( Vector<Token>& left, Token op, Vector<Token>& right, Node& tree ) const
@@ -919,7 +919,7 @@ void dawn::Parser::expression_complex_default( Vector<Token>& left, Token op, Ve
         auto& ac_node = tree.emplace<AccessNode>( op.location );
         ac_node.left_expr = node_pool().new_register();
         *ac_node.left_expr = left_expr;
-        ac_node.right_id = IDSystem::get( right.front().value );
+        ac_node.right_id = right.front().value;
     }
     else if ( op.value == op_cast )
     {
@@ -929,7 +929,7 @@ void dawn::Parser::expression_complex_default( Vector<Token>& left, Token op, Ve
         auto& cast_node = tree.emplace<CastNode>( op.location );
         cast_node.left_expr = node_pool().new_register();
         *cast_node.left_expr = left_expr;
-        cast_node.right_type_id = IDSystem::get( right.front().value );
+        cast_node.right_type_id = right.front().value;
     }
     else if ( is_op( op.value ) )
     {
@@ -1026,8 +1026,8 @@ void dawn::Parser::expression_single_keyword( Token const& token, Node& tree ) c
     }
     else if ( token.value == kw_self )
     {
-        static const ID self_id = IDSystem::get( kw_self );
-        tree.emplace<IdentifierNode>( token.location ).id = self_id;
+        static const ID SELF_ID{ kw_self };
+        tree.emplace<IdentifierNode>( token.location ).id = SELF_ID;
     }
     else
         PARSER_PANIC( token, "keyword [", token.value, "] is not an expression" );
@@ -1044,14 +1044,14 @@ void dawn::Parser::expression_single_type( Token const& token, Node& tree ) cons
         token.value == tp_range ||
         token.value == tp_function ||
         token.value == tp_array )
-        tree.emplace<IdentifierNode>( token.location ).id = IDSystem::get( token.value );
+        tree.emplace<IdentifierNode>( token.location ).id = token.value;
     else
         PARSER_PANIC( token, "type [", token.value, "] is not an expression" );
 }
 
 void dawn::Parser::expression_single_identifier( Token const& token, Node& tree ) const
 {
-    tree.emplace<IdentifierNode>( token.location ).id = IDSystem::get( token.value );
+    tree.emplace<IdentifierNode>( token.location ).id = token.value;
 }
 
 void dawn::Parser::parse_scope( TokenIterator& it, Scope& scope ) const
@@ -1069,7 +1069,7 @@ void dawn::Parser::parse_scope( TokenIterator& it, Scope& scope ) const
             parse_variable( it, node.var );
 
             if ( vars.contains( node.var.id ) )
-                PARSER_PANIC( *it, "variable [", IDSystem::get( node.var.id ), "] already defined" );
+                PARSER_PANIC( *it, "variable [", node.var.id, "] already defined" );
             vars.insert( node.var.id );
         }
         else if ( it->value == kw_if )
@@ -1196,7 +1196,7 @@ void dawn::Parser::scope_try( TokenIterator& it, Node& tree ) const
 
     if ( it->type != TokenType::NAME )
         PARSER_PANIC( *it, "expected catch name" );
-    node.catch_id = IDSystem::get( it->value );
+    node.catch_id = it->value;
     ++it;
 
     parse_scope( it, node.catch_scope );
@@ -1312,7 +1312,7 @@ void dawn::Parser::scope_for( TokenIterator& it, Node& tree ) const
     auto& node = tree.emplace<ForNode>( it->location );
     if ( it->type != TokenType::NAME )
         PARSER_PANIC( *it, "expected name" );
-    node.var_id = IDSystem::get( it->value );
+    node.var_id = it->value;
     ++it;
 
     if ( it->value != op_set )

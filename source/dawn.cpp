@@ -117,34 +117,34 @@ dawn::Opt<dawn::String> dawn::Dawn::eval( Source const& source ) noexcept
     return std::nullopt;
 }
 
-void dawn::Dawn::bind_func( StringRef const& name, Bool is_ctime, CFunction cfunc ) noexcept
+void dawn::Dawn::bind_func( ID id, Bool is_ctime, CFunction cfunc ) noexcept
 {
-    engine.bind_func( IDSystem::get( name ), is_ctime, std::move( cfunc ) );
+    engine.bind_func( id, is_ctime, std::move( cfunc ) );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( ID id ) noexcept
 {
-    return call_func( name, nullptr, 0, nullptr );
+    return call_func( id, nullptr, 0, nullptr );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( ID id, Value* retval ) noexcept
 {
-    return call_func( name, nullptr, 0, retval );
+    return call_func( id, nullptr, 0, retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, std::initializer_list<Value> const& args, Value* retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( ID id, std::initializer_list<Value> const& args, Value* retval ) noexcept
 {
-    return call_func( name, (Value*) args.begin(), (Int) args.size(), retval );
+    return call_func( id, (Value*) args.begin(), (Int) args.size(), retval );
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* args, Int arg_count, Value* retval ) noexcept
+dawn::Opt<dawn::String> dawn::Dawn::call_func( ID id, Value* args, Int arg_count, Value* retval ) noexcept
 {
     try
     {
         if ( retval )
-            *retval = engine.call_func( IDSystem::get( name ), args, arg_count );
+            *retval = engine.call_func( id, args, arg_count );
         else
-            engine.call_func( IDSystem::get( name ), args, arg_count );
+            engine.call_func( id, args, arg_count );
     }
     catch ( String const& msg )
     {
@@ -157,12 +157,12 @@ dawn::Opt<dawn::String> dawn::Dawn::call_func( StringRef const& name, Value* arg
     return std::nullopt;
 }
 
-void dawn::Dawn::add_var( Location const& location, VarType const& type, StringRef const& name, Value const& value ) noexcept
+void dawn::Dawn::add_var( VarType const& type, ID id, Value const& value ) noexcept
 {
-    engine.add_var( location, type, IDSystem::get( name ), value );
+    engine.add_var( Location{}, type, id, value );
 }
 
-dawn::Value* dawn::Dawn::get_var( StringRef const& name ) noexcept
+dawn::Value* dawn::Dawn::get_var( ID id ) noexcept
 {
-    return engine.get_var( IDSystem::get( name ) );
+    return engine.get_var( id );
 }

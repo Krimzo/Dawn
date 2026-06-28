@@ -47,7 +47,7 @@ void dawn::Engine::load_operator( Operator const& entry )
 
     auto* op = right_types->get( right.type.type_id );
     if ( op )
-        ENGINE_PANIC( {}, "operator [", entry.type, "] with left type [", IDSystem::get( left.type.type_id ), "] and right type [", IDSystem::get( right.type.type_id ), "] already defined" );
+        ENGINE_PANIC( {}, "operator [", entry.type, "] with left type [", left.type.type_id, "] and right type [", right.type.type_id, "] already defined" );
     right_types->set( right.type.type_id, {} ).as_global().func.emplace<DFunction>( entry.args, entry.body );
 }
 
@@ -58,7 +58,7 @@ void dawn::Engine::load_function( Function const& entry )
         if ( Opt<ValueType> value_type = builtin_type( entry.type_id ) )
         {
             if ( member_generators[(Int) *value_type].get( entry.id ) )
-                ENGINE_PANIC( {}, "method [", IDSystem::get( entry.id ), "] already defined for type [", IDSystem::get( entry.type_id ), "]" );
+                ENGINE_PANIC( {}, "method [", entry.id, "] already defined for type [", entry.type_id, "]" );
             member_generators[(Int) *value_type].set( entry.id, [entry]( Location const& location, Engine& engine, Value const& self ) -> Value
                 {
                     FunctionValue fv{};
@@ -72,16 +72,16 @@ void dawn::Engine::load_function( Function const& entry )
         else if ( Struct* struc = structs.get( entry.type_id ) )
         {
             if ( struc->contains( entry.id ) )
-                ENGINE_PANIC( {}, "method [", IDSystem::get( entry.id ), "] already defined for struct [", IDSystem::get( entry.type_id ), "]" );
+                ENGINE_PANIC( {}, "method [", entry.id, "] already defined for struct [", entry.type_id, "]" );
             struc->methods.push_back( entry );
         }
         else
-            ENGINE_PANIC( {}, "type [", IDSystem::get( entry.type_id ), "] does not exist or support function extensions" );
+            ENGINE_PANIC( {}, "type [", entry.type_id, "] does not exist or support function extensions" );
     }
     else
     {
         if ( stack.root().get( entry.id ) )
-            ENGINE_PANIC( {}, "object [", IDSystem::get( entry.id ), "] already exists" );
+            ENGINE_PANIC( {}, "object [", entry.id, "] already exists" );
 
         FunctionValue fv{};
         auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
@@ -124,7 +124,7 @@ void dawn::Engine::bind_oper( ID left_type_id, OperatorType op_type, ID right_ty
 
     auto* op = right_types->get( right_type_id );
     if ( op )
-        ENGINE_PANIC( {}, "operator [", op_type, "] with left type [", IDSystem::get( left_type_id ), "] and right type [", IDSystem::get( right_type_id ), "] already defined" );
+        ENGINE_PANIC( {}, "operator [", op_type, "] with left type [", left_type_id, "] and right type [", right_type_id, "] already defined" );
     right_types->set( right_type_id, {} ).as_global().func.emplace<CFunction>( std::move( cfunc ) );
 
     if ( is_const )
@@ -134,7 +134,7 @@ void dawn::Engine::bind_oper( ID left_type_id, OperatorType op_type, ID right_ty
 void dawn::Engine::bind_func( ID id, Bool is_ctime, CFunction cfunc )
 {
     if ( stack.root().get( id ) )
-        ENGINE_PANIC( {}, "object [", IDSystem::get( id ), "] already exists" );
+        ENGINE_PANIC( {}, "object [", id, "] already exists" );
     if ( is_ctime )
         m_ctime_funcs.insert( id );
 
@@ -149,10 +149,10 @@ dawn::Value dawn::Engine::call_func( ID id, Value* args, Int arg_count )
 {
     Value* value = stack.root().get( id );
     if ( !value )
-        ENGINE_PANIC( {}, "object [", IDSystem::get( id ), "] does not exist" );
+        ENGINE_PANIC( {}, "object [", id, "] does not exist" );
 
     if ( value->type() != ValueType::FUNCTION )
-        ENGINE_PANIC( {}, "object [", IDSystem::get( id ), "] can not be called" );
+        ENGINE_PANIC( {}, "object [", id, "] can not be called" );
 
     return handle_func( {}, value->as_function(), args, arg_count );
 }
@@ -160,7 +160,7 @@ dawn::Value dawn::Engine::call_func( ID id, Value* args, Int arg_count )
 void dawn::Engine::add_var( Location const& location, VarType const& type, ID id, Value const& value )
 {
     if ( type.type_id.valid() && type.type_id != value.type_id() )
-        ENGINE_PANIC( location, "can not init variable of type [", IDSystem::get( type.type_id ), "] with type [", IDSystem::get( value.type_id() ), "]" );
+        ENGINE_PANIC( location, "can not init variable of type [", type.type_id, "] with type [", value.type_id(), "]" );
 
     switch ( type.kind )
     {
@@ -183,22 +183,12 @@ dawn::Value* dawn::Engine::get_var( ID id )
     return stack.current().get( id );
 }
 
-void dawn::Engine::bind_member( ValueType type, StringRef const& name, CustomMemberFunc const& func )
-{
-    bind_member( type, IDSystem::get( name ), func );
-}
-
 void dawn::Engine::bind_member( ValueType type, ID id, CustomMemberFunc const& func )
 {
     member_generators[(Int) type].set( id, [func]( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return func( location, engine, const_cast<Value&>( self ) );
         } );
-}
-
-void dawn::Engine::bind_method( ValueType type, StringRef const& name, Bool is_const, Int expected_args, CustomMethodFunc const& body )
-{
-    bind_method( type, IDSystem::get( name ), is_const, expected_args, body );
 }
 
 void dawn::Engine::bind_method( ValueType type, ID id, Bool is_const, Int expected_args, CustomMethodFunc const& body )
@@ -211,9 +201,9 @@ void dawn::Engine::bind_method( ValueType type, ID id, Bool is_const, Int expect
             method.func = [id, is_const, expected_args, body]( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
                 {
                     if ( !is_const && args[0].is_const() )
-                        ENGINE_PANIC( location, "can not call [", IDSystem::get( id ), "] on a const value" );
+                        ENGINE_PANIC( location, "can not call [", id, "] on a const value" );
                     if ( ( 1 + expected_args ) != arg_count )
-                        ENGINE_PANIC( location, "method [", IDSystem::get( id ), "] expects self + ", expected_args, " arguments" );
+                        ENGINE_PANIC( location, "method [", id, "] expects self + ", expected_args, " arguments" );
                     return body( location, engine, args[0], args + 1 );
                 };
             *method.self = self;
@@ -230,7 +220,7 @@ dawn::Value const& dawn::Engine::handle_id_node( IdentifierNode const& node )
 {
     if ( auto* ptr = get_var( node.id ) )
         return *ptr;
-    ENGINE_PANIC( node.location, "object [", IDSystem::get( node.id ), "] does not exist" );
+    ENGINE_PANIC( node.location, "object [", node.id, "] does not exist" );
 }
 
 dawn::Value dawn::Engine::handle_call_node( CallNode const& node )
@@ -483,13 +473,13 @@ dawn::Value dawn::Engine::handle_enum_node( EnumNode const& node )
 {
     auto* enum_ptr = enums.get( node.type_id );
     if ( !enum_ptr )
-        ENGINE_PANIC( node.location, "enum [", IDSystem::get( node.type_id ), "] does not exist" );
+        ENGINE_PANIC( node.location, "enum [", node.type_id, "] does not exist" );
 
     auto* entry_ptr = enum_ptr->get( node.key_id );
     if ( !entry_ptr )
-        ENGINE_PANIC( node.location, "enum [", IDSystem::get( node.type_id ), "] does not have key [", IDSystem::get( node.key_id ), "]" );
+        ENGINE_PANIC( node.location, "enum [", node.type_id, "] does not have key [", node.key_id, "]" );
     if ( !std::holds_alternative<Holder<Value>>( entry_ptr->expr ) )
-        ENGINE_PANIC( node.location, "value expected at enum [", IDSystem::get( node.type_id ), "] and key [", IDSystem::get( node.key_id ), "] but found node" );
+        ENGINE_PANIC( node.location, "value expected at enum [", node.type_id, "] and key [", node.key_id, "] but found node" );
 
     EnumValue result{};
     result.parent_id = node.type_id;
@@ -503,10 +493,14 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
 {
     auto* struct_ptr = structs.get( node.type_id );
     if ( !struct_ptr )
-        ENGINE_PANIC( node.location, "struct [", IDSystem::get( node.type_id ), "] does not exist" );
+        ENGINE_PANIC( node.location, "struct [", node.type_id, "] does not exist" );
     auto& struc = *struct_ptr;
 
-    Value value{ StructValue{ node.type_id }, node.location };
+    Value value{ [&] {
+        StructValue _struc_val{};
+        _struc_val.parent_id = node.type_id; // parent_id must be set before passing StructValue to Value constructor.
+        return _struc_val;
+        }( ), node.location };
     auto& struc_value = const_cast<StructValue&>( value.as_struct() ); // This is fine because parent_id was already passed in the constructor, line above.
     struc_value.members.reserve( struc.fields.size() + struc.methods.size() );
 
@@ -521,7 +515,7 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
         {
             auto field_it = struc_value.members.find( id );
             if ( field_it == struc_value.members.end() ) // Only fields are stored at this stage.
-                ENGINE_PANIC( node.location, "struct [", IDSystem::get( struc.id ), "] does not contain field [", IDSystem::get( id ), "]" );
+                ENGINE_PANIC( node.location, "struct [", struc.id, "] does not contain field [", id, "]" );
 
             auto& field = field_it->second;
             Value expr = handle_expr( arg_node ).clone();
@@ -535,7 +529,7 @@ dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
     {
         auto& args = std::get<StructNode::ListInit>( node.init ).args;
         if ( args.size() > struc.fields.size() )
-            ENGINE_PANIC( node.location, "struct [", IDSystem::get( struc.id ), "] contains [", struc.fields.size(), "] fields but [", args.size(), "] were passed" );
+            ENGINE_PANIC( node.location, "struct [", struc.id, "] contains [", struc.fields.size(), "] fields but [", args.size(), "] were passed" );
 
         for ( Int i = 0; i < (Int) args.size(); i++ )
         {
@@ -593,14 +587,14 @@ dawn::Value dawn::Engine::handle_ac_node( AccessNode const& node )
         auto& left_struct = left.as_struct();
         const auto it = left_struct.members.find( node.right_id );
         if ( it == left_struct.members.end() )
-            ENGINE_PANIC( node.location, "struct [", IDSystem::get( left_struct.parent_id ), "] does not have member [", IDSystem::get( node.right_id ), "]" );
+            ENGINE_PANIC( node.location, "struct [", left_struct.parent_id, "] does not have member [", node.right_id, "]" );
         return it->second.value;
     }
     else
     {
         auto* generator_ptr = member_generators[(Int) left.type()].get( node.right_id );
         if ( !generator_ptr )
-            ENGINE_PANIC( node.location, "type [", left.type(), "] does not have member [", IDSystem::get( node.right_id ), "]" );
+            ENGINE_PANIC( node.location, "type [", left.type(), "] does not have member [", node.right_id, "]" );
         return ( *generator_ptr )( node.location, *this, left );
     }
 }
@@ -674,7 +668,7 @@ dawn::Value dawn::Engine::handle_cast_node( CastNode const& node )
     else if ( node.right_type_id == id_array )
         return Value{ left_value.to_array( *this ), node.location };
     else
-        ENGINE_PANIC( node.location, "unknown cast type: ", IDSystem::get( node.right_type_id ) );
+        ENGINE_PANIC( node.location, "unknown cast type: ", node.right_type_id );
 }
 
 void dawn::Engine::handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon )

@@ -22,7 +22,6 @@
     <ClCompile Include="source\stack.cpp" />
     <ClCompile Include="source\standard.cpp" />
     <ClCompile Include="source\err.cpp" />
-    <ClCompile Include="source\id.cpp" />
     <ClCompile Include="source\lexer.cpp" />
     <ClCompile Include="source\parser.cpp" />
     <ClCompile Include="source\token.cpp" />

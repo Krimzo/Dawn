@@ -11,6 +11,7 @@ func main(array& args)
 		print("out: {val}")
 	}
 	out(eval(da @ string))
+	print(Animal::cat.name)
 }
 
 struct Da
@@ -30,4 +31,10 @@ struct Ne
 	cast string {
 		return self.ne_data
 	}
+}
+
+enum Animal
+{
+	cat
+	dog
 }
