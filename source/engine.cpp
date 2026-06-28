@@ -199,9 +199,9 @@ void dawn::Engine::bind_method( ValueType type, String const& name, Bool is_cons
             FunctionValue fv{};
             auto& method = fv.data.emplace<FunctionValue::AsMethod>();
             method.id = id;
-            method.func = [name, is_const, expected_args, body, self]( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+            method.func = [name, is_const, expected_args, body]( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
                 {
-                    if ( !is_const && self.is_const() )
+                    if ( !is_const && args[0].is_const() )
                         ENGINE_PANIC( location, "can not call [", name, "] on a const value" );
                     if ( ( 1 + expected_args ) != arg_count )
                         ENGINE_PANIC( location, "method [", name, "] expects self + ", expected_args, " arguments" );
