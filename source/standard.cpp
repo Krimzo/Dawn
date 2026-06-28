@@ -605,6 +605,15 @@ void dawn::Engine::load_standard_functions()
             return Value{ stream.str(), location };
         } );
 
+    bind_func( IDSystem::get( "put" ), false, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
+        {
+            StringStream stream;
+            for ( Int i = 0; i < arg_count; i++ )
+                stream << args[i].to_string( engine );
+            put( stream.str() );
+            return Value{};
+        } );
+
     bind_func( IDSystem::get( "print" ), false, []( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
         {
             StringStream stream;
