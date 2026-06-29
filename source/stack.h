@@ -17,11 +17,7 @@ struct Stack
     Stack();
 
     [[nodiscard]] PopHandler mark_frame();
-
     void push( ID id, Value const& value );
-    void pop();
-
-    Int count() const;
     Value* get( ID id );
 
 private:

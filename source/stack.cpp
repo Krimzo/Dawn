@@ -18,16 +18,6 @@ void dawn::Stack::push( ID id, Value const& value )
     m_items.emplace_back( id, value );
 }
 
-void dawn::Stack::pop()
-{
-    m_items.pop_back();
-}
-
-dawn::Int dawn::Stack::count() const
-{
-    return (Int) m_items.size();
-}
-
 dawn::Value* dawn::Stack::get( ID id )
 {
     for ( Int i = (Int) m_items.size() - 1; i >= 0; --i )
