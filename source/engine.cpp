@@ -57,9 +57,9 @@ void dawn::Engine::load_function( Function const& entry )
     {
         if ( Opt<ValueType> value_type = builtin_type( entry.type_id ) )
         {
-            if ( member_generators[(Int) *value_type].get( entry.id ) )
+            if ( members[(Int) *value_type].get( entry.id ) )
                 ENGINE_PANIC( {}, "method [", entry.id, "] already defined for type [", entry.type_id, "]" );
-            member_generators[(Int) *value_type].set( entry.id, [entry]( Location const& location, Engine& engine, Value const& self ) -> Value
+            members[(Int) *value_type].set( entry.id, [entry]( Location const& location, Engine& engine, Value const& self ) -> Value
                 {
                     FunctionValue fv{};
                     auto& method = fv.data.emplace<FunctionValue::AsMethod>();
@@ -185,7 +185,7 @@ dawn::Value* dawn::Engine::get_var( ID id )
 
 void dawn::Engine::bind_member( ValueType type, ID id, CustomMemberFunc const& func )
 {
-    member_generators[(Int) type].set( id, [func]( Location const& location, Engine& engine, Value const& self ) -> Value
+    members[(Int) type].set( id, [func]( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return func( location, engine, const_cast<Value&>( self ) );
         } );
@@ -193,7 +193,7 @@ void dawn::Engine::bind_member( ValueType type, ID id, CustomMemberFunc const& f
 
 void dawn::Engine::bind_method( ValueType type, ID id, Bool is_const, Int expected_args, CustomMethodFunc const& body )
 {
-    member_generators[(Int) type].set( id, [id, is_const, expected_args, body]( Location const& location, Engine& _, Value const& self ) -> Value
+    members[(Int) type].set( id, [id, is_const, expected_args, body]( Location const& location, Engine& _, Value const& self ) -> Value
         {
             FunctionValue fv{};
             auto& method = fv.data.emplace<FunctionValue::AsMethod>();
@@ -590,7 +590,7 @@ dawn::Value dawn::Engine::handle_ac_node( AccessNode const& node )
     }
     else
     {
-        auto* generator_ptr = member_generators[(Int) left.type()].get( node.right_id );
+        auto* generator_ptr = members[(Int) left.type()].get( node.right_id );
         if ( !generator_ptr )
             ENGINE_PANIC( node.location, "type [", left.type(), "] does not have member [", node.right_id, "]" );
         return ( *generator_ptr )( node.location, *this, left );

@@ -21,7 +21,7 @@ struct Engine
     Storage<Enum> enums;
     Storage<Struct> structs;
     Storage<Storage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
-    Storage<MemberGenerator> member_generators[(Int) ValueType::_COUNT] = {};
+    Storage<MemberGenerator> members[(Int) ValueType::_COUNT] = {};
 
     Engine();
 
