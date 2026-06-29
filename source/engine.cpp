@@ -182,7 +182,7 @@ dawn::Value* dawn::Engine::get_var( ID id )
     return stack.get( id );
 }
 
-void dawn::Engine::bind_member( ValueType type, ID id, CustomMemberFunc const& func )
+void dawn::Engine::bind_field( ValueType type, ID id, FieldCFunc const& func )
 {
     members[(Int) type].set( id, [func]( Location const& location, Engine& engine, Value const& self ) -> Value
         {
@@ -190,7 +190,7 @@ void dawn::Engine::bind_member( ValueType type, ID id, CustomMemberFunc const& f
         } );
 }
 
-void dawn::Engine::bind_method( ValueType type, ID id, Bool is_const, Int expected_args, CustomMethodFunc const& body )
+void dawn::Engine::bind_method( ValueType type, ID id, Bool is_const, Int expected_args, MethodCFunc const& body )
 {
     members[(Int) type].set( id, [id, is_const, expected_args, body]( Location const& location, Engine& _, Value const& self ) -> Value
         {
@@ -589,10 +589,10 @@ dawn::Value dawn::Engine::handle_ac_node( AccessNode const& node )
     }
     else
     {
-        auto* generator_ptr = members[(Int) left.type()].get( node.right_id );
-        if ( !generator_ptr )
+        auto* member_func_ptr = members[(Int) left.type()].get( node.right_id );
+        if ( !member_func_ptr )
             ENGINE_PANIC( node.location, "type [", left.type(), "] does not have member [", node.right_id, "]" );
-        return ( *generator_ptr )( node.location, *this, left );
+        return ( *member_func_ptr )( node.location, *this, left );
     }
 }
 

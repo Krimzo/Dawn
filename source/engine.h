@@ -8,9 +8,9 @@ namespace dawn
 {
 struct Engine
 {
-    using MemberGenerator = Func<Value( Location const&, Engine&, Value const& )>;
-    using CustomMemberFunc = Func<Value( Location const&, Engine&, Value const& )>;
-    using CustomMethodFunc = Func<Value( Location const&, Engine&, Value const&, Value const* )>;
+    using MemberCFunc = Func<Value( Location const&, Engine&, Value const& )>;
+    using FieldCFunc = Func<Value( Location const&, Engine&, Value const& )>;
+    using MethodCFunc = Func<Value( Location const&, Engine&, Value const&, Value const* )>;
 
     friend struct Value;
     friend struct EnumValue;
@@ -20,7 +20,7 @@ struct Engine
     Stack stack;
     Storage<Enum> enums;
     Storage<Struct> structs;
-    Storage<MemberGenerator> members[(Int) ValueType::_COUNT] = {};
+    Storage<MemberCFunc> members[(Int) ValueType::_COUNT] = {};
     Storage<Storage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
 
     Engine();
@@ -40,8 +40,8 @@ struct Engine
     void add_var( Location const& location, VarType const& type, ID id, Value const& value );
     Value* get_var( ID id );
 
-    void bind_member( ValueType type, ID id, CustomMemberFunc const& func );
-    void bind_method( ValueType type, ID id, Bool is_const, Int expected_args, CustomMethodFunc const& body );
+    void bind_field( ValueType type, ID id, FieldCFunc const& func );
+    void bind_method( ValueType type, ID id, Bool is_const, Int expected_args, MethodCFunc const& body );
 
 private:
     Set<uint64_t> m_ctime_ops[(Int) OperatorType::_COUNT] = {};
