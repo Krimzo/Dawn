@@ -20,8 +20,8 @@ struct Engine
     Stack stack;
     Storage<Enum> enums;
     Storage<Struct> structs;
-    Storage<Storage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
     Storage<MemberGenerator> members[(Int) ValueType::_COUNT] = {};
+    Storage<Storage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
 
     Engine();
 
@@ -78,8 +78,7 @@ private:
 
     __forceinline Value handle_oper( Location const& location, Value const& left, const OperatorType op_type, Value const& right )
     {
-        auto& op_left_ids = operators[(Int) op_type];
-        auto* op_right_ids = op_left_ids.get( left.type_id() );
+        auto* op_right_ids = operators[(Int) op_type].get( left.type_id() );
         if ( !op_right_ids )
             ENGINE_PANIC( location, "type [", left.type_id(), "] does not support operator [", op_type, "]" );
         auto* func = op_right_ids->get( right.type_id() );
