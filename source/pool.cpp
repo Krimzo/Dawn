@@ -15,7 +15,6 @@ dawn::MemoryPools::~MemoryPools() noexcept
     };
 
     clear_chunks( node_memory );
-    clear_chunks( frame_memory );
     clear_chunks( ptr_memory );
     clear_chunks( bool_memory );
     clear_chunks( int_memory );
@@ -32,11 +31,6 @@ dawn::MemoryPools::~MemoryPools() noexcept
 dawn::NodeMemory& dawn::node_pool()
 {
     return pools.node_memory;
-}
-
-dawn::FrameMemory& dawn::frame_pool()
-{
-    return pools.frame_memory;
 }
 
 dawn::PtrMemory& dawn::ptr_pool()

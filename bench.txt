@@ -49,6 +49,7 @@
 48.  256312us add pointer storage inside value
 49.  201981us improve pointer storage 
 50.  203885us rework ID
+51.  177014us rework stack (lost frame ability)
 
 // linear fib(30)
 01.    9871us
