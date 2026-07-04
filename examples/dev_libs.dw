@@ -1,3 +1,10 @@
 struct MyStruct {
 	text: string
+
+	func get_self_func()
+	{
+		return ``{
+			return self
+		}
+	}
 }
