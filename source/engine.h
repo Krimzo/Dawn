@@ -18,10 +18,10 @@ struct Engine
     friend Value create_default_value( Engine* engine, ID typeid_, Location const& location );
 
     Stack stack;
-    Storage<Enum> enums;
-    Storage<Struct> structs;
-    Storage<MemberCFunc> members[(Int) ValueType::_COUNT] = {};
-    Storage<Storage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
+    GlobalStorage<Enum> enums;
+    GlobalStorage<Struct> structs;
+    GlobalStorage<MemberCFunc> members[(Int) ValueType::_COUNT] = {};
+    GlobalStorage<GlobalStorage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
 
     Engine();
 
@@ -107,7 +107,8 @@ private:
                     ENGINE_PANIC( location, "invalid argument count for lambda" );
             }
 
-            const PopHandler pop_handler = stack.mark_frame();
+            const PopHandler pop_handler = stack.push_from(
+                func.is_lambda() ? func.as_lambda().frame : RegisterRef<Frame>{} );
 
             for ( Int i = 0; i < arg_count; i++ )
                 add_var( location, dfunc->args[i].type, dfunc->args[i].id, args[i] );
@@ -129,7 +130,7 @@ private:
         {
         case NodeType::SCOPE:
         {
-            const PopHandler pop_handler = stack.mark_frame();
+            const PopHandler pop_handler = stack.push();
             handle_scope( std::get<Scope>( node ), retval, didbrk, didcon );
         }
         break;

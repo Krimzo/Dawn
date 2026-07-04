@@ -8,6 +8,7 @@
 namespace dawn
 {
 using NodeMemory = MemoryPool<Node, 1024>;
+using FrameMemory = MemoryPool<Frame, 256>;
 using PtrMemory = MemoryPool<ValueStorage<Ptr>, 1024>;
 using BoolMemory = MemoryPool<ValueStorage<Bool>, 1024>;
 using IntMemory = MemoryPool<ValueStorage<Int>, 1024>;
@@ -23,6 +24,7 @@ using RangeMemory = MemoryPool<ValueStorage<RangeValue>, 1024>;
 struct MemoryPools
 {
     NodeMemory node_memory;
+    FrameMemory frame_memory;
     PtrMemory ptr_memory;
     BoolMemory bool_memory;
     IntMemory int_memory;
@@ -39,6 +41,7 @@ struct MemoryPools
 };
 
 NodeMemory& node_pool();
+FrameMemory& frame_pool();
 PtrMemory& ptr_pool();
 BoolMemory& bool_pool();
 IntMemory& int_pool();

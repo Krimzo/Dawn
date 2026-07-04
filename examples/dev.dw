@@ -12,6 +12,12 @@ func main(array& args)
 	}
 	out(eval(da @ string))
 	print(Animal::cat.name)
+
+	function getSelf = ``{
+		return MyStruct{text: "some test self text"}.get_self_func()
+	}()
+	print(getSelf)
+	print(getSelf().text)
 }
 
 struct Da

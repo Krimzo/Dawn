@@ -12,12 +12,6 @@ void dawn::Optimizer::optimize( Module& module )
     optimize_structs( module.structs );
 }
 
-void dawn::Optimizer::reset()
-{
-    m_engine = {};
-    m_inline.clear();
-}
-
 void dawn::Optimizer::optimize_imports( StringSet& imports )
 {
     for ( auto& import : imports )
