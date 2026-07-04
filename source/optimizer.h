@@ -35,8 +35,6 @@ private:
     Engine m_engine;
     Vector<Inlineable> m_inline;
 
-    void reset();
-
     void optimize_imports( StringSet& imports );
     void optimize_variables( Vector<Variable>& vars );
     void optimize_operators( Vector<Operator>& ops );
