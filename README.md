@@ -97,6 +97,13 @@ person1.who()
 person2.who()
 ```
 
+# Booleans
+```dawn
+bool not_op = !false
+bool and_op = true and true
+bool or_op = true or false
+```
+
 # Branching
 ```dawn
 int value = 5
