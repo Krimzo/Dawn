@@ -80,7 +80,7 @@ void dawn::Engine::load_function( Function const& entry )
     }
     else
     {
-        if ( stack.get( entry.id ) )
+        if ( stack.root().get( entry.id ) )
             ENGINE_PANIC( {}, "object [", entry.id, "] already exists" );
 
         FunctionValue fv{};
@@ -88,7 +88,7 @@ void dawn::Engine::load_function( Function const& entry )
         global.id = entry.id;
         global.func = DFunction{ entry.args, entry.body };
 
-        stack.push( entry.id, Value{ fv } );
+        stack.root().set( entry.id, Value{ fv } );
     }
 }
 
@@ -132,7 +132,7 @@ void dawn::Engine::bind_oper( ID left_type_id, OperatorType op_type, ID right_ty
 
 void dawn::Engine::bind_func( ID id, Bool is_ctime, CFunction cfunc )
 {
-    if ( stack.get( id ) )
+    if ( stack.root().get( id ) )
         ENGINE_PANIC( {}, "object [", id, "] already exists" );
     if ( is_ctime )
         m_ctime_funcs.insert( id );
@@ -141,12 +141,12 @@ void dawn::Engine::bind_func( ID id, Bool is_ctime, CFunction cfunc )
     auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
     global.id = id;
     global.func = std::move( cfunc );
-    stack.push( id, Value{ fv } );
+    stack.root().set( id, Value{ fv } );
 }
 
 dawn::Value dawn::Engine::call_func( ID id, Value* args, Int arg_count )
 {
-    Value* value = stack.get( id );
+    Value* value = stack.root().get( id );
     if ( !value )
         ENGINE_PANIC( {}, "object [", id, "] does not exist" );
 
@@ -164,22 +164,22 @@ void dawn::Engine::add_var( Location const& location, VarType const& type, ID id
     switch ( type.kind )
     {
     case VarKind::CONSTANT:
-        stack.push( id, value.clone() );
+        stack.current().set( id, value.clone() );
         break;
 
     case VarKind::VARIABLE:
-        stack.push( id, value.clone().unlock_const() );
+        stack.current().set( id, value.clone().unlock_const() );
         break;
 
     default:
-        stack.push( id, value );
+        stack.current().set( id, value );
         break;
     }
 }
 
 dawn::Value* dawn::Engine::get_var( ID id )
 {
-    return stack.get( id );
+    return stack.current().get( id );
 }
 
 void dawn::Engine::bind_field( ValueType type, ID id, FieldCFunc const& func )
@@ -300,13 +300,13 @@ void dawn::Engine::handle_try_node( TryNode const& node, Opt<Value>& retval, Boo
 {
     try
     {
-        const PopHandler pop_handler = stack.mark_frame();
+        const PopHandler pop_handler = stack.push();
         handle_scope( node.try_scope, retval, didbrk, didcon );
     }
     catch ( Value const& value )
     {
-        const PopHandler pop_handler = stack.mark_frame();
-        stack.push( node.catch_id, value );
+        const PopHandler pop_handler = stack.push();
+        stack.current().set( node.catch_id, value );
         handle_scope( node.catch_scope, retval, didbrk, didcon );
     }
 }
@@ -318,7 +318,7 @@ void dawn::Engine::handle_if_node( IfNode const& node, Opt<Value>& retval, Bool*
         if ( !handle_expr( part.expr ).as_bool() )
             continue;
 
-        const PopHandler pop_handler = stack.mark_frame();
+        const PopHandler pop_handler = stack.push();
         handle_scope( part.scope, retval, didbrk, didcon );
         break;
     }
@@ -335,7 +335,7 @@ void dawn::Engine::handle_switch_node( SwitchNode const& node, Opt<Value>& retva
             if ( !handle_oper( expr.location(), check_value, OperatorType::EQ, handle_expr( expr ) ).as_bool() )
                 continue;
 
-            const PopHandler pop_handler = stack.mark_frame();
+            const PopHandler pop_handler = stack.push();
             handle_scope( case_part.scope, retval, didbrk, didcon );
             return;
         }
@@ -343,7 +343,7 @@ void dawn::Engine::handle_switch_node( SwitchNode const& node, Opt<Value>& retva
 
     if ( node.def_scope )
     {
-        const PopHandler pop_handler = stack.mark_frame();
+        const PopHandler pop_handler = stack.push();
         handle_scope( *node.def_scope, retval, didbrk, didcon );
     }
 }
@@ -357,7 +357,7 @@ void dawn::Engine::handle_loop_node( LoopNode const& node, Opt<Value>& retval )
             break;
         didcon = false;
 
-        const PopHandler pop_handler = stack.mark_frame();
+        const PopHandler pop_handler = stack.push();
         handle_scope( node.scope, retval, &didbrk, &didcon );
     }
 }
@@ -374,7 +374,7 @@ void dawn::Engine::handle_while_node( WhileNode const& node, Opt<Value>& retval 
         if ( !handle_expr( *node.expr ).as_bool() )
             break;
 
-        const PopHandler pop_handler = stack.mark_frame();
+        const PopHandler pop_handler = stack.push();
         handle_scope( node.scope, retval, &didbrk, &didcon );
     }
 }
@@ -394,8 +394,8 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
                 break;
             didcon = false;
 
-            const PopHandler pop_handler = stack.mark_frame();
-            stack.push( node.var_id, Value{ &c, loop_value.is_const(), node.location } );
+            const PopHandler pop_handler = stack.push();
+            stack.current().set( node.var_id, Value{ &c, loop_value.is_const(), node.location } );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -408,8 +408,8 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
             if ( retval || didbrk )\
                 break;\
             didcon = false;\
-            const PopHandler pop_handler = stack.mark_frame();\
-            stack.push( node.var_id, Value{ i, node.location } );\
+            const PopHandler pop_handler = stack.push();\
+            stack.current().set( node.var_id, Value{ i, node.location } );\
             handle_scope( node.scope, retval, &didbrk, &didcon );\
         }\
 
@@ -452,8 +452,8 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
                 break;
             didcon = false;
 
-            const PopHandler pop_handler = stack.mark_frame();
-            stack.push( node.var_id, value );
+            const PopHandler pop_handler = stack.push();
+            stack.current().set( node.var_id, value );
             handle_scope( node.scope, retval, &didbrk, &didcon );
         }
     }
@@ -463,7 +463,9 @@ void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
 
 dawn::Value const& dawn::Engine::handle_lambda_node( LambdaNode const& node )
 {
-    return node.func_value;
+    auto& func_val = node.func_value;
+    func_val.as_function().as_lambda().frame = stack.peek();
+    return func_val;
 }
 
 dawn::Value dawn::Engine::handle_enum_node( EnumNode const& node )
