@@ -6,45 +6,30 @@
 
 namespace dawn
 {
-struct Frame
+struct StackItem
 {
-    using LocalFrame = LocalStorage<Value>;
-    using GlobalFrame = GlobalStorage<Value>;
-
-    Frame( FrameType type = FrameType::LOCAL );
-
-    Value& set( ID id, Value const& value );
-    Value* get( ID id );
-
-    void reset( RegisterRef<Frame> const& parent );
-
-private:
-    Variant<LocalFrame, GlobalFrame> m_frame;
-    RegisterRef<Frame> m_parent;
+    ID id;
+    Value value;
 };
 
 struct Stack
 {
     Stack();
 
-    [[nodiscard]] PopHandler push();
-    [[nodiscard]] PopHandler push_from( RegisterRef<Frame> const& frame );
-    void pop();
-
-    Frame& root();
-    Frame& current();
-
-    RegisterRef<Frame> const& peek() const;
+    [[nodiscard]] PopHandler mark_frame();
+    void push( ID id, Value const& value );
+    Value* get( ID id );
 
 private:
-    Vector<RegisterRef<Frame>> m_frames;
+    Vector<StackItem> m_items;
 };
 
 struct PopHandler
 {
     friend struct Stack;
 
-    Stack& stack;
+    Vector<StackItem>& stack_data;
+    const size_t stack_size;
 
     PopHandler( PopHandler const& ) = delete;
     void operator=( PopHandler const& ) = delete;
@@ -52,6 +37,6 @@ struct PopHandler
     ~PopHandler() noexcept;
 
 private:
-    explicit PopHandler( Stack& stack );
+    explicit PopHandler( Vector<StackItem>& stack_data );
 };
 }

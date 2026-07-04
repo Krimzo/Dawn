@@ -724,7 +724,7 @@ void dawn::Engine::load_standard_members()
             return Value{};
         } );
 
-    bind_member( ValueType::STRING, "count", []( Location const& location, Engine& engine, Value const& self ) -> Value
+    bind_field( ValueType::STRING, "count", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return Value{ (Int) self.as_string().size(), location };
         } );
@@ -749,33 +749,33 @@ void dawn::Engine::load_standard_members()
         } );
 
     // Ranges.
-    bind_member( ValueType::RANGE, "start", []( Location const& location, Engine& engine, Value const& self ) -> Value
+    bind_field( ValueType::RANGE, "start", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return Value{ &self.as_range().start, self.is_const(), location };
         } );
 
-    bind_member( ValueType::RANGE, "end", []( Location const& location, Engine& engine, Value const& self ) -> Value
+    bind_field( ValueType::RANGE, "end", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return Value{ &self.as_range().end, self.is_const(), location };
         } );
 
-    bind_member( ValueType::RANGE, "inclusive", []( Location const& location, Engine& engine, Value const& self ) -> Value
+    bind_field( ValueType::RANGE, "inclusive", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return Value{ &self.as_range().inclusive, self.is_const(), location };
         } );
 
     // Enums.
-    bind_member( ValueType::ENUM, "id", []( Location const& location, Engine& engine, Value const& self ) -> Value
+    bind_field( ValueType::ENUM, "id", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return Value{ (Int) self.as_enum().key_id.integer(), location };
         } );
 
-    bind_member( ValueType::ENUM, "name", []( Location const& location, Engine& engine, Value const& self ) -> Value
+    bind_field( ValueType::ENUM, "name", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return Value{ self.as_enum().key_id.string(), location };
         } );
 
-    bind_member( ValueType::ENUM, "value", []( Location const& location, Engine& engine, Value const& self ) -> Value
+    bind_field( ValueType::ENUM, "value", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return *self.as_enum().value;
         } );
@@ -789,7 +789,7 @@ void dawn::Engine::load_standard_members()
             return Value{};
         } );
 
-    bind_member( ValueType::ARRAY, "count", []( Location const& location, Engine& engine, Value const& self ) -> Value
+    bind_field( ValueType::ARRAY, "count", []( Location const& location, Engine& engine, Value const& self ) -> Value
         {
             return Value{ (Int) self.as_array().data.size(), location };
         } );

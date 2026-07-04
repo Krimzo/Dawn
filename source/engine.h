@@ -8,9 +8,9 @@ namespace dawn
 {
 struct Engine
 {
-    using MemberGenerator = Func<Value( Location const&, Engine&, Value const& )>;
-    using CustomMemberFunc = Func<Value( Location const&, Engine&, Value const& )>;
-    using CustomMethodFunc = Func<Value( Location const&, Engine&, Value const&, Value const* )>;
+    using MemberCFunc = Func<Value( Location const&, Engine&, Value const& )>;
+    using FieldCFunc = Func<Value( Location const&, Engine&, Value const& )>;
+    using MethodCFunc = Func<Value( Location const&, Engine&, Value const&, Value const* )>;
 
     friend struct Value;
     friend struct EnumValue;
@@ -18,10 +18,10 @@ struct Engine
     friend Value create_default_value( Engine* engine, ID typeid_, Location const& location );
 
     Stack stack;
-    GlobalStorage<Enum> enums;
-    GlobalStorage<Struct> structs;
-    GlobalStorage<GlobalStorage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
-    GlobalStorage<MemberGenerator> member_generators[(Int) ValueType::_COUNT] = {};
+    Storage<Enum> enums;
+    Storage<Struct> structs;
+    Storage<MemberCFunc> members[(Int) ValueType::_COUNT] = {};
+    Storage<Storage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
 
     Engine();
 
@@ -40,8 +40,8 @@ struct Engine
     void add_var( Location const& location, VarType const& type, ID id, Value const& value );
     Value* get_var( ID id );
 
-    void bind_member( ValueType type, ID id, CustomMemberFunc const& func );
-    void bind_method( ValueType type, ID id, Bool is_const, Int expected_args, CustomMethodFunc const& body );
+    void bind_field( ValueType type, ID id, FieldCFunc const& func );
+    void bind_method( ValueType type, ID id, Bool is_const, Int expected_args, MethodCFunc const& body );
 
 private:
     Set<uint64_t> m_ctime_ops[(Int) OperatorType::_COUNT] = {};
@@ -78,8 +78,7 @@ private:
 
     __forceinline Value handle_oper( Location const& location, Value const& left, const OperatorType op_type, Value const& right )
     {
-        auto& op_left_ids = operators[(Int) op_type];
-        auto* op_right_ids = op_left_ids.get( left.type_id() );
+        auto* op_right_ids = operators[(Int) op_type].get( left.type_id() );
         if ( !op_right_ids )
             ENGINE_PANIC( location, "type [", left.type_id(), "] does not support operator [", op_type, "]" );
         auto* func = op_right_ids->get( right.type_id() );
@@ -108,8 +107,7 @@ private:
                     ENGINE_PANIC( location, "invalid argument count for lambda" );
             }
 
-            auto pop_handler = stack.push_from(
-                func.is_lambda() ? func.as_lambda().frame : RegisterRef<Frame>{} );
+            const PopHandler pop_handler = stack.mark_frame();
 
             for ( Int i = 0; i < arg_count; i++ )
                 add_var( location, dfunc->args[i].type, dfunc->args[i].id, args[i] );
@@ -131,7 +129,7 @@ private:
         {
         case NodeType::SCOPE:
         {
-            const auto pop_handler = stack.push();
+            const PopHandler pop_handler = stack.mark_frame();
             handle_scope( std::get<Scope>( node ), retval, didbrk, didcon );
         }
         break;

@@ -53,7 +53,6 @@ struct FunctionValue
     struct AsLambda
     {
         Fn func;
-        RegisterRef<Frame> frame;
     };
 
     Variant<AsGlobal, AsMethod, AsLambda> data;
