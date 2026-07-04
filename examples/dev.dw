@@ -18,6 +18,9 @@ func main(array& args)
 	}()
 	print(getSelf)
 	print(getSelf().text)
+
+	print("cat value {Animal::cat.value}")
+	print("dog value {Animal::dog.value}")
 }
 
 struct Da
@@ -39,8 +42,13 @@ struct Ne
 	}
 }
 
+func make_cat_val()
+{
+	return 7
+}
+
 enum Animal
 {
-	cat
-	dog
+	cat = make_cat_val()
+	dog = [1, 2]
 }

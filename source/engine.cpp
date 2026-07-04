@@ -94,13 +94,13 @@ void dawn::Engine::load_function( Function const& entry )
 
 void dawn::Engine::load_enum( Enum const& entry )
 {
-    Enum enu = entry;
-    for ( auto& entry : enu.entries )
+    for ( auto& entry : enums.set( entry.id, entry ).entries )
     {
-        if ( auto* expr_refptr = std::get_if<NodeRef>( &entry.expr ) )
-            *entry.expr.emplace<Holder<Value>>() = handle_expr( **expr_refptr );
+        if ( !std::holds_alternative<NodeRef>( entry.expr ) )
+            continue;
+        const NodeRef node_ref = std::get<NodeRef>( entry.expr ); // Forces read first/write later order since entry.expr is used in both cases.
+        *entry.expr.emplace<Holder<Value>>() = handle_expr( *node_ref );
     }
-    enums.set( enu.id, enu );
 }
 
 void dawn::Engine::load_struct( Struct const& entry )
