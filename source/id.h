@@ -34,8 +34,7 @@ struct ID
             m_id = it->second;
         else
         {
-            ID_STR.emplace_back( str );
-            m_id = (IntType) ID_STR.size() - 1;
+            m_id = (IntType) STR_ID.size() + 1; // IDs start from 1.
             STR_ID.emplace( str, m_id );
         }
     }
@@ -47,7 +46,13 @@ struct ID
 
     String const& string() const
     {
-        return ID_STR[m_id];
+        for ( auto& [str, id] : STR_ID )
+        {
+            if ( id == m_id )
+                return str;
+        }
+        static const String EMPTY;
+        return EMPTY;
     }
 
     constexpr Bool valid() const
@@ -72,14 +77,12 @@ struct ID
     }
 
 private:
-    static inline Vector<String> ID_STR = {};
-    static inline StringMap<IntType> STR_ID = {};
-    static constexpr auto RESERVE_SIZE = 256;
-    static inline const auto _ = [] {
-        ID_STR.reserve( RESERVE_SIZE );
-        STR_ID.reserve( RESERVE_SIZE );
-        ID_STR.resize( 1 ); // Because id=0 is not valid.
-        return nullptr;
+    static constexpr Int STR_ID_RESERVE = 250;
+    static inline StringMap<IntType> STR_ID;
+    static inline Bool STR_ID_INIT = []
+        {
+            STR_ID.reserve( STR_ID_RESERVE );
+            return true;
         }( );
     IntType m_id = 0;
 };
