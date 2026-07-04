@@ -1,1 +1,2 @@
 add compilation of a .dw into a .cdw file (optimize module and serialize)
+add vsc debug support
