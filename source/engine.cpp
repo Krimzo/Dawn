@@ -568,7 +568,7 @@ dawn::Value dawn::Engine::handle_array_node( ArrayNode const& node )
     else
     {
         auto& init_data = std::get<ArrayNode::SizedInit>( node.init );
-        Int size = handle_expr( *init_data.size_expr ).as_int();
+        const Int size = handle_expr( *init_data.size_expr ).as_int();
         if ( size < 0 )
             ENGINE_PANIC( node.location, "array size can not be negative" );
         result.data.reserve( size );

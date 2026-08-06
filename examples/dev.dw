@@ -17,6 +17,7 @@ func main(array& args)
 		return MyStruct{text: "some test self text"}.get_self_func()
 	}()
 	print(getSelf)
+	print(getSelf())
 	print(getSelf().text)
 
 	print("cat value {Animal::cat.value}")
