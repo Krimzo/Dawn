@@ -6,7 +6,7 @@ func main(array& args)
 		ne: Ne{ ne_data: "nice" },
 		da_data: "very"
 	}
-	array? very_nice = "it works!!" @ array // will be optimized away if not const, since using eval() here
+	array? very_nice = "it works!!" @ array // will be optimized away if const, since using eval() here
 	function out = `&val`{
 		print("out: {val}")
 	}
