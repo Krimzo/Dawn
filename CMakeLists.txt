@@ -10,6 +10,5 @@ target_include_directories(dawnlib PUBLIC source)
 
 add_executable(dawn main.cpp)
 target_link_libraries(dawn PUBLIC dawnlib)
-
 set_target_properties(dawn PROPERTIES
     DEBUGGER_WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
