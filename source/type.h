@@ -6,7 +6,6 @@
 #include "token.h"
 #include "decl.h"
 
-
 namespace dawn
 {
 struct VarType
@@ -63,7 +62,7 @@ struct Enum
     ID id;
     Vector<Entry> entries;
 
-    Entry* get( ID id );
+    Entry* get(ID id);
 };
 
 struct Struct
@@ -78,9 +77,9 @@ struct Struct
     Vector<Field> fields;
     Vector<Function> methods;
 
-    Bool contains( ID id ) const;
+    Bool contains(ID id) const;
 };
 
-std::ostream& operator<<( std::ostream& stream, VarKind kind );
-std::ostream& operator<<( std::ostream& stream, VarType const& type );
-}
+std::ostream& operator<<(std::ostream& stream, VarKind kind);
+std::ostream& operator<<(std::ostream& stream, VarType const& type);
+} // namespace dawn

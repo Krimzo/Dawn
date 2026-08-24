@@ -1,32 +1,28 @@
 #include "pool.h"
 
-
 static dawn::MemoryPools pools;
 
 dawn::MemoryPools::~MemoryPools() noexcept
 {
-    static constexpr auto clear_chunks = []<typename T, Int N>( MemoryPool<T, N>&pool )
-    {
-        for ( auto& chunk : pool.m_chunks )
-        {
-            for ( auto& regist : chunk.m_space )
+    static constexpr auto clear_chunks = []<typename T, Int N>(MemoryPool<T, N>& pool) {
+        for (auto& chunk : pool.m_chunks)
+            for (auto& regist : chunk.m_space)
                 regist.value = T{};
-        }
     };
 
-    clear_chunks( node_memory );
-    clear_chunks( frame_memory );
-    clear_chunks( ptr_memory );
-    clear_chunks( bool_memory );
-    clear_chunks( int_memory );
-    clear_chunks( float_memory );
-    clear_chunks( char_memory );
-    clear_chunks( string_memory );
-    clear_chunks( function_memory );
-    clear_chunks( enum_memory );
-    clear_chunks( struct_memory );
-    clear_chunks( array_memory );
-    clear_chunks( range_memory );
+    clear_chunks(node_memory);
+    clear_chunks(frame_memory);
+    clear_chunks(ptr_memory);
+    clear_chunks(bool_memory);
+    clear_chunks(int_memory);
+    clear_chunks(float_memory);
+    clear_chunks(char_memory);
+    clear_chunks(string_memory);
+    clear_chunks(function_memory);
+    clear_chunks(enum_memory);
+    clear_chunks(struct_memory);
+    clear_chunks(array_memory);
+    clear_chunks(range_memory);
 }
 
 dawn::NodeMemory& dawn::node_pool()

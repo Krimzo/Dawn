@@ -3,7 +3,6 @@
 #include "syntax.h"
 #include "err.h"
 
-
 namespace dawn
 {
 inline const ID id_void = tp_void;
@@ -46,61 +45,60 @@ struct Source
     const Opt<String> path;
     const String source;
 
-    static Source from_text( StringRef const& str );
-    static Source from_file( StringRef const& path );
+    static Source from_text(StringRef const& str);
+    static Source from_file(StringRef const& path);
 
-    constexpr Char operator[]( Int i ) const
+    constexpr Char operator[](Int i) const
     {
         return source[i];
     }
 
-    constexpr StringRef substr( Int i ) const
+    constexpr StringRef substr(Int i) const
     {
-        return StringRef{ source }.substr( i );
+        return StringRef{source}.substr(i);
     }
 
     constexpr Int size() const
     {
-        return (Int) source.size();
+        return (Int)source.size();
     }
 
-private:
-    explicit Source( Opt<String> path, String source )
-        : path( std::move( path ) )
-        , source( std::move( source ) )
-    {}
+  private:
+    explicit Source(Opt<String> path, String source) : path(std::move(path)), source(std::move(source))
+    {
+    }
 };
 
 struct Lexer
 {
     LanguageDef lang_def = LanguageDef::dawn();
 
-    void tokenize( Source const& source, Vector<Token>& tokens ) const;
-    void tokenize_at( Source const& source, Vector<Token>& tokens, Index& index ) const;
+    void tokenize(Source const& source, Vector<Token>& tokens) const;
+    void tokenize_at(Source const& source, Vector<Token>& tokens, Index& index) const;
 
-private:
-    Bool is_space( Source const& source, Int i ) const;
-    void extract_space( Source const& source, Vector<Token>& tokens, Index& index ) const;
+  private:
+    Bool is_space(Source const& source, Int i) const;
+    void extract_space(Source const& source, Vector<Token>& tokens, Index& index) const;
 
-    Bool is_comment( Source const& source, Int i ) const;
-    void extract_comment( Source const& source, Vector<Token>& tokens, Index& index ) const;
+    Bool is_comment(Source const& source, Int i) const;
+    void extract_comment(Source const& source, Vector<Token>& tokens, Index& index) const;
 
-    Bool is_mlcomment( Source const& source, Int i ) const;
-    void extract_mlcomment( Source const& source, Vector<Token>& tokens, Index& index ) const;
+    Bool is_mlcomment(Source const& source, Int i) const;
+    void extract_mlcomment(Source const& source, Vector<Token>& tokens, Index& index) const;
 
-    Bool is_word( Source const& source, Int i ) const;
-    void extract_word( Source const& source, Vector<Token>& tokens, Index& index ) const;
+    Bool is_word(Source const& source, Int i) const;
+    void extract_word(Source const& source, Vector<Token>& tokens, Index& index) const;
 
-    Bool is_number( Source const& source, Int i ) const;
-    void extract_number( Source const& source, Vector<Token>& tokens, Index& index ) const;
+    Bool is_number(Source const& source, Int i) const;
+    void extract_number(Source const& source, Vector<Token>& tokens, Index& index) const;
 
-    Bool is_char( Source const& source, Int i ) const;
-    void extract_char( Source const& source, Vector<Token>& tokens, Index& index ) const;
+    Bool is_char(Source const& source, Int i) const;
+    void extract_char(Source const& source, Vector<Token>& tokens, Index& index) const;
 
-    Bool is_string( Source const& source, Int i ) const;
-    void extract_string( Source const& source, Vector<Token>& tokens, Index& index ) const;
+    Bool is_string(Source const& source, Int i) const;
+    void extract_string(Source const& source, Vector<Token>& tokens, Index& index) const;
 
-    Bool is_operator( Source const& source, Int i ) const;
-    void extract_operator( Source const& source, Vector<Token>& tokens, Index& index ) const;
+    Bool is_operator(Source const& source, Int i) const;
+    void extract_operator(Source const& source, Vector<Token>& tokens, Index& index) const;
 };
-}
+} // namespace dawn

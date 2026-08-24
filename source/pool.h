@@ -4,7 +4,6 @@
 #include "node.h"
 #include "stack.h"
 
-
 namespace dawn
 {
 using NodeMemory = MemoryPool<Node, 1024>;
@@ -53,4 +52,4 @@ EnumMemory& enum_pool();
 StructMemory& struct_pool();
 ArrayMemory& array_pool();
 RangeMemory& range_pool();
-}
+} // namespace dawn

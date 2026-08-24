@@ -3,7 +3,6 @@
 #include "value.h"
 #include "storage.h"
 
-
 namespace dawn
 {
 struct Frame
@@ -11,14 +10,14 @@ struct Frame
     using LocalFrame = LocalStorage<Value>;
     using GlobalFrame = GlobalStorage<Value>;
 
-    Frame( FrameType type = FrameType::LOCAL );
+    Frame(FrameType type = FrameType::LOCAL);
 
-    Value& set( ID id, Value const& value );
-    Value* get( ID id );
+    Value& set(ID id, Value const& value);
+    Value* get(ID id);
 
-    void reset( RegisterRef<Frame> const& parent );
+    void reset(RegisterRef<Frame> const& parent);
 
-private:
+  private:
     Variant<LocalFrame, GlobalFrame> m_frame;
     RegisterRef<Frame> m_parent;
 };
@@ -28,7 +27,7 @@ struct Stack
     Stack();
 
     [[nodiscard]] PopHandler push();
-    [[nodiscard]] PopHandler push_from( RegisterRef<Frame> const& frame );
+    [[nodiscard]] PopHandler push_from(RegisterRef<Frame> const& frame);
     void pop();
 
     Frame& root();
@@ -36,7 +35,7 @@ struct Stack
 
     RegisterRef<Frame> const& peek() const;
 
-private:
+  private:
     Vector<RegisterRef<Frame>> m_frames;
 };
 
@@ -46,12 +45,12 @@ struct PopHandler
 
     Stack& stack;
 
-    PopHandler( PopHandler const& ) = delete;
-    void operator=( PopHandler const& ) = delete;
+    PopHandler(PopHandler const&) = delete;
+    void operator=(PopHandler const&) = delete;
 
     ~PopHandler() noexcept;
 
-private:
-    explicit PopHandler( Stack& stack );
+  private:
+    explicit PopHandler(Stack& stack);
 };
-}
+} // namespace dawn

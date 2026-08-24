@@ -2,7 +2,6 @@
 
 #include "t.h"
 
-
 namespace dawn
 {
 enum struct TokenType : uint8_t
@@ -126,8 +125,8 @@ enum struct FrameType : uint8_t
     GLOBAL = 1,
 };
 
-std::ostream& operator<<( std::ostream& stream, TokenType type );
-std::ostream& operator<<( std::ostream& stream, OperatorType type );
-std::ostream& operator<<( std::ostream& stream, NodeType type );
-std::ostream& operator<<( std::ostream& stream, ValueType type );
-}
+std::ostream& operator<<(std::ostream& stream, TokenType type);
+std::ostream& operator<<(std::ostream& stream, OperatorType type);
+std::ostream& operator<<(std::ostream& stream, NodeType type);
+std::ostream& operator<<(std::ostream& stream, ValueType type);
+} // namespace dawn

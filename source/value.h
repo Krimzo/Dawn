@@ -4,7 +4,6 @@
 #include "type.h"
 #include "salloc.h"
 
-
 namespace dawn
 {
 struct RangeValue
@@ -15,7 +14,7 @@ struct RangeValue
 
     constexpr Bool empty() const
     {
-        if ( inclusive )
+        if (inclusive)
             return false;
         else
             return start == end;
@@ -28,9 +27,9 @@ struct DFunction
     Scope body;
 };
 
-struct CFunction : Func<Value( Location const&, Engine&, Value const*, Int )>
+struct CFunction : Func<Value(Location const&, Engine&, Value const*, Int)>
 {
-    using Func<Value( Location const&, Engine&, Value const*, Int )>::function;
+    using Func<Value(Location const&, Engine&, Value const*, Int)>::function;
 };
 
 struct FunctionValue
@@ -76,11 +75,11 @@ struct ArrayValue
 
     ArrayValue() = default;
 
-    ArrayValue( ArrayValue const& other );
-    ArrayValue& operator=( ArrayValue const& other );
+    ArrayValue(ArrayValue const& other);
+    ArrayValue& operator=(ArrayValue const& other);
 
-    ArrayValue( ArrayValue&& other ) noexcept;
-    ArrayValue& operator=( ArrayValue&& other ) noexcept;
+    ArrayValue(ArrayValue&& other) noexcept;
+    ArrayValue& operator=(ArrayValue&& other) noexcept;
 };
 
 struct EnumValue
@@ -92,7 +91,7 @@ struct EnumValue
 
 struct StructValue
 {
-    template<typename T> // Template is required because Value does not exist at this stage.
+    template <typename T> // Template is required because Value does not exist at this stage.
     struct Member
     {
         T value;
@@ -104,14 +103,14 @@ struct StructValue
 
     StructValue() = default;
 
-    StructValue( StructValue const& other );
-    StructValue& operator=( StructValue const& other );
+    StructValue(StructValue const& other);
+    StructValue& operator=(StructValue const& other);
 
-    StructValue( StructValue&& other ) noexcept;
-    StructValue& operator=( StructValue&& other ) noexcept;
+    StructValue(StructValue&& other) noexcept;
+    StructValue& operator=(StructValue&& other) noexcept;
 
-    FunctionValue* get_method( ID id ) const;
-    FunctionValue* get_unary( ID id ) const;
+    FunctionValue* get_method(ID id) const;
+    FunctionValue* get_unary(ID id) const;
 };
 
 struct ValueInfo
@@ -123,28 +122,23 @@ struct ValueInfo
     Bool is_ptr = false;
 };
 
-template<typename T>
-struct ValueStorage
+template <typename T> struct ValueStorage
 {
     ValueInfo info{};
     T value{};
 
     constexpr T& get()
     {
-        if ( info.is_ptr )
-            return *static_cast<T*>(
-                reinterpret_cast<ValueStorage<Ptr>*>( this )->value
-                );
+        if (info.is_ptr)
+            return *static_cast<T*>(reinterpret_cast<ValueStorage<Ptr>*>(this)->value);
         else
             return value;
     }
 
     constexpr T const& get() const
     {
-        if ( info.is_ptr )
-            return *static_cast<T const*>(
-                reinterpret_cast<ValueStorage<Ptr> const*>( this )->value
-                );
+        if (info.is_ptr)
+            return *static_cast<T const*>(reinterpret_cast<ValueStorage<Ptr> const*>(this)->value);
         else
             return value;
     }
@@ -153,26 +147,26 @@ struct ValueStorage
 struct Value
 {
     constexpr Value() = default;
-    explicit Value( Bool value, Location const& location = {} );
-    explicit Value( Bool* value, Bool is_const, Location const& location = {} );
-    explicit Value( Int value, Location const& location = {} );
-    explicit Value( Int* value, Bool is_const, Location const& location = {} );
-    explicit Value( Float value, Location const& location = {} );
-    explicit Value( Float* value, Bool is_const, Location const& location = {} );
-    explicit Value( Char value, Location const& location = {} );
-    explicit Value( Char* value, Bool is_const, Location const& location = {} );
-    explicit Value( StringRef const& value, Location const& location = {} );
-    explicit Value( String* value, Bool is_const, Location const& location = {} );
-    explicit Value( RangeValue const& value, Location const& location = {} );
-    explicit Value( RangeValue* value, Bool is_const, Location const& location = {} );
-    explicit Value( FunctionValue const& value, Location const& location = {} );
-    explicit Value( FunctionValue* value, Bool is_const, Location const& location = {} );
-    explicit Value( ArrayValue const& value, Location const& location = {} );
-    explicit Value( ArrayValue* value, Bool is_const, Location const& location = {} );
-    explicit Value( EnumValue const& value, Location const& location = {} );
-    explicit Value( EnumValue* value, Bool is_const, Location const& location = {} );
-    explicit Value( StructValue const& value, Location const& location = {} );
-    explicit Value( StructValue* value, Bool is_const, Location const& location = {} );
+    explicit Value(Bool value, Location const& location = {});
+    explicit Value(Bool* value, Bool is_const, Location const& location = {});
+    explicit Value(Int value, Location const& location = {});
+    explicit Value(Int* value, Bool is_const, Location const& location = {});
+    explicit Value(Float value, Location const& location = {});
+    explicit Value(Float* value, Bool is_const, Location const& location = {});
+    explicit Value(Char value, Location const& location = {});
+    explicit Value(Char* value, Bool is_const, Location const& location = {});
+    explicit Value(StringRef const& value, Location const& location = {});
+    explicit Value(String* value, Bool is_const, Location const& location = {});
+    explicit Value(RangeValue const& value, Location const& location = {});
+    explicit Value(RangeValue* value, Bool is_const, Location const& location = {});
+    explicit Value(FunctionValue const& value, Location const& location = {});
+    explicit Value(FunctionValue* value, Bool is_const, Location const& location = {});
+    explicit Value(ArrayValue const& value, Location const& location = {});
+    explicit Value(ArrayValue* value, Bool is_const, Location const& location = {});
+    explicit Value(EnumValue const& value, Location const& location = {});
+    explicit Value(EnumValue* value, Bool is_const, Location const& location = {});
+    explicit Value(StructValue const& value, Location const& location = {});
+    explicit Value(StructValue* value, Bool is_const, Location const& location = {});
 
     void as_void() const;
     Bool& as_bool() const;
@@ -190,23 +184,23 @@ struct Value
     ValueType type() const;
     ID type_id() const;
 
-    void assign( Value const& other );
+    void assign(Value const& other);
     Value clone() const;
 
     Bool is_const() const;
     Value& unlock_const();
 
-    void to_void( Engine& engine ) const;
-    Bool to_bool( Engine& engine ) const;
-    Int to_int( Engine& engine ) const;
-    Float to_float( Engine& engine ) const;
-    Char to_char( Engine& engine ) const;
-    String to_string( Engine& engine ) const;
-    RangeValue to_range( Engine& engine ) const;
-    FunctionValue to_function( Engine& engine ) const;
-    ArrayValue to_array( Engine& engine ) const;
+    void to_void(Engine& engine) const;
+    Bool to_bool(Engine& engine) const;
+    Int to_int(Engine& engine) const;
+    Float to_float(Engine& engine) const;
+    Char to_char(Engine& engine) const;
+    String to_string(Engine& engine) const;
+    RangeValue to_range(Engine& engine) const;
+    FunctionValue to_function(Engine& engine) const;
+    ArrayValue to_array(Engine& engine) const;
 
-private:
+  private:
     RegisterRef<ValueInfo> m_regref;
 };
-}
+} // namespace dawn

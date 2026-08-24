@@ -2,7 +2,6 @@
 
 #include "decl.h"
 
-
 namespace dawn
 {
 struct Color
@@ -15,47 +14,42 @@ struct ColoredText
     Color color;
     String text;
 
-    template<typename... Args>
-    ColoredText( Color color, Args&&... args )
-        : color( color )
+    template <typename... Args> ColoredText(Color color, Args&&... args) : color(color)
     {
         StringStream stream;
-        ( stream << ... << args );
+        (stream << ... << args);
         text = stream.str();
     }
 };
 
-template<typename... Args>
-String format( Args&&... args )
+template <typename... Args> String format(Args&&... args)
 {
     StringStream stream;
-    ( stream << ... << args );
+    (stream << ... << args);
     return stream.str();
 }
 
-template<typename... Args>
-void put( Args&&... args )
+template <typename... Args> void put(Args&&... args)
 {
-    ( std::cout << ... << args );
+    (std::cout << ... << args);
 }
 
-template<typename... Args>
-void print( Args&&... args )
+template <typename... Args> void print(Args&&... args)
 {
-    ( std::cout << ... << args ) << '\n';
+    (std::cout << ... << args) << '\n';
 }
 
-Char to_escaping( Char c );
-String from_escaping( Char c );
+Char to_escaping(Char c);
+String from_escaping(Char c);
 
-Opt<String> read_file( StringRef const& path );
-Vector<String> split( StringRef const& data, StringRef const& delim );
+Opt<String> read_file(StringRef const& path);
+Vector<String> split(StringRef const& data, StringRef const& delim);
 
-Opt<Int> parse_int( StringRef const& data );
-Opt<Float> parse_float( StringRef const& data );
+Opt<Int> parse_int(StringRef const& data);
+Opt<Float> parse_float(StringRef const& data);
 
-Float dawn_mod( Float left, Float right );
+Float dawn_mod(Float left, Float right);
 
-std::ostream& operator<<( std::ostream& stream, Color const& color );
-std::ostream& operator<<( std::ostream& stream, ColoredText const& colored_text );
-}
+std::ostream& operator<<(std::ostream& stream, Color const& color);
+std::ostream& operator<<(std::ostream& stream, ColoredText const& colored_text);
+} // namespace dawn

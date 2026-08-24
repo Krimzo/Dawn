@@ -2,16 +2,36 @@
     "name": "dawn",
     "scopeName": "source.dawn",
     "patterns": [
-        { "include": "#comments" },
-        { "include": "#operators" },
-        { "include": "#keywords" },
-        { "include": "#keywords_special" },
-        { "include": "#types" },
-        { "include": "#functions" },
-        { "include": "#names" },
-        { "include": "#numbers" },
-        { "include": "#chars" },
-        { "include": "#strings" }
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#operators"
+        },
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#keywords_special"
+        },
+        {
+            "include": "#types"
+        },
+        {
+            "include": "#functions"
+        },
+        {
+            "include": "#names"
+        },
+        {
+            "include": "#numbers"
+        },
+        {
+            "include": "#chars"
+        },
+        {
+            "include": "#strings"
+        }
     ],
     "repository": {
         "comments": {
@@ -114,12 +134,20 @@
                     "begin": "\\{",
                     "end": "\\}",
                     "beginCaptures": {
-                        "0": { "name": "keyword.operator.dawn" }
+                        "0": {
+                            "name": "keyword.operator.dawn"
+                        }
                     },
                     "endCaptures": {
-                        "0": { "name": "keyword.operator.dawn" }
+                        "0": {
+                            "name": "keyword.operator.dawn"
+                        }
                     },
-                    "patterns": [ { "include": "$self" } ]
+                    "patterns": [
+                        {
+                            "include": "$self"
+                        }
+                    ]
                 }
             ]
         }

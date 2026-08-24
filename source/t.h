@@ -26,7 +26,7 @@ namespace dawn
 {
 namespace ch = std::chrono;
 namespace fs = std::filesystem;
-}
+} // namespace dawn
 
 // Basic.
 namespace dawn
@@ -44,30 +44,22 @@ using StringStream = std::stringstream;
 using IFileStream = std::ifstream;
 using OFileStream = std::ofstream;
 
-template<typename T>
-using Func = std::function<T>;
+template <typename T> using Func = std::function<T>;
 
-template<typename T1, typename T2>
-using Pair = std::pair<T1, T2>;
+template <typename T1, typename T2> using Pair = std::pair<T1, T2>;
 
-template<typename... Args>
-using Variant = std::variant<Args...>;
+template <typename... Args> using Variant = std::variant<Args...>;
 
-template<typename T>
-using Opt = std::optional<T>;
+template <typename T> using Opt = std::optional<T>;
 
-template<typename T>
-using Vector = std::vector<T>;
+template <typename T> using Vector = std::vector<T>;
 
-template<typename T>
-using List = std::forward_list<T>;
+template <typename T> using List = std::forward_list<T>;
 
-template<typename K>
-using Set = std::unordered_set<K>;
+template <typename K> using Set = std::unordered_set<K>;
 
-template<typename K, typename V>
-using Map = std::unordered_map<K, V>;
-}
+template <typename K, typename V> using Map = std::unordered_map<K, V>;
+} // namespace dawn
 
 // Hash.
 namespace dawn
@@ -77,24 +69,23 @@ struct StringHash
     using hash_type = std::hash<StringRef>;
     using is_transparent = void;
 
-    std::size_t operator()( Char const* str ) const
+    std::size_t operator()(Char const* str) const
     {
-        return hash_type{}( str );
+        return hash_type{}(str);
     }
 
-    std::size_t operator()( StringRef const& str ) const
+    std::size_t operator()(StringRef const& str) const
     {
-        return hash_type{}( str );
+        return hash_type{}(str);
     }
 
-    std::size_t operator()( String const& str ) const
+    std::size_t operator()(String const& str) const
     {
-        return hash_type{}( str );
+        return hash_type{}(str);
     }
 };
 
-template<typename T>
-using StringMap = std::unordered_map<String, T, StringHash, std::equal_to<>>;
+template <typename T> using StringMap = std::unordered_map<String, T, StringHash, std::equal_to<>>;
 
 using StringSet = std::unordered_set<String, StringHash, std::equal_to<>>;
-}
+} // namespace dawn

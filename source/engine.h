@@ -3,300 +3,295 @@
 #include "parser.h"
 #include "stack.h"
 
-
 namespace dawn
 {
 struct Engine
 {
-    using MemberCFunc = Func<Value( Location const&, Engine&, Value const& )>;
-    using FieldCFunc = Func<Value( Location const&, Engine&, Value const& )>;
-    using MethodCFunc = Func<Value( Location const&, Engine&, Value const&, Value const* )>;
+    using MemberCFunc = Func<Value(Location const&, Engine&, Value const&)>;
+    using FieldCFunc = Func<Value(Location const&, Engine&, Value const&)>;
+    using MethodCFunc = Func<Value(Location const&, Engine&, Value const&, Value const*)>;
 
     friend struct Value;
     friend struct EnumValue;
     friend struct Optimizer;
-    friend Value create_default_value( Engine* engine, ID typeid_, Location const& location );
+    friend Value create_default_value(Engine* engine, ID typeid_, Location const& location);
 
     Stack stack;
     GlobalStorage<Enum> enums;
     GlobalStorage<Struct> structs;
-    GlobalStorage<MemberCFunc> members[(Int) ValueType::_COUNT] = {};
-    GlobalStorage<GlobalStorage<FunctionValue>> operators[(Int) OperatorType::_COUNT] = {};
+    GlobalStorage<MemberCFunc> members[(Int)ValueType::_COUNT] = {};
+    GlobalStorage<GlobalStorage<FunctionValue>> operators[(Int)OperatorType::_COUNT] = {};
 
     Engine();
 
-    void load_mod( Module const& module );
-    void load_operator( Operator const& entry );
-    void load_function( Function const& entry );
-    void load_enum( Enum const& entry );
-    void load_struct( Struct const& entry );
-    void load_variable( Variable const& entry );
+    void load_mod(Module const& module);
+    void load_operator(Operator const& entry);
+    void load_function(Function const& entry);
+    void load_enum(Enum const& entry);
+    void load_struct(Struct const& entry);
+    void load_variable(Variable const& entry);
 
-    void bind_oper( ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const, CFunction cfunc );
+    void bind_oper(ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const, CFunction cfunc);
 
-    void bind_func( ID id, Bool is_ctime, CFunction cfunc );
-    Value call_func( ID id, Value* args, Int arg_count );
+    void bind_func(ID id, Bool is_ctime, CFunction cfunc);
+    Value call_func(ID id, Value* args, Int arg_count);
 
-    void add_var( Location const& location, VarType const& type, ID id, Value const& value );
-    Value* get_var( ID id );
+    void add_var(Location const& location, VarType const& type, ID id, Value const& value);
+    Value* get_var(ID id);
 
-    void bind_field( ValueType type, ID id, FieldCFunc const& func );
-    void bind_method( ValueType type, ID id, Bool is_const, Int expected_args, MethodCFunc const& body );
+    void bind_field(ValueType type, ID id, FieldCFunc const& func);
+    void bind_method(ValueType type, ID id, Bool is_const, Int expected_args, MethodCFunc const& body);
 
-private:
-    Set<uint64_t> m_ctime_ops[(Int) OperatorType::_COUNT] = {};
+  private:
+    Set<uint64_t> m_ctime_ops[(Int)OperatorType::_COUNT] = {};
     Set<ID> m_ctime_funcs;
 
     void load_standard_operators();
     void load_standard_functions();
     void load_standard_members();
 
-    void handle_var_node( VariableNode const& node );
-    Value const& handle_id_node( IdentifierNode const& node );
-    Value handle_call_node( CallNode const& node );
-    Value handle_index_node( IndexNode const& node );
-    void handle_return_node( ReturnNode const& node, Opt<Value>& retval );
-    void handle_break_node( BreakNode const& node, Bool* didbrk );
-    void handle_continue_node( ContinueNode const& node, Bool* didcon );
-    void handle_throw_node( ThrowNode const& node );
-    void handle_try_node( TryNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
-    void handle_if_node( IfNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
-    void handle_switch_node( SwitchNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon );
-    void handle_loop_node( LoopNode const& node, Opt<Value>& retval );
-    void handle_while_node( WhileNode const& node, Opt<Value>& retval );
-    void handle_for_node( ForNode const& node, Opt<Value>& retval );
-    Value const& handle_lambda_node( LambdaNode const& node );
-    Value handle_enum_node( EnumNode const& node );
-    Value handle_struct_node( StructNode const& node );
-    Value handle_array_node( ArrayNode const& node );
-    Value handle_ac_node( AccessNode const& node );
-    Value handle_op_node( OperatorNode const& node );
-    Value handle_as_node( AssignNode const& node );
-    Value handle_cast_node( CastNode const& node );
+    void handle_var_node(VariableNode const& node);
+    Value const& handle_id_node(IdentifierNode const& node);
+    Value handle_call_node(CallNode const& node);
+    Value handle_index_node(IndexNode const& node);
+    void handle_return_node(ReturnNode const& node, Opt<Value>& retval);
+    void handle_break_node(BreakNode const& node, Bool* didbrk);
+    void handle_continue_node(ContinueNode const& node, Bool* didcon);
+    void handle_throw_node(ThrowNode const& node);
+    void handle_try_node(TryNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon);
+    void handle_if_node(IfNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon);
+    void handle_switch_node(SwitchNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon);
+    void handle_loop_node(LoopNode const& node, Opt<Value>& retval);
+    void handle_while_node(WhileNode const& node, Opt<Value>& retval);
+    void handle_for_node(ForNode const& node, Opt<Value>& retval);
+    Value const& handle_lambda_node(LambdaNode const& node);
+    Value handle_enum_node(EnumNode const& node);
+    Value handle_struct_node(StructNode const& node);
+    Value handle_array_node(ArrayNode const& node);
+    Value handle_ac_node(AccessNode const& node);
+    Value handle_op_node(OperatorNode const& node);
+    Value handle_as_node(AssignNode const& node);
+    Value handle_cast_node(CastNode const& node);
 
-    void handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon ); // Should not inline since scope calls instr and instr calls scope.
+    void handle_scope(Scope const& scope, Opt<Value>& retval, Bool* didbrk,
+                      Bool* didcon); // Should not inline since scope calls instr and instr calls scope.
 
-    __forceinline Value handle_oper( Location const& location, Value const& left, const OperatorType op_type, Value const& right )
+    __forceinline Value handle_oper(Location const& location, Value const& left, const OperatorType op_type,
+                                    Value const& right)
     {
-        auto* op_right_ids = operators[(Int) op_type].get( left.type_id() );
-        if ( !op_right_ids )
-            ENGINE_PANIC( location, "type [", left.type_id(), "] does not support operator [", op_type, "]" );
-        auto* func = op_right_ids->get( right.type_id() );
-        if ( !func )
-            ENGINE_PANIC( location, "type [", left.type_id(), "] does not support operator [", op_type, "] with right type being [", right.type_id(), "]" );
+        auto* op_right_ids = operators[(Int)op_type].get(left.type_id());
+        if (!op_right_ids)
+            ENGINE_PANIC(location, "type [", left.type_id(), "] does not support operator [", op_type, "]");
+        auto* func = op_right_ids->get(right.type_id());
+        if (!func)
+            ENGINE_PANIC(location, "type [", left.type_id(), "] does not support operator [", op_type,
+                         "] with right type being [", right.type_id(), "]");
 
         using ProxyArg = uint64_t;
-        static_assert( sizeof( ProxyArg ) == sizeof( Value ), "ProxyArg size must be the same as Value" );
-        static_assert( alignof( ProxyArg ) == alignof( Value ), "ProxyArg alignment must be the same as Value" );
-        ProxyArg proxy_args[2] = { reinterpret_cast<ProxyArg const&>( left ), reinterpret_cast<ProxyArg const&>( right ) }; // Improves performance by not calling the constructors or destructors of Value.
+        static_assert(sizeof(ProxyArg) == sizeof(Value), "ProxyArg size must be the same as Value");
+        static_assert(alignof(ProxyArg) == alignof(Value), "ProxyArg alignment must be the same as Value");
+        ProxyArg proxy_args[2] = {
+            reinterpret_cast<ProxyArg const&>(left),
+            reinterpret_cast<ProxyArg const&>(
+                right)}; // Improves performance by not calling the constructors or destructors of Value.
 
-        return handle_func( location, *func, reinterpret_cast<Value*>( proxy_args ), (Int) std::size( proxy_args ) );
+        return handle_func(location, *func, reinterpret_cast<Value*>(proxy_args), (Int)std::size(proxy_args));
     }
 
-    __forceinline Value handle_func( Location const& location, FunctionValue const& func, Value const* args, Int arg_count )
+    __forceinline Value handle_func(Location const& location, FunctionValue const& func, Value const* args,
+                                    Int arg_count)
     {
-        if ( auto* dfunc = func.dfunction() )
+        if (auto* dfunc = func.dfunction())
         {
-            if ( dfunc->args.size() != arg_count )
+            if (dfunc->args.size() != arg_count)
             {
-                if ( func.is_global() )
-                    ENGINE_PANIC( location, "invalid argument count for function [", func.as_global().id, "]" );
-                else if ( func.is_method() )
-                    ENGINE_PANIC( location, "invalid argument count for method [", func.as_method().id, "]" );
+                if (func.is_global())
+                    ENGINE_PANIC(location, "invalid argument count for function [", func.as_global().id, "]");
+                else if (func.is_method())
+                    ENGINE_PANIC(location, "invalid argument count for method [", func.as_method().id, "]");
                 else
-                    ENGINE_PANIC( location, "invalid argument count for lambda" );
+                    ENGINE_PANIC(location, "invalid argument count for lambda");
             }
 
-            const PopHandler pop_handler = stack.push_from(
-                func.is_lambda() ? func.as_lambda().frame : RegisterRef<Frame>{} );
+            const PopHandler pop_handler =
+                stack.push_from(func.is_lambda() ? func.as_lambda().frame : RegisterRef<Frame>{});
 
-            for ( Int i = 0; i < arg_count; i++ )
-                add_var( location, dfunc->args[i].type, dfunc->args[i].id, args[i] );
+            for (Int i = 0; i < arg_count; i++)
+                add_var(location, dfunc->args[i].type, dfunc->args[i].id, args[i]);
 
             Opt<Value> retval;
-            handle_scope( dfunc->body, retval, nullptr, nullptr );
+            handle_scope(dfunc->body, retval, nullptr, nullptr);
             return retval ? *retval : Value{};
         }
         else
         {
             auto& cfunc = *func.cfunction();
-            return cfunc( location, *this, args, arg_count );
+            return cfunc(location, *this, args, arg_count);
         }
     }
 
-    __forceinline void handle_instr( Node const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
+    __forceinline void handle_instr(Node const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon)
     {
-        switch ( node.type() )
+        switch (node.type())
         {
-        case NodeType::SCOPE:
-        {
+        case NodeType::SCOPE: {
             const PopHandler pop_handler = stack.push();
-            handle_scope( std::get<Scope>( node ), retval, didbrk, didcon );
+            handle_scope(std::get<Scope>(node), retval, didbrk, didcon);
         }
         break;
 
         case NodeType::VARIABLE:
-            handle_var_node( std::get<VariableNode>( node ) );
+            handle_var_node(std::get<VariableNode>(node));
             break;
 
         case NodeType::RETURN:
-            handle_return_node( std::get<ReturnNode>( node ), retval );
+            handle_return_node(std::get<ReturnNode>(node), retval);
             break;
 
         case NodeType::BREAK:
-            handle_break_node( std::get<BreakNode>( node ), didbrk );
+            handle_break_node(std::get<BreakNode>(node), didbrk);
             break;
 
         case NodeType::CONTINUE:
-            handle_continue_node( std::get<ContinueNode>( node ), didcon );
+            handle_continue_node(std::get<ContinueNode>(node), didcon);
             break;
 
         case NodeType::THROW:
-            handle_throw_node( std::get<ThrowNode>( node ) );
+            handle_throw_node(std::get<ThrowNode>(node));
             break;
 
         case NodeType::TRY:
-            handle_try_node( std::get<TryNode>( node ), retval, didbrk, didcon );
+            handle_try_node(std::get<TryNode>(node), retval, didbrk, didcon);
             break;
 
         case NodeType::IF:
-            handle_if_node( std::get<IfNode>( node ), retval, didbrk, didcon );
+            handle_if_node(std::get<IfNode>(node), retval, didbrk, didcon);
             break;
 
         case NodeType::SWITCH:
-            handle_switch_node( std::get<SwitchNode>( node ), retval, didbrk, didcon );
+            handle_switch_node(std::get<SwitchNode>(node), retval, didbrk, didcon);
             break;
 
         case NodeType::LOOP:
-            handle_loop_node( std::get<LoopNode>( node ), retval );
+            handle_loop_node(std::get<LoopNode>(node), retval);
             break;
 
         case NodeType::WHILE:
-            handle_while_node( std::get<WhileNode>( node ), retval );
+            handle_while_node(std::get<WhileNode>(node), retval);
             break;
 
         case NodeType::FOR:
-            handle_for_node( std::get<ForNode>( node ), retval );
+            handle_for_node(std::get<ForNode>(node), retval);
             break;
 
         default:
-            handle_expr( node );
+            handle_expr(node);
         }
     }
 
-    __forceinline Value handle_expr( Node const& node )
+    __forceinline Value handle_expr(Node const& node)
     {
-        switch ( node.type() )
+        switch (node.type())
         {
         case NodeType::VALUE:
-            return std::get<Value>( node );
+            return std::get<Value>(node);
 
         case NodeType::IDENTIFIER:
-            return handle_id_node( std::get<IdentifierNode>( node ) );
+            return handle_id_node(std::get<IdentifierNode>(node));
 
         case NodeType::CALL:
-            return handle_call_node( std::get<CallNode>( node ) );
+            return handle_call_node(std::get<CallNode>(node));
 
         case NodeType::INDEX:
-            return handle_index_node( std::get<IndexNode>( node ) );
+            return handle_index_node(std::get<IndexNode>(node));
 
         case NodeType::LAMBDA:
-            return handle_lambda_node( std::get<LambdaNode>( node ) );
+            return handle_lambda_node(std::get<LambdaNode>(node));
 
         case NodeType::ENUM:
-            return handle_enum_node( std::get<EnumNode>( node ) );
+            return handle_enum_node(std::get<EnumNode>(node));
 
         case NodeType::STRUCT:
-            return handle_struct_node( std::get<StructNode>( node ) );
+            return handle_struct_node(std::get<StructNode>(node));
 
         case NodeType::ARRAY:
-            return handle_array_node( std::get<ArrayNode>( node ) );
+            return handle_array_node(std::get<ArrayNode>(node));
 
         case NodeType::ACCESS:
-            return handle_ac_node( std::get<AccessNode>( node ) );
+            return handle_ac_node(std::get<AccessNode>(node));
 
         case NodeType::OPERATOR:
-            return handle_op_node( std::get<OperatorNode>( node ) );
+            return handle_op_node(std::get<OperatorNode>(node));
 
         case NodeType::ASSIGN:
-            return handle_as_node( std::get<AssignNode>( node ) );
+            return handle_as_node(std::get<AssignNode>(node));
 
         case NodeType::CAST:
-            return handle_cast_node( std::get<CastNode>( node ) );
+            return handle_cast_node(std::get<CastNode>(node));
 
         default:
-            ENGINE_PANIC( node.location(), "unknown expr node type: ", (Int) node.type() );
+            ENGINE_PANIC(node.location(), "unknown expr node type: ", (Int)node.type());
         }
     }
 };
 
-__forceinline Value create_default_value( Engine* engine, ID typeid_, Location const& location )
+__forceinline Value create_default_value(Engine* engine, ID typeid_, Location const& location)
 {
-    if ( typeid_ == id_void )
+    if (typeid_ == id_void)
         return Value{};
 
-    else if ( typeid_ == id_bool )
-        return Value{ Bool{}, location };
+    else if (typeid_ == id_bool)
+        return Value{Bool{}, location};
 
-    else if ( typeid_ == id_int )
-        return Value{ Int{}, location };
+    else if (typeid_ == id_int)
+        return Value{Int{}, location};
 
-    else if ( typeid_ == id_float )
-        return Value{ Float{}, location };
+    else if (typeid_ == id_float)
+        return Value{Float{}, location};
 
-    else if ( typeid_ == id_char )
-        return Value{ Char{}, location };
+    else if (typeid_ == id_char)
+        return Value{Char{}, location};
 
-    else if ( typeid_ == id_string )
-        return Value{ StringRef{}, location };
+    else if (typeid_ == id_string)
+        return Value{StringRef{}, location};
 
-    else if ( typeid_ == id_range )
-        return Value{ RangeValue{}, location };
+    else if (typeid_ == id_range)
+        return Value{RangeValue{}, location};
 
-    else if ( typeid_ == id_function )
-        return Value{ FunctionValue{}, location };
+    else if (typeid_ == id_function)
+        return Value{FunctionValue{}, location};
 
-    else if ( typeid_ == id_array )
-        return Value{ ArrayValue{}, location };
+    else if (typeid_ == id_array)
+        return Value{ArrayValue{}, location};
 
-    else if ( auto* enum_ptr = engine->enums.get( typeid_ ) )
+    else if (auto* enum_ptr = engine->enums.get(typeid_))
     {
         auto& entry = *enum_ptr->entries.begin();
-        EnumNode node{ location };
+        EnumNode node{location};
         node.type_id = typeid_;
         node.key_id = entry.id;
-        return engine->handle_enum_node( node );
+        return engine->handle_enum_node(node);
     }
 
-    else if ( auto* struct_ptr = engine->structs.get( typeid_ ) )
+    else if (auto* struct_ptr = engine->structs.get(typeid_))
     {
-        StructNode node{ location };
+        StructNode node{location};
         node.type_id = typeid_;
-        return engine->handle_struct_node( node );
+        return engine->handle_struct_node(node);
     }
 
     else
-        ENGINE_PANIC( location, "type [", typeid_, "] does not exist" );
+        ENGINE_PANIC(location, "type [", typeid_, "] does not exist");
 }
 
-__forceinline Opt<ValueType> builtin_type( ID id )
+__forceinline Opt<ValueType> builtin_type(ID id)
 {
     static const ID ids[] = {
-        id_void,
-        id_bool,
-        id_int,
-        id_float,
-        id_char,
-        id_string,
-        id_range,
-        id_function,
-        id_array,
+        id_void, id_bool, id_int, id_float, id_char, id_string, id_range, id_function, id_array,
     };
-    for ( int i = 0; i < (int) std::size( ids ); i++ )
-    {
-        if ( ids[i] == id )
-            return ValueType( i );
-    }
+    for (int i = 0; i < (int)std::size(ids); i++)
+        if (ids[i] == id)
+            return ValueType(i);
     return std::nullopt;
 }
-}
+} // namespace dawn

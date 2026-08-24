@@ -2,7 +2,6 @@
 
 #include "en.h"
 
-
 namespace dawn
 {
 struct Location;
@@ -12,8 +11,7 @@ struct Frame;
 struct PopHandler;
 struct Engine;
 
-template<typename T>
-struct RegisterRef;
+template <typename T> struct RegisterRef;
 
 using NodeRef = RegisterRef<Node>;
-}
+} // namespace dawn

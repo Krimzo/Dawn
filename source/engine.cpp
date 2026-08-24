@@ -1,6 +1,5 @@
 #include "engine.h"
 
-
 dawn::Engine::Engine()
 {
     load_standard_operators();
@@ -8,675 +7,680 @@ dawn::Engine::Engine()
     load_standard_members();
 }
 
-void dawn::Engine::load_mod( Module const& module )
+void dawn::Engine::load_mod(Module const& module)
 {
-    for ( auto& entry : module.operators )
-        load_operator( entry );
+    for (auto& entry : module.operators)
+        load_operator(entry);
 
-    for ( auto& entry : module.functions )
-        if ( !entry.is_extension() )
-            load_function( entry );
+    for (auto& entry : module.functions)
+        if (!entry.is_extension())
+            load_function(entry);
 
-    for ( auto& entry : module.enums )
-        load_enum( entry );
+    for (auto& entry : module.enums)
+        load_enum(entry);
 
-    for ( auto& entry : module.structs )
-        load_struct( entry );
+    for (auto& entry : module.structs)
+        load_struct(entry);
 
-    for ( auto& entry : module.functions )
-        if ( entry.is_extension() )
-            load_function( entry );
+    for (auto& entry : module.functions)
+        if (entry.is_extension())
+            load_function(entry);
 
-    for ( auto& entry : module.variables )
-        load_variable( entry );
+    for (auto& entry : module.variables)
+        load_variable(entry);
 }
 
-void dawn::Engine::load_operator( Operator const& entry )
+void dawn::Engine::load_operator(Operator const& entry)
 {
-    if ( entry.args.size() != 2 )
-        ENGINE_PANIC( {}, "operators must have 2 arguments" );
+    if (entry.args.size() != 2)
+        ENGINE_PANIC({}, "operators must have 2 arguments");
 
     auto const& left = entry.args[0];
     auto const& right = entry.args[1];
 
-    auto& left_types = operators[(Int) entry.type];
+    auto& left_types = operators[(Int)entry.type];
 
-    auto* right_types = left_types.get( left.type.type_id );
-    if ( !right_types )
-        right_types = &left_types.set( left.type.type_id, {} );
+    auto* right_types = left_types.get(left.type.type_id);
+    if (!right_types)
+        right_types = &left_types.set(left.type.type_id, {});
 
-    auto* op = right_types->get( right.type.type_id );
-    if ( op )
-        ENGINE_PANIC( {}, "operator [", entry.type, "] with left type [", left.type.type_id, "] and right type [", right.type.type_id, "] already defined" );
-    right_types->set( right.type.type_id, {} ).as_global().func.emplace<DFunction>( entry.args, entry.body );
+    auto* op = right_types->get(right.type.type_id);
+    if (op)
+        ENGINE_PANIC({}, "operator [", entry.type, "] with left type [", left.type.type_id, "] and right type [",
+                     right.type.type_id, "] already defined");
+    right_types->set(right.type.type_id, {}).as_global().func.emplace<DFunction>(entry.args, entry.body);
 }
 
-void dawn::Engine::load_function( Function const& entry )
+void dawn::Engine::load_function(Function const& entry)
 {
-    if ( entry.is_extension() )
+    if (entry.is_extension())
     {
-        if ( Opt<ValueType> value_type = builtin_type( entry.type_id ) )
+        if (Opt<ValueType> value_type = builtin_type(entry.type_id))
         {
-            if ( members[(Int) *value_type].get( entry.id ) )
-                ENGINE_PANIC( {}, "method [", entry.id, "] already defined for type [", entry.type_id, "]" );
-            members[(Int) *value_type].set( entry.id, [entry]( Location const& location, Engine& engine, Value const& self ) -> Value
-                {
+            if (members[(Int)*value_type].get(entry.id))
+                ENGINE_PANIC({}, "method [", entry.id, "] already defined for type [", entry.type_id, "]");
+            members[(Int)*value_type].set(
+                entry.id, [entry](Location const& location, Engine& engine, Value const& self) -> Value {
                     FunctionValue fv{};
                     auto& method = fv.data.emplace<FunctionValue::AsMethod>();
                     method.id = entry.id;
-                    method.func = DFunction{ entry.args, entry.body };
+                    method.func = DFunction{entry.args, entry.body};
                     *method.self = self;
-                    return Value{ fv, location };
-                } );
+                    return Value{fv, location};
+                });
         }
-        else if ( Struct* struc = structs.get( entry.type_id ) )
+        else if (Struct* struc = structs.get(entry.type_id))
         {
-            if ( struc->contains( entry.id ) )
-                ENGINE_PANIC( {}, "method [", entry.id, "] already defined for struct [", entry.type_id, "]" );
-            struc->methods.push_back( entry );
+            if (struc->contains(entry.id))
+                ENGINE_PANIC({}, "method [", entry.id, "] already defined for struct [", entry.type_id, "]");
+            struc->methods.push_back(entry);
         }
         else
-            ENGINE_PANIC( {}, "type [", entry.type_id, "] does not exist or support function extensions" );
+            ENGINE_PANIC({}, "type [", entry.type_id, "] does not exist or support function extensions");
     }
     else
     {
-        if ( stack.root().get( entry.id ) )
-            ENGINE_PANIC( {}, "object [", entry.id, "] already exists" );
+        if (stack.root().get(entry.id))
+            ENGINE_PANIC({}, "object [", entry.id, "] already exists");
 
         FunctionValue fv{};
         auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
         global.id = entry.id;
-        global.func = DFunction{ entry.args, entry.body };
+        global.func = DFunction{entry.args, entry.body};
 
-        stack.root().set( entry.id, Value{ fv } );
+        stack.root().set(entry.id, Value{fv});
     }
 }
 
-void dawn::Engine::load_enum( Enum const& entry )
+void dawn::Engine::load_enum(Enum const& entry)
 {
-    for ( auto& entry : enums.set( entry.id, entry ).entries )
+    for (auto& entry : enums.set(entry.id, entry).entries)
     {
-        if ( !std::holds_alternative<NodeRef>( entry.expr ) )
+        if (!std::holds_alternative<NodeRef>(entry.expr))
             continue;
-        const NodeRef node_ref = std::get<NodeRef>( entry.expr ); // Forces read first/write later order since entry.expr is used in both cases.
-        *entry.expr.emplace<Holder<Value>>() = handle_expr( *node_ref );
+        const NodeRef node_ref = std::get<NodeRef>(
+            entry.expr); // Forces read first/write later order since entry.expr is used in both cases.
+        *entry.expr.emplace<Holder<Value>>() = handle_expr(*node_ref);
     }
 }
 
-void dawn::Engine::load_struct( Struct const& entry )
+void dawn::Engine::load_struct(Struct const& entry)
 {
-    structs.set( entry.id, entry );
+    structs.set(entry.id, entry);
 }
 
-void dawn::Engine::load_variable( Variable const& entry )
+void dawn::Engine::load_variable(Variable const& entry)
 {
     auto& expr = *entry.expr;
-    add_var( expr.location(), entry.type, entry.id, handle_expr( expr ) );
+    add_var(expr.location(), entry.type, entry.id, handle_expr(expr));
 }
 
-void dawn::Engine::bind_oper( ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const, CFunction cfunc )
+void dawn::Engine::bind_oper(ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const, CFunction cfunc)
 {
-    auto& left_types = operators[(Int) op_type];
+    auto& left_types = operators[(Int)op_type];
 
-    auto* right_types = left_types.get( left_type_id );
-    if ( !right_types )
-        right_types = &left_types.set( left_type_id, {} );
+    auto* right_types = left_types.get(left_type_id);
+    if (!right_types)
+        right_types = &left_types.set(left_type_id, {});
 
-    if ( right_types->get( right_type_id ) )
-        ENGINE_PANIC( {}, "operator [", op_type, "] with left type [", left_type_id, "] and right type [", right_type_id, "] already defined" );
-    right_types->set( right_type_id, {} ).as_global().func.emplace<CFunction>( std::move( cfunc ) );
+    if (right_types->get(right_type_id))
+        ENGINE_PANIC({}, "operator [", op_type, "] with left type [", left_type_id, "] and right type [", right_type_id,
+                     "] already defined");
+    right_types->set(right_type_id, {}).as_global().func.emplace<CFunction>(std::move(cfunc));
 
-    if ( is_const )
-        m_ctime_ops[(Int) op_type].insert( combine_ids( left_type_id, right_type_id ) );
+    if (is_const)
+        m_ctime_ops[(Int)op_type].insert(combine_ids(left_type_id, right_type_id));
 }
 
-void dawn::Engine::bind_func( ID id, Bool is_ctime, CFunction cfunc )
+void dawn::Engine::bind_func(ID id, Bool is_ctime, CFunction cfunc)
 {
-    if ( stack.root().get( id ) )
-        ENGINE_PANIC( {}, "object [", id, "] already exists" );
-    if ( is_ctime )
-        m_ctime_funcs.insert( id );
+    if (stack.root().get(id))
+        ENGINE_PANIC({}, "object [", id, "] already exists");
+    if (is_ctime)
+        m_ctime_funcs.insert(id);
 
     FunctionValue fv{};
     auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
     global.id = id;
-    global.func = std::move( cfunc );
-    stack.root().set( id, Value{ fv } );
+    global.func = std::move(cfunc);
+    stack.root().set(id, Value{fv});
 }
 
-dawn::Value dawn::Engine::call_func( ID id, Value* args, Int arg_count )
+dawn::Value dawn::Engine::call_func(ID id, Value* args, Int arg_count)
 {
-    Value* value = stack.root().get( id );
-    if ( !value )
-        ENGINE_PANIC( {}, "object [", id, "] does not exist" );
+    Value* value = stack.root().get(id);
+    if (!value)
+        ENGINE_PANIC({}, "object [", id, "] does not exist");
 
-    if ( value->type() != ValueType::FUNCTION )
-        ENGINE_PANIC( {}, "object [", id, "] can not be called" );
+    if (value->type() != ValueType::FUNCTION)
+        ENGINE_PANIC({}, "object [", id, "] can not be called");
 
-    return handle_func( {}, value->as_function(), args, arg_count );
+    return handle_func({}, value->as_function(), args, arg_count);
 }
 
-void dawn::Engine::add_var( Location const& location, VarType const& type, ID id, Value const& value )
+void dawn::Engine::add_var(Location const& location, VarType const& type, ID id, Value const& value)
 {
-    if ( type.type_id.valid() && type.type_id != value.type_id() )
-        ENGINE_PANIC( location, "can not init variable of type [", type.type_id, "] with type [", value.type_id(), "]" );
+    if (type.type_id.valid() && type.type_id != value.type_id())
+        ENGINE_PANIC(location, "can not init variable of type [", type.type_id, "] with type [", value.type_id(), "]");
 
-    switch ( type.kind )
+    switch (type.kind)
     {
     case VarKind::CONSTANT:
-        stack.current().set( id, value.clone() );
+        stack.current().set(id, value.clone());
         break;
 
     case VarKind::VARIABLE:
-        stack.current().set( id, value.clone().unlock_const() );
+        stack.current().set(id, value.clone().unlock_const());
         break;
 
     default:
-        stack.current().set( id, value );
+        stack.current().set(id, value);
         break;
     }
 }
 
-dawn::Value* dawn::Engine::get_var( ID id )
+dawn::Value* dawn::Engine::get_var(ID id)
 {
-    return stack.current().get( id );
+    return stack.current().get(id);
 }
 
-void dawn::Engine::bind_field( ValueType type, ID id, FieldCFunc const& func )
+void dawn::Engine::bind_field(ValueType type, ID id, FieldCFunc const& func)
 {
-    members[(Int) type].set( id, [func]( Location const& location, Engine& engine, Value const& self ) -> Value
-        {
-            return func( location, engine, const_cast<Value&>( self ) );
-        } );
+    members[(Int)type].set(id, [func](Location const& location, Engine& engine, Value const& self) -> Value {
+        return func(location, engine, const_cast<Value&>(self));
+    });
 }
 
-void dawn::Engine::bind_method( ValueType type, ID id, Bool is_const, Int expected_args, MethodCFunc const& body )
+void dawn::Engine::bind_method(ValueType type, ID id, Bool is_const, Int expected_args, MethodCFunc const& body)
 {
-    members[(Int) type].set( id, [id, is_const, expected_args, body]( Location const& location, Engine& _, Value const& self ) -> Value
-        {
+    members[(Int)type].set(
+        id, [id, is_const, expected_args, body](Location const& location, Engine& _, Value const& self) -> Value {
             FunctionValue fv{};
             auto& method = fv.data.emplace<FunctionValue::AsMethod>();
             method.id = id;
-            method.func = [id, is_const, expected_args, body]( Location const& location, Engine& engine, Value const* args, Int arg_count ) -> Value
-                {
-                    if ( !is_const && args[0].is_const() )
-                        ENGINE_PANIC( location, "can not call [", id, "] on a const value" );
-                    if ( ( 1 + expected_args ) != arg_count )
-                        ENGINE_PANIC( location, "method [", id, "] expects self + ", expected_args, " arguments" );
-                    return body( location, engine, args[0], args + 1 );
-                };
+            method.func = [id, is_const, expected_args, body](Location const& location, Engine& engine,
+                                                              Value const* args, Int arg_count) -> Value {
+                if (!is_const && args[0].is_const())
+                    ENGINE_PANIC(location, "can not call [", id, "] on a const value");
+                if ((1 + expected_args) != arg_count)
+                    ENGINE_PANIC(location, "method [", id, "] expects self + ", expected_args, " arguments");
+                return body(location, engine, args[0], args + 1);
+            };
             *method.self = self;
-            return Value{ fv, location };
-        } );
+            return Value{fv, location};
+        });
 }
 
-void dawn::Engine::handle_var_node( VariableNode const& node )
+void dawn::Engine::handle_var_node(VariableNode const& node)
 {
-    add_var( node.location, node.var.type, node.var.id, handle_expr( *node.var.expr ) );
+    add_var(node.location, node.var.type, node.var.id, handle_expr(*node.var.expr));
 }
 
-dawn::Value const& dawn::Engine::handle_id_node( IdentifierNode const& node )
+dawn::Value const& dawn::Engine::handle_id_node(IdentifierNode const& node)
 {
-    if ( auto* ptr = get_var( node.id ) )
+    if (auto* ptr = get_var(node.id))
         return *ptr;
-    ENGINE_PANIC( node.location, "object [", node.id, "] does not exist" );
+    ENGINE_PANIC(node.location, "object [", node.id, "] does not exist");
 }
 
-dawn::Value dawn::Engine::handle_call_node( CallNode const& node )
+dawn::Value dawn::Engine::handle_call_node(CallNode const& node)
 {
-    const Value left = handle_expr( *node.left_expr );
-    if ( left.type() != ValueType::FUNCTION )
-        ENGINE_PANIC( node.location, "can not call [", left.type(), "]" );
+    const Value left = handle_expr(*node.left_expr);
+    if (left.type() != ValueType::FUNCTION)
+        ENGINE_PANIC(node.location, "can not call [", left.type(), "]");
 
     auto const& func = left.as_function();
-    const Int arg_count = func.is_method() ? ( 1 + node.args.size() ) : node.args.size();
+    const Int arg_count = func.is_method() ? (1 + node.args.size()) : node.args.size();
 
-    Value* const args_ptr = SALLOC( Value, arg_count );
-    const SAllocManager<Value> alloc_manager{ args_ptr, arg_count };
+    Value* const args_ptr = SALLOC(Value, arg_count);
+    const SAllocManager<Value> alloc_manager{args_ptr, arg_count};
 
-    if ( func.is_method() )
+    if (func.is_method())
     {
         args_ptr[0] = *func.as_method().self;
-        for ( Int i = 0; i < (Int) node.args.size(); i++ )
-            args_ptr[1 + i] = handle_expr( node.args[i] );
+        for (Int i = 0; i < (Int)node.args.size(); i++)
+            args_ptr[1 + i] = handle_expr(node.args[i]);
     }
     else
     {
-        for ( Int i = 0; i < (Int) node.args.size(); i++ )
-            args_ptr[i] = handle_expr( node.args[i] );
+        for (Int i = 0; i < (Int)node.args.size(); i++)
+            args_ptr[i] = handle_expr(node.args[i]);
     }
 
-    return handle_func( node.location, func, args_ptr, arg_count );
+    return handle_func(node.location, func, args_ptr, arg_count);
 }
 
-dawn::Value dawn::Engine::handle_index_node( IndexNode const& node )
+dawn::Value dawn::Engine::handle_index_node(IndexNode const& node)
 {
-    const Value left = handle_expr( *node.left_expr );
-    const Int index = handle_expr( *node.expr ).as_int();
+    const Value left = handle_expr(*node.left_expr);
+    const Int index = handle_expr(*node.expr).as_int();
 
-    if ( left.type() == ValueType::STRING )
+    if (left.type() == ValueType::STRING)
     {
         auto& value = left.as_string();
-        if ( index < 0 || index >= (Int) value.size() )
-            ENGINE_PANIC( node.location, "string access [", index, "] out of bounds" );
-        return Value{ &value[index], left.is_const(), node.location };
+        if (index < 0 || index >= (Int)value.size())
+            ENGINE_PANIC(node.location, "string access [", index, "] out of bounds");
+        return Value{&value[index], left.is_const(), node.location};
     }
-    else if ( left.type() == ValueType::ARRAY )
+    else if (left.type() == ValueType::ARRAY)
     {
         auto& value = left.as_array();
-        if ( index < 0 || index >= (Int) value.data.size() )
-            ENGINE_PANIC( node.location, "array access [", index, "] out of bounds" );
+        if (index < 0 || index >= (Int)value.data.size())
+            ENGINE_PANIC(node.location, "array access [", index, "] out of bounds");
         return value.data[index];
     }
     else
-        ENGINE_PANIC( node.location, "can not index type [", left.type(), "]" );
+        ENGINE_PANIC(node.location, "can not index type [", left.type(), "]");
 }
 
-void dawn::Engine::handle_return_node( ReturnNode const& node, Opt<Value>& retval )
+void dawn::Engine::handle_return_node(ReturnNode const& node, Opt<Value>& retval)
 {
-    retval = handle_expr( *node.expr );
+    retval = handle_expr(*node.expr);
 }
 
-void dawn::Engine::handle_break_node( BreakNode const& node, Bool* didbrk )
+void dawn::Engine::handle_break_node(BreakNode const& node, Bool* didbrk)
 {
-    if ( !didbrk )
-        ENGINE_PANIC( node.location, "break statement outside of loop" );
+    if (!didbrk)
+        ENGINE_PANIC(node.location, "break statement outside of loop");
     *didbrk = true;
 }
 
-void dawn::Engine::handle_continue_node( ContinueNode const& node, Bool* didcon )
+void dawn::Engine::handle_continue_node(ContinueNode const& node, Bool* didcon)
 {
-    if ( !didcon )
-        ENGINE_PANIC( node.location, "continue statement outside of loop" );
+    if (!didcon)
+        ENGINE_PANIC(node.location, "continue statement outside of loop");
     *didcon = true;
 }
 
-void dawn::Engine::handle_throw_node( ThrowNode const& node )
+void dawn::Engine::handle_throw_node(ThrowNode const& node)
 {
-    throw handle_expr( *node.expr );
+    throw handle_expr(*node.expr);
 }
 
-void dawn::Engine::handle_try_node( TryNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
+void dawn::Engine::handle_try_node(TryNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon)
 {
     try
     {
         const PopHandler pop_handler = stack.push();
-        handle_scope( node.try_scope, retval, didbrk, didcon );
+        handle_scope(node.try_scope, retval, didbrk, didcon);
     }
-    catch ( Value const& value )
+    catch (Value const& value)
     {
         const PopHandler pop_handler = stack.push();
-        stack.current().set( node.catch_id, value );
-        handle_scope( node.catch_scope, retval, didbrk, didcon );
+        stack.current().set(node.catch_id, value);
+        handle_scope(node.catch_scope, retval, didbrk, didcon);
     }
 }
 
-void dawn::Engine::handle_if_node( IfNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
+void dawn::Engine::handle_if_node(IfNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon)
 {
-    for ( auto& part : node.parts )
+    for (auto& part : node.parts)
     {
-        if ( !handle_expr( part.expr ).as_bool() )
+        if (!handle_expr(part.expr).as_bool())
             continue;
 
         const PopHandler pop_handler = stack.push();
-        handle_scope( part.scope, retval, didbrk, didcon );
+        handle_scope(part.scope, retval, didbrk, didcon);
         break;
     }
 }
 
-void dawn::Engine::handle_switch_node( SwitchNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
+void dawn::Engine::handle_switch_node(SwitchNode const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon)
 {
-    const Value check_value = handle_expr( *node.main_expr );
+    const Value check_value = handle_expr(*node.main_expr);
 
-    for ( auto& case_part : node.cases )
+    for (auto& case_part : node.cases)
     {
-        for ( auto& expr : case_part.exprs )
+        for (auto& expr : case_part.exprs)
         {
-            if ( !handle_oper( expr.location(), check_value, OperatorType::EQ, handle_expr( expr ) ).as_bool() )
+            if (!handle_oper(expr.location(), check_value, OperatorType::EQ, handle_expr(expr)).as_bool())
                 continue;
 
             const PopHandler pop_handler = stack.push();
-            handle_scope( case_part.scope, retval, didbrk, didcon );
+            handle_scope(case_part.scope, retval, didbrk, didcon);
             return;
         }
     }
 
-    if ( node.def_scope )
+    if (node.def_scope)
     {
         const PopHandler pop_handler = stack.push();
-        handle_scope( *node.def_scope, retval, didbrk, didcon );
+        handle_scope(*node.def_scope, retval, didbrk, didcon);
     }
 }
 
-void dawn::Engine::handle_loop_node( LoopNode const& node, Opt<Value>& retval )
+void dawn::Engine::handle_loop_node(LoopNode const& node, Opt<Value>& retval)
 {
     Bool didbrk = false, didcon = false;
-    while ( true )
+    while (true)
     {
-        if ( retval || didbrk )
+        if (retval || didbrk)
             break;
         didcon = false;
 
         const PopHandler pop_handler = stack.push();
-        handle_scope( node.scope, retval, &didbrk, &didcon );
+        handle_scope(node.scope, retval, &didbrk, &didcon);
     }
 }
 
-void dawn::Engine::handle_while_node( WhileNode const& node, Opt<Value>& retval )
+void dawn::Engine::handle_while_node(WhileNode const& node, Opt<Value>& retval)
 {
     Bool didbrk = false, didcon = false;
-    while ( true )
+    while (true)
     {
-        if ( retval || didbrk )
+        if (retval || didbrk)
             break;
         didcon = false;
 
-        if ( !handle_expr( *node.expr ).as_bool() )
+        if (!handle_expr(*node.expr).as_bool())
             break;
 
         const PopHandler pop_handler = stack.push();
-        handle_scope( node.scope, retval, &didbrk, &didcon );
+        handle_scope(node.scope, retval, &didbrk, &didcon);
     }
 }
 
-void dawn::Engine::handle_for_node( ForNode const& node, Opt<Value>& retval )
+void dawn::Engine::handle_for_node(ForNode const& node, Opt<Value>& retval)
 {
-    Value loop_value = handle_expr( *node.expr );
+    Value loop_value = handle_expr(*node.expr);
     const auto value_type = loop_value.type();
-    if ( value_type == ValueType::STRING )
+    if (value_type == ValueType::STRING)
     {
         auto& value_str = loop_value.as_string();
 
         Bool didbrk = false, didcon = false;
-        for ( Char& c : value_str )
+        for (Char& c : value_str)
         {
-            if ( retval || didbrk )
+            if (retval || didbrk)
                 break;
             didcon = false;
 
             const PopHandler pop_handler = stack.push();
-            stack.current().set( node.var_id, Value{ &c, loop_value.is_const(), node.location } );
-            handle_scope( node.scope, retval, &didbrk, &didcon );
+            stack.current().set(node.var_id, Value{&c, loop_value.is_const(), node.location});
+            handle_scope(node.scope, retval, &didbrk, &didcon);
         }
     }
-    else if ( value_type == ValueType::RANGE )
+    else if (value_type == ValueType::RANGE)
     {
         auto& value_rng = loop_value.as_range();
 
-#define FOR_LOOP_RANGE_BODY\
-        {\
-            if ( retval || didbrk )\
-                break;\
-            didcon = false;\
-            const PopHandler pop_handler = stack.push();\
-            stack.current().set( node.var_id, Value{ i, node.location } );\
-            handle_scope( node.scope, retval, &didbrk, &didcon );\
-        }\
+#define FOR_LOOP_RANGE_BODY                                                                                            \
+    {                                                                                                                  \
+        if (retval || didbrk)                                                                                          \
+            break;                                                                                                     \
+        didcon = false;                                                                                                \
+        const PopHandler pop_handler = stack.push();                                                                   \
+        stack.current().set(node.var_id, Value{i, node.location});                                                     \
+        handle_scope(node.scope, retval, &didbrk, &didcon);                                                            \
+    }
 
         Bool didbrk = false, didcon = false;
-        if ( value_rng.start <= value_rng.end )
+        if (value_rng.start <= value_rng.end)
         {
-            if ( value_rng.inclusive )
-            {
-                for ( Int i = value_rng.start; i <= value_rng.end; ++i )
+            if (value_rng.inclusive)
+                for (Int i = value_rng.start; i <= value_rng.end; ++i)
                     FOR_LOOP_RANGE_BODY
-            }
             else
-            {
-                for ( Int i = value_rng.start; i < value_rng.end; ++i )
+                for (Int i = value_rng.start; i < value_rng.end; ++i)
                     FOR_LOOP_RANGE_BODY
-            }
         }
         else
         {
-            if ( value_rng.inclusive )
-            {
-                for ( Int i = value_rng.start; i >= value_rng.end; --i )
+            if (value_rng.inclusive)
+                for (Int i = value_rng.start; i >= value_rng.end; --i)
                     FOR_LOOP_RANGE_BODY
-            }
             else
-            {
-                for ( Int i = value_rng.start; i > value_rng.end; --i )
+                for (Int i = value_rng.start; i > value_rng.end; --i)
                     FOR_LOOP_RANGE_BODY
-            }
         }
     }
-    else if ( value_type == ValueType::ARRAY )
+    else if (value_type == ValueType::ARRAY)
     {
         auto& value_arr = loop_value.as_array();
 
         Bool didbrk = false, didcon = false;
-        for ( auto& value : value_arr.data )
+        for (auto& value : value_arr.data)
         {
-            if ( retval || didbrk )
+            if (retval || didbrk)
                 break;
             didcon = false;
 
             const PopHandler pop_handler = stack.push();
-            stack.current().set( node.var_id, value );
-            handle_scope( node.scope, retval, &didbrk, &didcon );
+            stack.current().set(node.var_id, value);
+            handle_scope(node.scope, retval, &didbrk, &didcon);
         }
     }
     else
-        ENGINE_PANIC( node.location, "can not for loop [", value_type, "]" );
+        ENGINE_PANIC(node.location, "can not for loop [", value_type, "]");
 }
 
-dawn::Value const& dawn::Engine::handle_lambda_node( LambdaNode const& node )
+dawn::Value const& dawn::Engine::handle_lambda_node(LambdaNode const& node)
 {
     auto& func_val = node.func_value;
     func_val.as_function().as_lambda().frame = stack.peek();
     return func_val;
 }
 
-dawn::Value dawn::Engine::handle_enum_node( EnumNode const& node )
+dawn::Value dawn::Engine::handle_enum_node(EnumNode const& node)
 {
-    auto* enum_ptr = enums.get( node.type_id );
-    if ( !enum_ptr )
-        ENGINE_PANIC( node.location, "enum [", node.type_id, "] does not exist" );
+    auto* enum_ptr = enums.get(node.type_id);
+    if (!enum_ptr)
+        ENGINE_PANIC(node.location, "enum [", node.type_id, "] does not exist");
 
-    auto* entry_ptr = enum_ptr->get( node.key_id );
-    if ( !entry_ptr )
-        ENGINE_PANIC( node.location, "enum [", node.type_id, "] does not have key [", node.key_id, "]" );
-    if ( !std::holds_alternative<Holder<Value>>( entry_ptr->expr ) )
-        ENGINE_PANIC( node.location, "value expected at enum [", node.type_id, "] and key [", node.key_id, "] but found node" );
+    auto* entry_ptr = enum_ptr->get(node.key_id);
+    if (!entry_ptr)
+        ENGINE_PANIC(node.location, "enum [", node.type_id, "] does not have key [", node.key_id, "]");
+    if (!std::holds_alternative<Holder<Value>>(entry_ptr->expr))
+        ENGINE_PANIC(node.location, "value expected at enum [", node.type_id, "] and key [", node.key_id,
+                     "] but found node");
 
     EnumValue result{};
     result.parent_id = node.type_id;
     result.key_id = node.key_id;
-    result.value = std::get<Holder<Value>>( entry_ptr->expr );
+    result.value = std::get<Holder<Value>>(entry_ptr->expr);
 
-    return Value{ result, node.location };
+    return Value{result, node.location};
 }
 
-dawn::Value dawn::Engine::handle_struct_node( StructNode const& node )
+dawn::Value dawn::Engine::handle_struct_node(StructNode const& node)
 {
-    auto* struct_ptr = structs.get( node.type_id );
-    if ( !struct_ptr )
-        ENGINE_PANIC( node.location, "struct [", node.type_id, "] does not exist" );
+    auto* struct_ptr = structs.get(node.type_id);
+    if (!struct_ptr)
+        ENGINE_PANIC(node.location, "struct [", node.type_id, "] does not exist");
     auto& struc = *struct_ptr;
 
-    Value value{ [&] {
-        StructValue _struc_val{};
-        _struc_val.parent_id = node.type_id; // parent_id must be set before passing StructValue to Value constructor.
-        return _struc_val;
-        }( ), node.location };
-    auto& struc_value = const_cast<StructValue&>( value.as_struct() ); // This is fine because parent_id was already passed in the constructor, line above.
-    struc_value.members.reserve( struc.fields.size() + struc.methods.size() );
+    Value value{[&] {
+                    StructValue _struc_val{};
+                    _struc_val.parent_id =
+                        node.type_id; // parent_id must be set before passing StructValue to Value constructor.
+                    return _struc_val;
+                }(),
+                node.location};
+    auto& struc_value = const_cast<StructValue&>(
+        value.as_struct()); // This is fine because parent_id was already passed in the constructor, line above.
+    struc_value.members.reserve(struc.fields.size() + struc.methods.size());
 
     // Structure default initialization.
-    for ( auto& field : struc.fields )
-        struc_value.members[field.id] = { .value = create_default_value( this, field.type_id, node.location ), .type = MemberType::FIELD };
+    for (auto& field : struc.fields)
+        struc_value.members[field.id] = {.value = create_default_value(this, field.type_id, node.location),
+                                         .type = MemberType::FIELD};
 
     // Structure argument initialization.
-    if ( auto* named_init = std::get_if<StructNode::NamedInit>( &node.init ) )
+    if (auto* named_init = std::get_if<StructNode::NamedInit>(&node.init))
     {
-        for ( auto& [id, arg_node] : named_init->args )
+        for (auto& [id, arg_node] : named_init->args)
         {
-            auto field_it = struc_value.members.find( id );
-            if ( field_it == struc_value.members.end() ) // Only fields are stored at this stage.
-                ENGINE_PANIC( node.location, "struct [", struc.id, "] does not contain field [", id, "]" );
+            auto field_it = struc_value.members.find(id);
+            if (field_it == struc_value.members.end()) // Only fields are stored at this stage.
+                ENGINE_PANIC(node.location, "struct [", struc.id, "] does not contain field [", id, "]");
 
             auto& field = field_it->second;
-            Value expr = handle_expr( arg_node ).clone();
-            if ( field.value.type() != expr.type() )
-                ENGINE_PANIC( node.location, "can not assign type [", expr.type(), "] to type [", field.value.type(), "]" );
+            Value expr = handle_expr(arg_node).clone();
+            if (field.value.type() != expr.type())
+                ENGINE_PANIC(node.location, "can not assign type [", expr.type(), "] to type [", field.value.type(),
+                             "]");
 
             field.value = expr; // Must use = instead of assign() because member is const at this stage.
         }
     }
     else
     {
-        auto& args = std::get<StructNode::ListInit>( node.init ).args;
-        if ( args.size() > struc.fields.size() )
-            ENGINE_PANIC( node.location, "struct [", struc.id, "] contains [", struc.fields.size(), "] fields but [", args.size(), "] were passed" );
+        auto& args = std::get<StructNode::ListInit>(node.init).args;
+        if (args.size() > struc.fields.size())
+            ENGINE_PANIC(node.location, "struct [", struc.id, "] contains [", struc.fields.size(), "] fields but [",
+                         args.size(), "] were passed");
 
-        for ( Int i = 0; i < (Int) args.size(); i++ )
+        for (Int i = 0; i < (Int)args.size(); i++)
         {
             auto& field = struc_value.members[struc.fields[i].id];
-            Value expr = handle_expr( args[i] ).clone();
-            if ( field.value.type() != expr.type() )
-                ENGINE_PANIC( node.location, "can not assign type [", expr.type(), "] to type [", field.value.type(), "]" );
+            Value expr = handle_expr(args[i]).clone();
+            if (field.value.type() != expr.type())
+                ENGINE_PANIC(node.location, "can not assign type [", expr.type(), "] to type [", field.value.type(),
+                             "]");
 
-            field = { .value = expr, .type = MemberType::FIELD }; // Must use = instead of assign() because member is const at this stage.
+            field = {.value = expr,
+                     .type =
+                         MemberType::FIELD}; // Must use = instead of assign() because member is const at this stage.
         }
     }
 
     // Structure methods.
-    for ( auto& method : struc.methods )
+    for (auto& method : struc.methods)
     {
         FunctionValue fv{};
         auto& f = fv.data.emplace<FunctionValue::AsMethod>();
         f.id = method.id;
-        f.func = DFunction{ method.args, method.body };
+        f.func = DFunction{method.args, method.body};
         *f.self = value;
-        struc_value.members[f.id] = { .value = Value{ fv, node.location }, .type = MemberType::METHOD };
+        struc_value.members[f.id] = {.value = Value{fv, node.location}, .type = MemberType::METHOD};
     }
 
     return value;
 }
 
-dawn::Value dawn::Engine::handle_array_node( ArrayNode const& node )
+dawn::Value dawn::Engine::handle_array_node(ArrayNode const& node)
 {
     ArrayValue result{};
-    if ( std::holds_alternative<ArrayNode::ListInit>( node.init ) )
+    if (std::holds_alternative<ArrayNode::ListInit>(node.init))
     {
-        auto& init_data = std::get<ArrayNode::ListInit>( node.init );
-        result.data.reserve( init_data.elements.size() );
-        for ( auto& expr : init_data.elements )
-            result.data.push_back( handle_expr( expr ).clone() );
+        auto& init_data = std::get<ArrayNode::ListInit>(node.init);
+        result.data.reserve(init_data.elements.size());
+        for (auto& expr : init_data.elements)
+            result.data.push_back(handle_expr(expr).clone());
     }
     else
     {
-        auto& init_data = std::get<ArrayNode::SizedInit>( node.init );
-        const Int size = handle_expr( *init_data.size_expr ).as_int();
-        if ( size < 0 )
-            ENGINE_PANIC( node.location, "array size can not be negative" );
-        result.data.reserve( size );
-        for ( Int i = 0; i < size; i++ )
-            result.data.push_back( create_default_value( this, init_data.type_id, node.location ) );
+        auto& init_data = std::get<ArrayNode::SizedInit>(node.init);
+        const Int size = handle_expr(*init_data.size_expr).as_int();
+        if (size < 0)
+            ENGINE_PANIC(node.location, "array size can not be negative");
+        result.data.reserve(size);
+        for (Int i = 0; i < size; i++)
+            result.data.push_back(create_default_value(this, init_data.type_id, node.location));
     }
-    return Value{ result, node.location };
+    return Value{result, node.location};
 }
 
-dawn::Value dawn::Engine::handle_ac_node( AccessNode const& node )
+dawn::Value dawn::Engine::handle_ac_node(AccessNode const& node)
 {
-    const Value left = handle_expr( *node.left_expr );
-    if ( left.type() == ValueType::STRUCT )
+    const Value left = handle_expr(*node.left_expr);
+    if (left.type() == ValueType::STRUCT)
     {
         auto& left_struct = left.as_struct();
-        const auto it = left_struct.members.find( node.right_id );
-        if ( it == left_struct.members.end() )
-            ENGINE_PANIC( node.location, "struct [", left_struct.parent_id, "] does not have member [", node.right_id, "]" );
+        const auto it = left_struct.members.find(node.right_id);
+        if (it == left_struct.members.end())
+            ENGINE_PANIC(node.location, "struct [", left_struct.parent_id, "] does not have member [", node.right_id,
+                         "]");
         return it->second.value;
     }
     else
     {
-        auto* member_func_ptr = members[(Int) left.type()].get( node.right_id );
-        if ( !member_func_ptr )
-            ENGINE_PANIC( node.location, "type [", left.type(), "] does not have member [", node.right_id, "]" );
-        return ( *member_func_ptr )( node.location, *this, left );
+        auto* member_func_ptr = members[(Int)left.type()].get(node.right_id);
+        if (!member_func_ptr)
+            ENGINE_PANIC(node.location, "type [", left.type(), "] does not have member [", node.right_id, "]");
+        return (*member_func_ptr)(node.location, *this, left);
     }
 }
 
-dawn::Value dawn::Engine::handle_op_node( OperatorNode const& node )
+dawn::Value dawn::Engine::handle_op_node(OperatorNode const& node)
 {
-    const Value left = handle_expr( node.sides[0] ); // Make sure that left side is computed first.
-    return handle_oper( node.location, left, node.type, handle_expr( node.sides[1] ) );
+    const Value left = handle_expr(node.sides[0]); // Make sure that left side is computed first.
+    return handle_oper(node.location, left, node.type, handle_expr(node.sides[1]));
 }
 
-dawn::Value dawn::Engine::handle_as_node( AssignNode const& node )
+dawn::Value dawn::Engine::handle_as_node(AssignNode const& node)
 {
-    Value left = handle_expr( node.sides[0] );
-    switch ( node.type )
+    Value left = handle_expr(node.sides[0]);
+    switch (node.type)
     {
     case AssignType::ASSIGN:
-        left.assign( handle_expr( node.sides[1] ) );
+        left.assign(handle_expr(node.sides[1]));
         return left;
 
     case AssignType::ADD:
-        left.assign( handle_oper( node.location, left, OperatorType::ADD, handle_expr( node.sides[1] ) ) );
+        left.assign(handle_oper(node.location, left, OperatorType::ADD, handle_expr(node.sides[1])));
         return left;
 
     case AssignType::SUB:
-        left.assign( handle_oper( node.location, left, OperatorType::SUB, handle_expr( node.sides[1] ) ) );
+        left.assign(handle_oper(node.location, left, OperatorType::SUB, handle_expr(node.sides[1])));
         return left;
 
     case AssignType::MUL:
-        left.assign( handle_oper( node.location, left, OperatorType::MUL, handle_expr( node.sides[1] ) ) );
+        left.assign(handle_oper(node.location, left, OperatorType::MUL, handle_expr(node.sides[1])));
         return left;
 
     case AssignType::DIV:
-        left.assign( handle_oper( node.location, left, OperatorType::DIV, handle_expr( node.sides[1] ) ) );
+        left.assign(handle_oper(node.location, left, OperatorType::DIV, handle_expr(node.sides[1])));
         return left;
 
     case AssignType::POW:
-        left.assign( handle_oper( node.location, left, OperatorType::POW, handle_expr( node.sides[1] ) ) );
+        left.assign(handle_oper(node.location, left, OperatorType::POW, handle_expr(node.sides[1])));
         return left;
 
     case AssignType::MOD:
-        left.assign( handle_oper( node.location, left, OperatorType::MOD, handle_expr( node.sides[1] ) ) );
+        left.assign(handle_oper(node.location, left, OperatorType::MOD, handle_expr(node.sides[1])));
         return left;
 
     default:
-        ENGINE_PANIC( node.location, "unknown assign node type: ", (Int) node.type );
+        ENGINE_PANIC(node.location, "unknown assign node type: ", (Int)node.type);
     }
 }
 
-dawn::Value dawn::Engine::handle_cast_node( CastNode const& node )
+dawn::Value dawn::Engine::handle_cast_node(CastNode const& node)
 {
-    const Value left_value = handle_expr( *node.left_expr );
-    if ( node.right_type_id == id_void )
+    const Value left_value = handle_expr(*node.left_expr);
+    if (node.right_type_id == id_void)
     {
-        left_value.to_void( *this );
+        left_value.to_void(*this);
         return Value{};
     }
-    else if ( node.right_type_id == id_bool )
-        return Value{ left_value.to_bool( *this ), node.location };
-    else if ( node.right_type_id == id_int )
-        return Value{ left_value.to_int( *this ), node.location };
-    else if ( node.right_type_id == id_float )
-        return Value{ left_value.to_float( *this ), node.location };
-    else if ( node.right_type_id == id_char )
-        return Value{ left_value.to_char( *this ), node.location };
-    else if ( node.right_type_id == id_string )
-        return Value{ left_value.to_string( *this ), node.location };
-    else if ( node.right_type_id == id_range )
-        return Value{ left_value.to_range( *this ), node.location };
-    else if ( node.right_type_id == id_function )
-        return Value{ left_value.to_function( *this ), node.location };
-    else if ( node.right_type_id == id_array )
-        return Value{ left_value.to_array( *this ), node.location };
+    else if (node.right_type_id == id_bool)
+        return Value{left_value.to_bool(*this), node.location};
+    else if (node.right_type_id == id_int)
+        return Value{left_value.to_int(*this), node.location};
+    else if (node.right_type_id == id_float)
+        return Value{left_value.to_float(*this), node.location};
+    else if (node.right_type_id == id_char)
+        return Value{left_value.to_char(*this), node.location};
+    else if (node.right_type_id == id_string)
+        return Value{left_value.to_string(*this), node.location};
+    else if (node.right_type_id == id_range)
+        return Value{left_value.to_range(*this), node.location};
+    else if (node.right_type_id == id_function)
+        return Value{left_value.to_function(*this), node.location};
+    else if (node.right_type_id == id_array)
+        return Value{left_value.to_array(*this), node.location};
     else
-        ENGINE_PANIC( node.location, "unknown cast type: ", node.right_type_id );
+        ENGINE_PANIC(node.location, "unknown cast type: ", node.right_type_id);
 }
 
-void dawn::Engine::handle_scope( Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon )
+void dawn::Engine::handle_scope(Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon)
 {
-    for ( auto& instr : scope.instr )
+    for (auto& instr : scope.instr)
     {
-        if ( retval || ( didbrk && *didbrk ) || ( didcon && *didcon ) )
+        if (retval || (didbrk && *didbrk) || (didcon && *didcon))
             break;
 
-        handle_instr( instr, retval, didbrk, didcon );
+        handle_instr(instr, retval, didbrk, didcon);
     }
 }

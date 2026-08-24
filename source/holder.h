@@ -2,35 +2,32 @@
 
 #include "decl.h"
 
-
 namespace dawn
 {
-template<typename T>
-struct Holder
+template <typename T> struct Holder
 {
     Holder() = default;
 
-    Holder( Holder const& other )
+    Holder(Holder const& other)
     {
         *ptr = *other.ptr;
     }
 
-    Holder& operator=( Holder const& other )
+    Holder& operator=(Holder const& other)
     {
-        if ( this != &other )
+        if (this != &other)
             *ptr = *other.ptr;
         return *this;
     }
 
-    Holder( Holder&& other ) noexcept
-        : ptr( std::move( other.ptr ) )
+    Holder(Holder&& other) noexcept : ptr(std::move(other.ptr))
     {
     }
 
-    Holder& operator=( Holder&& other ) noexcept
+    Holder& operator=(Holder&& other) noexcept
     {
-        if ( this != &other )
-            ptr = std::move( other.ptr );
+        if (this != &other)
+            ptr = std::move(other.ptr);
         return *this;
     }
 
@@ -44,7 +41,7 @@ struct Holder
         return ptr.get();
     }
 
-private:
+  private:
     std::unique_ptr<T> ptr = std::make_unique<T>();
 };
-}
+} // namespace dawn
