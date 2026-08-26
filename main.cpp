@@ -3,7 +3,7 @@
 using namespace dawn; // Not in a header file, it's fine.
 
 #ifdef _DEBUG
-#define DEBUG_TESTS 1
+#define DEBUG_TESTS 0
 
 struct Stopwatch
 {

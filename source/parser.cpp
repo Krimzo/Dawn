@@ -281,7 +281,7 @@ void dawn::Parser::parse_enum(TokenIterator& it, Enum& en) const
             if (it->value == op_assign)
             {
                 ++it;
-                parse_expression(ExtractType::NEW_LINE, it, expr);
+                parse_expression(ExtractType::NEW_LINE_EXP_END, it, expr);
             }
             else
                 expr.emplace<Value>();
@@ -502,7 +502,7 @@ void dawn::Parser::parse_variable(TokenIterator& it, Variable& variable) const
     if (it->value == op_assign)
     {
         ++it;
-        parse_expression(ExtractType::NEW_LINE, it, *variable.expr);
+        parse_expression(ExtractType::NEW_LINE_EXP_END, it, *variable.expr);
     }
     else if (is_custom_type)
         PARSER_PANIC(*it, "custom type variable must be initialized");
@@ -577,6 +577,7 @@ void dawn::Parser::expression_extract(ExtractType type, TokenIterator& it, Vecto
 {
     const TokenIterator first_it = it;
     Int last_line = it->location.line;
+    String last_val = {};
     Int expr_depth = 0;
     Bool in_lambda = false;
 
@@ -584,10 +585,15 @@ void dawn::Parser::expression_extract(ExtractType type, TokenIterator& it, Vecto
     {
         if (expr_depth == 0)
         {
-            if (type == ExtractType::NEW_LINE)
+            if (type == ExtractType::NEW_LINE_EXP_END)
             {
-                if (it->location.line != last_line)
+                if (it->location.line != last_line && last_val != op_lambda)
                     break;
+                if (it->value == exp_end)
+                {
+                    ++it;
+                    break;
+                }
             }
             else if (type == ExtractType::SPLITTER)
             {
@@ -614,10 +620,15 @@ void dawn::Parser::expression_extract(ExtractType type, TokenIterator& it, Vecto
 
         expr_depth += token_depth(*it, in_lambda);
         if (expr_depth < 0)
-            PARSER_PANIC(*it, "unexpected expression end");
+        {
+            if (tokens.empty())
+                PARSER_PANIC(*it, "unexpected expression end");
+            break;
+        }
 
         tokens.push_back(*it);
         last_line = it->location.line;
+        last_val = it->value;
     }
 
     if (expr_depth > 0)
@@ -1093,7 +1104,7 @@ void dawn::Parser::parse_scope(TokenIterator& it, Scope& scope) const
         else
         {
             auto& expr = scope.instr.emplace_back();
-            parse_expression(ExtractType::NEW_LINE, it, expr);
+            parse_expression(ExtractType::NEW_LINE_EXP_END, it, expr);
         }
     }
     ++it;
@@ -1109,7 +1120,7 @@ void dawn::Parser::scope_return(TokenIterator& it, Node& tree) const
     auto& node = tree.emplace<ReturnNode>(it->location);
     node.expr = node_pool().new_register();
     if (it->location.line == return_location.line)
-        parse_expression(ExtractType::NEW_LINE, it, *node.expr);
+        parse_expression(ExtractType::NEW_LINE_EXP_END, it, *node.expr);
     else
         node.expr->emplace<Value>();
 }
@@ -1140,7 +1151,7 @@ void dawn::Parser::scope_throw(TokenIterator& it, Node& tree) const
 
     auto& node = tree.emplace<ThrowNode>(it->location);
     node.expr = node_pool().new_register();
-    parse_expression(ExtractType::NEW_LINE, it, *node.expr);
+    parse_expression(ExtractType::NEW_LINE_EXP_END, it, *node.expr);
 }
 
 void dawn::Parser::scope_try(TokenIterator& it, Node& tree) const

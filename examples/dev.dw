@@ -1,55 +1,8 @@
 import "dev_libs.dw"
 
-func main(array& args)
+func main( array & args )
 {
-	Da da = Da{
-		ne: Ne{ ne_data: "nice" },
-		da_data: "very"
+	int a = 3; int b = 7; & c = `int e`
+		{ return (a * b) - e }
+	print(c(1))
 	}
-	array? very_nice = "it works!!" @ array // will be optimized away if const, since using eval() here
-	function out = `&val`{
-		print("out: {val}")
-	}
-	out(eval(da @ string))
-	print(Animal::cat.name)
-
-	function getSelf = ``{
-		return MyStruct{text: "some test self text"}.get_self_func()
-	}()
-	print(getSelf)
-	print(getSelf())
-	print(getSelf().text)
-
-	print("cat value {Animal::cat.value}")
-	print("dog value {Animal::dog.value}")
-}
-
-struct Da
-{
-	da_data : string
-	ne : Ne
-
-	cast string {
-		return "{self.da_data}_{self.ne}"
-	}
-}
-
-struct Ne
-{
-	ne_data : string
-
-	cast string {
-		return self.ne_data
-	}
-}
-
-func make_cat_val()
-{
-	return 7
-}
-
-enum Animal
-{
-	cat = make_cat_val()
-	dog = [1, 2]
-}
