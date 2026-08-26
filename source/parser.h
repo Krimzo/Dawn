@@ -43,7 +43,6 @@ struct Parser
     void parse(Vector<Token> const& tokens, Module& module) const;
     void parse(Token const* token_ptr, Int token_count, Module& module) const;
 
-  private:
     Bool is_variable(TokenIterator const& it) const;
 
     void parse_import(TokenIterator& it, Module& module) const;

@@ -42,10 +42,6 @@ struct Engine
     void bind_field(ValueType type, ID id, FieldCFunc const& func);
     void bind_method(ValueType type, ID id, Bool is_const, Int expected_args, MethodCFunc const& body);
 
-  private:
-    Set<uint64_t> m_ctime_ops[(Int)OperatorType::_COUNT] = {};
-    Set<ID> m_ctime_funcs;
-
     void load_standard_operators();
     void load_standard_functions();
     void load_standard_members();
@@ -233,6 +229,10 @@ struct Engine
             ENGINE_PANIC(node.location(), "unknown expr node type: ", (Int)node.type());
         }
     }
+
+  private:
+    Set<uint64_t> m_ctime_ops[(Int)OperatorType::_COUNT] = {};
+    Set<ID> m_ctime_funcs;
 };
 
 __forceinline Value create_default_value(Engine* engine, ID typeid_, Location const& location)

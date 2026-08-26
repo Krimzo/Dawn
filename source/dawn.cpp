@@ -76,14 +76,14 @@ dawn::Bool dawn::Config::flag_status(StringRef const& flag) const
     return it->second;
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::eval(Source const& source) noexcept
+void dawn::Dawn::eval_source(Source const& source, String* out_error) noexcept
 {
     try
     {
         if (source.path)
         {
             if (imports.contains(*source.path))
-                return std::nullopt;
+                return;
             imports.insert(*source.path);
         }
 
@@ -101,8 +101,14 @@ dawn::Opt<dawn::String> dawn::Dawn::eval(Source const& source) noexcept
                     throw String("import can only be used inside dawn files");
                 path = fs::path{*source.path}.parent_path().string() + "/" + path;
             }
-            if (auto error = eval(Source::from_file(path)))
-                return error;
+            String error;
+            eval_source(Source::from_file(path), &error);
+            if (!error.empty())
+            {
+                if (out_error)
+                    *out_error = error;
+                return;
+            }
         }
 
         if (!config.flag_status(Flags::DISABLE_OPTIMIZATIONS))
@@ -111,9 +117,54 @@ dawn::Opt<dawn::String> dawn::Dawn::eval(Source const& source) noexcept
     }
     catch (String const& msg)
     {
-        return msg;
+        if (out_error)
+            *out_error = msg;
     }
-    return std::nullopt;
+}
+
+dawn::Value dawn::Dawn::eval_scope(StringRef const& scope_src, String* out_error) noexcept
+{
+    Opt<Value> retval;
+    try
+    {
+        Vector<Token> tokens;
+        tokens.push_back(Token{.type = TokenType::OPERATOR, .value = (String)op_scope_opn});
+        lexer.tokenize(Source::from_text(scope_src), tokens);
+        tokens.push_back(Token{.type = TokenType::OPERATOR, .value = (String)op_scope_cls});
+
+        Scope scope;
+        TokenIterator it{tokens.data(), tokens.data() + tokens.size()};
+        parser.parse_scope(it, scope);
+
+        engine.handle_scope(scope, retval, nullptr, nullptr);
+    }
+    catch (String const& msg)
+    {
+        if (out_error)
+            *out_error = msg;
+    }
+    return retval.value_or({});
+}
+
+dawn::Value dawn::Dawn::eval_expr(StringRef const& expr_src, String* out_error) noexcept
+{
+    try
+    {
+        Vector<Token> tokens;
+        lexer.tokenize(Source::from_text(expr_src), tokens);
+
+        Node expr;
+        TokenIterator it{tokens.data(), tokens.data() + tokens.size()};
+        parser.parse_expression(ExtractType::NEW_LINE_EXP_END, it, expr);
+
+        return engine.handle_expr(expr);
+    }
+    catch (String const& msg)
+    {
+        if (out_error)
+            *out_error = msg;
+    }
+    return {};
 }
 
 void dawn::Dawn::bind_func(ID id, Bool is_ctime, CFunction cfunc) noexcept
@@ -121,39 +172,33 @@ void dawn::Dawn::bind_func(ID id, Bool is_ctime, CFunction cfunc) noexcept
     engine.bind_func(id, is_ctime, std::move(cfunc));
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func(ID id) noexcept
+dawn::Value dawn::Dawn::call_func(ID id, String* out_error) noexcept
 {
-    return call_func(id, nullptr, 0, nullptr);
+    return call_func(id, nullptr, 0, out_error);
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func(ID id, Value* retval) noexcept
+dawn::Value dawn::Dawn::call_func(ID id, std::initializer_list<Value> const& args, String* out_error) noexcept
 {
-    return call_func(id, nullptr, 0, retval);
+    return call_func(id, (Value*)args.begin(), (Int)args.size(), out_error);
 }
 
-dawn::Opt<dawn::String> dawn::Dawn::call_func(ID id, std::initializer_list<Value> const& args, Value* retval) noexcept
-{
-    return call_func(id, (Value*)args.begin(), (Int)args.size(), retval);
-}
-
-dawn::Opt<dawn::String> dawn::Dawn::call_func(ID id, Value* args, Int arg_count, Value* retval) noexcept
+dawn::Value dawn::Dawn::call_func(ID id, Value* args, Int arg_count, String* out_error) noexcept
 {
     try
     {
-        if (retval)
-            *retval = engine.call_func(id, args, arg_count);
-        else
-            engine.call_func(id, args, arg_count);
+        return engine.call_func(id, args, arg_count);
     }
     catch (String const& msg)
     {
-        return msg;
+        if (out_error)
+            *out_error = msg;
     }
     catch (Value const& err)
     {
-        return dawn::format("Uncaught error: ", err.to_string(engine));
+        if (out_error)
+            *out_error = dawn::format("Uncaught error: ", err.to_string(engine));
     }
-    return std::nullopt;
+    return {};
 }
 
 void dawn::Dawn::add_var(VarType const& type, ID id, Value const& value) noexcept

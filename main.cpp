@@ -3,7 +3,8 @@
 using namespace dawn; // Not in a header file, it's fine.
 
 #ifdef _DEBUG
-#define DEBUG_TESTS 0
+
+static constexpr bool DEBUG_TESTS = false;
 
 struct Stopwatch
 {
@@ -23,15 +24,11 @@ int main(int argc, char** argv)
     Stopwatch stopwatch;
     Dawn dawn;
 
-    if (auto error = dawn.eval(Source::from_file(
-#if DEBUG_TESTS
-            "examples/tests.dw"
-#else
-            "examples/dev.dw"
-#endif
-            )))
+    String error;
+    dawn.eval_source(Source::from_file(DEBUG_TESTS ? "examples/tests.dw" : "examples/dev.dw"), &error);
+    if (!error.empty())
     {
-        print(error.value());
+        print(error);
         return -1;
     }
 
@@ -39,10 +36,11 @@ int main(int argc, char** argv)
     for (int i = 0; i < argc; i++)
         args.data.emplace_back<String>(argv[i]);
 
-    Value retval{Int()};
-    if (auto error = dawn.call_func("main", {Value{&args, true}}, &retval))
+    error.clear();
+    const Value retval = dawn.call_func("main", {Value{&args, true}}, &error);
+    if (!error.empty())
     {
-        print(error.value());
+        print(error);
         return -2;
     }
     return (int)retval.to_int(dawn.engine);

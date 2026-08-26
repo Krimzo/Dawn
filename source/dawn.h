@@ -36,13 +36,14 @@ struct Dawn
     Optimizer optimizer;
     Engine engine;
 
-    Opt<String> eval(Source const& source) noexcept;
+    void eval_source(Source const& source, String* out_error = nullptr) noexcept;
+    Value eval_scope(StringRef const& scope_src, String* out_error = nullptr) noexcept;
+    Value eval_expr(StringRef const& expr_src, String* out_error = nullptr) noexcept;
 
     void bind_func(ID id, Bool is_ctime, CFunction cfunc) noexcept;
-    Opt<String> call_func(ID id) noexcept;
-    Opt<String> call_func(ID id, Value* retval) noexcept;
-    Opt<String> call_func(ID id, std::initializer_list<Value> const& args, Value* retval = nullptr) noexcept;
-    Opt<String> call_func(ID id, Value* args, Int arg_count, Value* retval = nullptr) noexcept;
+    Value call_func(ID id, String* out_error = nullptr) noexcept;
+    Value call_func(ID id, std::initializer_list<Value> const& args, String* out_error = nullptr) noexcept;
+    Value call_func(ID id, Value* args, Int arg_count, String* out_error = nullptr) noexcept;
 
     void add_var(VarType const& type, ID id, Value const& value) noexcept;
     Value* get_var(ID id) noexcept;

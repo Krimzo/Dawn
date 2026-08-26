@@ -2,7 +2,7 @@ import "dev_libs.dw"
 
 func main( array & args )
 {
-	int a = 3; int b = 7; & c = `int e`
+	int a = 7; int b = 7; & c = `int e`
 		{ return (a * b) - e }
 	print(c(1))
 	}
