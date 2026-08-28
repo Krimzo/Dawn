@@ -10,10 +10,25 @@ func main( array & args )
 	int a = 7; int b = 7; & c = `int e`
 		{ return (a * b) - e }
 	print(c(1))
-	}
+
+	Person person = Person{ name: "Ivan", fav_animal: animal }
+	print(person)
+}
 
 enum Animal
 {
-	cat = "very nice" @ array
+	cat = ("very nice"
+		@
+		array)
 	dog = "meh"
+}
+
+struct Person
+{
+	name: string
+	fav_animal: Animal
+
+	cast string {
+		return "{self.name} likes {self.fav_animal.name}s"
+	}
 }

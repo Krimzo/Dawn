@@ -485,29 +485,23 @@ dawn::Value dawn::Engine::handle_struct_node(StructNode const& node)
         ENGINE_PANIC(node.location, "struct [", node.type_id, "] does not exist");
     auto& struc = *struct_ptr;
 
-    Value value{[&] {
-                    StructValue _struc_val{};
-                    _struc_val.parent_id =
-                        node.type_id; // parent_id must be set before passing StructValue to Value constructor.
-                    return _struc_val;
-                }(),
-                node.location};
-    auto& struc_value = const_cast<StructValue&>(
-        value.as_struct()); // This is fine because parent_id was already passed in the constructor, line above.
-    struc_value.members.reserve(struc.fields.size() + struc.methods.size());
+    Value value{StructValue{}, node.location};
+    auto& struct_value = value.as_struct();
+    struct_value.parent_id = node.type_id;
+    struct_value.members.reserve(struc.fields.size() + struc.methods.size());
 
     // Structure default initialization.
     for (auto& field : struc.fields)
-        struc_value.members[field.id] = {.value = create_default_value(this, field.type_id, node.location),
-                                         .type = MemberType::FIELD};
+        struct_value.members[field.id] = {.value = create_default_value(this, field.type_id, node.location),
+                                          .type = MemberType::FIELD};
 
     // Structure argument initialization.
     if (auto* named_init = std::get_if<StructNode::NamedInit>(&node.init))
     {
         for (auto& [id, arg_node] : named_init->args)
         {
-            auto field_it = struc_value.members.find(id);
-            if (field_it == struc_value.members.end()) // Only fields are stored at this stage.
+            auto field_it = struct_value.members.find(id);
+            if (field_it == struct_value.members.end()) // Only fields are stored at this stage.
                 ENGINE_PANIC(node.location, "struct [", struc.id, "] does not contain field [", id, "]");
 
             auto& field = field_it->second;
@@ -528,7 +522,7 @@ dawn::Value dawn::Engine::handle_struct_node(StructNode const& node)
 
         for (Int i = 0; i < (Int)args.size(); i++)
         {
-            auto& field = struc_value.members[struc.fields[i].id];
+            auto& field = struct_value.members[struc.fields[i].id];
             Value expr = handle_expr(args[i]).clone();
             if (field.value.type() != expr.type())
                 ENGINE_PANIC(node.location, "can not assign type [", expr.type(), "] to type [", field.value.type(),
@@ -548,7 +542,7 @@ dawn::Value dawn::Engine::handle_struct_node(StructNode const& node)
         f.id = method.id;
         f.func = DFunction{method.args, method.body};
         *f.self = value;
-        struc_value.members[f.id] = {.value = Value{fv, node.location}, .type = MemberType::METHOD};
+        struct_value.members[f.id] = {.value = Value{fv, node.location}, .type = MemberType::METHOD};
     }
 
     return value;

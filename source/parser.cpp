@@ -232,7 +232,7 @@ void dawn::Parser::parse_struct(TokenIterator& it, Struct& struc) const
         {
             Function cast;
             parse_cast(it, cast);
-            if (struc.contains(cast.id))
+            if (struc.contains_method(cast.id))
                 PARSER_PANIC(*it, "struct cast [", cast.id, "] already defined");
 
             auto& self_var = *cast.args.emplace(cast.args.begin());

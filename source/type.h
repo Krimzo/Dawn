@@ -69,14 +69,16 @@ struct Struct
 {
     struct Field
     {
-        ID type_id;
         ID id;
+        ID type_id;
     };
 
     ID id;
     Vector<Field> fields;
     Vector<Function> methods;
 
+    Bool contains_field(ID id) const;
+    Bool contains_method(ID id) const;
     Bool contains(ID id) const;
 };
 

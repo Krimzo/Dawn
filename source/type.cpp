@@ -10,15 +10,25 @@ dawn::Enum::Entry* dawn::Enum::get(ID id)
     return nullptr;
 }
 
-dawn::Bool dawn::Struct::contains(ID id) const
+dawn::Bool dawn::Struct::contains_field(ID id) const
 {
     for (auto& field : fields)
         if (field.id == id)
             return true;
+    return false;
+}
+
+dawn::Bool dawn::Struct::contains_method(ID id) const
+{
     for (auto& method : methods)
         if (method.id == id)
             return true;
     return false;
+}
+
+dawn::Bool dawn::Struct::contains(ID id) const
+{
+    return contains_field(id) || contains_method(id);
 }
 
 std::ostream& dawn::operator<<(std::ostream& stream, VarKind kind)
