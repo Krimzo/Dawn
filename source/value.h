@@ -116,7 +116,6 @@ struct StructValue
 struct ValueInfo
 {
     Location location;
-    ID type_id;
     ValueType type = ValueType::VOID;
     Bool is_const = true;
     Bool is_ptr = false;
@@ -177,8 +176,8 @@ struct Value
     RangeValue& as_range() const;
     FunctionValue& as_function() const;
     ArrayValue& as_array() const;
-    EnumValue const& as_enum() const;     // Must be const since parent_id mustn't be changed.
-    StructValue const& as_struct() const; // Must be const since parent_id mustn't be changed.
+    EnumValue& as_enum() const;
+    StructValue& as_struct() const;
 
     Location location() const;
     ValueType type() const;
