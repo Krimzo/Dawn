@@ -477,7 +477,6 @@ dawn::Value dawn::Engine::handle_enum_node(EnumNode const& node)
     EnumValue result{};
     result.parent_id = node.type_id;
     result.key_id = node.key_id;
-    result.value = std::get<Holder<Value>>(entry_ptr->expr);
 
     return Value{result, node.location};
 }

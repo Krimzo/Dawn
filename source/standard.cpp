@@ -809,8 +809,20 @@ void dawn::Engine::load_standard_members()
         return Value{self.as_enum().key_id.string(), location};
     });
 
-    bind_field(ValueType::ENUM, "value",
-               [](Location location, Engine& engine, Value const& self) -> Value { return *self.as_enum().value; });
+    bind_field(ValueType::ENUM, "value", [](Location location, Engine& engine, Value const& self) -> Value {
+        EnumValue& enum_val = self.as_enum();
+        Enum* parent = engine.enums.get(enum_val.parent_id);
+        if (!parent)
+            ENGINE_PANIC(location, "Unknown enum [", enum_val.parent_id, "]");
+        Enum::Entry* entry = parent->get(enum_val.key_id);
+        if (!entry)
+            ENGINE_PANIC(location, "Enum [", enum_val.parent_id, "] does not have entry [", enum_val.key_id, "]");
+        Holder<Value>* holder = std::get_if<Holder<Value>>(&entry->expr);
+        if (!holder)
+            ENGINE_PANIC(location, "Enum [", enum_val.parent_id, "] does not have initialized value for key [",
+                         enum_val.key_id, "]");
+        return **holder;
+    });
 
     // Arrays.
     bind_method(ValueType::ARRAY, "for_each", true, 1,

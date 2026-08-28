@@ -86,7 +86,6 @@ struct EnumValue
 {
     ID parent_id;
     ID key_id;
-    Holder<Value> value;
 };
 
 struct StructValue
