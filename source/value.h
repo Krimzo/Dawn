@@ -155,7 +155,7 @@ struct Value
     explicit Value(Float* value, Bool is_const, Location const& location = {});
     explicit Value(Char value, Location const& location = {});
     explicit Value(Char* value, Bool is_const, Location const& location = {});
-    explicit Value(StringRef const& value, Location const& location = {});
+    explicit Value(String value, Location const& location = {});
     explicit Value(String* value, Bool is_const, Location const& location = {});
     explicit Value(RangeValue const& value, Location const& location = {});
     explicit Value(RangeValue* value, Bool is_const, Location const& location = {});

@@ -540,7 +540,7 @@ void dawn::Parser::parse_expression(ExtractType type, TokenIterator& it, Node& t
             TokenIterator expr_it{expr_tokens.begin()._Ptr + 1, expr_tokens.end()._Ptr};
             op_node.sides.resize(2);
             op_node.sides[0].emplace<Value>();
-            parse_expression(ExtractType::DEFAULT, expr_it, op_node.sides[1]);
+            parse_expression(ExtractType::WHOLE, expr_it, op_node.sides[1]);
         }
         else
         {
@@ -699,7 +699,7 @@ void dawn::Parser::expression_complex_expr(Vector<Token>& left, Token op, Vector
 
         TokenIterator left_it{left.begin()._Ptr, left.end()._Ptr};
         node.left_expr = node_pool().new_register();
-        parse_expression(ExtractType::DEFAULT, left_it, *node.left_expr);
+        parse_expression(ExtractType::WHOLE, left_it, *node.left_expr);
 
         TokenIterator right_it{right.begin()._Ptr, right.end()._Ptr};
         while (right_it.valid())
@@ -708,7 +708,7 @@ void dawn::Parser::expression_complex_expr(Vector<Token>& left, Token op, Vector
     else
     {
         TokenIterator right_it{right.begin()._Ptr, right.end()._Ptr};
-        parse_expression(ExtractType::DEFAULT, right_it, tree);
+        parse_expression(ExtractType::WHOLE, right_it, tree);
     }
 }
 
@@ -853,7 +853,7 @@ void dawn::Parser::expression_complex_array(Vector<Token>& left, Token op, Vecto
         init.size_expr = node_pool().new_register();
 
         TokenIterator right_it{right.begin()._Ptr, right.end()._Ptr};
-        parse_expression(ExtractType::DEFAULT, right_it, *init.size_expr);
+        parse_expression(ExtractType::WHOLE, right_it, *init.size_expr);
 
         auto& node = tree.emplace<ArrayNode>(op.location);
         node.init = init;
@@ -864,11 +864,11 @@ void dawn::Parser::expression_complex_array(Vector<Token>& left, Token op, Vecto
 
         TokenIterator left_it{left.begin()._Ptr, left.end()._Ptr};
         node.left_expr = node_pool().new_register();
-        parse_expression(ExtractType::DEFAULT, left_it, *node.left_expr);
+        parse_expression(ExtractType::WHOLE, left_it, *node.left_expr);
 
         TokenIterator right_it{right.begin()._Ptr, right.end()._Ptr};
         node.expr = node_pool().new_register();
-        parse_expression(ExtractType::DEFAULT, right_it, *node.expr);
+        parse_expression(ExtractType::WHOLE, right_it, *node.expr);
     }
 }
 
@@ -897,11 +897,11 @@ void dawn::Parser::expression_complex_default(Vector<Token>& left, Token op, Vec
 {
     TokenIterator left_it{left.begin()._Ptr, left.end()._Ptr};
     Node left_expr;
-    parse_expression(ExtractType::DEFAULT, left_it, left_expr);
+    parse_expression(ExtractType::WHOLE, left_it, left_expr);
 
     TokenIterator right_it{right.begin()._Ptr, right.end()._Ptr};
     Node right_expr;
-    parse_expression(ExtractType::DEFAULT, right_it, right_expr);
+    parse_expression(ExtractType::WHOLE, right_it, right_expr);
 
     if (op.value == op_access)
     {
@@ -989,7 +989,7 @@ void dawn::Parser::expression_single_literal(Token const& token, Node& tree) con
     else if (token.type == TokenType::CHAR)
         tree.emplace<Value>((Char)token.literal[0], token.location);
     else if (token.type == TokenType::STRING)
-        tree.emplace<Value>((StringRef)token.literal, token.location);
+        tree.emplace<Value>((String)token.literal, token.location);
     else
         PARSER_PANIC(token, "expected literal");
 }

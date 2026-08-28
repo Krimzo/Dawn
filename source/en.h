@@ -18,7 +18,7 @@ enum struct TokenType : uint8_t
 
 enum struct ExtractType : uint8_t
 {
-    DEFAULT = 0,
+    WHOLE = 0,
     NEW_LINE_EXP_END,
     SPLITTER,
     SCOPE_START,

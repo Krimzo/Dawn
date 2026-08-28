@@ -253,7 +253,7 @@ __forceinline Value create_default_value(Engine* engine, ID typeid_, Location co
         return Value{Char{}, location};
 
     else if (typeid_ == id_string)
-        return Value{StringRef{}, location};
+        return Value{String{}, location};
 
     else if (typeid_ == id_range)
         return Value{RangeValue{}, location};

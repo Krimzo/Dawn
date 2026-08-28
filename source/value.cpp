@@ -257,15 +257,14 @@ dawn::Value::Value(Char* value, Bool is_const, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(StringRef const& value, Location const& location)
-    : m_regref(string_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(String value, Location const& location) : m_regref(string_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<String>>();
     storage.info.location = location;
     storage.info.type_id = id_string;
     storage.info.type = ValueType::STRING;
     storage.info.is_const = true;
-    storage.value = value;
+    storage.value = std::move(value);
 }
 
 dawn::Value::Value(String* value, Bool is_const, Location const& location)

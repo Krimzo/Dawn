@@ -534,7 +534,7 @@ void dawn::Engine::load_standard_functions()
         _lexer.tokenize(Source::from_text(args[0].as_string()), tokens);
         TokenIterator it{tokens.data(), tokens.data() + tokens.size()};
         Node node;
-        _parser.parse_expression(ExtractType::DEFAULT, it, node);
+        _parser.parse_expression(ExtractType::WHOLE, it, node);
         return engine.handle_expr(node);
     });
 
@@ -607,7 +607,7 @@ void dawn::Engine::load_standard_functions()
         if (arg_count == 1)
             return Value{args[0].to_string(engine), location};
         else if (arg_count == 0)
-            return Value{StringRef{}, location};
+            return Value{String{}, location};
         else
             ENGINE_PANIC(location, tp_string, "() expects 1 or 0 arguments, but got ", arg_count);
     });
