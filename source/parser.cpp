@@ -275,7 +275,7 @@ void dawn::Parser::parse_enum(TokenIterator& it, Enum& en) const
             auto& entry = en.entries.emplace_back();
             entry.id = name_id;
             entry.expr = node_pool().new_register();
-            auto& expr = *std::get<NodeRef>(entry.expr);
+            auto& expr = *entry.expr;
             ++it;
 
             if (it->value == op_assign)

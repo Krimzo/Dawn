@@ -56,7 +56,7 @@ struct Enum
     struct Entry
     {
         ID id;
-        Variant<NodeRef, Holder<Value>> expr;
+        NodeRef expr;
     };
 
     ID id;
@@ -69,8 +69,8 @@ struct Struct
 {
     struct Field
     {
-        ID id;
         ID type_id;
+        ID id;
     };
 
     ID id;

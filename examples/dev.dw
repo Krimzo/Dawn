@@ -2,7 +2,18 @@ import "dev_libs.dw"
 
 func main( array & args )
 {
+	Animal animal = Animal::cat
+	print(animal)
+	print(animal.value)
+	print(Animal::dog.value)
+
 	int a = 7; int b = 7; & c = `int e`
 		{ return (a * b) - e }
 	print(c(1))
 	}
+
+enum Animal
+{
+	cat = "very nice" @ array
+	dog = "meh"
+}

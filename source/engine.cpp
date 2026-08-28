@@ -96,11 +96,11 @@ void dawn::Engine::load_enum(Enum const& entry)
 {
     for (auto& entry : enums.set(entry.id, entry).entries)
     {
-        if (!std::holds_alternative<NodeRef>(entry.expr))
+        if (std::holds_alternative<Value>(*entry.expr))
             continue;
-        const NodeRef node_ref = std::get<NodeRef>(
-            entry.expr); // Forces read first/write later order since entry.expr is used in both cases.
-        *entry.expr.emplace<Holder<Value>>() = handle_expr(*node_ref);
+        const NodeRef node_ref =
+            entry.expr; // Forces read first/write later order since entry.expr is used in both cases.
+        entry.expr->emplace<Value>(handle_expr(*node_ref));
     }
 }
 
@@ -470,9 +470,6 @@ dawn::Value dawn::Engine::handle_enum_node(EnumNode const& node)
     auto* entry_ptr = enum_ptr->get(node.key_id);
     if (!entry_ptr)
         ENGINE_PANIC(node.location, "enum [", node.type_id, "] does not have key [", node.key_id, "]");
-    if (!std::holds_alternative<Holder<Value>>(entry_ptr->expr))
-        ENGINE_PANIC(node.location, "value expected at enum [", node.type_id, "] and key [", node.key_id,
-                     "] but found node");
 
     EnumValue result{};
     result.parent_id = node.type_id;

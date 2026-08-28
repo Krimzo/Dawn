@@ -817,11 +817,7 @@ void dawn::Engine::load_standard_members()
         Enum::Entry* entry = parent->get(enum_val.key_id);
         if (!entry)
             ENGINE_PANIC(location, "Enum [", enum_val.parent_id, "] does not have entry [", enum_val.key_id, "]");
-        Holder<Value>* holder = std::get_if<Holder<Value>>(&entry->expr);
-        if (!holder)
-            ENGINE_PANIC(location, "Enum [", enum_val.parent_id, "] does not have initialized value for key [",
-                         enum_val.key_id, "]");
-        return **holder;
+        return std::get<Value>(*entry->expr);
     });
 
     // Arrays.

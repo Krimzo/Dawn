@@ -76,8 +76,7 @@ void dawn::Optimizer::optimize_function(Function& func)
 void dawn::Optimizer::optimize_enum(Enum& enu)
 {
     for (auto& entry : enu.entries)
-        if (auto* expr_refptr = std::get_if<NodeRef>(&entry.expr))
-            optimize_expr(**expr_refptr);
+        optimize_expr(*entry.expr);
 }
 
 void dawn::Optimizer::optimize_struct(Struct& struc)
