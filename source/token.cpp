@@ -42,7 +42,7 @@ dawn::Color dawn::to_color(TokenType type)
     return {204, 204, 204};
 }
 
-dawn::Bool dawn::is_custom_type(StringRef const& value)
+dawn::Bool dawn::is_custom_type(StringRef value)
 {
     return !value.empty() ? std::isupper(value.front()) : false;
 }

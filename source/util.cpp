@@ -47,7 +47,7 @@ dawn::String dawn::from_escaping(Char c)
     return String{c};
 }
 
-dawn::Opt<dawn::String> dawn::read_file(StringRef const& path)
+dawn::Opt<dawn::String> dawn::read_file(StringRef path)
 {
     IFileStream file{path.data()};
     if (!file)
@@ -55,7 +55,7 @@ dawn::Opt<dawn::String> dawn::read_file(StringRef const& path)
     return {(StringStream{} << file.rdbuf()).str()};
 }
 
-dawn::Vector<dawn::String> dawn::split(StringRef const& data, StringRef const& delim)
+dawn::Vector<dawn::String> dawn::split(StringRef data, StringRef delim)
 {
     std::vector<std::string> parts;
     for (auto const& part : std::views::split(data, delim))
@@ -63,7 +63,7 @@ dawn::Vector<dawn::String> dawn::split(StringRef const& data, StringRef const& d
     return parts;
 }
 
-dawn::Opt<dawn::Int> dawn::parse_int(StringRef const& data)
+dawn::Opt<dawn::Int> dawn::parse_int(StringRef data)
 {
     if (data.empty())
         return std::nullopt;
@@ -76,7 +76,7 @@ dawn::Opt<dawn::Int> dawn::parse_int(StringRef const& data)
     return {result};
 }
 
-dawn::Opt<dawn::Float> dawn::parse_float(StringRef const& data)
+dawn::Opt<dawn::Float> dawn::parse_float(StringRef data)
 {
     if (data.empty())
         return std::nullopt;

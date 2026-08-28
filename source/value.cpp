@@ -169,7 +169,7 @@ dawn::ArrayValue& dawn::ArrayValue::operator=(ArrayValue&& other) noexcept
     return *this;
 }
 
-dawn::Value::Value(Bool value, Location const& location) : m_regref(bool_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(Bool value, Location location) : m_regref(bool_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Bool>>();
     storage.info.location = location;
@@ -179,8 +179,7 @@ dawn::Value::Value(Bool value, Location const& location) : m_regref(bool_pool().
     storage.value = value;
 }
 
-dawn::Value::Value(Bool* value, Bool is_const, Location const& location)
-    : m_regref(ptr_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(Bool* value, Bool is_const, Location location) : m_regref(ptr_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Ptr>>();
     storage.info.location = location;
@@ -191,7 +190,7 @@ dawn::Value::Value(Bool* value, Bool is_const, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(Int value, Location const& location) : m_regref(int_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(Int value, Location location) : m_regref(int_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Int>>();
     storage.info.location = location;
@@ -201,8 +200,7 @@ dawn::Value::Value(Int value, Location const& location) : m_regref(int_pool().ne
     storage.value = value;
 }
 
-dawn::Value::Value(Int* value, Bool is_const, Location const& location)
-    : m_regref(ptr_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(Int* value, Bool is_const, Location location) : m_regref(ptr_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Ptr>>();
     storage.info.location = location;
@@ -213,7 +211,7 @@ dawn::Value::Value(Int* value, Bool is_const, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(Float value, Location const& location) : m_regref(float_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(Float value, Location location) : m_regref(float_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Float>>();
     storage.info.location = location;
@@ -223,8 +221,7 @@ dawn::Value::Value(Float value, Location const& location) : m_regref(float_pool(
     storage.value = value;
 }
 
-dawn::Value::Value(Float* value, Bool is_const, Location const& location)
-    : m_regref(ptr_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(Float* value, Bool is_const, Location location) : m_regref(ptr_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Ptr>>();
     storage.info.location = location;
@@ -235,7 +232,7 @@ dawn::Value::Value(Float* value, Bool is_const, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(Char value, Location const& location) : m_regref(char_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(Char value, Location location) : m_regref(char_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Char>>();
     storage.info.location = location;
@@ -245,8 +242,7 @@ dawn::Value::Value(Char value, Location const& location) : m_regref(char_pool().
     storage.value = value;
 }
 
-dawn::Value::Value(Char* value, Bool is_const, Location const& location)
-    : m_regref(ptr_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(Char* value, Bool is_const, Location location) : m_regref(ptr_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Ptr>>();
     storage.info.location = location;
@@ -257,7 +253,7 @@ dawn::Value::Value(Char* value, Bool is_const, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(String value, Location const& location) : m_regref(string_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(String value, Location location) : m_regref(string_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<String>>();
     storage.info.location = location;
@@ -267,7 +263,7 @@ dawn::Value::Value(String value, Location const& location) : m_regref(string_poo
     storage.value = std::move(value);
 }
 
-dawn::Value::Value(String* value, Bool is_const, Location const& location)
+dawn::Value::Value(String* value, Bool is_const, Location location)
     : m_regref(ptr_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Ptr>>();
@@ -279,8 +275,7 @@ dawn::Value::Value(String* value, Bool is_const, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(RangeValue const& value, Location const& location)
-    : m_regref(range_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(RangeValue const& value, Location location) : m_regref(range_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<RangeValue>>();
     storage.info.location = location;
@@ -290,7 +285,7 @@ dawn::Value::Value(RangeValue const& value, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(RangeValue* value, Bool is_const, Location const& location)
+dawn::Value::Value(RangeValue* value, Bool is_const, Location location)
     : m_regref(ptr_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Ptr>>();
@@ -302,7 +297,7 @@ dawn::Value::Value(RangeValue* value, Bool is_const, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(FunctionValue const& value, Location const& location)
+dawn::Value::Value(FunctionValue const& value, Location location)
     : m_regref(function_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<FunctionValue>>();
@@ -313,7 +308,7 @@ dawn::Value::Value(FunctionValue const& value, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(FunctionValue* value, Bool is_const, Location const& location)
+dawn::Value::Value(FunctionValue* value, Bool is_const, Location location)
     : m_regref(ptr_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Ptr>>();
@@ -325,8 +320,7 @@ dawn::Value::Value(FunctionValue* value, Bool is_const, Location const& location
     storage.value = value;
 }
 
-dawn::Value::Value(ArrayValue const& value, Location const& location)
-    : m_regref(array_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(ArrayValue const& value, Location location) : m_regref(array_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<ArrayValue>>();
     storage.info.location = location;
@@ -336,7 +330,7 @@ dawn::Value::Value(ArrayValue const& value, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(ArrayValue* value, Bool is_const, Location const& location)
+dawn::Value::Value(ArrayValue* value, Bool is_const, Location location)
     : m_regref(ptr_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Ptr>>();
@@ -348,8 +342,7 @@ dawn::Value::Value(ArrayValue* value, Bool is_const, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(EnumValue const& value, Location const& location)
-    : m_regref(enum_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(EnumValue const& value, Location location) : m_regref(enum_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<EnumValue>>();
     storage.info.location = location;
@@ -359,7 +352,7 @@ dawn::Value::Value(EnumValue const& value, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(EnumValue* value, Bool is_const, Location const& location)
+dawn::Value::Value(EnumValue* value, Bool is_const, Location location)
     : m_regref(ptr_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Ptr>>();
@@ -371,8 +364,7 @@ dawn::Value::Value(EnumValue* value, Bool is_const, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(StructValue const& value, Location const& location)
-    : m_regref(struct_pool().new_register().as<ValueInfo>())
+dawn::Value::Value(StructValue const& value, Location location) : m_regref(struct_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<StructValue>>();
     storage.info.location = location;
@@ -382,7 +374,7 @@ dawn::Value::Value(StructValue const& value, Location const& location)
     storage.value = value;
 }
 
-dawn::Value::Value(StructValue* value, Bool is_const, Location const& location)
+dawn::Value::Value(StructValue* value, Bool is_const, Location location)
     : m_regref(ptr_pool().new_register().as<ValueInfo>())
 {
     auto& storage = *m_regref.as<ValueStorage<Ptr>>();
@@ -470,7 +462,7 @@ dawn::StructValue const& dawn::Value::as_struct() const
     return m_regref.as<ValueStorage<StructValue>>()->get();
 }
 
-dawn::Location const& dawn::Value::location() const
+dawn::Location dawn::Value::location() const
 {
     static constexpr Location l{};
     return m_regref ? m_regref->location : l;

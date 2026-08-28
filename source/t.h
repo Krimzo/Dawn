@@ -74,7 +74,7 @@ struct StringHash
         return hash_type{}(str);
     }
 
-    std::size_t operator()(StringRef const& str) const
+    std::size_t operator()(StringRef str) const
     {
         return hash_type{}(str);
     }

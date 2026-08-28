@@ -8,7 +8,7 @@ struct LocationHolder
 {
     Location location;
 
-    explicit constexpr LocationHolder(Location const& location) : location(location)
+    explicit constexpr LocationHolder(Location location) : location(location)
     {
     }
 };
@@ -22,7 +22,7 @@ struct VariableNode : LocationHolder
 {
     Variable var;
 
-    constexpr VariableNode(Location const& location) : LocationHolder(location)
+    constexpr VariableNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -31,7 +31,7 @@ struct IdentifierNode : LocationHolder
 {
     ID id;
 
-    constexpr IdentifierNode(Location const& location) : LocationHolder(location)
+    constexpr IdentifierNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -41,7 +41,7 @@ struct CallNode : LocationHolder
     NodeRef left_expr;
     Vector<Node> args;
 
-    constexpr CallNode(Location const& location) : LocationHolder(location)
+    constexpr CallNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -51,7 +51,7 @@ struct IndexNode : LocationHolder
     NodeRef left_expr;
     NodeRef expr;
 
-    constexpr IndexNode(Location const& location) : LocationHolder(location)
+    constexpr IndexNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -60,21 +60,21 @@ struct ReturnNode : LocationHolder
 {
     NodeRef expr;
 
-    constexpr ReturnNode(Location const& location) : LocationHolder(location)
+    constexpr ReturnNode(Location location) : LocationHolder(location)
     {
     }
 };
 
 struct BreakNode : LocationHolder
 {
-    constexpr BreakNode(Location const& location) : LocationHolder(location)
+    constexpr BreakNode(Location location) : LocationHolder(location)
     {
     }
 };
 
 struct ContinueNode : LocationHolder
 {
-    constexpr ContinueNode(Location const& location) : LocationHolder(location)
+    constexpr ContinueNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -83,7 +83,7 @@ struct ThrowNode : LocationHolder
 {
     NodeRef expr;
 
-    constexpr ThrowNode(Location const& location) : LocationHolder(location)
+    constexpr ThrowNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -94,7 +94,7 @@ struct TryNode : LocationHolder
     ID catch_id;
     Scope catch_scope;
 
-    constexpr TryNode(Location const& location) : LocationHolder(location)
+    constexpr TryNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -110,7 +110,7 @@ struct IfNode : LocationHolder
 
     Vector<Part<Node>> parts;
 
-    constexpr IfNode(Location const& location) : LocationHolder(location)
+    constexpr IfNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -127,7 +127,7 @@ struct SwitchNode : LocationHolder
     Vector<Case> cases;
     Opt<Scope> def_scope;
 
-    constexpr SwitchNode(Location const& location) : LocationHolder(location)
+    constexpr SwitchNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -136,7 +136,7 @@ struct LoopNode : LocationHolder
 {
     Scope scope;
 
-    constexpr LoopNode(Location const& location) : LocationHolder(location)
+    constexpr LoopNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -146,7 +146,7 @@ struct WhileNode : LocationHolder
     NodeRef expr;
     Scope scope;
 
-    constexpr WhileNode(Location const& location) : LocationHolder(location)
+    constexpr WhileNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -157,7 +157,7 @@ struct ForNode : LocationHolder
     NodeRef expr;
     Scope scope;
 
-    constexpr ForNode(Location const& location) : LocationHolder(location)
+    constexpr ForNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -166,7 +166,7 @@ struct LambdaNode : LocationHolder
 {
     Value func_value;
 
-    constexpr LambdaNode(Location const& location) : LocationHolder(location)
+    constexpr LambdaNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -176,7 +176,7 @@ struct EnumNode : LocationHolder
     ID type_id;
     ID key_id;
 
-    constexpr EnumNode(Location const& location) : LocationHolder(location)
+    constexpr EnumNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -196,7 +196,7 @@ struct StructNode : LocationHolder
     ID type_id;
     Variant<NamedInit, ListInit> init;
 
-    constexpr StructNode(Location const& location) : LocationHolder(location)
+    constexpr StructNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -216,7 +216,7 @@ struct ArrayNode : LocationHolder
 
     Variant<ListInit, SizedInit> init;
 
-    constexpr ArrayNode(Location const& location) : LocationHolder(location)
+    constexpr ArrayNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -226,7 +226,7 @@ struct AccessNode : LocationHolder
     NodeRef left_expr;
     ID right_id;
 
-    constexpr AccessNode(Location const& location) : LocationHolder(location)
+    constexpr AccessNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -236,7 +236,7 @@ struct CastNode : LocationHolder
     NodeRef left_expr;
     ID right_type_id;
 
-    constexpr CastNode(Location const& location) : LocationHolder(location)
+    constexpr CastNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -246,7 +246,7 @@ struct OperatorNode : LocationHolder
     OperatorType type{};
     Vector<Node> sides;
 
-    constexpr OperatorNode(Location const& location) : LocationHolder(location)
+    constexpr OperatorNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -256,7 +256,7 @@ struct AssignNode : LocationHolder
     AssignType type{};
     Vector<Node> sides;
 
-    constexpr AssignNode(Location const& location) : LocationHolder(location)
+    constexpr AssignNode(Location location) : LocationHolder(location)
     {
     }
 };
@@ -270,7 +270,7 @@ struct Node : Variant<None, Scope, VariableNode, ReturnNode, BreakNode, Continue
         return static_cast<NodeType>(this->index());
     }
 
-    constexpr Location const& location() const
+    constexpr Location location() const
     {
         switch (type())
         {

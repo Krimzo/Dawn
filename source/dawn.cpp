@@ -4,12 +4,12 @@ dawn::Opt<dawn::String> dawn::Config::from_args(char const* const* args, int cou
 {
     for (int i = 0; i < count; i++)
     {
-        const std::string_view arg = args[i];
+        const StringRef arg = args[i];
         if (arg.starts_with(Flags::_PREFIX))
         {
             if (arg.size() < Flags::_PREFIX.size() + 1)
                 return format("invalid argument: ", arg);
-            const std::string_view arg_value = arg.substr(Flags::_PREFIX.size());
+            const StringRef arg_value = arg.substr(Flags::_PREFIX.size());
             const auto it = flags.find(arg_value);
             if (it != flags.end())
                 it->second = true;
@@ -24,7 +24,7 @@ dawn::Opt<dawn::String> dawn::Config::from_args(char const* const* args, int cou
     return std::nullopt;
 }
 
-dawn::Opt<dawn::String> dawn::Config::from_file(StringRef const& path) noexcept
+dawn::Opt<dawn::String> dawn::Config::from_file(StringRef path) noexcept
 {
     const Opt<String> file_data = read_file(path);
     if (!file_data)
@@ -68,7 +68,7 @@ dawn::Opt<dawn::String> dawn::Config::from_file(StringRef const& path) noexcept
     return std::nullopt;
 }
 
-dawn::Bool dawn::Config::flag_status(StringRef const& flag) const
+dawn::Bool dawn::Config::flag_status(StringRef flag) const
 {
     const auto it = flags.find(flag);
     if (it == flags.end())
@@ -122,7 +122,7 @@ void dawn::Dawn::eval_source(Source const& source, String* out_error) noexcept
     }
 }
 
-dawn::Value dawn::Dawn::eval_scope(StringRef const& scope_src, String* out_error) noexcept
+dawn::Value dawn::Dawn::eval_scope(StringRef scope_src, String* out_error) noexcept
 {
     Opt<Value> retval;
     try
@@ -146,7 +146,7 @@ dawn::Value dawn::Dawn::eval_scope(StringRef const& scope_src, String* out_error
     return retval.value_or({});
 }
 
-dawn::Value dawn::Dawn::eval_expr(StringRef const& expr_src, String* out_error) noexcept
+dawn::Value dawn::Dawn::eval_expr(StringRef expr_src, String* out_error) noexcept
 {
     try
     {

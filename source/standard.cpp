@@ -10,56 +10,56 @@ void dawn::Engine::load_standard_operators()
 {
     // op add
     bind_oper(id_void, OperatorType::ADD, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{+right.as_int(), location};
               });
 
     bind_oper(id_void, OperatorType::ADD, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{+right.as_float(), location};
               });
 
     bind_oper(id_int, OperatorType::ADD, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() + right.as_int(), location};
               });
 
     bind_oper(id_int, OperatorType::ADD, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() + right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::ADD, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() + right.as_int(), location};
               });
 
     bind_oper(id_float, OperatorType::ADD, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() + right.as_float(), location};
               });
 
     bind_oper(id_string, OperatorType::ADD, id_string, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_string() + right.as_string(), location};
               });
 
     bind_oper(id_array, OperatorType::ADD, id_array, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   ArrayValue result;
@@ -70,42 +70,42 @@ void dawn::Engine::load_standard_operators()
 
     // op sub
     bind_oper(id_void, OperatorType::SUB, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{-right.as_int(), location};
               });
 
     bind_oper(id_void, OperatorType::SUB, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{-right.as_float(), location};
               });
 
     bind_oper(id_int, OperatorType::SUB, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() - right.as_int(), location};
               });
 
     bind_oper(id_int, OperatorType::SUB, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() - right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::SUB, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() - right.as_int(), location};
               });
 
     bind_oper(id_float, OperatorType::SUB, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() - right.as_float(), location};
@@ -113,28 +113,28 @@ void dawn::Engine::load_standard_operators()
 
     // op mul
     bind_oper(id_int, OperatorType::MUL, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() * right.as_int(), location};
               });
 
     bind_oper(id_int, OperatorType::MUL, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() * right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::MUL, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() * right.as_int(), location};
               });
 
     bind_oper(id_float, OperatorType::MUL, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() * right.as_float(), location};
@@ -142,28 +142,28 @@ void dawn::Engine::load_standard_operators()
 
     // op div
     bind_oper(id_int, OperatorType::DIV, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() / right.as_int(), location};
               });
 
     bind_oper(id_int, OperatorType::DIV, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() / right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::DIV, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() / right.as_int(), location};
               });
 
     bind_oper(id_float, OperatorType::DIV, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() / right.as_float(), location};
@@ -171,28 +171,28 @@ void dawn::Engine::load_standard_operators()
 
     // op pow
     bind_oper(id_int, OperatorType::POW, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{(Int)std::pow(left.as_int(), right.as_int()), location};
               });
 
     bind_oper(id_int, OperatorType::POW, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{std::pow(left.as_int(), right.as_float()), location};
               });
 
     bind_oper(id_float, OperatorType::POW, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{std::pow(left.as_float(), right.as_int()), location};
               });
 
     bind_oper(id_float, OperatorType::POW, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{std::pow(left.as_float(), right.as_float()), location};
@@ -200,28 +200,28 @@ void dawn::Engine::load_standard_operators()
 
     // op mod
     bind_oper(id_int, OperatorType::MOD, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() % right.as_int(), location};
               });
 
     bind_oper(id_int, OperatorType::MOD, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{dawn_mod((Float)left.as_int(), right.as_float()), location};
               });
 
     bind_oper(id_float, OperatorType::MOD, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{dawn_mod(left.as_float(), (Float)right.as_int()), location};
               });
 
     bind_oper(id_float, OperatorType::MOD, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{dawn_mod(left.as_float(), right.as_float()), location};
@@ -229,56 +229,56 @@ void dawn::Engine::load_standard_operators()
 
     // op equals
     bind_oper(id_void, OperatorType::EQ, id_void, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{Bool{true}, location};
               });
 
     bind_oper(id_bool, OperatorType::EQ, id_bool, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_bool() == right.as_bool(), location};
               });
 
     bind_oper(id_int, OperatorType::EQ, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() == right.as_int(), location};
               });
 
     bind_oper(id_int, OperatorType::EQ, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() == right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::EQ, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() == right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::EQ, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() == right.as_int(), location};
               });
 
     bind_oper(id_char, OperatorType::EQ, id_char, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_char() == right.as_char(), location};
               });
 
     bind_oper(id_string, OperatorType::EQ, id_string, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_string() == right.as_string(), location};
@@ -286,56 +286,56 @@ void dawn::Engine::load_standard_operators()
 
     // op not equals
     bind_oper(id_void, OperatorType::NOT_EQ, id_void, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{Int{false}, location};
               });
 
     bind_oper(id_bool, OperatorType::NOT_EQ, id_bool, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_bool() != right.as_bool(), location};
               });
 
     bind_oper(id_int, OperatorType::NOT_EQ, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() != right.as_int(), location};
               });
 
     bind_oper(id_int, OperatorType::NOT_EQ, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() != right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::NOT_EQ, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() != right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::NOT_EQ, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() != right.as_int(), location};
               });
 
     bind_oper(id_char, OperatorType::NOT_EQ, id_char, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_char() != right.as_char(), location};
               });
 
     bind_oper(id_string, OperatorType::NOT_EQ, id_string, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_string() != right.as_string(), location};
@@ -343,28 +343,28 @@ void dawn::Engine::load_standard_operators()
 
     // op less
     bind_oper(id_int, OperatorType::LESS, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() < right.as_int(), location};
               });
 
     bind_oper(id_int, OperatorType::LESS, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() < right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::LESS, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() < right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::LESS, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() < right.as_int(), location};
@@ -372,28 +372,28 @@ void dawn::Engine::load_standard_operators()
 
     // op great
     bind_oper(id_int, OperatorType::GREAT, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() > right.as_int(), location};
               });
 
     bind_oper(id_int, OperatorType::GREAT, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() > right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::GREAT, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() > right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::GREAT, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() > right.as_int(), location};
@@ -401,28 +401,28 @@ void dawn::Engine::load_standard_operators()
 
     // op less equals
     bind_oper(id_int, OperatorType::LESS_EQ, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() <= right.as_int(), location};
               });
 
     bind_oper(id_int, OperatorType::LESS_EQ, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() <= right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::LESS_EQ, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() <= right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::LESS_EQ, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() <= right.as_int(), location};
@@ -430,28 +430,28 @@ void dawn::Engine::load_standard_operators()
 
     // op great equals
     bind_oper(id_int, OperatorType::GREAT_EQ, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() >= right.as_int(), location};
               });
 
     bind_oper(id_int, OperatorType::GREAT_EQ, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_int() >= right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::GREAT_EQ, id_float, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() >= right.as_float(), location};
               });
 
     bind_oper(id_float, OperatorType::GREAT_EQ, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_float() >= right.as_int(), location};
@@ -459,7 +459,7 @@ void dawn::Engine::load_standard_operators()
 
     // op not
     bind_oper(id_void, OperatorType::NOT, id_bool, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{!right.as_bool(), location};
@@ -467,7 +467,7 @@ void dawn::Engine::load_standard_operators()
 
     // op and
     bind_oper(id_bool, OperatorType::AND, id_bool, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_bool() && right.as_bool(), location};
@@ -475,7 +475,7 @@ void dawn::Engine::load_standard_operators()
 
     // op or
     bind_oper(id_bool, OperatorType::OR, id_bool, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{left.as_bool() || right.as_bool(), location};
@@ -483,28 +483,28 @@ void dawn::Engine::load_standard_operators()
 
     // op range
     bind_oper(id_int, OperatorType::RANGE, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{RangeValue{.start = left.as_int(), .end = right.as_int(), .inclusive = false}, location};
               });
 
     bind_oper(id_void, OperatorType::RANGE, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto const& right = args[1];
                   return Value{RangeValue{.start = 0, .end = right.as_int(), .inclusive = false}, location};
               });
 
     // op range_incl
     bind_oper(id_int, OperatorType::RANGE_INCL, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto& left = args[0];
                   auto& right = args[1];
                   return Value{RangeValue{.start = left.as_int(), .end = right.as_int(), .inclusive = true}, location};
               });
 
     bind_oper(id_void, OperatorType::RANGE_INCL, id_int, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+              [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
                   auto const& right = args[1];
                   return Value{RangeValue{.start = 0, .end = right.as_int(), .inclusive = true}, location};
               });
@@ -516,7 +516,7 @@ void dawn::Engine::load_standard_functions()
     static constexpr Parser _parser{};
 
     /* DAWN */
-    bind_func("lex", true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func("lex", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count != 1)
             ENGINE_PANIC(location, "lex expected 1 argument, but got ", arg_count);
         Vector<Token> tokens;
@@ -527,7 +527,7 @@ void dawn::Engine::load_standard_functions()
         return Value{array, location};
     });
 
-    bind_func("eval", true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func("eval", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count != 1)
             ENGINE_PANIC(location, "eval expected 1 argument, but got ", arg_count);
         Vector<Token> tokens;
@@ -539,23 +539,22 @@ void dawn::Engine::load_standard_functions()
     });
 
     /* TYPE */
-    bind_func("typeid", true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func("typeid", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             return Value{(Int)args[0].type_id().integer(), location};
         else
             ENGINE_PANIC(location, "typeid expected 1 argument, but got ", arg_count);
     });
 
-    bind_func("typename", true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
-                  if (arg_count == 1)
-                      return Value{args[0].type_id().string(), location};
-                  else
-                      ENGINE_PANIC(location, "typename expected 1 argument, but got ", arg_count);
-              });
+    bind_func("typename", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 1)
+            return Value{args[0].type_id().string(), location};
+        else
+            ENGINE_PANIC(location, "typename expected 1 argument, but got ", arg_count);
+    });
 
     /* CAST */
-    bind_func(id_void, true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func(id_void, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
         {
             args[0].to_void(engine);
@@ -567,7 +566,7 @@ void dawn::Engine::load_standard_functions()
             ENGINE_PANIC(location, tp_void, "() expects 1 or 0 arguments, but got ", arg_count);
     });
 
-    bind_func(id_bool, true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func(id_bool, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             return Value{args[0].to_bool(engine), location};
         else if (arg_count == 0)
@@ -576,7 +575,7 @@ void dawn::Engine::load_standard_functions()
             ENGINE_PANIC(location, tp_bool, "() expects 1 or 0 arguments, but got ", arg_count);
     });
 
-    bind_func(id_int, true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func(id_int, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             return Value{args[0].to_int(engine), location};
         else if (arg_count == 0)
@@ -585,7 +584,7 @@ void dawn::Engine::load_standard_functions()
             ENGINE_PANIC(location, tp_int, "() expects 1 or 0 arguments, but got ", arg_count);
     });
 
-    bind_func(id_float, true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func(id_float, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             return Value{args[0].to_float(engine), location};
         else if (arg_count == 0)
@@ -594,7 +593,7 @@ void dawn::Engine::load_standard_functions()
             ENGINE_PANIC(location, tp_float, "() expects 1 or 0 arguments, but got ", arg_count);
     });
 
-    bind_func(id_char, true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func(id_char, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             return Value{args[0].to_char(engine), location};
         else if (arg_count == 0)
@@ -603,7 +602,7 @@ void dawn::Engine::load_standard_functions()
             ENGINE_PANIC(location, tp_char, "() expects 1 or 0 arguments, but got ", arg_count);
     });
 
-    bind_func(id_string, true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func(id_string, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             return Value{args[0].to_string(engine), location};
         else if (arg_count == 0)
@@ -612,7 +611,7 @@ void dawn::Engine::load_standard_functions()
             ENGINE_PANIC(location, tp_string, "() expects 1 or 0 arguments, but got ", arg_count);
     });
 
-    bind_func(id_range, true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func(id_range, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             return Value{args[0].to_range(engine), location};
         else if (arg_count == 0)
@@ -621,17 +620,16 @@ void dawn::Engine::load_standard_functions()
             ENGINE_PANIC(location, tp_range, "() expects 1 or 0 arguments, but got ", arg_count);
     });
 
-    bind_func(id_function, true,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
-                  if (arg_count == 1)
-                      return Value{args[0].to_function(engine), location};
-                  else if (arg_count == 0)
-                      return Value{FunctionValue{}, location};
-                  else
-                      ENGINE_PANIC(location, tp_function, "() expects 1 or 0 arguments, but got ", arg_count);
-              });
+    bind_func(id_function, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 1)
+            return Value{args[0].to_function(engine), location};
+        else if (arg_count == 0)
+            return Value{FunctionValue{}, location};
+        else
+            ENGINE_PANIC(location, tp_function, "() expects 1 or 0 arguments, but got ", arg_count);
+    });
 
-    bind_func(id_array, true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func(id_array, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             return Value{args[0].to_array(engine), location};
         else if (arg_count == 0)
@@ -641,7 +639,7 @@ void dawn::Engine::load_standard_functions()
     });
 
     /* SYSTEM */
-    bind_func("exit", false, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func("exit", false, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             std::exit((int)args[0].as_int());
         else
@@ -650,14 +648,14 @@ void dawn::Engine::load_standard_functions()
     });
 
     /* UTILITY */
-    bind_func("format", true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func("format", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         StringStream stream;
         for (Int i = 0; i < arg_count; i++)
             stream << args[i].to_string(engine);
         return Value{stream.str(), location};
     });
 
-    bind_func("put", false, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func("put", false, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         StringStream stream;
         for (Int i = 0; i < arg_count; i++)
             stream << args[i].to_string(engine);
@@ -665,7 +663,7 @@ void dawn::Engine::load_standard_functions()
         return Value{};
     });
 
-    bind_func("print", false, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func("print", false, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         StringStream stream;
         for (Int i = 0; i < arg_count; i++)
             stream << args[i].to_string(engine);
@@ -673,24 +671,22 @@ void dawn::Engine::load_standard_functions()
         return Value{};
     });
 
-    bind_func("rand_int", false,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
-                  if (arg_count == 1)
-                      return Value{Int(RAND_ENGINE() % args[0].as_int()), location};
-                  else
-                      ENGINE_PANIC(location, "rand_int() expects 1 argument, but got ", arg_count);
-              });
+    bind_func("rand_int", false, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 1)
+            return Value{Int(RAND_ENGINE() % args[0].as_int()), location};
+        else
+            ENGINE_PANIC(location, "rand_int() expects 1 argument, but got ", arg_count);
+    });
 
-    bind_func("rand_flt", false,
-              [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
-                  if (arg_count == 0)
-                      return Value{((Float)RAND_ENGINE() / UINT64_MAX), location};
-                  else
-                      ENGINE_PANIC(location, "rand_flt() expects 0 arguments, but got ", arg_count);
-              });
+    bind_func("rand_flt", false, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 0)
+            return Value{((Float)RAND_ENGINE() / UINT64_MAX), location};
+        else
+            ENGINE_PANIC(location, "rand_flt() expects 0 arguments, but got ", arg_count);
+    });
 
     /* MATH */
-    bind_func("min", true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func("min", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 2)
         {
             if (args[0].type() == ValueType::INT)
@@ -704,7 +700,7 @@ void dawn::Engine::load_standard_functions()
             ENGINE_PANIC(location, "min() expects 2 arguments, but got ", arg_count);
     });
 
-    bind_func("max", true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func("max", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 2)
         {
             if (args[0].type() == ValueType::INT)
@@ -718,7 +714,7 @@ void dawn::Engine::load_standard_functions()
             ENGINE_PANIC(location, "max() expects 2 arguments, but got ", arg_count);
     });
 
-    bind_func("abs", true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func("abs", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
         {
             if (args[0].type() == ValueType::INT)
@@ -732,21 +728,21 @@ void dawn::Engine::load_standard_functions()
             ENGINE_PANIC(location, "abs() expects 1 argument, but got ", arg_count);
     });
 
-    bind_func("sqrt", true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func("sqrt", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             return Value{std::sqrt(args[0].as_float()), location};
         else
             ENGINE_PANIC(location, "sqrt() expects 1 argument, but got ", arg_count);
     });
 
-    bind_func("sin", true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func("sin", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             return Value{std::sin(args[0].as_float()), location};
         else
             ENGINE_PANIC(location, "sin() expects 1 argument, but got ", arg_count);
     });
 
-    bind_func("cos", true, [](Location const& location, Engine& engine, Value const* args, Int arg_count) -> Value {
+    bind_func("cos", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             return Value{std::cos(args[0].as_float()), location};
         else
@@ -758,7 +754,7 @@ void dawn::Engine::load_standard_members()
 {
     // Strings.
     bind_method(ValueType::STRING, "for_each", true, 1,
-                [](Location const& location, Engine& engine, Value const& self, Value const* args) -> Value {
+                [](Location location, Engine& engine, Value const& self, Value const* args) -> Value {
                     auto& func = args[0].as_function();
                     for (Char& c : self.as_string())
                     {
@@ -768,82 +764,81 @@ void dawn::Engine::load_standard_members()
                     return Value{};
                 });
 
-    bind_field(ValueType::STRING, "count", [](Location const& location, Engine& engine, Value const& self) -> Value {
+    bind_field(ValueType::STRING, "count", [](Location location, Engine& engine, Value const& self) -> Value {
         return Value{(Int)self.as_string().size(), location};
     });
 
     bind_method(ValueType::STRING, "push", false, 1,
-                [](Location const& location, Engine& engine, Value const& self, Value const* args) -> Value {
+                [](Location location, Engine& engine, Value const& self, Value const* args) -> Value {
                     self.as_string().push_back(args[0].as_char());
                     return self;
                 });
 
     bind_method(ValueType::STRING, "pop", false, 0,
-                [](Location const& location, Engine& engine, Value const& self, Value const* args) -> Value {
+                [](Location location, Engine& engine, Value const& self, Value const* args) -> Value {
                     self.as_string().pop_back();
                     return self;
                 });
 
     bind_method(ValueType::STRING, "find", true, 1,
-                [](Location const& location, Engine& engine, Value const& self, Value const* args) -> Value {
+                [](Location location, Engine& engine, Value const& self, Value const* args) -> Value {
                     auto& self_str = self.as_string();
                     size_t index = self_str.find(args[0].as_string());
                     return Value{Int(index), location};
                 });
 
     // Ranges.
-    bind_field(ValueType::RANGE, "start", [](Location const& location, Engine& engine, Value const& self) -> Value {
+    bind_field(ValueType::RANGE, "start", [](Location location, Engine& engine, Value const& self) -> Value {
         return Value{&self.as_range().start, self.is_const(), location};
     });
 
-    bind_field(ValueType::RANGE, "end", [](Location const& location, Engine& engine, Value const& self) -> Value {
+    bind_field(ValueType::RANGE, "end", [](Location location, Engine& engine, Value const& self) -> Value {
         return Value{&self.as_range().end, self.is_const(), location};
     });
 
-    bind_field(ValueType::RANGE, "inclusive", [](Location const& location, Engine& engine, Value const& self) -> Value {
+    bind_field(ValueType::RANGE, "inclusive", [](Location location, Engine& engine, Value const& self) -> Value {
         return Value{&self.as_range().inclusive, self.is_const(), location};
     });
 
     // Enums.
-    bind_field(ValueType::ENUM, "id", [](Location const& location, Engine& engine, Value const& self) -> Value {
+    bind_field(ValueType::ENUM, "id", [](Location location, Engine& engine, Value const& self) -> Value {
         return Value{(Int)self.as_enum().key_id.integer(), location};
     });
 
-    bind_field(ValueType::ENUM, "name", [](Location const& location, Engine& engine, Value const& self) -> Value {
+    bind_field(ValueType::ENUM, "name", [](Location location, Engine& engine, Value const& self) -> Value {
         return Value{self.as_enum().key_id.string(), location};
     });
 
-    bind_field(ValueType::ENUM, "value", [](Location const& location, Engine& engine, Value const& self) -> Value {
-        return *self.as_enum().value;
-    });
+    bind_field(ValueType::ENUM, "value",
+               [](Location location, Engine& engine, Value const& self) -> Value { return *self.as_enum().value; });
 
     // Arrays.
     bind_method(ValueType::ARRAY, "for_each", true, 1,
-                [](Location const& location, Engine& engine, Value const& self, Value const* args) -> Value {
+                [](Location location, Engine& engine, Value const& self, Value const* args) -> Value {
                     auto& func = args[0].as_function();
                     for (Value const& v : self.as_array().data)
                         engine.handle_func(location, func, &v, 1);
                     return Value{};
                 });
 
-    bind_field(ValueType::ARRAY, "count", [](Location const& location, Engine& engine, Value const& self) -> Value {
+    bind_field(ValueType::ARRAY, "count", [](Location location, Engine& engine, Value const& self) -> Value {
         return Value{(Int)self.as_array().data.size(), location};
     });
 
     bind_method(ValueType::ARRAY, "push", false, 1,
-                [](Location const& location, Engine& engine, Value const& self, Value const* args) -> Value {
+                [](Location location, Engine& engine, Value const& self, Value const* args) -> Value {
                     self.as_array().data.emplace_back(args[0]).unlock_const();
                     return self;
                 });
 
     bind_method(ValueType::ARRAY, "pop", false, 0,
-                [](Location const& location, Engine& engine, Value const& self, Value const* args) -> Value {
+                [](Location location, Engine& engine, Value const& self, Value const* args) -> Value {
                     self.as_array().data.pop_back();
                     return self;
                 });
 
     bind_method(ValueType::ARRAY, "find", true, 1,
-                [](Location const& location, Engine& engine, Value const& self, Value const* args) -> Value {
+                [](Location location, Engine& engine, Value const& self, Value const* args) -> Value {
                     auto const& self_arr = self.as_array().data;
                     auto const& item = args[0];
                     for (Int i = 0; i < (Int)self_arr.size(); i++)

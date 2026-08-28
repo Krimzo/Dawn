@@ -10,7 +10,7 @@ struct LexerError
 
     String msg;
 
-    template <typename... Args> explicit LexerError(Location const& location, Char c, Args&&... args)
+    template <typename... Args> explicit LexerError(Location location, Char c, Args&&... args)
     {
         StringStream stream;
         stream << ColoredText{COLOR, "Lexer"} << " error at char " << location.to_string(COLOR) << "["
@@ -41,7 +41,7 @@ struct EngineError
 
     String msg;
 
-    template <typename... Args> explicit EngineError(Location const& location, Args&&... args)
+    template <typename... Args> explicit EngineError(Location location, Args&&... args)
     {
         StringStream stream;
         stream << ColoredText{COLOR, "Engine"} << " error at " << location.to_string(COLOR) << ": ";

@@ -59,15 +59,15 @@ void dawn::Engine::load_function(Function const& entry)
         {
             if (members[(Int)*value_type].get(entry.id))
                 ENGINE_PANIC({}, "method [", entry.id, "] already defined for type [", entry.type_id, "]");
-            members[(Int)*value_type].set(
-                entry.id, [entry](Location const& location, Engine& engine, Value const& self) -> Value {
-                    FunctionValue fv{};
-                    auto& method = fv.data.emplace<FunctionValue::AsMethod>();
-                    method.id = entry.id;
-                    method.func = DFunction{entry.args, entry.body};
-                    *method.self = self;
-                    return Value{fv, location};
-                });
+            members[(Int)*value_type].set(entry.id,
+                                          [entry](Location location, Engine& engine, Value const& self) -> Value {
+                                              FunctionValue fv{};
+                                              auto& method = fv.data.emplace<FunctionValue::AsMethod>();
+                                              method.id = entry.id;
+                                              method.func = DFunction{entry.args, entry.body};
+                                              *method.self = self;
+                                              return Value{fv, location};
+                                          });
         }
         else if (Struct* struc = structs.get(entry.type_id))
         {
@@ -158,7 +158,7 @@ dawn::Value dawn::Engine::call_func(ID id, Value* args, Int arg_count)
     return handle_func({}, value->as_function(), args, arg_count);
 }
 
-void dawn::Engine::add_var(Location const& location, VarType const& type, ID id, Value const& value)
+void dawn::Engine::add_var(Location location, VarType const& type, ID id, Value const& value)
 {
     if (type.type_id.valid() && type.type_id != value.type_id())
         ENGINE_PANIC(location, "can not init variable of type [", type.type_id, "] with type [", value.type_id(), "]");
@@ -186,7 +186,7 @@ dawn::Value* dawn::Engine::get_var(ID id)
 
 void dawn::Engine::bind_field(ValueType type, ID id, FieldCFunc const& func)
 {
-    members[(Int)type].set(id, [func](Location const& location, Engine& engine, Value const& self) -> Value {
+    members[(Int)type].set(id, [func](Location location, Engine& engine, Value const& self) -> Value {
         return func(location, engine, const_cast<Value&>(self));
     });
 }
@@ -194,12 +194,12 @@ void dawn::Engine::bind_field(ValueType type, ID id, FieldCFunc const& func)
 void dawn::Engine::bind_method(ValueType type, ID id, Bool is_const, Int expected_args, MethodCFunc const& body)
 {
     members[(Int)type].set(
-        id, [id, is_const, expected_args, body](Location const& location, Engine& _, Value const& self) -> Value {
+        id, [id, is_const, expected_args, body](Location location, Engine& _, Value const& self) -> Value {
             FunctionValue fv{};
             auto& method = fv.data.emplace<FunctionValue::AsMethod>();
             method.id = id;
-            method.func = [id, is_const, expected_args, body](Location const& location, Engine& engine,
-                                                              Value const* args, Int arg_count) -> Value {
+            method.func = [id, is_const, expected_args, body](Location location, Engine& engine, Value const* args,
+                                                              Int arg_count) -> Value {
                 if (!is_const && args[0].is_const())
                     ENGINE_PANIC(location, "can not call [", id, "] on a const value");
                 if ((1 + expected_args) != arg_count)

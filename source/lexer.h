@@ -45,8 +45,8 @@ struct Source
     const Opt<String> path;
     const String source;
 
-    static Source from_text(StringRef const& str);
-    static Source from_file(StringRef const& path);
+    static Source from_text(StringRef str);
+    static Source from_file(StringRef path);
 
     constexpr Char operator[](Int i) const
     {

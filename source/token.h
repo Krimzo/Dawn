@@ -43,7 +43,7 @@ struct Location
     {
     }
 
-    explicit Location(StringRef const& path, Index const& index)
+    explicit Location(StringRef path, Index const& index)
         : path_id(path), line((IntType)index.line()), col((IntType)index.col())
     {
     }
@@ -75,7 +75,7 @@ struct Token
 };
 
 Color to_color(TokenType type);
-Bool is_custom_type(StringRef const& value);
+Bool is_custom_type(StringRef value);
 
 std::ostream& operator<<(std::ostream& stream, Token const& token);
 } // namespace dawn

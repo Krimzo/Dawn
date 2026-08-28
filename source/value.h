@@ -27,9 +27,9 @@ struct DFunction
     Scope body;
 };
 
-struct CFunction : Func<Value(Location const&, Engine&, Value const*, Int)>
+struct CFunction : Func<Value(Location, Engine&, Value const*, Int)>
 {
-    using Func<Value(Location const&, Engine&, Value const*, Int)>::function;
+    using Func<Value(Location, Engine&, Value const*, Int)>::function;
 };
 
 struct FunctionValue
@@ -147,26 +147,26 @@ template <typename T> struct ValueStorage
 struct Value
 {
     constexpr Value() = default;
-    explicit Value(Bool value, Location const& location = {});
-    explicit Value(Bool* value, Bool is_const, Location const& location = {});
-    explicit Value(Int value, Location const& location = {});
-    explicit Value(Int* value, Bool is_const, Location const& location = {});
-    explicit Value(Float value, Location const& location = {});
-    explicit Value(Float* value, Bool is_const, Location const& location = {});
-    explicit Value(Char value, Location const& location = {});
-    explicit Value(Char* value, Bool is_const, Location const& location = {});
-    explicit Value(String value, Location const& location = {});
-    explicit Value(String* value, Bool is_const, Location const& location = {});
-    explicit Value(RangeValue const& value, Location const& location = {});
-    explicit Value(RangeValue* value, Bool is_const, Location const& location = {});
-    explicit Value(FunctionValue const& value, Location const& location = {});
-    explicit Value(FunctionValue* value, Bool is_const, Location const& location = {});
-    explicit Value(ArrayValue const& value, Location const& location = {});
-    explicit Value(ArrayValue* value, Bool is_const, Location const& location = {});
-    explicit Value(EnumValue const& value, Location const& location = {});
-    explicit Value(EnumValue* value, Bool is_const, Location const& location = {});
-    explicit Value(StructValue const& value, Location const& location = {});
-    explicit Value(StructValue* value, Bool is_const, Location const& location = {});
+    explicit Value(Bool value, Location location = {});
+    explicit Value(Bool* value, Bool is_const, Location location = {});
+    explicit Value(Int value, Location location = {});
+    explicit Value(Int* value, Bool is_const, Location location = {});
+    explicit Value(Float value, Location location = {});
+    explicit Value(Float* value, Bool is_const, Location location = {});
+    explicit Value(Char value, Location location = {});
+    explicit Value(Char* value, Bool is_const, Location location = {});
+    explicit Value(String value, Location location = {});
+    explicit Value(String* value, Bool is_const, Location location = {});
+    explicit Value(RangeValue const& value, Location location = {});
+    explicit Value(RangeValue* value, Bool is_const, Location location = {});
+    explicit Value(FunctionValue const& value, Location location = {});
+    explicit Value(FunctionValue* value, Bool is_const, Location location = {});
+    explicit Value(ArrayValue const& value, Location location = {});
+    explicit Value(ArrayValue* value, Bool is_const, Location location = {});
+    explicit Value(EnumValue const& value, Location location = {});
+    explicit Value(EnumValue* value, Bool is_const, Location location = {});
+    explicit Value(StructValue const& value, Location location = {});
+    explicit Value(StructValue* value, Bool is_const, Location location = {});
 
     void as_void() const;
     Bool& as_bool() const;
@@ -180,7 +180,7 @@ struct Value
     EnumValue const& as_enum() const;     // Must be const since parent_id mustn't be changed.
     StructValue const& as_struct() const; // Must be const since parent_id mustn't be changed.
 
-    Location const& location() const;
+    Location location() const;
     ValueType type() const;
     ID type_id() const;
 

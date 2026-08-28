@@ -23,8 +23,8 @@ struct Config
     StringMap<Bool> flags = {{(String)Flags::DISABLE_OPTIMIZATIONS, false}};
 
     Opt<String> from_args(char const* const* args, int count) noexcept;
-    Opt<String> from_file(StringRef const& path) noexcept;
-    Bool flag_status(StringRef const& flag) const;
+    Opt<String> from_file(StringRef path) noexcept;
+    Bool flag_status(StringRef flag) const;
 };
 
 struct Dawn
@@ -37,8 +37,8 @@ struct Dawn
     Engine engine;
 
     void eval_source(Source const& source, String* out_error = nullptr) noexcept;
-    Value eval_scope(StringRef const& scope_src, String* out_error = nullptr) noexcept;
-    Value eval_expr(StringRef const& expr_src, String* out_error = nullptr) noexcept;
+    Value eval_scope(StringRef scope_src, String* out_error = nullptr) noexcept;
+    Value eval_expr(StringRef expr_src, String* out_error = nullptr) noexcept;
 
     void bind_func(ID id, Bool is_ctime, CFunction cfunc) noexcept;
     Value call_func(ID id, String* out_error = nullptr) noexcept;

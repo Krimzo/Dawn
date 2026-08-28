@@ -42,12 +42,12 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
     return result;
 }
 
-dawn::Source dawn::Source::from_text(StringRef const& str)
+dawn::Source dawn::Source::from_text(StringRef str)
 {
     return Source{std::nullopt, String{str}};
 }
 
-dawn::Source dawn::Source::from_file(StringRef const& path)
+dawn::Source dawn::Source::from_file(StringRef path)
 {
     std::error_code error{};
     const String abs_path = fs::canonical(path, error).generic_string();
@@ -277,13 +277,13 @@ dawn::Bool dawn::Lexer::is_string(Source const& source, Int i) const
 
 void dawn::Lexer::extract_string(Source const& source, Vector<Token>& tokens, Index& index) const
 {
-    const auto add_value_token = [&](TokenType type, StringRef const& str) {
+    const auto add_value_token = [&](TokenType type, StringRef str) {
         auto& token = tokens.emplace_back();
         token.type = type;
         token.value = str;
         token.location = Location{source.path.value_or({}), index};
     };
-    const auto add_literal_token = [&](TokenType type, StringRef const& str) {
+    const auto add_literal_token = [&](TokenType type, StringRef str) {
         auto& token = tokens.emplace_back();
         token.type = type;
         token.literal = str;

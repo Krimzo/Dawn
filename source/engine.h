@@ -7,14 +7,14 @@ namespace dawn
 {
 struct Engine
 {
-    using MemberCFunc = Func<Value(Location const&, Engine&, Value const&)>;
-    using FieldCFunc = Func<Value(Location const&, Engine&, Value const&)>;
-    using MethodCFunc = Func<Value(Location const&, Engine&, Value const&, Value const*)>;
+    using MemberCFunc = Func<Value(Location, Engine&, Value const&)>;
+    using FieldCFunc = Func<Value(Location, Engine&, Value const&)>;
+    using MethodCFunc = Func<Value(Location, Engine&, Value const&, Value const*)>;
 
     friend struct Value;
     friend struct EnumValue;
     friend struct Optimizer;
-    friend Value create_default_value(Engine* engine, ID typeid_, Location const& location);
+    friend Value create_default_value(Engine* engine, ID typeid_, Location location);
 
     Stack stack;
     GlobalStorage<Enum> enums;
@@ -36,7 +36,7 @@ struct Engine
     void bind_func(ID id, Bool is_ctime, CFunction cfunc);
     Value call_func(ID id, Value* args, Int arg_count);
 
-    void add_var(Location const& location, VarType const& type, ID id, Value const& value);
+    void add_var(Location location, VarType const& type, ID id, Value const& value);
     Value* get_var(ID id);
 
     void bind_field(ValueType type, ID id, FieldCFunc const& func);
@@ -72,7 +72,7 @@ struct Engine
     void handle_scope(Scope const& scope, Opt<Value>& retval, Bool* didbrk,
                       Bool* didcon); // Should not inline since scope calls instr and instr calls scope.
 
-    __forceinline Value handle_oper(Location const& location, Value const& left, const OperatorType op_type,
+    __forceinline Value handle_oper(Location location, Value const& left, const OperatorType op_type,
                                     Value const& right)
     {
         auto* op_right_ids = operators[(Int)op_type].get(left.type_id());
@@ -94,8 +94,7 @@ struct Engine
         return handle_func(location, *func, reinterpret_cast<Value*>(proxy_args), (Int)std::size(proxy_args));
     }
 
-    __forceinline Value handle_func(Location const& location, FunctionValue const& func, Value const* args,
-                                    Int arg_count)
+    __forceinline Value handle_func(Location location, FunctionValue const& func, Value const* args, Int arg_count)
     {
         if (auto* dfunc = func.dfunction())
         {
@@ -235,7 +234,7 @@ struct Engine
     Set<ID> m_ctime_funcs;
 };
 
-__forceinline Value create_default_value(Engine* engine, ID typeid_, Location const& location)
+__forceinline Value create_default_value(Engine* engine, ID typeid_, Location location)
 {
     if (typeid_ == id_void)
         return Value{};

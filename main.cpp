@@ -83,9 +83,11 @@ int main(int argc, char** argv)
     try
     {
         const Source source = Source::from_file(dawn.config.input_file);
-        if (auto error = dawn.eval(source))
+        String error;
+        dawn.eval_source(source, &error);
+        if (!error.empty())
         {
-            print(error.value());
+            print(error);
             return -5;
         }
     }
@@ -99,10 +101,11 @@ int main(int argc, char** argv)
     for (String const& arg : dawn.config.args_to_pass)
         args.data.emplace_back(arg);
 
-    Value retval{Int()};
-    if (auto error = dawn.call_func("main", {Value{&args, true}}, &retval))
+    String error;
+    const Value retval = dawn.call_func("main", {Value{&args, true}}, &error);
+    if (!error.empty())
     {
-        print(error.value());
+        print(error);
         return -6;
     }
     return (int)retval.to_int(dawn.engine);

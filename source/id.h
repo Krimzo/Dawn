@@ -22,12 +22,12 @@ struct ID
         this->init(str);
     }
 
-    ID(StringRef const& str)
+    ID(StringRef str)
     {
         this->init(str);
     }
 
-    void init(StringRef const& str)
+    void init(StringRef str)
     {
         const auto it = STR_ID.find(str);
         if (it != STR_ID.end())

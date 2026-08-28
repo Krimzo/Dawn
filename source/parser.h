@@ -93,7 +93,7 @@ Int token_depth(Token const& token, Bool& in_lambda);
 void create_operator_node(Token const& token, Node& node);
 void create_assign_node(Token const& token, Node& node);
 
-__forceinline Bool is_op(StringRef const& value)
+__forceinline Bool is_op(StringRef value)
 {
     static const StringSet OPS = {
         (String)op_add, (String)op_sub, (String)op_mul,  (String)op_div,   (String)op_pow,        (String)op_mod,
@@ -103,7 +103,7 @@ __forceinline Bool is_op(StringRef const& value)
     return OPS.contains(value);
 }
 
-__forceinline OperatorType get_op(StringRef const& value)
+__forceinline OperatorType get_op(StringRef value)
 {
     if (value == op_add)
         return OperatorType::ADD;
