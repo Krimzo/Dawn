@@ -534,12 +534,11 @@ void dawn::Value::assign(Value const& other)
         break;
 
     case ValueType::ENUM:
-        const_cast<EnumValue&>(as_enum()) = other.as_enum(); // This is fine because this->type_id() == other.type_id().
+        as_enum() = other.as_enum();
         break;
 
     case ValueType::STRUCT:
-        const_cast<StructValue&>(as_struct()) =
-            other.as_struct(); // This is fine because this->type_id() == other.type_id().
+        as_struct() = other.as_struct();
         break;
 
     default:
@@ -608,15 +607,13 @@ dawn::Value& dawn::Value::unlock_const()
     switch (type())
     {
     case ValueType::ARRAY: {
-        auto& value = as_array();
-        for (auto& entry : value.data)
+        for (auto& entry : as_array().data)
             entry.unlock_const();
     }
     break;
 
     case ValueType::STRUCT: {
-        auto& value = const_cast<StructValue&>(as_struct()); // Fine because type_id is not being changed.
-        for (auto& [_, member] : value.members)
+        for (auto& [_, member] : as_struct().members)
             if (member.type == MemberType::FIELD)
                 member.value.unlock_const();
     }

@@ -158,6 +158,6 @@ template <typename T, Int ChunkSize> struct MemoryPool
 
   private:
     List<MemoryChunk<T, ChunkSize>> m_chunks;
-    List<MemoryChunk<T, ChunkSize>>::iterator m_current;
+    decltype(m_chunks)::iterator m_current;
 };
 } // namespace dawn
