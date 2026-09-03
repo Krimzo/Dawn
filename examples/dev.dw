@@ -2,16 +2,32 @@ import "dev_libs.dw"
 
 func main( array & args )
 {
+	& a = 7; & b = 7;
+	& c = `int e`
+	{
+		if e % 2 == 0 {
+			throw (e - 5)
+		}
+		return (a * b) - e;
+	}
+
+	print(c(1));
+	try {
+		print(c(2));
+	}
+	catch f {
+		print("{f} -> {is_const(f)}")
+	}
+
 	Animal animal = Animal::cat
 	print(animal)
 	print(animal.value)
-	print(Animal::dog.value)
+	print("{Animal::dog} -> {Animal::dog.value}")
 
-	int a = 7; int b = 7; & c = `int e`
-		{ return (a * b) - e }
-	print(c(1))
-
-	Person person = Person{ name: "Ivan", fav_animal: animal }
+	& person = Person{
+		name: "Ivan",
+		fav_animal: animal,
+		}
 	print(person)
 }
 

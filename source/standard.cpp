@@ -553,6 +553,13 @@ void dawn::Engine::load_standard_functions()
             ENGINE_PANIC(location, "typename expected 1 argument, but got ", arg_count);
     });
 
+    bind_func("is_const", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 1)
+            return Value{(Bool)args[0].is_const(), location};
+        else
+            ENGINE_PANIC(location, "is_const expected 1 argument, but got ", arg_count);
+    });
+
     /* CAST */
     bind_func(id_void, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
