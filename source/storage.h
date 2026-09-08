@@ -50,11 +50,16 @@ template <typename T> struct GlobalStorage
     T* get(ID id)
     {
         if (id.integer() < m_data.size())
-        {
             if (auto& opt_obj = m_data[id.integer()])
                 return &(*opt_obj);
-        }
         return nullptr;
+    }
+
+    T& get_or_set(ID id)
+    {
+        if (auto* ptr = get(id))
+            return *ptr;
+        return set(id, T{});
     }
 
     void clear()

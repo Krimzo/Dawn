@@ -37,13 +37,13 @@ int main(int argc, char** argv)
         args.data.emplace_back<String>(argv[i]);
 
     error.clear();
-    const Value retval = dawn.call_func("main", {Value{&args, true}}, &error);
+    const Value retval = dawn.call_function("main", {Value{&args, true}}, &error);
     if (!error.empty())
     {
         print(error);
         return -2;
     }
-    return (int)retval.to_int(dawn.engine);
+    return (int)dawn.engine.to_int(retval);
 }
 
 #else

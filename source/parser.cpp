@@ -81,6 +81,8 @@ void dawn::Parser::parse(Token const* token_ptr, Int token_count, Module& module
             parse_global_struct(it, module);
         else if (it->value == kw_enum)
             parse_global_enum(it, module);
+        else if (it->value == kw_cast)
+            parse_global_cast(it, module);
         else if (it->value == kw_func)
             parse_global_function(it, module);
         else if (it->value == kw_oper)
@@ -100,6 +102,39 @@ dawn::Bool dawn::Parser::is_variable(TokenIterator const& it) const
     TokenIterator next = it;
     ++next;
     return next->value == vr_variable || next->value == vr_reference || next->type == TokenType::NAME;
+}
+
+dawn::Value dawn::Parser::create_default_value(ID type_id, TokenIterator const& it) const
+{
+    if (type_id == id_void)
+        return Value{};
+
+    else if (type_id == id_bool)
+        return Value{Bool{}, it->location};
+
+    else if (type_id == id_int)
+        return Value{Int{}, it->location};
+
+    else if (type_id == id_float)
+        return Value{Float{}, it->location};
+
+    else if (type_id == id_char)
+        return Value{Char{}, it->location};
+
+    else if (type_id == id_string)
+        return Value{String{}, it->location};
+
+    else if (type_id == id_range)
+        return Value{RangeValue{}, it->location};
+
+    else if (type_id == id_function)
+        return Value{FunctionValue{}, it->location};
+
+    else if (type_id == id_array)
+        return Value{ArrayValue{}, it->location};
+
+    else
+        PARSER_PANIC(*it, "type [", type_id, "] does not exist");
 }
 
 void dawn::Parser::parse_import(TokenIterator& it, Module& module) const
@@ -122,7 +157,7 @@ void dawn::Parser::parse_global_struct(TokenIterator& it, Module& module) const
     parse_struct(it, struc);
 
     if (module.contains_id(struc.id))
-        PARSER_PANIC(*first_it, "name [", struc.id, "] already in use");
+        PARSER_PANIC(*first_it, "name [", struc.id, "] already defined");
 
     module.structs.push_back(struc);
 }
@@ -135,9 +170,17 @@ void dawn::Parser::parse_global_enum(TokenIterator& it, Module& module) const
     parse_enum(it, en);
 
     if (module.contains_id(en.id))
-        PARSER_PANIC(*first_it, "name [", en.id, "] already in use");
+        PARSER_PANIC(*first_it, "name [", en.id, "] already defined");
 
     module.enums.push_back(en);
+}
+
+void dawn::Parser::parse_global_cast(TokenIterator& it, Module& module) const
+{
+    const auto first_it = it;
+    Cast cast;
+    parse_cast(it, cast);
+    module.casts.push_back(cast);
 }
 
 void dawn::Parser::parse_global_function(TokenIterator& it, Module& module) const
@@ -148,7 +191,7 @@ void dawn::Parser::parse_global_function(TokenIterator& it, Module& module) cons
     parse_function(it, function);
 
     if (!function.is_extension() && module.contains_id(function.id))
-        PARSER_PANIC(*first_it, "name [", function.id, "] already in use");
+        PARSER_PANIC(*first_it, "name [", function.id, "] already defined");
 
     module.functions.push_back(function);
 }
@@ -156,10 +199,8 @@ void dawn::Parser::parse_global_function(TokenIterator& it, Module& module) cons
 void dawn::Parser::parse_global_operator(TokenIterator& it, Module& module) const
 {
     const auto first_it = it;
-
     Operator op;
     parse_operator(it, op);
-
     module.operators.push_back(op);
 }
 
@@ -174,7 +215,7 @@ void dawn::Parser::parse_global_variable(TokenIterator& it, Module& module) cons
         PARSER_PANIC(*first_it, "global variables must be const");
 
     if (module.contains_id(variable.id))
-        PARSER_PANIC(*first_it, "name [", variable.id, "] already in use");
+        PARSER_PANIC(*first_it, "name [", variable.id, "] already defined");
 
     module.variables.push_back(variable);
 }
@@ -196,7 +237,11 @@ void dawn::Parser::parse_struct(TokenIterator& it, Struct& struc) const
 
     while (it->value != op_scope_cls)
     {
-        if (it->type == TokenType::NAME)
+        if (it->type != TokenType::NAME)
+            PARSER_PANIC(*it, "field or method name expected");
+
+        static_assert(false);
+
         {
             const ID name_id{it->value};
             if (struc.contains(name_id))
@@ -228,21 +273,7 @@ void dawn::Parser::parse_struct(TokenIterator& it, Struct& struc) const
             self_var.id = kw_self;
             struc.methods.push_back(method);
         }
-        else if (it->value == kw_cast)
-        {
-            Function cast;
-            parse_cast(it, cast);
-            if (struc.contains_method(cast.id))
-                PARSER_PANIC(*it, "struct cast [", cast.id, "] already defined");
-
-            auto& self_var = *cast.args.emplace(cast.args.begin());
-            self_var.type.type_id = struc.id;
-            self_var.type.kind = VarKind::REFERENCE;
-            self_var.id = kw_self;
-            struc.methods.push_back(cast);
-        }
-        else
-            PARSER_PANIC(*it, "expected field name, func or cast");
+        else PARSER_PANIC(*it, "expected field name or func");
     }
     ++it;
 }
@@ -295,72 +326,23 @@ void dawn::Parser::parse_enum(TokenIterator& it, Enum& en) const
         PARSER_PANIC(*first_it, "enum [", en.id, "] cannot be empty");
 }
 
-void dawn::Parser::parse_operator(TokenIterator& it, Operator& oper) const
+void dawn::Parser::parse_cast(TokenIterator& it, Cast& cast) const
 {
-    if (it->value != kw_oper)
-        PARSER_PANIC(*it, "expected oper");
+    if (it->value != kw_cast)
+        PARSER_PANIC(*it, "expected cast");
     ++it;
 
-    if (it->type != TokenType::OPERATOR)
-        PARSER_PANIC(*it, "expected operator");
-    const String op_val = it->value;
-    oper.type = get_op(op_val);
+    if (it->type != TokenType::TYPE)
+        PARSER_PANIC(*it, "expected FROM cast type");
+    cast.from_type_id = it->value;
     ++it;
 
-    if (it->value != op_expr_opn)
-        PARSER_PANIC(*it, "expected open expr");
+    if (it->type != TokenType::TYPE)
+        PARSER_PANIC(*it, "expected TO cast type");
+    cast.to_type_id = it->value;
     ++it;
 
-    Set<ID> arg_set;
-    while (it->value != op_expr_cls)
-    {
-        auto& arg = oper.args.emplace_back();
-
-        if (it->type != TokenType::TYPE)
-            PARSER_PANIC(*it, "expected argument type");
-        arg.type.type_id = it->value;
-        ++it;
-
-        if (it->value == vr_variable)
-        {
-            arg.type.kind = VarKind::VARIABLE;
-            ++it;
-        }
-        else if (it->value == vr_reference)
-        {
-            arg.type.kind = VarKind::REFERENCE;
-            ++it;
-        }
-        else
-            arg.type.kind = VarKind::CONSTANT;
-
-        if (it->type != TokenType::NAME)
-            PARSER_PANIC(*it, "expected arg name");
-        arg.id = it->value;
-
-        if (arg_set.contains(arg.id))
-            PARSER_PANIC(*it, "argument [", it->value, "] already defined");
-        arg_set.insert(arg.id);
-        ++it;
-
-        if (it->value != op_expr_cls)
-        {
-            if (it->value != op_split)
-                PARSER_PANIC(*it, "expected split or expression close");
-            ++it;
-        }
-    }
-    ++it;
-
-    if (oper.args.size() == 1)
-    {
-        auto& arg = *oper.args.emplace(oper.args.begin());
-        arg.type = VarType{.type_id = id_void, .kind = VarKind::CONSTANT};
-    }
-    else if (oper.args.size() != 2)
-        PARSER_PANIC(*it, "operator must have either 1 or 2 arguments");
-
-    parse_scope(it, oper.body);
+    parse_scope(it, cast.body);
 }
 
 void dawn::Parser::parse_function(TokenIterator& it, Function& function) const
@@ -445,20 +427,72 @@ void dawn::Parser::parse_function(TokenIterator& it, Function& function) const
     parse_scope(it, function.body);
 }
 
-void dawn::Parser::parse_cast(TokenIterator& it, Function& function) const
+void dawn::Parser::parse_operator(TokenIterator& it, Operator& oper) const
 {
-    if (it->value != kw_cast)
-        PARSER_PANIC(*it, "expected cast");
+    if (it->value != kw_oper)
+        PARSER_PANIC(*it, "expected oper");
     ++it;
 
-    if (it->value != tp_void && it->value != tp_bool && it->value != tp_int && it->value != tp_float &&
-        it->value != tp_char && it->value != tp_string && it->value != tp_range && it->value != tp_function &&
-        it->value != tp_array)
-        PARSER_PANIC(*it, "expected cast type");
-    function.id = it->value;
+    if (it->type != TokenType::OPERATOR)
+        PARSER_PANIC(*it, "expected operator");
+    const String op_val = it->value;
+    oper.type = get_op(op_val);
     ++it;
 
-    parse_scope(it, function.body);
+    if (it->value != op_expr_opn)
+        PARSER_PANIC(*it, "expected open expr");
+    ++it;
+
+    Set<ID> arg_set;
+    while (it->value != op_expr_cls)
+    {
+        auto& arg = oper.args.emplace_back();
+
+        if (it->type != TokenType::TYPE)
+            PARSER_PANIC(*it, "expected argument type");
+        arg.type.type_id = it->value;
+        ++it;
+
+        if (it->value == vr_variable)
+        {
+            arg.type.kind = VarKind::VARIABLE;
+            ++it;
+        }
+        else if (it->value == vr_reference)
+        {
+            arg.type.kind = VarKind::REFERENCE;
+            ++it;
+        }
+        else
+            arg.type.kind = VarKind::CONSTANT;
+
+        if (it->type != TokenType::NAME)
+            PARSER_PANIC(*it, "expected arg name");
+        arg.id = it->value;
+
+        if (arg_set.contains(arg.id))
+            PARSER_PANIC(*it, "argument [", it->value, "] already defined");
+        arg_set.insert(arg.id);
+        ++it;
+
+        if (it->value != op_expr_cls)
+        {
+            if (it->value != op_split)
+                PARSER_PANIC(*it, "expected split or expression close");
+            ++it;
+        }
+    }
+    ++it;
+
+    if (oper.args.size() == 1)
+    {
+        auto& arg = *oper.args.emplace(oper.args.begin());
+        arg.type = VarType{.type_id = id_void, .kind = VarKind::CONSTANT};
+    }
+    else if (oper.args.size() != 2)
+        PARSER_PANIC(*it, "operator must have either 1 or 2 arguments");
+
+    parse_scope(it, oper.body);
 }
 
 void dawn::Parser::parse_variable(TokenIterator& it, Variable& variable) const
@@ -509,7 +543,7 @@ void dawn::Parser::parse_variable(TokenIterator& it, Variable& variable) const
     else if (variable.type.is_typeless())
         PARSER_PANIC(*it, "typeless variable must be initialized");
     else
-        variable.expr->emplace<Value>(create_default_value(nullptr, variable.type.type_id, var_location));
+        variable.expr->emplace<Value>(create_default_value(variable.type.type_id, it));
 }
 
 void dawn::Parser::parse_expression(ExtractType type, TokenIterator& it, Node& tree) const
@@ -724,7 +758,7 @@ void dawn::Parser::expression_complex_scope(Vector<Token>& left, Token op, Vecto
 
     if (left.size() == 1 && left.front().type == TokenType::TYPE)
     {
-        Map<ID, Node> struct_args;
+        Vector<Pair<ID, Node>> struct_args;
         TokenIterator right_it{right.begin()._Ptr, right.end()._Ptr};
         while (right_it.valid())
         {
@@ -732,7 +766,8 @@ void dawn::Parser::expression_complex_scope(Vector<Token>& left, Token op, Vecto
                 PARSER_PANIC(*right_it, "expected field init name");
 
             const ID name_id{right_it->value};
-            if (struct_args.contains(name_id))
+            if (std::find_if(struct_args.begin(), struct_args.end(),
+                             [&](auto& field) { return field.first == name_id; }) != struct_args.end())
                 PARSER_PANIC(*right_it, "argument [", right_it->value, "] already passed");
             ++right_it;
 
@@ -740,7 +775,7 @@ void dawn::Parser::expression_complex_scope(Vector<Token>& left, Token op, Vecto
                 PARSER_PANIC(*right_it, "expected assign or set operator");
             ++right_it;
 
-            auto& arg = struct_args[name_id];
+            auto& arg = struct_args.emplace_back(name_id, Value{}).second;
             parse_expression(ExtractType::SPLITTER, right_it, arg);
         }
 

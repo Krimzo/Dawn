@@ -113,7 +113,7 @@ void dawn::Dawn::eval_source(Source const& source, String* out_error) noexcept
 
         if (!config.flag_status(Flags::DISABLE_OPTIMIZATIONS))
             optimizer.optimize(module);
-        engine.load_mod(module);
+        engine.load_module(module);
     }
     catch (String const& msg)
     {
@@ -146,7 +146,7 @@ dawn::Value dawn::Dawn::eval_scope(StringRef scope_src, String* out_error) noexc
     return retval.value_or({});
 }
 
-dawn::Value dawn::Dawn::eval_expr(StringRef expr_src, String* out_error) noexcept
+dawn::Value dawn::Dawn::eval_expression(StringRef expr_src, String* out_error) noexcept
 {
     try
     {
@@ -157,7 +157,7 @@ dawn::Value dawn::Dawn::eval_expr(StringRef expr_src, String* out_error) noexcep
         TokenIterator it{tokens.data(), tokens.data() + tokens.size()};
         parser.parse_expression(ExtractType::NEW_LINE_EXP_END, it, expr);
 
-        return engine.handle_expr(expr);
+        return engine.handle_expression(expr);
     }
     catch (String const& msg)
     {
@@ -167,26 +167,26 @@ dawn::Value dawn::Dawn::eval_expr(StringRef expr_src, String* out_error) noexcep
     return {};
 }
 
-void dawn::Dawn::bind_func(ID id, Bool is_ctime, CFunction cfunc) noexcept
+void dawn::Dawn::bind_function(ID id, Bool is_ctime, CFunction cfunc) noexcept
 {
-    engine.bind_func(id, is_ctime, std::move(cfunc));
+    engine.bind_function(id, is_ctime, std::move(cfunc));
 }
 
-dawn::Value dawn::Dawn::call_func(ID id, String* out_error) noexcept
+dawn::Value dawn::Dawn::call_function(ID id, String* out_error) noexcept
 {
-    return call_func(id, nullptr, 0, out_error);
+    return call_function(id, nullptr, 0, out_error);
 }
 
-dawn::Value dawn::Dawn::call_func(ID id, std::initializer_list<Value> const& args, String* out_error) noexcept
+dawn::Value dawn::Dawn::call_function(ID id, std::initializer_list<Value> const& args, String* out_error) noexcept
 {
-    return call_func(id, (Value*)args.begin(), (Int)args.size(), out_error);
+    return call_function(id, (Value*)args.begin(), (Int)args.size(), out_error);
 }
 
-dawn::Value dawn::Dawn::call_func(ID id, Value* args, Int arg_count, String* out_error) noexcept
+dawn::Value dawn::Dawn::call_function(ID id, Value* args, Int arg_count, String* out_error) noexcept
 {
     try
     {
-        return engine.call_func(id, args, arg_count);
+        return engine.call_function(id, args, arg_count);
     }
     catch (String const& msg)
     {
@@ -195,18 +195,18 @@ dawn::Value dawn::Dawn::call_func(ID id, Value* args, Int arg_count, String* out
     }
     catch (Value const& err)
     {
-        if (out_error)
-            *out_error = dawn::format("Uncaught error: ", err.to_string(engine));
+        // if (out_error)
+        //     *out_error = dawn::format("Uncaught error: ", err.to_string(engine));
     }
     return {};
 }
 
-void dawn::Dawn::add_var(VarType const& type, ID id, Value const& value) noexcept
+void dawn::Dawn::add_variable(VarType const& type, ID id, Value const& value) noexcept
 {
-    engine.add_var(Location{}, type, id, value);
+    engine.add_variable(Location{}, type, id, value);
 }
 
-dawn::Value* dawn::Dawn::get_var(ID id) noexcept
+dawn::Value* dawn::Dawn::get_variable(ID id) noexcept
 {
-    return engine.get_var(id);
+    return engine.get_variable(id);
 }

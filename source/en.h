@@ -90,28 +90,6 @@ enum struct NodeType : uint8_t
     CAST,
 };
 
-enum struct ValueType : uint8_t
-{
-    VOID = 0,
-    BOOL,
-    INT,
-    FLOAT,
-    CHAR,
-    STRING,
-    RANGE,
-    FUNCTION,
-    ARRAY,
-    ENUM,
-    STRUCT,
-    _COUNT,
-};
-
-enum struct MemberType : uint8_t
-{
-    FIELD = 0,
-    METHOD,
-};
-
 enum struct VarKind : uint8_t
 {
     CONSTANT = 0,
@@ -122,11 +100,10 @@ enum struct VarKind : uint8_t
 enum struct FrameType : uint8_t
 {
     LOCAL = 0,
-    GLOBAL = 1,
+    GLOBAL,
 };
 
 std::ostream& operator<<(std::ostream& stream, TokenType type);
 std::ostream& operator<<(std::ostream& stream, OperatorType type);
 std::ostream& operator<<(std::ostream& stream, NodeType type);
-std::ostream& operator<<(std::ostream& stream, ValueType type);
 } // namespace dawn

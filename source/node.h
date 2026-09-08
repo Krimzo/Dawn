@@ -185,7 +185,7 @@ struct StructNode : LocationHolder
 {
     struct NamedInit
     {
-        Map<ID, Node> args;
+        Vector<Pair<ID, Node>> args;
     };
 
     struct ListInit

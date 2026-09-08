@@ -51,6 +51,13 @@ struct Function
     Bool is_extension() const;
 };
 
+struct Cast
+{
+    ID from_type_id;
+    ID to_type_id;
+    Scope body;
+};
+
 struct Enum
 {
     struct Entry

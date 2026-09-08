@@ -11,6 +11,7 @@ struct Module
     Vector<Variable> variables;
     Vector<Operator> operators;
     Vector<Function> functions;
+    Vector<Cast> casts;
     Vector<Enum> enums;
     Vector<Struct> structs;
 
@@ -44,19 +45,21 @@ struct Parser
     void parse(Token const* token_ptr, Int token_count, Module& module) const;
 
     Bool is_variable(TokenIterator const& it) const;
+    Value create_default_value(ID type_id, TokenIterator const& it) const;
 
     void parse_import(TokenIterator& it, Module& module) const;
     void parse_global_struct(TokenIterator& it, Module& module) const;
     void parse_global_enum(TokenIterator& it, Module& module) const;
+    void parse_global_cast(TokenIterator& it, Module& module) const;
     void parse_global_function(TokenIterator& it, Module& module) const;
     void parse_global_operator(TokenIterator& it, Module& module) const;
     void parse_global_variable(TokenIterator& it, Module& module) const;
 
     void parse_struct(TokenIterator& it, Struct& struc) const;
     void parse_enum(TokenIterator& it, Enum& en) const;
-    void parse_operator(TokenIterator& it, Operator& oper) const;
+    void parse_cast(TokenIterator& it, Cast& cast) const;
     void parse_function(TokenIterator& it, Function& function) const;
-    void parse_cast(TokenIterator& it, Function& function) const;
+    void parse_operator(TokenIterator& it, Operator& oper) const;
     void parse_variable(TokenIterator& it, Variable& variable) const;
 
     void parse_expression(ExtractType type, TokenIterator& it, Node& tree) const;
@@ -93,7 +96,7 @@ Int token_depth(Token const& token, Bool& in_lambda);
 void create_operator_node(Token const& token, Node& node);
 void create_assign_node(Token const& token, Node& node);
 
-__forceinline Bool is_op(StringRef value)
+inline Bool is_op(StringRef value)
 {
     static const StringSet OPS = {
         (String)op_add, (String)op_sub, (String)op_mul,  (String)op_div,   (String)op_pow,        (String)op_mod,
@@ -103,7 +106,7 @@ __forceinline Bool is_op(StringRef value)
     return OPS.contains(value);
 }
 
-__forceinline OperatorType get_op(StringRef value)
+inline OperatorType get_op(StringRef value)
 {
     if (value == op_add)
         return OperatorType::ADD;

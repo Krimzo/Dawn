@@ -43,8 +43,8 @@ struct Person
 {
 	name: string
 	fav_animal: Animal
+}
 
-	cast string {
-		return "{self.name} likes {self.fav_animal.name}s"
-	}
+cast Person string {
+	return "{self.name} likes {self.fav_animal.name}s"
 }
