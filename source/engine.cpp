@@ -13,6 +13,9 @@ void dawn::Engine::load_module(Module const& module)
     for (auto& entry : module.operators)
         load_operator(entry);
 
+    for (auto& cast : module.casts)
+        load_cast(cast);
+
     for (auto& entry : module.functions)
         if (!entry.is_extension())
             load_function(entry);
@@ -48,6 +51,20 @@ void dawn::Engine::load_operator(Operator const& entry)
     right_types.set(right.type.type_id, {}).as_global().func.emplace<DFunction>(entry.args, entry.body);
 }
 
+void dawn::Engine::load_cast(Cast const& entry)
+{
+    FunctionValue fv{};
+    auto& func = fv.data.emplace<FunctionValue::AsGlobal>().func.emplace<DFunction>();
+    auto& self_arg = func.args.emplace_back();
+    self_arg.type.type_id = entry.from_type_id;
+    self_arg.type.kind = VarKind::REFERENCE;
+    self_arg.id = kw_self;
+    func.body = entry.body;
+    bind_cast(entry.from_type_id, entry.to_type_id, false, [fv](Location location, Engine& engine, Value const& value) {
+        return engine.handle_function(location, fv, &value, 1);
+    });
+}
+
 void dawn::Engine::load_function(Function const& entry)
 {
     if (entry.is_extension())
@@ -78,7 +95,9 @@ void dawn::Engine::load_function(Function const& entry)
 
 void dawn::Engine::load_enum(Enum const& entry)
 {
-    for (auto& entry : enums.set(entry.id, entry).entries)
+    auto& enu = enums.set(entry.id, entry);
+    load_enum_standards(enu);
+    for (auto& entry : enu.entries)
     {
         if (std::holds_alternative<Value>(*entry.expr))
             continue;
@@ -90,7 +109,8 @@ void dawn::Engine::load_enum(Enum const& entry)
 
 void dawn::Engine::load_struct(Struct const& entry)
 {
-    structs.set(entry.id, entry);
+    auto& struc = structs.set(entry.id, entry);
+    load_struct_standards(struc);
     auto& funcs = members.get_or_set(entry.id);
     for (auto& method : entry.methods)
     {
@@ -131,12 +151,13 @@ void dawn::Engine::bind_operator(ID left_type_id, OperatorType op_type, ID right
         m_ctime_ops[(Int)op_type].insert(combine_ids(left_type_id, right_type_id));
 }
 
-void dawn::Engine::bind_cast(ID left_type_id, ID right_type_id, Bool is_const, CastCFunc const& cfunc)
+void dawn::Engine::bind_cast(ID left_type_id, ID right_type_id, Bool is_ctime, CastCFunc const& cfunc)
 {
-    auto* cast_ptr = casts.get_or_set(left_type_id).get(right_type_id);
-    if (cast_ptr)
-        ENGINE_PANIC(Location{}, "cast [", left_type_id, "] -> [", right_type_id, "] already defined");
     casts.get_or_set(left_type_id).set(right_type_id, cfunc);
+    if (is_ctime)
+        m_ctime_casts.insert(combine_ids(left_type_id, right_type_id));
+    else
+        m_ctime_casts.erase(combine_ids(left_type_id, right_type_id));
 }
 
 void dawn::Engine::bind_function(ID id, Bool is_ctime, CFunction cfunc)
@@ -145,6 +166,8 @@ void dawn::Engine::bind_function(ID id, Bool is_ctime, CFunction cfunc)
         ENGINE_PANIC({}, "object [", id, "] already exists");
     if (is_ctime)
         m_ctime_funcs.insert(id);
+    else
+        m_ctime_funcs.erase(id);
 
     FunctionValue fv{};
     auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
@@ -308,6 +331,11 @@ dawn::FunctionValue dawn::Engine::to_function(Value const& value)
 dawn::ArrayValue dawn::Engine::to_array(Value const& value)
 {
     return handle_cast(value.location(), value, id_array).as_array();
+}
+
+dawn::Value dawn::Engine::to_type(Value const& value, ID type_id)
+{
+    return handle_cast(value.location(), value, type_id);
 }
 
 void dawn::Engine::handle_variable_node(VariableNode const& node)

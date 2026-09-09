@@ -15,7 +15,6 @@ struct Engine
     friend struct Value;
     friend struct EnumValue;
     friend struct Optimizer;
-    friend Value create_default_value(Engine* engine, ID typeid_, Location location);
 
     Stack stack;
     GlobalStorage<Enum> enums;
@@ -31,15 +30,19 @@ struct Engine
     void load_standard_members();
     void load_standard_casts();
 
+    void load_enum_standards(Enum const& enu);
+    void load_struct_standards(Struct const& struc);
+
     void load_module(Module const& module);
     void load_operator(Operator const& entry);
+    void load_cast(Cast const& entry);
     void load_function(Function const& entry);
     void load_enum(Enum const& entry);
     void load_struct(Struct const& entry);
     void load_variable(Variable const& entry);
 
     void bind_operator(ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const, CFunction cfunc);
-    void bind_cast(ID left_type_id, ID right_type_id, Bool is_const, CastCFunc const& cfunc);
+    void bind_cast(ID left_type_id, ID right_type_id, Bool is_ctime, CastCFunc const& cfunc);
 
     void bind_function(ID id, Bool is_ctime, CFunction cfunc);
     Value call_function(ID id, Value* args, Int arg_count);
@@ -61,6 +64,7 @@ struct Engine
     RangeValue to_range(Value const& value);
     FunctionValue to_function(Value const& value);
     ArrayValue to_array(Value const& value);
+    Value to_type(Value const& value, ID type_id);
 
     void handle_variable_node(VariableNode const& node);
     Value const& handle_identifier_node(IdentifierNode const& node);
@@ -94,6 +98,7 @@ struct Engine
 
   private:
     Set<uint64_t> m_ctime_ops[(Int)OperatorType::_COUNT] = {};
+    Set<uint64_t> m_ctime_casts;
     Set<ID> m_ctime_funcs;
 };
 } // namespace dawn

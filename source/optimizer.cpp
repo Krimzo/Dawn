@@ -550,9 +550,17 @@ void dawn::Optimizer::optimize_expression_cast(CastNode& node, Node& out_node)
     if (node.left_expr->type() != NodeType::VALUE)
         return;
 
-    auto& left_value = std::get<Value>(*node.left_expr);
-    if (engine.structs.get(left_value.type_id()))
+    Value left_value = std::get<Value>(*node.left_expr);
+    if (!engine.m_ctime_casts.contains(combine_ids(left_value.type_id(), node.right_type_id)))
         return;
 
-    out_node.emplace<Value>(engine.handle_cast_node(node));
+    auto* left_casts = engine.casts.get(left_value.type_id());
+    if (!left_casts)
+        return;
+
+    auto* cast_func = left_casts->get(node.right_type_id);
+    if (!cast_func)
+        return;
+
+    out_node.emplace<Value>(engine.handle_cast(node.location, left_value, node.right_type_id));
 }

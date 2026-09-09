@@ -355,8 +355,8 @@ dawn::Value::Value(StructValue* value, Bool is_const, Location location)
 dawn::Bool& dawn::Value::as_bool() const
 {
     const auto type = m_regref ? m_regref->type_id : id_void;
-    if (type != id_void)
-        ENGINE_PANIC(location(), "expected [", id_void, "] but got [", type, "]");
+    if (type != id_bool)
+        ENGINE_PANIC(location(), "expected [", id_bool, "] but got [", type, "]");
     return m_regref.as<ValueStorage<Bool>>()->get();
 }
 

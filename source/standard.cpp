@@ -517,6 +517,80 @@ void dawn::Engine::load_standard_functions()
     static const Lexer _lexer{};
     static constexpr Parser _parser{};
 
+    // builtin
+    bind_function(id_void, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 0)
+            return Value{};
+        else if (arg_count == 1)
+            return Value{};
+        else
+            ENGINE_PANIC(location, id_void, " constructor supports only 0 or 1 arguments");
+    });
+    bind_function(id_bool, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 0)
+            return Value{Bool{}, location};
+        else if (arg_count == 1)
+            return Value{engine.to_bool(args[0]), location};
+        else
+            ENGINE_PANIC(location, id_bool, " constructor supports only 0 or 1 arguments");
+    });
+    bind_function(id_int, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 0)
+            return Value{Int{}, location};
+        else if (arg_count == 1)
+            return Value{engine.to_int(args[0]), location};
+        else
+            ENGINE_PANIC(location, id_int, " constructor supports only 0 or 1 arguments");
+    });
+    bind_function(id_float, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 0)
+            return Value{Float{}, location};
+        else if (arg_count == 1)
+            return Value{engine.to_float(args[0]), location};
+        else
+            ENGINE_PANIC(location, id_float, " constructor supports only 0 or 1 arguments");
+    });
+    bind_function(id_char, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 0)
+            return Value{Char{}, location};
+        else if (arg_count == 1)
+            return Value{engine.to_char(args[0]), location};
+        else
+            ENGINE_PANIC(location, id_char, " constructor supports only 0 or 1 arguments");
+    });
+    bind_function(id_string, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 0)
+            return Value{String{}, location};
+        else if (arg_count == 1)
+            return Value{engine.to_string(args[0]), location};
+        else
+            ENGINE_PANIC(location, id_string, " constructor supports only 0 or 1 arguments");
+    });
+    bind_function(id_range, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 0)
+            return Value{RangeValue{}, location};
+        else if (arg_count == 1)
+            return Value{engine.to_range(args[0]), location};
+        else
+            ENGINE_PANIC(location, id_range, " constructor supports only 0 or 1 arguments");
+    });
+    bind_function(id_function, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 0)
+            return Value{FunctionValue{}, location};
+        else if (arg_count == 1)
+            return Value{engine.to_function(args[0]), location};
+        else
+            ENGINE_PANIC(location, id_function, " constructor supports only 0 or 1 arguments");
+    });
+    bind_function(id_array, true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
+        if (arg_count == 0)
+            return Value{ArrayValue{}, location};
+        else if (arg_count == 1)
+            return Value{engine.to_array(args[0]), location};
+        else
+            ENGINE_PANIC(location, id_array, " constructor supports only 0 or 1 arguments");
+    });
+
     // dawn
     bind_function("lex", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count != 1)
@@ -540,7 +614,7 @@ void dawn::Engine::load_standard_functions()
         return engine.handle_expression(node);
     });
 
-    // type
+    // type info
     bind_function("typeid", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             return Value{(Int)args[0].type_id().integer(), location};
@@ -724,26 +798,6 @@ void dawn::Engine::load_standard_members()
         return Value{&self.as_range().inclusive, self.is_const(), location};
     });
 
-    // enum
-    // bind_field(ValueType::ENUM, "id", [](Location location, Engine& engine, Value const& self) -> Value {
-    //     return Value{(Int)self.as_enum().key_id.integer(), location};
-    // });
-
-    // bind_field(ValueType::ENUM, "name", [](Location location, Engine& engine, Value const& self) -> Value {
-    //     return Value{self.as_enum().key_id.string(), location};
-    // });
-
-    // bind_field(ValueType::ENUM, "value", [](Location location, Engine& engine, Value const& self) -> Value {
-    //     EnumValue& enum_val = self.as_enum();
-    //     Enum* parent = engine.enums.get(enum_val.parent_id);
-    //     if (!parent)
-    //         ENGINE_PANIC(location, "Unknown enum [", enum_val.parent_id, "]");
-    //     Enum::Entry* entry = parent->get(enum_val.key_id);
-    //     if (!entry)
-    //         ENGINE_PANIC(location, "Enum [", enum_val.parent_id, "] does not have entry [", enum_val.key_id, "]");
-    //     return std::get<Value>(*entry->expr);
-    // });
-
     // array
     bind_method(id_array, "for_each", true, 1,
                 [](Location location, Engine& engine, Value const& self, Value const* args) -> Value {
@@ -802,313 +856,211 @@ void dawn::Engine::load_standard_casts()
     });
 
     // to int
-    // dawn::Int dawn::Engine::to_int(Value const& value)
-    // {
-    //     switch (value.type())
-    //     {
-    //     case ValueType::VOID:
-    //         return Int{};
-
-    //     case ValueType::BOOL:
-    //         return (Int)as_bool();
-
-    //     case ValueType::INT:
-    //         return as_int();
-
-    //     case ValueType::FLOAT:
-    //         return (Int)as_float();
-
-    //     case ValueType::CHAR:
-    //         return (Int)as_char();
-
-    //     case ValueType::STRING: {
-    //         if (auto optres = parse_int(as_string()))
-    //             return *optres;
-    //         throw Value{dawn::format("string \"", as_string(), "\" to int failed"), location()};
-    //     }
-
-    //     case ValueType::STRUCT: {
-    //         auto& left = as_struct();
-    //         auto* method = left.get_method(id_int);
-    //         if (!method)
-    //             ENGINE_PANIC(location(), "can not convert struct [", left.parent_id, "] to int");
-    //         return engine.handle_func(location(), *method, this, 1).as_int();
-    //     }
-
-    //     default:
-    //         ENGINE_PANIC(location(), "can not convert [", type(), "] to int");
-    //     }
-    // }
+    bind_cast(id_void, id_int, true,
+              [](Location location, Engine& engine, Value const& value) { return Value{Int{}, location}; });
+    bind_cast(id_bool, id_int, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{(Int)value.as_bool(), location};
+    });
+    bind_cast(id_int, id_int, true,
+              [](Location location, Engine& engine, Value const& value) { return Value{value.as_int(), location}; });
+    bind_cast(id_float, id_int, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{(Int)value.as_float(), location};
+    });
+    bind_cast(id_char, id_int, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{(Int)value.as_char(), location};
+    });
+    bind_cast(id_string, id_int, true, [](Location location, Engine& engine, Value const& value) {
+        if (auto optres = parse_int(value.as_string()))
+            return Value{*optres, location};
+        throw Value{dawn::format("string \"", value.as_string(), "\" to int failed"), location};
+    });
 
     // to float
-    // dawn::Float dawn::Engine::to_float(Value const& value)
-    // {
-    //     switch (type())
-    //     {
-    //     case ValueType::VOID:
-    //         return Float{};
+    bind_cast(id_void, id_float, true,
+              [](Location location, Engine& engine, Value const& value) { return Value{Float{}, location}; });
+    bind_cast(id_bool, id_float, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{(Float)value.as_bool(), location};
+    });
+    bind_cast(id_int, id_float, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{(Float)value.as_int(), location};
+    });
+    bind_cast(id_float, id_float, true,
+              [](Location location, Engine& engine, Value const& value) { return Value{value.as_float(), location}; });
+    bind_cast(id_char, id_float, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{(Float)value.as_char(), location};
+    });
+    bind_cast(id_string, id_float, true, [](Location location, Engine& engine, Value const& value) {
+        if (auto optres = parse_float(value.as_string()))
+            return Value{*optres, location};
+        throw Value{dawn::format("string \"", value.as_string(), "\" to float failed"), location};
+    });
 
-    //     case ValueType::BOOL:
-    //         return (Float)as_bool();
-
-    //     case ValueType::INT:
-    //         return (Float)as_int();
-
-    //     case ValueType::FLOAT:
-    //         return as_float();
-
-    //     case ValueType::CHAR:
-    //         return (Float)as_char();
-
-    //     case ValueType::STRING: {
-    //         if (auto optres = parse_float(as_string()))
-    //             return *optres;
-    //         throw Value{dawn::format("string \"", as_string(), "\" to float failed"), location()};
-    //     }
-
-    //     case ValueType::STRUCT: {
-    //         auto& left = as_struct();
-    //         auto* method = left.get_method(id_float);
-    //         if (!method)
-    //             ENGINE_PANIC(location(), "can not convert struct [", left.parent_id, "] to float");
-    //         return engine.handle_func(location(), *method, this, 1).as_float();
-    //     }
-
-    //     default:
-    //         ENGINE_PANIC(location(), "can not convert [", type(), "] to float");
-    //     }
-    // }
-
-    /* TO CHAR */
-    // dawn::Char dawn::Engine::to_char(Value const& value)
-    // {
-    //     switch (type())
-    //     {
-    //     case ValueType::VOID:
-    //         return Char{};
-
-    //     case ValueType::BOOL:
-    //         return as_bool() ? kw_true.front() : kw_false.front();
-
-    //     case ValueType::INT:
-    //         return (Char)as_int();
-
-    //     case ValueType::FLOAT:
-    //         return (Char)as_float();
-
-    //     case ValueType::CHAR:
-    //         return as_char();
-
-    //     case ValueType::STRING: {
-    //         auto& str = as_string();
-    //         if (str.empty())
-    //             return Char{};
-    //         return str.front();
-    //     }
-
-    //     case ValueType::STRUCT: {
-    //         auto& left = as_struct();
-    //         auto* method = left.get_method(id_char);
-    //         if (!method)
-    //             ENGINE_PANIC(location(), "can not convert struct [", left.parent_id, "] to char");
-    //         return engine.handle_func(location(), *method, this, 1).as_char();
-    //     }
-
-    //     default:
-    //         ENGINE_PANIC(location(), "can not convert [", type(), "] to char");
-    //     }
-    // }
+    // to char
+    bind_cast(id_void, id_char, true,
+              [](Location location, Engine& engine, Value const& value) { return Value{Char{}, location}; });
+    bind_cast(id_bool, id_char, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{(Char)value.as_bool(), location};
+    });
+    bind_cast(id_int, id_char, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{(Char)value.as_int(), location};
+    });
+    bind_cast(id_float, id_char, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{(Char)value.as_float(), location};
+    });
+    bind_cast(id_char, id_char, true,
+              [](Location location, Engine& engine, Value const& value) { return Value{value.as_char(), location}; });
+    bind_cast(id_string, id_char, true, [](Location location, Engine& engine, Value const& value) {
+        auto& str = value.as_string();
+        if (str.empty())
+            return Value{Char{}, location};
+        return Value{str.front(), location};
+    });
 
     // to string
-    // dawn::String dawn::Engine::to_string(Value const& value)
-    // {
-    //     switch (type())
-    //     {
-    //     case ValueType::VOID:
-    //         return String{};
+    bind_cast(id_void, id_string, true,
+              [](Location location, Engine& engine, Value const& value) { return Value{String{}, location}; });
+    bind_cast(id_bool, id_string, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{String{value.as_bool() ? kw_true : kw_false}, location};
+    });
+    bind_cast(id_int, id_string, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{std::to_string(value.as_int()), location};
+    });
+    bind_cast(id_float, id_string, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{format(std::showpoint, value.as_float()), location};
+    });
+    bind_cast(id_char, id_string, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{String{value.as_char()}, location};
+    });
+    bind_cast(id_string, id_string, true,
+              [](Location location, Engine& engine, Value const& value) { return Value{value.as_string(), location}; });
+    bind_cast(id_range, id_string, true, [](Location location, Engine& engine, Value const& value) {
+        auto& range_val = value.as_range();
+        if (range_val.inclusive)
+            return Value{format(op_array_opn, range_val.start, " -> ", range_val.end, op_array_cls), location};
+        else
+            return Value{format(op_array_opn, range_val.start, " -> ", range_val.end, op_expr_cls), location};
+    });
+    bind_cast(id_function, id_string, true, [](Location location, Engine& engine, Value const& value) {
+        StringStream stream;
+        auto& func = value.as_function();
+        if (func.is_global())
+        {
+            auto& global = func.as_global();
+            stream << global.id << op_expr_opn;
+        }
+        else if (func.is_method())
+        {
+            auto& method = func.as_method();
+            stream << method.self->as_struct().parent_id << op_access << method.id << op_expr_opn;
+        }
+        else
+            stream << "lambda" << op_lambda;
+        if (auto* dfunc = func.dfunction())
+        {
+            if (!dfunc->args.empty())
+            {
+                for (Int i = 0; i < (Int)dfunc->args.size() - 1; i++)
+                    stream << dfunc->args[i].type << ' ' << dfunc->args[i].id << op_split << ' ';
+                stream << dfunc->args.back().type << ' ' << dfunc->args.back().id;
+            }
+        }
+        stream << (func.is_lambda() ? op_lambda : op_expr_cls);
+        return Value{stream.str(), location};
+    });
+    bind_cast(id_array, id_string, true, [](Location location, Engine& engine, Value const& value) {
+        auto& array_val = value.as_array();
+        if (array_val.data.empty())
+            return Value{format(op_array_opn, op_array_cls), location};
+        StringStream stream;
+        stream << op_array_opn;
+        for (Int i = 0; i < (Int)array_val.data.size() - 1; i++)
+            stream << engine.to_string(array_val.data[i]) << op_split << ' ';
+        stream << engine.to_string(array_val.data.back()) << op_array_cls;
+        return Value{stream.str(), location};
+    });
 
-    //     case ValueType::BOOL:
-    //         return String{as_bool() ? kw_true : kw_false};
-
-    //     case ValueType::INT:
-    //         return std::to_string(as_int());
-
-    //     case ValueType::FLOAT:
-    //         return format(std::showpoint, as_float());
-
-    //     case ValueType::CHAR:
-    //         return String{as_char()};
-
-    //     case ValueType::STRING:
-    //         return as_string();
-
-    //     case ValueType::RANGE: {
-    //         auto& value = as_range();
-    //         if (value.inclusive)
-    //             return format(op_array_opn, value.start, " -> ", value.end, op_array_cls);
-    //         else
-    //             return format(op_array_opn, value.start, " -> ", value.end, op_expr_cls);
-    //     }
-
-    //     case ValueType::FUNCTION: {
-    //         StringStream stream;
-    //         auto& func = as_function();
-
-    //         if (func.is_global())
-    //         {
-    //             auto& global = func.as_global();
-    //             stream << global.id << op_expr_opn;
-    //         }
-    //         else if (func.is_method())
-    //         {
-    //             auto& method = func.as_method();
-    //             stream << method.self->as_struct().parent_id << op_access << method.id << op_expr_opn;
-    //         }
-    //         else
-    //         {
-    //             stream << "lambda" << op_lambda;
-    //         }
-
-    //         if (auto* dfunc = func.dfunction())
-    //         {
-    //             if (!dfunc->args.empty())
-    //             {
-    //                 for (Int i = 0; i < (Int)dfunc->args.size() - 1; i++)
-    //                     stream << dfunc->args[i].type << ' ' << dfunc->args[i].id << op_split << ' ';
-    //                 stream << dfunc->args.back().type << ' ' << dfunc->args.back().id;
-    //             }
-    //         }
-
-    //         stream << (func.is_lambda() ? op_lambda : op_expr_cls);
-    //         return stream.str();
-    //     }
-
-    //     case ValueType::ARRAY: {
-    //         auto& value = as_array();
-    //         if (value.data.empty())
-    //             return format(op_array_opn, op_array_cls);
-
-    //         StringStream stream;
-    //         stream << op_array_opn;
-    //         for (Int i = 0; i < (Int)value.data.size() - 1; i++)
-    //             stream << value.data[i].to_string(engine) << op_split << ' ';
-    //         stream << value.data.back().to_string(engine) << op_array_cls;
-    //         return stream.str();
-    //     }
-
-    //     case ValueType::ENUM: {
-    //         auto const& value = as_enum();
-    //         return format(value.parent_id, op_link, value.key_id);
-    //     }
-
-    //     case ValueType::STRUCT: {
-    //         auto& left = as_struct();
-    //         if (auto* method = left.get_method(id_string))
-    //         {
-    //             return engine.handle_func(location(), *method, this, 1).as_string();
-    //         }
-    //         else
-    //         {
-    //             StringStream stream;
-    //             stream << left.parent_id;
-    //             if (left.members.empty())
-    //             {
-    //                 stream << op_scope_opn << op_scope_cls;
-    //                 return stream.str();
-    //             }
-
-    //             auto it = left.members.begin();
-    //             stream << op_scope_opn;
-    //             for (; it != --left.members.end(); ++it)
-    //                 stream << it->id << op_assign << it->value.to_string(engine) << op_split << ' ';
-    //             stream << it->id << op_assign << it->value.to_string(engine) << op_scope_cls;
-    //             return stream.str();
-    //         }
-    //     }
-
-    //     default:
-    //         ENGINE_PANIC(location(), "can not convert [", type(), "] to string");
-    //     }
-    // }
-
-    // to string
-    // dawn::RangeValue dawn::Engine::to_range(Value const& value)
-    // {
-    //     switch (type())
-    //     {
-    //     case ValueType::VOID:
-    //         return RangeValue{};
-
-    //     case ValueType::INT:
-    //         return RangeValue{0, as_int()};
-
-    //     case ValueType::RANGE:
-    //         return as_range();
-
-    //     case ValueType::STRUCT: {
-    //         auto& left = as_struct();
-    //         auto* method = left.get_method(id_range);
-    //         if (!method)
-    //             ENGINE_PANIC(location(), "can not convert struct [", left.parent_id, "] to range");
-    //         return engine.handle_func(location(), *method, this, 1).as_range();
-    //     }
-
-    //     default:
-    //         ENGINE_PANIC(location(), "can not convert [", type(), "] to range");
-    //     }
-    // }
+    // to range
+    bind_cast(id_void, id_range, true,
+              [](Location location, Engine& engine, Value const& value) { return Value{RangeValue{}, location}; });
+    bind_cast(id_int, id_range, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{RangeValue{0, value.as_int()}, location};
+    });
+    bind_cast(id_range, id_range, true,
+              [](Location location, Engine& engine, Value const& value) { return Value{value.as_range(), location}; });
 
     // to function
-    // dawn::FunctionValue dawn::Engine::to_function(Value const& value)
-    // {
-    //     switch (type())
-    //     {
-    //     case ValueType::FUNCTION:
-    //         return as_function();
-
-    //     case ValueType::STRUCT: {
-    //         auto& left = as_struct();
-    //         auto* method = left.get_method(id_function);
-    //         if (!method)
-    //             ENGINE_PANIC(location(), "can not convert struct [", left.parent_id, "] to function");
-    //         return engine.handle_func(location(), *method, this, 1).as_function();
-    //     }
-
-    //     default:
-    //         ENGINE_PANIC(location(), "can not convert [", type(), "] to function");
-    //     }
-    // }
+    bind_cast(id_function, id_function, true, [](Location location, Engine& engine, Value const& value) {
+        return Value{value.as_function(), location};
+    });
 
     // to array
-    // dawn::ArrayValue dawn::Value::to_array(Engine& engine) const
-    // {
-    //     switch (type())
-    //     {
-    //     case ValueType::VOID:
-    //         return ArrayValue{};
+    bind_cast(id_void, id_array, true,
+              [](Location location, Engine& engine, Value const& value) { return Value{ArrayValue{}, location}; });
+    bind_cast(id_string, id_array, true, [](Location location, Engine& engine, Value const& value) {
+        auto& strval = value.as_string();
+        ArrayValue result;
+        result.data.reserve(strval.size());
+        for (Char c : strval)
+            result.data.emplace_back(c, location);
+        return Value{result, location};
+    });
+    bind_cast(id_array, id_array, true,
+              [](Location location, Engine& engine, Value const& value) { return Value{value.as_array(), location}; });
+}
 
-    //     case ValueType::STRING: {
-    //         auto& strval = as_string();
-    //         ArrayValue result;
-    //         result.data.reserve(strval.size());
-    //         for (Char c : strval)
-    //             result.data.emplace_back(c, location());
-    //         return result;
-    //     }
+void dawn::Engine::load_enum_standards(Enum const& enu)
+{
+    auto& members = this->members.get_or_set(enu.id);
+    auto& casts = this->casts.get_or_set(enu.id);
+    members.clear();
+    casts.clear();
 
-    //     case ValueType::ARRAY:
-    //         return as_array();
+    bind_field(enu.id, "id", [](Location location, Engine& engine, Value const& self) -> Value {
+        return Value{(Int)self.as_enum().key_id.integer(), location};
+    });
 
-    //     case ValueType::STRUCT: {
-    //         auto& left = as_struct();
-    //         auto* method = left.get_method(id_array);
-    //         if (!method)
-    //             ENGINE_PANIC(location(), "can not convert struct [", left.parent_id, "] to array");
-    //         return engine.handle_func(location(), *method, this, 1).as_array();
-    //     }
+    bind_field(enu.id, "name", [](Location location, Engine& engine, Value const& self) -> Value {
+        return Value{self.as_enum().key_id.string(), location};
+    });
 
-    //     default:
-    //         ENGINE_PANIC(location(), "can not convert [", type(), "] to array");
-    //     }
-    // }
+    bind_field(enu.id, "value", [](Location location, Engine& engine, Value const& self) -> Value {
+        EnumValue& enum_val = self.as_enum();
+        Enum* parent = engine.enums.get(enum_val.parent_id);
+        if (!parent)
+            ENGINE_PANIC(location, "Unknown enum [", enum_val.parent_id, "]");
+        Enum::Entry* entry = parent->get(enum_val.key_id);
+        if (!entry)
+            ENGINE_PANIC(location, "Enum [", enum_val.parent_id, "] does not have entry [", enum_val.key_id, "]");
+        return std::get<Value>(*entry->expr);
+    });
+
+    bind_cast(enu.id, id_string, true, [](Location location, Engine& engine, Value const& value) {
+        auto& enum_value = value.as_enum();
+        return Value{format(enum_value.parent_id, op_link, enum_value.key_id), location};
+    });
+}
+
+void dawn::Engine::load_struct_standards(Struct const& struc)
+{
+    auto& members = this->members.get_or_set(struc.id);
+    auto& casts = this->casts.get_or_set(struc.id);
+    members.clear();
+    casts.clear();
+
+    bind_cast(struc.id, id_string, true, [](Location location, Engine& engine, Value const& value) {
+        auto& left = value.as_struct();
+        StringStream stream;
+        stream << left.parent_id;
+        if (left.fields.empty())
+        {
+            stream << op_scope_opn << op_scope_cls;
+            return Value{stream.str(), location};
+        }
+        auto it = left.fields.begin();
+        stream << op_scope_opn;
+        for (; it != --left.fields.end(); ++it)
+            stream << it->first << op_assign << engine.to_string(it->second) << op_split << ' ';
+        stream << it->first << op_assign << engine.to_string(it->second) << op_scope_cls;
+        return Value{stream.str(), location};
+    });
 }

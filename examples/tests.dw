@@ -136,18 +136,15 @@ struct SomeStruct
 	name : string
 	value : int
 
-	func who()
-	{
-		print(self)
-	}
-
-	cast string
-	{
-		return "SomeStruct: {self.name} is {self.value}"
-	}
+	who() { print(self) }
 }
 
-oper +(SomeStruct& left, int right)
+cast SomeStruct -> string
+{
+	return "SomeStruct: {self.name} is {self.value}"
+}
+
+oper + (SomeStruct& left, int right)
 {
 	left.value += right
 	return left
@@ -161,7 +158,7 @@ func struct_test()
 		+
 		"cool", value = 2 }
 
-	some_val1.who()
+	some_val1.who();
 	assert(string(some_val2 + some_val1.value) == string(some_val2), "structs are bad")
 }
 

@@ -255,6 +255,7 @@ void dawn::Parser::parse_struct(TokenIterator& it, Struct& struc) const
         else if (it->value == op_expr_opn)
         {
             Function method;
+            method.id = name_id;
             parse_args(it, method.args);
             parse_scope(it, method.body);
             if (struc.contains(method.id))
@@ -952,12 +953,7 @@ void dawn::Parser::expression_single_keyword(Token const& token, Node& tree) con
 
 void dawn::Parser::expression_single_type(Token const& token, Node& tree) const
 {
-    if (token.value == tp_void || token.value == tp_bool || token.value == tp_int || token.value == tp_float ||
-        token.value == tp_char || token.value == tp_string || token.value == tp_range || token.value == tp_function ||
-        token.value == tp_array)
-        tree.emplace<IdentifierNode>(token.location).id = token.value;
-    else
-        PARSER_PANIC(token, "type [", token.value, "] is not an expression");
+    tree.emplace<IdentifierNode>(token.location).id = token.value;
 }
 
 void dawn::Parser::expression_single_identifier(Token const& token, Node& tree) const
