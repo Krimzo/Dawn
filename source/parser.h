@@ -97,14 +97,13 @@ Int token_depth(Token const& token, Bool& in_lambda);
 void create_operator_node(Token const& token, Node& node);
 void create_assign_node(Token const& token, Node& node);
 
-inline Bool is_op(StringRef value)
+inline Bool is_assign(StringRef value)
 {
-    static const StringSet OPS = {
-        (String)op_add, (String)op_sub, (String)op_mul,  (String)op_div,   (String)op_pow,        (String)op_mod,
-        (String)op_eq,  (String)op_neq, (String)op_less, (String)op_great, (String)op_lesseq,     (String)op_greateq,
-        (String)op_not, (String)op_and, (String)op_or,   (String)op_range, (String)op_range_incl,
+    static const StringSet ASSIGN_OPS = {
+        (String)op_assign, (String)op_addas, (String)op_subas, (String)op_mulas,
+        (String)op_divas,  (String)op_powas, (String)op_modas,
     };
-    return OPS.contains(value);
+    return ASSIGN_OPS.contains(value);
 }
 
 inline OperatorType get_op(StringRef value)

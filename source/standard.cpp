@@ -517,7 +517,7 @@ void dawn::Engine::load_standard_functions()
     static const Lexer _lexer{};
     static constexpr Parser _parser{};
 
-    /* DAWN */
+    // dawn
     bind_function("lex", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count != 1)
             ENGINE_PANIC(location, "lex expected 1 argument, but got ", arg_count);
@@ -540,7 +540,7 @@ void dawn::Engine::load_standard_functions()
         return engine.handle_expression(node);
     });
 
-    /* TYPE */
+    // type
     bind_function("typeid", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             return Value{(Int)args[0].type_id().integer(), location};
@@ -562,7 +562,7 @@ void dawn::Engine::load_standard_functions()
             ENGINE_PANIC(location, "is_const expected 1 argument, but got ", arg_count);
     });
 
-    /* SYSTEM */
+    // system
     bind_function("exit", false, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 1)
             std::exit((int)args[0].as_int());
@@ -571,7 +571,7 @@ void dawn::Engine::load_standard_functions()
         return {};
     });
 
-    /* UTILITY */
+    // util
     bind_function("format", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         StringStream stream;
         for (Int i = 0; i < arg_count; i++)
@@ -609,7 +609,7 @@ void dawn::Engine::load_standard_functions()
             ENGINE_PANIC(location, "rand_flt() expects 0 arguments, but got ", arg_count);
     });
 
-    /* MATH */
+    // math
     bind_function("min", true, [](Location location, Engine& engine, Value const* args, Int arg_count) -> Value {
         if (arg_count == 2)
         {
@@ -676,7 +676,7 @@ void dawn::Engine::load_standard_functions()
 
 void dawn::Engine::load_standard_members()
 {
-    // Strings.
+    // string
     bind_method(id_string, "for_each", true, 1,
                 [](Location location, Engine& engine, Value const& self, Value const* args) -> Value {
                     auto& func = args[0].as_function();
@@ -711,7 +711,7 @@ void dawn::Engine::load_standard_members()
                     return Value{Int(index), location};
                 });
 
-    // Ranges.
+    // range
     bind_field(id_range, "start", [](Location location, Engine& engine, Value const& self) -> Value {
         return Value{&self.as_range().start, self.is_const(), location};
     });
@@ -724,7 +724,7 @@ void dawn::Engine::load_standard_members()
         return Value{&self.as_range().inclusive, self.is_const(), location};
     });
 
-    // Enums.
+    // enum
     // bind_field(ValueType::ENUM, "id", [](Location location, Engine& engine, Value const& self) -> Value {
     //     return Value{(Int)self.as_enum().key_id.integer(), location};
     // });
@@ -744,7 +744,7 @@ void dawn::Engine::load_standard_members()
     //     return std::get<Value>(*entry->expr);
     // });
 
-    // Arrays.
+    // array
     bind_method(id_array, "for_each", true, 1,
                 [](Location location, Engine& engine, Value const& self, Value const* args) -> Value {
                     auto& func = args[0].as_function();
@@ -786,7 +786,7 @@ void dawn::Engine::load_standard_members()
 
 void dawn::Engine::load_standard_casts()
 {
-    /* TO BOOL */
+    // to bool
     bind_cast(id_void, id_bool, true,
               [](Location location, Engine& engine, Value const& value) { return Value{Bool{}, location}; });
     bind_cast(id_bool, id_bool, true,

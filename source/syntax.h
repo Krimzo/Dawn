@@ -71,6 +71,7 @@ inline constexpr StringRef op_powas = "^=";
 inline constexpr StringRef op_modas = "%=";
 
 inline constexpr StringRef op_link = "::";
+inline constexpr StringRef op_point = "->";
 inline constexpr StringRef op_access = ".";
 inline constexpr StringRef op_set = ":";
 inline constexpr StringRef op_split = ",";

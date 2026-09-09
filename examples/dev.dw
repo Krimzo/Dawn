@@ -45,6 +45,6 @@ struct Person
 	fav_animal: Animal
 }
 
-cast Person string {
+cast Person -> string {
 	return "{self.name} likes {self.fav_animal.name}s"
 }

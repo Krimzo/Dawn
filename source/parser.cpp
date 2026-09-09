@@ -331,6 +331,10 @@ void dawn::Parser::parse_cast(TokenIterator& it, Cast& cast) const
     cast.from_type_id = it->value;
     ++it;
 
+    if (it->value != op_point)
+        PARSER_PANIC(*it, "expected point operator");
+    ++it;
+
     if (it->type != TokenType::TYPE)
         PARSER_PANIC(*it, "expected TO cast type");
     cast.to_type_id = it->value;
@@ -856,19 +860,19 @@ void dawn::Parser::expression_complex_default(Vector<Token>& left, Token op, Vec
         *cast_node.left_expr = left_expr;
         cast_node.right_type_id = right.front().value;
     }
-    else if (is_op(op.value))
-    {
-        create_operator_node(op, tree);
-        auto& op_node = std::get<OperatorNode>(tree);
-        op_node.sides.emplace_back(left_expr);
-        op_node.sides.emplace_back(right_expr);
-    }
-    else
+    else if (is_assign(op.value))
     {
         create_assign_node(op, tree);
         auto& as_node = std::get<AssignNode>(tree);
         as_node.sides.emplace_back(left_expr);
         as_node.sides.emplace_back(right_expr);
+    }
+    else
+    {
+        create_operator_node(op, tree);
+        auto& op_node = std::get<OperatorNode>(tree);
+        op_node.sides.emplace_back(left_expr);
+        op_node.sides.emplace_back(right_expr);
     }
 }
 

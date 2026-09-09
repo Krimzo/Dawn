@@ -195,8 +195,8 @@ dawn::Value dawn::Dawn::call_function(ID id, Value* args, Int arg_count, String*
     }
     catch (Value const& err)
     {
-        // if (out_error)
-        //     *out_error = dawn::format("Uncaught error: ", err.to_string(engine));
+        if (out_error)
+            *out_error = dawn::format("Uncaught error: ", engine.to_string(err));
     }
     return {};
 }
