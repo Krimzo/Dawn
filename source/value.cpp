@@ -3,8 +3,8 @@
 #include "engine.h"
 
 // value.cpp use only
-static const dawn::ID id_enum = "enum";
-static const dawn::ID id_struct = "struct";
+static const dawn::ID id_enum = dawn::kw_enum;
+static const dawn::ID id_struct = dawn::kw_struct;
 
 dawn::Bool dawn::FunctionValue::is_global() const
 {

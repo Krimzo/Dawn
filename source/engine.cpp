@@ -738,7 +738,7 @@ dawn::Value dawn::Engine::handle_operator(Location location, Value const& left, 
     ProxyArg proxy_args[2] = {
         reinterpret_cast<ProxyArg const&>(left),
         reinterpret_cast<ProxyArg const&>(
-            right)}; // Improves performance by not calling the constructors or destructors of Value.
+            right)}; // Improves performance by not calling the constructor or destructor of Value.
 
     return handle_function(location, *func, reinterpret_cast<Value*>(proxy_args), (Int)std::size(proxy_args));
 }

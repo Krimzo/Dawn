@@ -77,6 +77,7 @@ struct Parser
     void expression_single_type(Token const& token, Node& tree) const;
     void expression_single_identifier(Token const& token, Node& tree) const;
 
+    void parse_args(TokenIterator& it, Vector<Arg>& args) const;
     void parse_scope(TokenIterator& it, Scope& scope) const;
     void scope_return(TokenIterator& it, Node& tree) const;
     void scope_break(TokenIterator& it, Node& tree) const;
