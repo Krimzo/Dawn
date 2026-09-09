@@ -23,12 +23,12 @@ int& p = b // reference
 # Types
 ```dawn
 void n = ()                       // void
-bool b = false                    // bool (1 byte)
-int i = -10                       // integer (8 bytes)
-float f = 6.0                     // float (8 bytes)
-char c = 'd'                      // char (1 byte)
+bool b = false                    // bool
+int i = -10                       // integer
+float f = 6.0                     // float
+char c = 'd'                      // char
 string s = "nice"                 // string
-range r = 0>>10                   // range (16 bytes)
+range r = 0>>10                   // range
 function fn = ``{}                // function
 array a = []                      // array
 SomeEnum se = SomeEnum::something // enum
@@ -37,8 +37,12 @@ SomeStruct ss = SomeStruct{}      // struct
 
 # Casting
 ```dawn
-int i = int(3.14)        // functional type cast
+int i = int(3.14)        // functional type cast (works only on builtin types)
 float f = "27.3" @ float // operator type cast
+
+cast SomeStruct -> float {
+    return ...
+}
 ```
 
 # Strings
@@ -82,14 +86,15 @@ struct Person {
     name: string
     age: int
 
-    func who() {
+    who() {
         print("{self.name} is {self.age} years old")
     }
-
-    cast string {
-        return "Person({self.name}, {self.age})"
-    }
 }
+
+cast Person -> string {
+    return "Person({self.name}, {self.age})"
+}
+
 Person person1 = Person{ name="Krim", age: 24 } // both = and : are allowed when assigning a value
 Person? person2 = Person((), "Krim", 22)        // assigning values by order
 person2.age += 2
