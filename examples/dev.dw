@@ -2,8 +2,8 @@ func main(array& args)
 {
 	array? people = [12.5]
 	people.push(Person{name: "First", age: rand_flt() * 50})
-	people.push(Person{name: "Second", age: rand_flt() * 50})
-	
+	people.push(Person("Second", rand_flt() * 50))
+
 	print("using default for")
 	for person : people {
 		person.who()
