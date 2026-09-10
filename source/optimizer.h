@@ -74,7 +74,6 @@ struct Optimizer
     void optimize_expression_array(ArrayNode& node, Node& out_node);
     void optimize_expression_access(AccessNode& node, Node& out_node);
     void optimize_expression_operator(OperatorNode& node, Node& out_node);
-    void optimize_expression_assign(AssignNode& node, Node& out_node);
     void optimize_expression_cast(CastNode& node, Node& out_node);
 };
 } // namespace dawn

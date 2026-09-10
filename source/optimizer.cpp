@@ -179,9 +179,6 @@ void dawn::Optimizer::optimize_expression(Node& node)
     case NodeType::OPERATOR:
         optimize_expression_operator(std::get<OperatorNode>(node), node);
         break;
-    case NodeType::ASSIGN:
-        optimize_expression_assign(std::get<AssignNode>(node), node);
-        break;
     case NodeType::CAST:
         optimize_expression_cast(std::get<CastNode>(node), node);
         break;
@@ -536,12 +533,6 @@ void dawn::Optimizer::optimize_expression_operator(OperatorNode& node, Node& out
 
     left_value = engine.handle_operator(node.location, left_value, node.type, right_value);
     out_node.emplace<Value>(left_value);
-}
-
-void dawn::Optimizer::optimize_expression_assign(AssignNode& node, Node& out_node)
-{
-    for (auto& side : node.sides)
-        optimize_expression(side);
 }
 
 void dawn::Optimizer::optimize_expression_cast(CastNode& node, Node& out_node)

@@ -865,13 +865,6 @@ void dawn::Parser::expression_complex_default(Vector<Token>& left, Token op, Vec
         *cast_node.left_expr = left_expr;
         cast_node.right_type_id = right.front().value;
     }
-    else if (is_assign(op.value))
-    {
-        create_assign_node(op, tree);
-        auto& as_node = std::get<AssignNode>(tree);
-        as_node.sides.emplace_back(left_expr);
-        as_node.sides.emplace_back(right_expr);
-    }
     else
     {
         create_operator_node(op, tree);
@@ -1317,31 +1310,80 @@ void dawn::create_operator_node(Token const& token, Node& node)
     op_node.type = get_op(token.value);
 }
 
-void dawn::create_assign_node(Token const& token, Node& node)
+dawn::OperatorType dawn::get_op(StringRef value)
 {
-    auto& as_node = node.emplace<AssignNode>(token.location);
+    if (value == op_add)
+        return OperatorType::ADD;
 
-    if (token.value == op_assign)
-        as_node.type = AssignType::ASSIGN;
+    else if (value == op_sub)
+        return OperatorType::SUB;
 
-    else if (token.value == op_addas)
-        as_node.type = AssignType::ADD;
+    else if (value == op_mul)
+        return OperatorType::MUL;
 
-    else if (token.value == op_subas)
-        as_node.type = AssignType::SUB;
+    else if (value == op_div)
+        return OperatorType::DIV;
 
-    else if (token.value == op_mulas)
-        as_node.type = AssignType::MUL;
+    else if (value == op_pow)
+        return OperatorType::POW;
 
-    else if (token.value == op_divas)
-        as_node.type = AssignType::DIV;
+    else if (value == op_mod)
+        return OperatorType::MOD;
 
-    else if (token.value == op_powas)
-        as_node.type = AssignType::POW;
+    else if (value == op_eq)
+        return OperatorType::EQ;
 
-    else if (token.value == op_modas)
-        as_node.type = AssignType::MOD;
+    else if (value == op_neq)
+        return OperatorType::NOT_EQ;
+
+    else if (value == op_less)
+        return OperatorType::LESS;
+
+    else if (value == op_great)
+        return OperatorType::GREAT;
+
+    else if (value == op_lesseq)
+        return OperatorType::LESS_EQ;
+
+    else if (value == op_greateq)
+        return OperatorType::GREAT_EQ;
+
+    else if (value == op_not)
+        return OperatorType::NOT;
+
+    else if (value == op_and)
+        return OperatorType::AND;
+
+    else if (value == op_or)
+        return OperatorType::OR;
+
+    else if (value == op_range)
+        return OperatorType::RANGE;
+
+    else if (value == op_range_incl)
+        return OperatorType::RANGE_INCL;
+
+    else if (value == op_assign)
+        return OperatorType::ASSIGN;
+
+    else if (value == op_addas)
+        return OperatorType::ADD_ASSIGN;
+
+    else if (value == op_subas)
+        return OperatorType::SUB_ASSIGN;
+
+    else if (value == op_mulas)
+        return OperatorType::MUL_ASSIGN;
+
+    else if (value == op_divas)
+        return OperatorType::DIV_ASSIGN;
+
+    else if (value == op_powas)
+        return OperatorType::POW_ASSIGN;
+
+    else if (value == op_modas)
+        return OperatorType::MOD_ASSIGN;
 
     else
-        PARSER_PANIC(token, "unknown assign operator");
+        PARSER_PANIC({}, "unknown operator [", value, "]");
 }

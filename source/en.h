@@ -43,18 +43,14 @@ enum struct OperatorType : uint8_t
     OR,
     RANGE,
     RANGE_INCL,
+    ASSIGN, // assigns must be last in enum and in the same order as add, sub, etc...
+    ADD_ASSIGN,
+    SUB_ASSIGN,
+    MUL_ASSIGN,
+    DIV_ASSIGN,
+    POW_ASSIGN,
+    MOD_ASSIGN,
     _COUNT,
-};
-
-enum struct AssignType : uint8_t
-{
-    ASSIGN = 0,
-    ADD,
-    SUB,
-    MUL,
-    DIV,
-    POW,
-    MOD,
 };
 
 enum struct NodeType : uint8_t
@@ -86,7 +82,6 @@ enum struct NodeType : uint8_t
     ARRAY,
     ACCESS,
     OPERATOR,
-    ASSIGN,
     CAST,
 };
 

@@ -688,44 +688,6 @@ dawn::Value dawn::Engine::handle_operator_node(OperatorNode const& node)
     return handle_operator(node.location, left, node.type, handle_expression(node.sides[1]));
 }
 
-dawn::Value dawn::Engine::handle_assign_node(AssignNode const& node)
-{
-    Value left = handle_expression(node.sides[0]);
-    switch (node.type)
-    {
-    case AssignType::ASSIGN:
-        left.assign(handle_expression(node.sides[1]));
-        return left;
-
-    case AssignType::ADD:
-        left.assign(handle_operator(node.location, left, OperatorType::ADD, handle_expression(node.sides[1])));
-        return left;
-
-    case AssignType::SUB:
-        left.assign(handle_operator(node.location, left, OperatorType::SUB, handle_expression(node.sides[1])));
-        return left;
-
-    case AssignType::MUL:
-        left.assign(handle_operator(node.location, left, OperatorType::MUL, handle_expression(node.sides[1])));
-        return left;
-
-    case AssignType::DIV:
-        left.assign(handle_operator(node.location, left, OperatorType::DIV, handle_expression(node.sides[1])));
-        return left;
-
-    case AssignType::POW:
-        left.assign(handle_operator(node.location, left, OperatorType::POW, handle_expression(node.sides[1])));
-        return left;
-
-    case AssignType::MOD:
-        left.assign(handle_operator(node.location, left, OperatorType::MOD, handle_expression(node.sides[1])));
-        return left;
-
-    default:
-        ENGINE_PANIC(node.location, "unknown assign node type: ", (Int)node.type);
-    }
-}
-
 dawn::Value dawn::Engine::handle_cast_node(CastNode const& node)
 {
     const Value left_value = handle_expression(*node.left_expr);
@@ -746,23 +708,37 @@ void dawn::Engine::handle_scope(Scope const& scope, Opt<Value>& retval, Bool* di
 dawn::Value dawn::Engine::handle_operator(Location location, Value const& left, OperatorType op_type,
                                           Value const& right)
 {
-    auto* op_right_ids = operators[(Int)op_type].get(left.type_id());
-    if (!op_right_ids)
-        ENGINE_PANIC(location, "type [", left.type_id(), "] does not support operator [", op_type, "]");
-    auto* func = op_right_ids->get(right.type_id());
-    if (!func)
-        ENGINE_PANIC(location, "type [", left.type_id(), "] does not support operator [", op_type,
-                     "] with right type being [", right.type_id(), "]");
+    if (op_type < OperatorType::ASSIGN)
+    {
+        auto* op_right_ids = operators[(Int)op_type].get(left.type_id());
+        if (!op_right_ids)
+            ENGINE_PANIC(location, "type [", left.type_id(), "] does not support operator [", op_type, "]");
+        auto* func = op_right_ids->get(right.type_id());
+        if (!func)
+            ENGINE_PANIC(location, "type [", left.type_id(), "] does not support operator [", op_type,
+                         "] with right type being [", right.type_id(), "]");
 
-    using ProxyArg = uint64_t;
-    static_assert(sizeof(ProxyArg) == sizeof(Value), "ProxyArg size must be the same as Value");
-    static_assert(alignof(ProxyArg) == alignof(Value), "ProxyArg alignment must be the same as Value");
-    ProxyArg proxy_args[2] = {
-        reinterpret_cast<ProxyArg const&>(left),
-        reinterpret_cast<ProxyArg const&>(
-            right)}; // Improves performance by not calling the constructor or destructor of Value.
+        using ProxyArg = uint64_t;
+        static_assert(sizeof(ProxyArg) == sizeof(Value), "ProxyArg size must be the same as Value");
+        static_assert(alignof(ProxyArg) == alignof(Value), "ProxyArg alignment must be the same as Value");
+        ProxyArg proxy_args[2] = {
+            reinterpret_cast<ProxyArg const&>(left),
+            reinterpret_cast<ProxyArg const&>(
+                right)}; // Improves performance by not calling the constructor or destructor of Value.
 
-    return handle_function(location, *func, reinterpret_cast<Value*>(proxy_args), (Int)std::size(proxy_args));
+        return handle_function(location, *func, reinterpret_cast<Value*>(proxy_args), (Int)std::size(proxy_args));
+    }
+    else if (op_type == OperatorType::ASSIGN)
+    {
+        const_cast<Value&>(left).assign(right);
+        return left;
+    }
+    else
+    {
+        const_cast<Value&>(left).assign(
+            handle_operator(location, left, OperatorType((int)op_type - ((int)OperatorType::ASSIGN + 1)), right));
+        return left;
+    }
 }
 
 dawn::Value dawn::Engine::handle_function(Location location, FunctionValue const& func, Value const* argv, Int argc)
@@ -896,9 +872,6 @@ dawn::Value dawn::Engine::handle_expression(Node const& node)
 
     case NodeType::OPERATOR:
         return handle_operator_node(std::get<OperatorNode>(node));
-
-    case NodeType::ASSIGN:
-        return handle_assign_node(std::get<AssignNode>(node));
 
     case NodeType::CAST:
         return handle_cast_node(std::get<CastNode>(node));

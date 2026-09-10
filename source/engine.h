@@ -78,7 +78,6 @@ struct Engine
     Value handle_array_node(ArrayNode const& node);
     Value handle_access_node(AccessNode const& node);
     Value handle_operator_node(OperatorNode const& node);
-    Value handle_assign_node(AssignNode const& node);
     Value handle_cast_node(CastNode const& node);
 
     void handle_scope(Scope const& scope, Opt<Value>& retval, Bool* didbrk, Bool* didcon);

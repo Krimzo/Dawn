@@ -85,6 +85,30 @@ std::ostream& dawn::operator<<(std::ostream& stream, OperatorType type)
     case OperatorType::RANGE:
         stream << "Range";
         break;
+    case OperatorType::RANGE_INCL:
+        stream << "Range_Incl";
+        break;
+    case OperatorType::ASSIGN:
+        stream << "Assign";
+        break;
+    case OperatorType::ADD_ASSIGN:
+        stream << "Add_Assign";
+        break;
+    case OperatorType::SUB_ASSIGN:
+        stream << "Sub_Assign";
+        break;
+    case OperatorType::MUL_ASSIGN:
+        stream << "Mul_Assign";
+        break;
+    case OperatorType::DIV_ASSIGN:
+        stream << "Div_Assign";
+        break;
+    case OperatorType::POW_ASSIGN:
+        stream << "Pow_Assign";
+        break;
+    case OperatorType::MOD_ASSIGN:
+        stream << "Mod_Assign";
+        break;
     }
     return stream;
 }
@@ -161,9 +185,6 @@ std::ostream& dawn::operator<<(std::ostream& stream, NodeType type)
         break;
     case NodeType::OPERATOR:
         stream << "Operator";
-        break;
-    case NodeType::ASSIGN:
-        stream << "Assign";
         break;
     case NodeType::CAST:
         stream << "Cast";
