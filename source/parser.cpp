@@ -387,6 +387,8 @@ void dawn::Parser::parse_operator(TokenIterator& it, Operator& oper) const
         PARSER_PANIC(*it, "expected operator");
     const String op_val = it->value;
     oper.type = get_op(op_val);
+    if (oper.type >= OperatorType::ASSIGN)
+        PARSER_PANIC(*it, "can't overload assign operators");
     ++it;
 
     parse_args(it, oper.args);

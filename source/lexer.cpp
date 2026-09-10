@@ -73,6 +73,8 @@ void dawn::Lexer::tokenize_at(Source const& source, Vector<Token>& tokens, Index
         extract_comment(source, tokens, index);
     else if (is_mlcomment(source, index.index()))
         extract_mlcomment(source, tokens, index);
+    else if (is_operator(source, index.index()))
+        extract_operator(source, tokens, index);
     else if (is_word(source, index.index()))
         extract_word(source, tokens, index);
     else if (is_number(source, index.index()))
@@ -81,8 +83,6 @@ void dawn::Lexer::tokenize_at(Source const& source, Vector<Token>& tokens, Index
         extract_char(source, tokens, index);
     else if (is_string(source, index.index()))
         extract_string(source, tokens, index);
-    else if (is_operator(source, index.index()))
-        extract_operator(source, tokens, index);
     else
         LEXER_PANIC(Location{source.path.value_or({}), index}, source[index.index()], "unexpected character");
 }

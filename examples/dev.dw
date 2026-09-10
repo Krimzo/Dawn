@@ -3,6 +3,7 @@ func main(array& args)
 	array? people = [12.5]
 	people.push(Person{name: "First", age: rand_flt() * 50})
 	people.push(Person("Second", rand_flt() * 50))
+	people.push(Person("Yeah"))
 
 	print("using default for")
 	for person : people {
@@ -18,6 +19,24 @@ func main(array& args)
 	int? b = 7;
 	b %= a;
 	print("{a} {b}")
+
+	people.for_each(`& person`
+	{
+		if typeid(person) != typeid(Person{}) {
+			return;
+		}
+		switch person {
+			default {
+				print("default...")
+			}
+			case people[2] {
+				print("it's second")
+			}
+			case people[1] {
+				print("it's first")
+			}
+		}
+	})
 }
 
 struct Person
@@ -28,6 +47,12 @@ struct Person
 
 cast Person -> string {
 	return "I am {self.name} and I'm {self.age} years old."
+}
+
+oper == (Person& l, Person& r)
+{
+	print("person and op called")
+	return l.name == r.name
 }
 
 func float.who()
