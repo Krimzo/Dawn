@@ -55,6 +55,7 @@ struct Cast
 {
     ID from_type_id;
     ID to_type_id;
+    Vector<Arg> args;
     Scope body;
 };
 

@@ -256,15 +256,14 @@ void dawn::Parser::parse_struct(TokenIterator& it, Struct& struc) const
         {
             Function method;
             method.id = name_id;
+            auto& self_arg = method.args.emplace_back();
+            self_arg.type.type_id = struc.id;
+            self_arg.type.kind = VarKind::REFERENCE;
+            self_arg.id = kw_self;
             parse_args(it, method.args);
             parse_scope(it, method.body);
             if (struc.contains(method.id))
                 PARSER_PANIC(*it, "struct method [", method.id, "] already defined");
-
-            auto& self_var = *method.args.emplace(method.args.begin());
-            self_var.type.type_id = struc.id;
-            self_var.type.kind = VarKind::REFERENCE;
-            self_var.id = kw_self;
             struc.methods.push_back(method);
         }
         else
@@ -341,6 +340,11 @@ void dawn::Parser::parse_cast(TokenIterator& it, Cast& cast) const
     cast.to_type_id = it->value;
     ++it;
 
+    auto& self_arg = cast.args.emplace_back();
+    self_arg.type.type_id = cast.from_type_id;
+    self_arg.type.kind = VarKind::REFERENCE;
+    self_arg.id = kw_self;
+
     parse_scope(it, cast.body);
 }
 
@@ -358,10 +362,10 @@ void dawn::Parser::parse_function(TokenIterator& it, Function& function) const
             PARSER_PANIC(*it, "expected access operator");
         ++it;
 
-        auto& self_var = function.args.emplace_back();
-        self_var.type.type_id = function.type_id;
-        self_var.type.kind = VarKind::REFERENCE;
-        self_var.id = kw_self;
+        auto& self_arg = function.args.emplace_back();
+        self_arg.type.type_id = function.type_id;
+        self_arg.type.kind = VarKind::REFERENCE;
+        self_arg.id = kw_self;
     }
 
     if (it->type != TokenType::NAME)

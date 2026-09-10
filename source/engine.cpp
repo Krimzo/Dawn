@@ -13,9 +13,6 @@ void dawn::Engine::load_module(Module const& module)
     for (auto& entry : module.operators)
         load_operator(entry);
 
-    for (auto& cast : module.casts)
-        load_cast(cast);
-
     for (auto& entry : module.functions)
         if (!entry.is_extension())
             load_function(entry);
@@ -29,6 +26,9 @@ void dawn::Engine::load_module(Module const& module)
     for (auto& entry : module.functions)
         if (entry.is_extension())
             load_function(entry);
+
+    for (auto& cast : module.casts)
+        load_cast(cast);
 
     for (auto& entry : module.variables)
         load_variable(entry);
@@ -54,15 +54,13 @@ void dawn::Engine::load_operator(Operator const& entry)
 void dawn::Engine::load_cast(Cast const& entry)
 {
     FunctionValue fv{};
-    auto& func = fv.data.emplace<FunctionValue::AsGlobal>().func.emplace<DFunction>();
-    auto& self_arg = func.args.emplace_back();
-    self_arg.type.type_id = entry.from_type_id;
-    self_arg.type.kind = VarKind::REFERENCE;
-    self_arg.id = kw_self;
-    func.body = entry.body;
-    bind_cast(entry.from_type_id, entry.to_type_id, false, [fv](Location location, Engine& engine, Value const& value) {
-        return engine.handle_function(location, fv, &value, 1);
-    });
+    auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
+    global.id = format(entry.from_type_id, op_point, entry.to_type_id);
+    global.func.emplace<DFunction>(entry.args, entry.body);
+    bind_cast(entry.from_type_id, entry.to_type_id, false,
+              [fv](Location location, Engine& engine, Value const* argv, Int argc) {
+                  return engine.handle_function(location, fv, argv, argc);
+              });
 }
 
 void dawn::Engine::load_function(Function const& entry)
@@ -72,12 +70,12 @@ void dawn::Engine::load_function(Function const& entry)
         auto& funcs = members.get_or_set(entry.type_id);
         if (funcs.get(entry.id))
             ENGINE_PANIC({}, "method [", entry.id, "] already defined for type [", entry.type_id, "]");
-        funcs.set(entry.id, [entry](Location location, Engine& engine, Value const& self) -> Value {
+        funcs.set(entry.id, [entry](Location location, Engine& engine, Value const* argv, Int argc) -> Value {
             FunctionValue fv{};
             auto& method = fv.data.emplace<FunctionValue::AsMethod>();
             method.id = entry.id;
             method.func = DFunction{entry.args, entry.body};
-            *method.self = self;
+            *method.self = argv[0];
             return Value{fv, location};
         });
     }
@@ -117,11 +115,9 @@ void dawn::Engine::load_struct(Struct const& entry)
         FunctionValue fv{};
         auto& f = fv.data.emplace<FunctionValue::AsMethod>();
         f.id = method.id;
-        auto& dfunc = f.func.emplace<DFunction>();
-        dfunc.args = method.args;
-        dfunc.body = method.body;
-        funcs.set(method.id, [fv](Location location, Engine& engine, Value const& self) -> Value {
-            *fv.as_method().self = self;
+        f.func.emplace<DFunction>(method.args, method.body);
+        funcs.set(method.id, [fv](Location location, Engine& engine, Value const* argv, Int argc) -> Value {
+            *fv.as_method().self = argv[0];
             return Value{fv, location};
         });
     }
@@ -131,6 +127,55 @@ void dawn::Engine::load_variable(Variable const& entry)
 {
     auto& expr = *entry.expr;
     add_variable(expr.location(), entry.type, entry.id, handle_expression(expr));
+}
+
+dawn::Value dawn::Engine::create_default_value(ID type_id, Location location)
+{
+    if (type_id == id_void)
+        return Value{};
+
+    else if (type_id == id_bool)
+        return Value{Bool{}, location};
+
+    else if (type_id == id_int)
+        return Value{Int{}, location};
+
+    else if (type_id == id_float)
+        return Value{Float{}, location};
+
+    else if (type_id == id_char)
+        return Value{Char{}, location};
+
+    else if (type_id == id_string)
+        return Value{String{}, location};
+
+    else if (type_id == id_range)
+        return Value{RangeValue{}, location};
+
+    else if (type_id == id_function)
+        return Value{FunctionValue{}, location};
+
+    else if (type_id == id_array)
+        return Value{ArrayValue{}, location};
+
+    else if (auto* enum_ptr = enums.get(type_id))
+    {
+        auto& entry = *enum_ptr->entries.begin();
+        EnumNode node{location};
+        node.type_id = type_id;
+        node.key_id = entry.id;
+        return handle_enum_node(node);
+    }
+
+    else if (auto* struct_ptr = structs.get(type_id))
+    {
+        StructNode node{location};
+        node.type_id = type_id;
+        return handle_struct_node(node);
+    }
+
+    else
+        ENGINE_PANIC(location, "type [", type_id, "] does not exist");
 }
 
 void dawn::Engine::bind_operator(ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const,
@@ -151,13 +196,38 @@ void dawn::Engine::bind_operator(ID left_type_id, OperatorType op_type, ID right
         m_ctime_ops[(Int)op_type].insert(combine_ids(left_type_id, right_type_id));
 }
 
-void dawn::Engine::bind_cast(ID left_type_id, ID right_type_id, Bool is_ctime, CastCFunc const& cfunc)
+void dawn::Engine::bind_cast(ID left_type_id, ID right_type_id, Bool is_ctime, CFunction const& cfunc)
 {
     casts.get_or_set(left_type_id).set(right_type_id, cfunc);
     if (is_ctime)
         m_ctime_casts.insert(combine_ids(left_type_id, right_type_id));
     else
         m_ctime_casts.erase(combine_ids(left_type_id, right_type_id));
+}
+
+void dawn::Engine::bind_method(ID type_id, ID id, Bool is_const, Int expected_args, CFunction const& func)
+{
+    members.get_or_set(type_id).set(
+        id, [id, is_const, expected_args, func](Location location, Engine& _, Value const* argv, Int argc) -> Value {
+            FunctionValue fv{};
+            auto& f = fv.data.emplace<FunctionValue::AsMethod>();
+            f.id = id;
+            *f.self = argv[0];
+            f.func = [id, is_const, expected_args, func](Location location, Engine& engine, Value const* argv,
+                                                         Int argc) -> Value {
+                if (!is_const && argv[0].is_const())
+                    ENGINE_PANIC(location, "can not call [", id, "] on a const value");
+                if ((1 + expected_args) != argc)
+                    ENGINE_PANIC(location, "method [", id, "] expects self + ", expected_args, " arguments");
+                return func(location, engine, argv, argc);
+            };
+            return Value{fv, location};
+        });
+}
+
+void dawn::Engine::bind_field(ID type_id, ID id, CFunction const& func)
+{
+    members.get_or_set(type_id).set(id, func);
 }
 
 void dawn::Engine::bind_function(ID id, Bool is_ctime, CFunction cfunc)
@@ -210,82 +280,6 @@ void dawn::Engine::add_variable(Location location, VarType const& type, ID id, V
 dawn::Value* dawn::Engine::get_variable(ID id)
 {
     return stack.current().get(id);
-}
-
-void dawn::Engine::bind_field(ID type_id, ID id, FieldCFunc const& func)
-{
-    members.get_or_set(type_id).set(id, [func](Location location, Engine& engine, Value const& self) -> Value {
-        return func(location, engine, const_cast<Value&>(self));
-    });
-}
-
-void dawn::Engine::bind_method(ID type_id, ID id, Bool is_const, Int expected_args, MethodCFunc const& func)
-{
-    members.get_or_set(type_id).set(
-        id, [id, is_const, expected_args, func](Location location, Engine& _, Value const& self) -> Value {
-            FunctionValue fv{};
-            auto& method = fv.data.emplace<FunctionValue::AsMethod>();
-            method.id = id;
-            method.func = [id, is_const, expected_args, func](Location location, Engine& engine, Value const* args,
-                                                              Int arg_count) -> Value {
-                if (!is_const && args[0].is_const())
-                    ENGINE_PANIC(location, "can not call [", id, "] on a const value");
-                if ((1 + expected_args) != arg_count)
-                    ENGINE_PANIC(location, "method [", id, "] expects self + ", expected_args, " arguments");
-                return func(location, engine, args[0], args + 1);
-            };
-            *method.self = self;
-            return Value{fv, location};
-        });
-}
-
-dawn::Value dawn::Engine::create_default_value(ID type_id, Location location)
-{
-    if (type_id == id_void)
-        return Value{};
-
-    else if (type_id == id_bool)
-        return Value{Bool{}, location};
-
-    else if (type_id == id_int)
-        return Value{Int{}, location};
-
-    else if (type_id == id_float)
-        return Value{Float{}, location};
-
-    else if (type_id == id_char)
-        return Value{Char{}, location};
-
-    else if (type_id == id_string)
-        return Value{String{}, location};
-
-    else if (type_id == id_range)
-        return Value{RangeValue{}, location};
-
-    else if (type_id == id_function)
-        return Value{FunctionValue{}, location};
-
-    else if (type_id == id_array)
-        return Value{ArrayValue{}, location};
-
-    else if (auto* enum_ptr = enums.get(type_id))
-    {
-        auto& entry = *enum_ptr->entries.begin();
-        EnumNode node{location};
-        node.type_id = type_id;
-        node.key_id = entry.id;
-        return handle_enum_node(node);
-    }
-
-    else if (auto* struct_ptr = structs.get(type_id))
-    {
-        StructNode node{location};
-        node.type_id = type_id;
-        return handle_struct_node(node);
-    }
-
-    else
-        ENGINE_PANIC(location, "type [", type_id, "] does not exist");
 }
 
 void dawn::Engine::to_void(Value const& value)
@@ -685,7 +679,7 @@ dawn::Value dawn::Engine::handle_access_node(AccessNode const& node)
     auto* member_func = members.get_or_set(left.type_id()).get(node.right_id);
     if (!member_func)
         ENGINE_PANIC(node.location, "type [", left.type_id(), "] does not have member [", node.right_id, "]");
-    return (*member_func)(node.location, *this, left);
+    return (*member_func)(node.location, *this, &left, 1);
 }
 
 dawn::Value dawn::Engine::handle_operator_node(OperatorNode const& node)
@@ -771,12 +765,11 @@ dawn::Value dawn::Engine::handle_operator(Location location, Value const& left, 
     return handle_function(location, *func, reinterpret_cast<Value*>(proxy_args), (Int)std::size(proxy_args));
 }
 
-dawn::Value dawn::Engine::handle_function(Location location, FunctionValue const& func, Value const* args,
-                                          Int arg_count)
+dawn::Value dawn::Engine::handle_function(Location location, FunctionValue const& func, Value const* argv, Int argc)
 {
     if (auto* dfunc = func.dfunction())
     {
-        if (dfunc->args.size() != arg_count)
+        if (dfunc->args.size() != argc)
         {
             if (func.is_global())
                 ENGINE_PANIC(location, "invalid argument count for function [", func.as_global().id, "]");
@@ -789,8 +782,8 @@ dawn::Value dawn::Engine::handle_function(Location location, FunctionValue const
         const PopHandler pop_handler =
             stack.push_from(func.is_lambda() ? func.as_lambda().frame : RegisterRef<Frame>{});
 
-        for (Int i = 0; i < arg_count; i++)
-            add_variable(location, dfunc->args[i].type, dfunc->args[i].id, args[i]);
+        for (Int i = 0; i < argc; i++)
+            add_variable(location, dfunc->args[i].type, dfunc->args[i].id, argv[i]);
 
         Opt<Value> retval;
         handle_scope(dfunc->body, retval, nullptr, nullptr);
@@ -799,7 +792,7 @@ dawn::Value dawn::Engine::handle_function(Location location, FunctionValue const
     else
     {
         auto& cfunc = *func.cfunction();
-        return cfunc(location, *this, args, arg_count);
+        return cfunc(location, *this, argv, argc);
     }
 }
 
@@ -808,7 +801,7 @@ dawn::Value dawn::Engine::handle_cast(Location location, Value const& left, ID c
     auto* cast_ptr = casts.get_or_set(left.type_id()).get(cast_type);
     if (!cast_ptr)
         ENGINE_PANIC(location, "cast [", left.type_id(), "] -> [", cast_type, "] not defined");
-    return (*cast_ptr)(location, *this, left);
+    return (*cast_ptr)(location, *this, &left, 1);
 }
 
 void dawn::Engine::handle_instruction(Node const& node, Opt<Value>& retval, Bool* didbrk, Bool* didcon)

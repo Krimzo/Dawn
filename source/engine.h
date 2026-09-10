@@ -7,20 +7,13 @@ namespace dawn
 {
 struct Engine
 {
-    using CastCFunc = Func<Value(Location, Engine&, Value const&)>;
-    using MemberCFunc = Func<Value(Location, Engine&, Value const&)>;
-    using FieldCFunc = Func<Value(Location, Engine&, Value const&)>;
-    using MethodCFunc = Func<Value(Location, Engine&, Value const&, Value const*)>;
-
-    friend struct Value;
-    friend struct EnumValue;
     friend struct Optimizer;
 
     Stack stack;
     GlobalStorage<Enum> enums;
     GlobalStorage<Struct> structs;
-    GlobalStorage<GlobalStorage<CastCFunc>> casts;
-    GlobalStorage<GlobalStorage<MemberCFunc>> members;
+    GlobalStorage<GlobalStorage<CFunction>> casts;
+    GlobalStorage<GlobalStorage<CFunction>> members;
     GlobalStorage<GlobalStorage<FunctionValue>> operators[(Int)OperatorType::_COUNT];
 
     Engine();
@@ -41,19 +34,18 @@ struct Engine
     void load_struct(Struct const& entry);
     void load_variable(Variable const& entry);
 
+    Value create_default_value(ID type_id, Location location);
+
     void bind_operator(ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const, CFunction cfunc);
-    void bind_cast(ID left_type_id, ID right_type_id, Bool is_ctime, CastCFunc const& cfunc);
+    void bind_cast(ID left_type_id, ID right_type_id, Bool is_ctime, CFunction const& cfunc);
+    void bind_method(ID type_id, ID id, Bool is_const, Int expected_args, CFunction const& func);
+    void bind_field(ID type_id, ID id, CFunction const& func);
 
     void bind_function(ID id, Bool is_ctime, CFunction cfunc);
     Value call_function(ID id, Value* args, Int arg_count);
 
     void add_variable(Location location, VarType const& type, ID id, Value const& value);
     Value* get_variable(ID id);
-
-    void bind_field(ID type_id, ID id, FieldCFunc const& func);
-    void bind_method(ID type_id, ID id, Bool is_const, Int expected_args, MethodCFunc const& func);
-
-    Value create_default_value(ID type_id, Location location);
 
     void to_void(Value const& value);
     Bool to_bool(Value const& value);
@@ -97,7 +89,7 @@ struct Engine
     Value handle_expression(Node const& node);
 
   private:
-    Set<uint64_t> m_ctime_ops[(Int)OperatorType::_COUNT] = {};
+    Set<uint64_t> m_ctime_ops[(Int)OperatorType::_COUNT];
     Set<uint64_t> m_ctime_casts;
     Set<ID> m_ctime_funcs;
 };

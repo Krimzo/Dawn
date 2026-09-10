@@ -1,4 +1,29 @@
 func main(array& args)
 {
-	print("nice")
+	array? people
+	people.push(Person{name: "First", age: rand_flt() * 50})
+	people.push(Person{name: "Second", age: rand_flt() * 50})
+	print("using default for")
+	for person : people {
+		person.who()
+	}
+	print("using for_each")
+	people.for_each(`& p`{ p.who() })
+	print((0 >> 5).inclusive)
+	print((0 => 5).inclusive)
+}
+
+struct Person
+{
+	name: string
+	age: float
+}
+
+func Person.who()
+{
+	print(self @ string);
+}
+
+cast Person -> string {
+	return "I am {self.name} and I'm {self.age} years old."
 }
