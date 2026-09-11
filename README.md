@@ -184,7 +184,12 @@ oper *(Float2& left, float right) {
 ```dawn
 func some_fun(int arg0, bool& arg2) {
 }
-some_fun(5, false)
+some_fun(5, false) // multiple arg call
+
+func some_other_func(int val) {
+    print(val)
+}
+some_other_func -> 12 // single arg call (useful when passing lambdas as callbacks)
 ```
 
 # Extensions
