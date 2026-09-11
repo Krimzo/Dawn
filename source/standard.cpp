@@ -1045,6 +1045,15 @@ void dawn::Engine::load_enum_standards(Enum const& enu)
         auto& enum_value = argv[0].as_enum();
         return Value{format(enum_value.parent_id, op_link, enum_value.key_id), location};
     });
+
+    bind_operator(enu.id, OperatorType::EQ, enu.id, true,
+                  [](Location location, Engine& engine, Value const* argv, Int argc) -> Value {
+                      return Value{argv[0].as_enum().key_id == argv[1].as_enum().key_id, location};
+                  });
+    bind_operator(enu.id, OperatorType::NOT_EQ, enu.id, true,
+                  [](Location location, Engine& engine, Value const* argv, Int argc) -> Value {
+                      return Value{argv[0].as_enum().key_id != argv[1].as_enum().key_id, location};
+                  });
 }
 
 void dawn::Engine::load_struct_standards(Struct const& struc)

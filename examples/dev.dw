@@ -37,6 +37,28 @@ func main(array& args)
 			}
 		}
 	})
+
+	Animal animal = Animal::cat
+	print("{animal} is a pet: {is_a_pet(animal)}")
+}
+
+enum Animal
+{
+	cat
+	dog
+	ant
+}
+
+func is_a_pet(Animal& animal)
+{
+	switch animal {
+		case Animal::cat, Animal::dog {
+			return true
+		}
+		default {
+			return false
+		}
+	}
 }
 
 struct Person
