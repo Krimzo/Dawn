@@ -73,7 +73,7 @@ cast Person -> string {
 
 oper == (Person& l, Person& r)
 {
-	print("person and op called")
+	print("person eq op called")
 	return l.name == r.name
 }
 

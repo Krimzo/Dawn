@@ -422,8 +422,7 @@ void dawn::Optimizer::optimize_expression_call(CallNode& node, Node& out_node)
     Bool is_ctime = true;
     auto& left_expr = *node.left_expr;
     optimize_expression(left_expr);
-    if (left_expr.type() != NodeType::IDENTIFIER ||
-        !engine.m_ctime_funcs.contains(std::get<IdentifierNode>(left_expr).id))
+    if (left_expr.type() != NodeType::IDENTIFIER || !engine.is_func_ctime(std::get<IdentifierNode>(left_expr).id))
         is_ctime = false;
     for (auto& arg : node.args)
     {
@@ -528,7 +527,7 @@ void dawn::Optimizer::optimize_expression_operator(OperatorNode& node, Node& out
 
     Value left_value = std::get<Value>(left_node);
     auto& right_value = std::get<Value>(right_node);
-    if (!engine.m_ctime_ops[(Int)node.type].contains(combine_ids(left_value.type_id(), right_value.type_id())))
+    if (!engine.is_op_ctime(left_value.type_id(), node.type, right_value.type_id()))
         return;
 
     left_value = engine.handle_operator(node.location, left_value, node.type, right_value);
@@ -542,7 +541,7 @@ void dawn::Optimizer::optimize_expression_cast(CastNode& node, Node& out_node)
         return;
 
     Value left_value = std::get<Value>(*node.left_expr);
-    if (!engine.m_ctime_casts.contains(combine_ids(left_value.type_id(), node.right_type_id)))
+    if (!engine.is_cast_ctime(left_value.type_id(), node.right_type_id))
         return;
 
     auto* left_casts = engine.casts.get(left_value.type_id());

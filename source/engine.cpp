@@ -129,53 +129,19 @@ void dawn::Engine::load_variable(Variable const& entry)
     add_variable(expr.location(), entry.type, entry.id, handle_expression(expr));
 }
 
-dawn::Value dawn::Engine::create_default_value(ID type_id, Location location)
+dawn::Bool dawn::Engine::is_op_ctime(ID left_type_id, OperatorType op_type, ID right_type_id) const
 {
-    if (type_id == id_void)
-        return Value{};
+    return m_ctime_ops[(Int)op_type].contains(combine_ids(left_type_id, right_type_id));
+}
 
-    else if (type_id == id_bool)
-        return Value{Bool{}, location};
+dawn::Bool dawn::Engine::is_cast_ctime(ID left_type_id, ID right_type_id) const
+{
+    return m_ctime_casts.contains(combine_ids(left_type_id, right_type_id));
+}
 
-    else if (type_id == id_int)
-        return Value{Int{}, location};
-
-    else if (type_id == id_float)
-        return Value{Float{}, location};
-
-    else if (type_id == id_char)
-        return Value{Char{}, location};
-
-    else if (type_id == id_string)
-        return Value{String{}, location};
-
-    else if (type_id == id_range)
-        return Value{RangeValue{}, location};
-
-    else if (type_id == id_function)
-        return Value{FunctionValue{}, location};
-
-    else if (type_id == id_array)
-        return Value{ArrayValue{}, location};
-
-    else if (auto* enum_ptr = enums.get(type_id))
-    {
-        auto& entry = *enum_ptr->entries.begin();
-        EnumNode node{location};
-        node.type_id = type_id;
-        node.key_id = entry.id;
-        return handle_enum_node(node);
-    }
-
-    else if (auto* struct_ptr = structs.get(type_id))
-    {
-        StructNode node{location};
-        node.type_id = type_id;
-        return handle_struct_node(node);
-    }
-
-    else
-        ENGINE_PANIC(location, "type [", type_id, "] does not exist");
+dawn::Bool dawn::Engine::is_func_ctime(ID id) const
+{
+    return m_ctime_funcs.contains(id);
 }
 
 void dawn::Engine::bind_operator(ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const,
@@ -194,6 +160,8 @@ void dawn::Engine::bind_operator(ID left_type_id, OperatorType op_type, ID right
 
     if (is_const)
         m_ctime_ops[(Int)op_type].insert(combine_ids(left_type_id, right_type_id));
+    else
+        m_ctime_ops[(Int)op_type].erase(combine_ids(left_type_id, right_type_id));
 }
 
 void dawn::Engine::bind_cast(ID left_type_id, ID right_type_id, Bool is_ctime, CFunction const& cfunc)
@@ -280,6 +248,55 @@ void dawn::Engine::add_variable(Location location, VarType const& type, ID id, V
 dawn::Value* dawn::Engine::get_variable(ID id)
 {
     return stack.current().get(id);
+}
+
+dawn::Value dawn::Engine::create_default_value(ID type_id, Location location)
+{
+    if (type_id == id_void)
+        return Value{};
+
+    else if (type_id == id_bool)
+        return Value{Bool{}, location};
+
+    else if (type_id == id_int)
+        return Value{Int{}, location};
+
+    else if (type_id == id_float)
+        return Value{Float{}, location};
+
+    else if (type_id == id_char)
+        return Value{Char{}, location};
+
+    else if (type_id == id_string)
+        return Value{String{}, location};
+
+    else if (type_id == id_range)
+        return Value{RangeValue{}, location};
+
+    else if (type_id == id_function)
+        return Value{FunctionValue{}, location};
+
+    else if (type_id == id_array)
+        return Value{ArrayValue{}, location};
+
+    else if (auto* enum_ptr = enums.get(type_id))
+    {
+        auto& entry = *enum_ptr->entries.begin();
+        EnumNode node{location};
+        node.type_id = type_id;
+        node.key_id = entry.id;
+        return handle_enum_node(node);
+    }
+
+    else if (auto* struct_ptr = structs.get(type_id))
+    {
+        StructNode node{location};
+        node.type_id = type_id;
+        return handle_struct_node(node);
+    }
+
+    else
+        ENGINE_PANIC(location, "type [", type_id, "] does not exist");
 }
 
 void dawn::Engine::to_void(Value const& value)

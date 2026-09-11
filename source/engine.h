@@ -7,8 +7,6 @@ namespace dawn
 {
 struct Engine
 {
-    friend struct Optimizer;
-
     Stack stack;
     GlobalStorage<Enum> enums;
     GlobalStorage<Struct> structs;
@@ -34,7 +32,9 @@ struct Engine
     void load_struct(Struct const& entry);
     void load_variable(Variable const& entry);
 
-    Value create_default_value(ID type_id, Location location);
+    Bool is_op_ctime(ID left_type_id, OperatorType op_type, ID right_type_id) const;
+    Bool is_cast_ctime(ID left_type_id, ID right_type_id) const;
+    Bool is_func_ctime(ID id) const;
 
     void bind_operator(ID left_type_id, OperatorType op_type, ID right_type_id, Bool is_const, CFunction cfunc);
     void bind_cast(ID left_type_id, ID right_type_id, Bool is_ctime, CFunction const& cfunc);
@@ -46,6 +46,8 @@ struct Engine
 
     void add_variable(Location location, VarType const& type, ID id, Value const& value);
     Value* get_variable(ID id);
+
+    Value create_default_value(ID type_id, Location location);
 
     void to_void(Value const& value);
     Bool to_bool(Value const& value);
