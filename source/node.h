@@ -185,7 +185,7 @@ struct StructNode : LocationHolder
 {
     struct NamedInit
     {
-        Map<ID, Node> args;
+        Vector<Pair<ID, Node>> args;
     };
 
     struct ListInit
@@ -251,19 +251,9 @@ struct OperatorNode : LocationHolder
     }
 };
 
-struct AssignNode : LocationHolder
-{
-    AssignType type{};
-    Vector<Node> sides;
-
-    constexpr AssignNode(Location location) : LocationHolder(location)
-    {
-    }
-};
-
 struct Node : Variant<None, Scope, VariableNode, ReturnNode, BreakNode, ContinueNode, ThrowNode, TryNode, IfNode,
                       SwitchNode, LoopNode, WhileNode, ForNode, Value, IdentifierNode, CallNode, IndexNode, LambdaNode,
-                      EnumNode, StructNode, ArrayNode, AccessNode, OperatorNode, AssignNode, CastNode>
+                      EnumNode, StructNode, ArrayNode, AccessNode, OperatorNode, CastNode>
 {
     constexpr NodeType type() const noexcept
     {
@@ -302,7 +292,6 @@ struct Node : Variant<None, Scope, VariableNode, ReturnNode, BreakNode, Continue
         case NodeType::ARRAY:
         case NodeType::ACCESS:
         case NodeType::OPERATOR:
-        case NodeType::ASSIGN:
         case NodeType::CAST:
             return reinterpret_cast<LocationHolder const*>(this)->location;
         }

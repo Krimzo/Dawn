@@ -38,14 +38,14 @@ struct Dawn
 
     void eval_source(Source const& source, String* out_error = nullptr) noexcept;
     Value eval_scope(StringRef scope_src, String* out_error = nullptr) noexcept;
-    Value eval_expr(StringRef expr_src, String* out_error = nullptr) noexcept;
+    Value eval_expression(StringRef expr_src, String* out_error = nullptr) noexcept;
 
-    void bind_func(ID id, Bool is_ctime, CFunction cfunc) noexcept;
-    Value call_func(ID id, String* out_error = nullptr) noexcept;
-    Value call_func(ID id, std::initializer_list<Value> const& args, String* out_error = nullptr) noexcept;
-    Value call_func(ID id, Value* args, Int arg_count, String* out_error = nullptr) noexcept;
+    void bind_function(ID id, Bool is_ctime, CFunction cfunc) noexcept;
+    Value call_function(ID id, String* out_error = nullptr) noexcept;
+    Value call_function(ID id, std::initializer_list<Value> const& args, String* out_error = nullptr) noexcept;
+    Value call_function(ID id, Value* args, Int arg_count, String* out_error = nullptr) noexcept;
 
-    void add_var(VarType const& type, ID id, Value const& value) noexcept;
-    Value* get_var(ID id) noexcept;
+    void add_variable(VarType const& type, ID id, Value const& value) noexcept;
+    Value* get_variable(ID id) noexcept;
 };
 } // namespace dawn

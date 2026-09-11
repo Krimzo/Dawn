@@ -43,18 +43,14 @@ enum struct OperatorType : uint8_t
     OR,
     RANGE,
     RANGE_INCL,
+    ASSIGN, // assigns must be last in enum and in the same order as add, sub, etc...
+    ADD_ASSIGN,
+    SUB_ASSIGN,
+    MUL_ASSIGN,
+    DIV_ASSIGN,
+    POW_ASSIGN,
+    MOD_ASSIGN,
     _COUNT,
-};
-
-enum struct AssignType : uint8_t
-{
-    ASSIGN = 0,
-    ADD,
-    SUB,
-    MUL,
-    DIV,
-    POW,
-    MOD,
 };
 
 enum struct NodeType : uint8_t
@@ -86,30 +82,7 @@ enum struct NodeType : uint8_t
     ARRAY,
     ACCESS,
     OPERATOR,
-    ASSIGN,
     CAST,
-};
-
-enum struct ValueType : uint8_t
-{
-    VOID = 0,
-    BOOL,
-    INT,
-    FLOAT,
-    CHAR,
-    STRING,
-    RANGE,
-    FUNCTION,
-    ARRAY,
-    ENUM,
-    STRUCT,
-    _COUNT,
-};
-
-enum struct MemberType : uint8_t
-{
-    FIELD = 0,
-    METHOD,
 };
 
 enum struct VarKind : uint8_t
@@ -122,11 +95,10 @@ enum struct VarKind : uint8_t
 enum struct FrameType : uint8_t
 {
     LOCAL = 0,
-    GLOBAL = 1,
+    GLOBAL,
 };
 
 std::ostream& operator<<(std::ostream& stream, TokenType type);
 std::ostream& operator<<(std::ostream& stream, OperatorType type);
 std::ostream& operator<<(std::ostream& stream, NodeType type);
-std::ostream& operator<<(std::ostream& stream, ValueType type);
 } // namespace dawn

@@ -85,6 +85,30 @@ std::ostream& dawn::operator<<(std::ostream& stream, OperatorType type)
     case OperatorType::RANGE:
         stream << "Range";
         break;
+    case OperatorType::RANGE_INCL:
+        stream << "Range_Incl";
+        break;
+    case OperatorType::ASSIGN:
+        stream << "Assign";
+        break;
+    case OperatorType::ADD_ASSIGN:
+        stream << "Add_Assign";
+        break;
+    case OperatorType::SUB_ASSIGN:
+        stream << "Sub_Assign";
+        break;
+    case OperatorType::MUL_ASSIGN:
+        stream << "Mul_Assign";
+        break;
+    case OperatorType::DIV_ASSIGN:
+        stream << "Div_Assign";
+        break;
+    case OperatorType::POW_ASSIGN:
+        stream << "Pow_Assign";
+        break;
+    case OperatorType::MOD_ASSIGN:
+        stream << "Mod_Assign";
+        break;
     }
     return stream;
 }
@@ -162,52 +186,8 @@ std::ostream& dawn::operator<<(std::ostream& stream, NodeType type)
     case NodeType::OPERATOR:
         stream << "Operator";
         break;
-    case NodeType::ASSIGN:
-        stream << "Assign";
-        break;
     case NodeType::CAST:
         stream << "Cast";
-        break;
-    }
-    return stream;
-}
-
-std::ostream& dawn::operator<<(std::ostream& stream, ValueType type)
-{
-    switch (type)
-    {
-    case ValueType::VOID:
-        stream << tp_void;
-        break;
-    case ValueType::BOOL:
-        stream << tp_bool;
-        break;
-    case ValueType::INT:
-        stream << tp_int;
-        break;
-    case ValueType::FLOAT:
-        stream << tp_float;
-        break;
-    case ValueType::CHAR:
-        stream << tp_char;
-        break;
-    case ValueType::STRING:
-        stream << tp_string;
-        break;
-    case ValueType::RANGE:
-        stream << tp_range;
-        break;
-    case ValueType::FUNCTION:
-        stream << tp_function;
-        break;
-    case ValueType::ARRAY:
-        stream << tp_array;
-        break;
-    case ValueType::ENUM:
-        stream << kw_enum;
-        break;
-    case ValueType::STRUCT:
-        stream << kw_struct;
         break;
     }
     return stream;

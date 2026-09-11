@@ -14,14 +14,14 @@ dawn::LanguageDef dawn::LanguageDef::dawn()
         (String)tp_string, (String)tp_range, (String)tp_function, (String)tp_array,
     };
     result.operators = {
-        (String)exp_end,      (String)vr_variable,  (String)vr_reference, (String)op_add,        (String)op_sub,
-        (String)op_mul,       (String)op_div,       (String)op_pow,       (String)op_mod,        (String)op_addas,
-        (String)op_subas,     (String)op_mulas,     (String)op_divas,     (String)op_powas,      (String)op_modas,
-        (String)op_not,       (String)op_and,       (String)op_or,        (String)op_eq,         (String)op_neq,
-        (String)op_less,      (String)op_great,     (String)op_lesseq,    (String)op_greateq,    (String)op_assign,
-        (String)op_link,      (String)op_access,    (String)op_range,     (String)op_range_incl, (String)op_cast,
-        (String)op_set,       (String)op_split,     (String)op_lambda,    (String)op_expr_opn,   (String)op_expr_cls,
-        (String)op_scope_opn, (String)op_scope_cls, (String)op_array_opn, (String)op_array_cls,
+        (String)exp_end,     (String)vr_variable,  (String)vr_reference, (String)op_add,       (String)op_sub,
+        (String)op_mul,      (String)op_div,       (String)op_pow,       (String)op_mod,       (String)op_addas,
+        (String)op_subas,    (String)op_mulas,     (String)op_divas,     (String)op_powas,     (String)op_modas,
+        (String)op_not,      (String)op_and,       (String)op_or,        (String)op_eq,        (String)op_neq,
+        (String)op_less,     (String)op_great,     (String)op_lesseq,    (String)op_greateq,   (String)op_assign,
+        (String)op_link,     (String)op_point,     (String)op_access,    (String)op_range,     (String)op_range_incl,
+        (String)op_cast,     (String)op_set,       (String)op_split,     (String)op_lambda,    (String)op_expr_opn,
+        (String)op_expr_cls, (String)op_scope_opn, (String)op_scope_cls, (String)op_array_opn, (String)op_array_cls,
     };
     result.separator_identifier = sep_identifier;
     result.separator_number = sep_number;
@@ -73,6 +73,8 @@ void dawn::Lexer::tokenize_at(Source const& source, Vector<Token>& tokens, Index
         extract_comment(source, tokens, index);
     else if (is_mlcomment(source, index.index()))
         extract_mlcomment(source, tokens, index);
+    else if (is_operator(source, index.index()))
+        extract_operator(source, tokens, index);
     else if (is_word(source, index.index()))
         extract_word(source, tokens, index);
     else if (is_number(source, index.index()))
@@ -81,8 +83,6 @@ void dawn::Lexer::tokenize_at(Source const& source, Vector<Token>& tokens, Index
         extract_char(source, tokens, index);
     else if (is_string(source, index.index()))
         extract_string(source, tokens, index);
-    else if (is_operator(source, index.index()))
-        extract_operator(source, tokens, index);
     else
         LEXER_PANIC(Location{source.path.value_or({}), index}, source[index.index()], "unexpected character");
 }

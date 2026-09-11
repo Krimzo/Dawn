@@ -90,15 +90,8 @@ struct EnumValue
 
 struct StructValue
 {
-    template <typename T> // Template is required because Value does not exist at this stage.
-    struct Member
-    {
-        T value;
-        MemberType type = MemberType::FIELD;
-    };
-
     ID parent_id;
-    Map<ID, Member<Value>> members;
+    Vector<Pair<ID, Value>> fields;
 
     StructValue() = default;
 
@@ -108,14 +101,13 @@ struct StructValue
     StructValue(StructValue&& other) noexcept;
     StructValue& operator=(StructValue&& other) noexcept;
 
-    FunctionValue* get_method(ID id) const;
-    FunctionValue* get_unary(ID id) const;
+    Value* get(ID id) const;
 };
 
-struct ValueInfo
+struct alignas(8) ValueInfo
 {
     Location location;
-    ValueType type = ValueType::VOID;
+    ID type_id;
     Bool is_const = true;
     Bool is_ptr = false;
 };
@@ -127,6 +119,7 @@ template <typename T> struct ValueStorage
 
     constexpr T& get()
     {
+        static_assert(alignof(decltype(*this)) == alignof(ValueInfo), "Bad ValueStorage data alignment.");
         if (info.is_ptr)
             return *static_cast<T*>(reinterpret_cast<ValueStorage<Ptr>*>(this)->value);
         else
@@ -135,6 +128,7 @@ template <typename T> struct ValueStorage
 
     constexpr T const& get() const
     {
+        static_assert(alignof(decltype(*this)) == alignof(ValueInfo), "Bad ValueStorage data alignment.");
         if (info.is_ptr)
             return *static_cast<T const*>(reinterpret_cast<ValueStorage<Ptr> const*>(this)->value);
         else
@@ -166,7 +160,6 @@ struct Value
     explicit Value(StructValue const& value, Location location = {});
     explicit Value(StructValue* value, Bool is_const, Location location = {});
 
-    void as_void() const;
     Bool& as_bool() const;
     Int& as_int() const;
     Float& as_float() const;
@@ -179,7 +172,6 @@ struct Value
     StructValue& as_struct() const;
 
     Location location() const;
-    ValueType type() const;
     ID type_id() const;
 
     void assign(Value const& other);
@@ -187,16 +179,6 @@ struct Value
 
     Bool is_const() const;
     Value& unlock_const();
-
-    void to_void(Engine& engine) const;
-    Bool to_bool(Engine& engine) const;
-    Int to_int(Engine& engine) const;
-    Float to_float(Engine& engine) const;
-    Char to_char(Engine& engine) const;
-    String to_string(Engine& engine) const;
-    RangeValue to_range(Engine& engine) const;
-    FunctionValue to_function(Engine& engine) const;
-    ArrayValue to_array(Engine& engine) const;
 
   private:
     RegisterRef<ValueInfo> m_regref;

@@ -11,6 +11,7 @@ struct Module
     Vector<Variable> variables;
     Vector<Operator> operators;
     Vector<Function> functions;
+    Vector<Cast> casts;
     Vector<Enum> enums;
     Vector<Struct> structs;
 
@@ -44,19 +45,21 @@ struct Parser
     void parse(Token const* token_ptr, Int token_count, Module& module) const;
 
     Bool is_variable(TokenIterator const& it) const;
+    Value create_default_value(ID type_id, TokenIterator const& it) const;
 
     void parse_import(TokenIterator& it, Module& module) const;
     void parse_global_struct(TokenIterator& it, Module& module) const;
     void parse_global_enum(TokenIterator& it, Module& module) const;
+    void parse_global_cast(TokenIterator& it, Module& module) const;
     void parse_global_function(TokenIterator& it, Module& module) const;
     void parse_global_operator(TokenIterator& it, Module& module) const;
     void parse_global_variable(TokenIterator& it, Module& module) const;
 
     void parse_struct(TokenIterator& it, Struct& struc) const;
     void parse_enum(TokenIterator& it, Enum& en) const;
-    void parse_operator(TokenIterator& it, Operator& oper) const;
+    void parse_cast(TokenIterator& it, Cast& cast) const;
     void parse_function(TokenIterator& it, Function& function) const;
-    void parse_cast(TokenIterator& it, Function& function) const;
+    void parse_operator(TokenIterator& it, Operator& oper) const;
     void parse_variable(TokenIterator& it, Variable& variable) const;
 
     void parse_expression(ExtractType type, TokenIterator& it, Node& tree) const;
@@ -74,6 +77,7 @@ struct Parser
     void expression_single_type(Token const& token, Node& tree) const;
     void expression_single_identifier(Token const& token, Node& tree) const;
 
+    void parse_args(TokenIterator& it, Vector<Arg>& args) const;
     void parse_scope(TokenIterator& it, Scope& scope) const;
     void scope_return(TokenIterator& it, Node& tree) const;
     void scope_break(TokenIterator& it, Node& tree) const;
@@ -91,72 +95,5 @@ Bool is_unary(Token const& token);
 Int token_depth(Token const& token, Bool& in_lambda);
 
 void create_operator_node(Token const& token, Node& node);
-void create_assign_node(Token const& token, Node& node);
-
-__forceinline Bool is_op(StringRef value)
-{
-    static const StringSet OPS = {
-        (String)op_add, (String)op_sub, (String)op_mul,  (String)op_div,   (String)op_pow,        (String)op_mod,
-        (String)op_eq,  (String)op_neq, (String)op_less, (String)op_great, (String)op_lesseq,     (String)op_greateq,
-        (String)op_not, (String)op_and, (String)op_or,   (String)op_range, (String)op_range_incl,
-    };
-    return OPS.contains(value);
-}
-
-__forceinline OperatorType get_op(StringRef value)
-{
-    if (value == op_add)
-        return OperatorType::ADD;
-
-    else if (value == op_sub)
-        return OperatorType::SUB;
-
-    else if (value == op_mul)
-        return OperatorType::MUL;
-
-    else if (value == op_div)
-        return OperatorType::DIV;
-
-    else if (value == op_pow)
-        return OperatorType::POW;
-
-    else if (value == op_mod)
-        return OperatorType::MOD;
-
-    else if (value == op_eq)
-        return OperatorType::EQ;
-
-    else if (value == op_neq)
-        return OperatorType::NOT_EQ;
-
-    else if (value == op_less)
-        return OperatorType::LESS;
-
-    else if (value == op_great)
-        return OperatorType::GREAT;
-
-    else if (value == op_lesseq)
-        return OperatorType::LESS_EQ;
-
-    else if (value == op_greateq)
-        return OperatorType::GREAT_EQ;
-
-    else if (value == op_not)
-        return OperatorType::NOT;
-
-    else if (value == op_and)
-        return OperatorType::AND;
-
-    else if (value == op_or)
-        return OperatorType::OR;
-
-    else if (value == op_range)
-        return OperatorType::RANGE;
-
-    else if (value == op_range_incl)
-        return OperatorType::RANGE_INCL;
-
-    else
-        PARSER_PANIC({}, "unknown operator [", value, "]");
-}
+OperatorType get_op(StringRef value);
 } // namespace dawn

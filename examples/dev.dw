@@ -1,34 +1,88 @@
-import "dev_libs.dw"
-
-func main( array & args )
+func main(array& args)
 {
+	array? people = [12.5]
+	people.push(Person{name: "First", age: rand_flt() * 50})
+	people.push(Person("Second", rand_flt() * 50))
+	people.push(Person("Yeah"))
+
+	print("using default for")
+	for person : people {
+		person.who()
+	}
+
+	print("using for_each")
+	people.for_each(`& p`{ p.who() })
+	print((0 >> 5).inclusive)
+	print((0 => 5).inclusive)
+
+	int a = 5;
+	int? b = 7;
+	b %= a;
+	print("{a} {b}")
+
+	people.for_each -> `& person`
+	{
+		if typeid(person) != typeid(Person{}) {
+			return;
+		}
+		switch person {
+			default {
+				print("default...")
+			}
+			case people[2] {
+				print("it's second")
+			}
+			case people[1] {
+				print("it's first")
+			}
+		}
+	}
+
 	Animal animal = Animal::cat
-	print(animal)
-	print(animal.value)
-	print(Animal::dog.value)
-
-	int a = 7; int b = 7; & c = `int e`
-		{ return (a * b) - e }
-	print(c(1))
-
-	Person person = Person{ name: "Ivan", fav_animal: animal }
-	print(person)
+	print -> "{animal} is a pet: {is_a_pet(animal)}" + " !"
 }
 
 enum Animal
 {
-	cat = ("very nice"
-		@
-		array)
-	dog = "meh"
+	cat
+	dog
+	ant
+}
+
+func is_a_pet(Animal& animal)
+{
+	switch animal {
+		case Animal::cat, Animal::dog {
+			return true
+		}
+		default {
+			return false
+		}
+	}
 }
 
 struct Person
 {
 	name: string
-	fav_animal: Animal
+	age: float
+}
 
-	cast string {
-		return "{self.name} likes {self.fav_animal.name}s"
-	}
+cast Person -> string {
+	return "I am {self.name} and I'm {self.age} years old."
+}
+
+oper == (Person& l, Person& r)
+{
+	print("person eq op called")
+	return l.name == r.name
+}
+
+func float.who()
+{
+	print("I'm a float: {self}")
+}
+
+func Person.who()
+{
+	print(self @ string);
 }

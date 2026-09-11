@@ -34,7 +34,7 @@ struct ID
             m_id = it->second;
         else
         {
-            m_id = (IntType)STR_ID.size() + 1; // IDs start from 1.
+            m_id = 1 + (IntType)STR_ID.size(); // IDs start from 1.
             STR_ID.emplace(str, m_id);
         }
     }
