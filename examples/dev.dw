@@ -20,7 +20,7 @@ func main(array& args)
 	b %= a;
 	print("{a} {b}")
 
-	people.for_each(`& person`
+	people.for_each -> `& person`
 	{
 		if typeid(person) != typeid(Person{}) {
 			return;
@@ -36,10 +36,10 @@ func main(array& args)
 				print("it's first")
 			}
 		}
-	})
+	}
 
 	Animal animal = Animal::cat
-	print("{animal} is a pet: {is_a_pet(animal)}")
+	print -> "{animal} is a pet: {is_a_pet(animal)}"
 }
 
 enum Animal

@@ -867,6 +867,23 @@ void dawn::Parser::expression_complex_default(Vector<Token>& left, Token op, Vec
         *cast_node.left_expr = left_expr;
         cast_node.right_type_id = right.front().value;
     }
+    else if (op.value == op_point)
+    {
+        if (left.empty())
+            PARSER_PANIC(op, "op_point left can't be empty");
+        if (right.empty())
+            PARSER_PANIC(op, "op_point right can't be empty");
+
+        auto& node = tree.emplace<CallNode>(op.location);
+
+        TokenIterator left_it{left.begin()._Ptr, left.end()._Ptr};
+        node.left_expr = node_pool().new_register();
+        parse_expression(ExtractType::WHOLE, left_it, *node.left_expr);
+
+        TokenIterator right_it{right.begin()._Ptr, right.end()._Ptr};
+        auto& right_expr = node.args.emplace_back();
+        parse_expression(ExtractType::WHOLE, right_it, right_expr);
+    }
     else
     {
         create_operator_node(op, tree);

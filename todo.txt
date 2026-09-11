@@ -1,3 +1,1 @@
-add -> for funcs calls with lambdas
-add init func to struct
 add vsc debug support
