@@ -103,8 +103,6 @@ inline const StringMap<Int> precedences{
     {(String)op_access, _incr_get_prec()},  {(String)op_expr_opn, _get_prec()},   {(String)op_scope_opn, _get_prec()},
     {(String)op_array_opn, _get_prec()},
 
-    {(String)op_point, _incr_get_prec()},
-
     {(String)prec_unary, _incr_get_prec()}, {(String)op_not, _get_prec()},
 
     {(String)op_cast, _incr_get_prec()},
@@ -125,6 +123,8 @@ inline const StringMap<Int> precedences{
     {(String)op_or, _incr_get_prec()},
 
     {(String)op_range, _incr_get_prec()},   {(String)op_range_incl, _get_prec()},
+
+    {(String)op_point, _incr_get_prec()},
 
     {(String)op_assign, _incr_get_prec()},  {(String)op_addas, _get_prec()},      {(String)op_subas, _get_prec()},
     {(String)op_mulas, _get_prec()},        {(String)op_divas, _get_prec()},      {(String)op_powas, _get_prec()},
