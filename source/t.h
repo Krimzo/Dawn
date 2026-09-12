@@ -26,11 +26,7 @@ namespace dawn
 {
 namespace ch = std::chrono;
 namespace fs = std::filesystem;
-} // namespace dawn
 
-// Basic.
-namespace dawn
-{
 using Ptr = void*;
 using Bool = bool;
 using Int = int64_t;
@@ -57,11 +53,7 @@ template <typename T> using Vector = std::vector<T>;
 template <typename T> using List = std::forward_list<T>;
 
 template <typename K> using Set = std::unordered_set<K>;
-} // namespace dawn
 
-// Hash.
-namespace dawn
-{
 struct StringHash
 {
     using hash_type = std::hash<StringRef>;
