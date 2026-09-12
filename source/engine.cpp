@@ -54,7 +54,7 @@ void dawn::Engine::load_operator(Operator const& entry)
 void dawn::Engine::load_cast(Cast const& entry)
 {
     FunctionValue fv{};
-    auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
+    auto& global = fv.emplace<GlobalFunc>();
     global.id = format(entry.from_type_id, op_point, entry.to_type_id);
     global.func.emplace<DFunction>(entry.args, entry.body);
     bind_cast(entry.from_type_id, entry.to_type_id, false,
@@ -72,7 +72,7 @@ void dawn::Engine::load_function(Function const& entry)
             ENGINE_PANIC({}, "method [", entry.id, "] already defined for type [", entry.type_id, "]");
         funcs.set(entry.id, [entry](Location location, Engine& engine, Value const* argv, Int argc) -> Value {
             FunctionValue fv{};
-            auto& method = fv.data.emplace<FunctionValue::AsMethod>();
+            auto& method = fv.emplace<MethodFunc>();
             method.id = entry.id;
             method.func = DFunction{entry.args, entry.body};
             *method.self = argv[0];
@@ -84,7 +84,7 @@ void dawn::Engine::load_function(Function const& entry)
         if (stack.root().get(entry.id))
             ENGINE_PANIC({}, "object [", entry.id, "] already exists");
         FunctionValue fv{};
-        auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
+        auto& global = fv.emplace<GlobalFunc>();
         global.id = entry.id;
         global.func = DFunction{entry.args, entry.body};
         stack.root().set(entry.id, Value{fv});
@@ -113,7 +113,7 @@ void dawn::Engine::load_struct(Struct const& entry)
     for (auto& method : entry.methods)
     {
         FunctionValue fv{};
-        auto& f = fv.data.emplace<FunctionValue::AsMethod>();
+        auto& f = fv.emplace<MethodFunc>();
         f.id = method.id;
         f.func.emplace<DFunction>(method.args, method.body);
         funcs.set(method.id, [fv](Location location, Engine& engine, Value const* argv, Int argc) -> Value {
@@ -178,7 +178,7 @@ void dawn::Engine::bind_method(ID type_id, ID id, Bool is_const, Int expected_ar
     members.get_or_set(type_id).set(
         id, [id, is_const, expected_args, func](Location location, Engine& _, Value const* argv, Int argc) -> Value {
             FunctionValue fv{};
-            auto& f = fv.data.emplace<FunctionValue::AsMethod>();
+            auto& f = fv.emplace<MethodFunc>();
             f.id = id;
             *f.self = argv[0];
             f.func = [id, is_const, expected_args, func](Location location, Engine& engine, Value const* argv,
@@ -208,7 +208,7 @@ void dawn::Engine::bind_function(ID id, Bool is_ctime, CFunction cfunc)
         m_ctime_funcs.erase(id);
 
     FunctionValue fv{};
-    auto& global = fv.data.emplace<FunctionValue::AsGlobal>();
+    auto& global = fv.emplace<GlobalFunc>();
     global.id = id;
     global.func = std::move(cfunc);
     stack.root().set(id, Value{fv});

@@ -700,7 +700,7 @@ void dawn::Parser::expression_complex_scope(Vector<Token>& left, Token op, Vecto
         auto& node = tree.emplace<LambdaNode>(op.location);
         auto& func = (node.func_value = Value{FunctionValue{}, op.location})
                          .as_function()
-                         .data.emplace<FunctionValue::AsLambda>()
+                         .emplace<LambdaFunc>()
                          .func.emplace<DFunction>();
 
         Set<ID> args;

@@ -8,77 +8,53 @@ static const dawn::ID id_struct = dawn::kw_struct;
 
 dawn::Bool dawn::FunctionValue::is_global() const
 {
-    return std::holds_alternative<AsGlobal>(data);
+    return std::holds_alternative<GlobalFunc>(*this);
 }
 
 dawn::Bool dawn::FunctionValue::is_method() const
 {
-    return std::holds_alternative<AsMethod>(data);
+    return std::holds_alternative<MethodFunc>(*this);
 }
 
 dawn::Bool dawn::FunctionValue::is_lambda() const
 {
-    return std::holds_alternative<AsLambda>(data);
+    return std::holds_alternative<LambdaFunc>(*this);
 }
 
-dawn::FunctionValue::AsGlobal& dawn::FunctionValue::as_global() const
+dawn::GlobalFunc& dawn::FunctionValue::as_global() const
 {
-    return const_cast<AsGlobal&>(std::get<AsGlobal>(data));
+    return *const_cast<GlobalFunc*>(std::get_if<GlobalFunc>(this));
 }
 
-dawn::FunctionValue::AsMethod& dawn::FunctionValue::as_method() const
+dawn::MethodFunc& dawn::FunctionValue::as_method() const
 {
-    return const_cast<AsMethod&>(std::get<AsMethod>(data));
+    return *const_cast<MethodFunc*>(std::get_if<MethodFunc>(this));
 }
 
-dawn::FunctionValue::AsLambda& dawn::FunctionValue::as_lambda() const
+dawn::LambdaFunc& dawn::FunctionValue::as_lambda() const
 {
-    return const_cast<AsLambda&>(std::get<AsLambda>(data));
+    return *const_cast<LambdaFunc*>(std::get_if<LambdaFunc>(this));
 }
 
 dawn::DFunction* dawn::FunctionValue::dfunction() const
 {
-    if (std::holds_alternative<AsGlobal>(data))
-    {
-        auto& func = std::get<AsGlobal>(data).func;
-        if (std::holds_alternative<DFunction>(func))
-            return const_cast<DFunction*>(&std::get<DFunction>(func));
-    }
-    else if (std::holds_alternative<AsMethod>(data))
-    {
-        auto& func = std::get<AsMethod>(data).func;
-        if (std::holds_alternative<DFunction>(func))
-            return const_cast<DFunction*>(&std::get<DFunction>(func));
-    }
-    else if (std::holds_alternative<AsLambda>(data))
-    {
-        auto& func = std::get<AsLambda>(data).func;
-        if (std::holds_alternative<DFunction>(func))
-            return const_cast<DFunction*>(&std::get<DFunction>(func));
-    }
+    if (auto* global_ptr = std::get_if<GlobalFunc>(this))
+        return const_cast<DFunction*>(std::get_if<DFunction>(&global_ptr->func));
+    if (auto* method_ptr = std::get_if<MethodFunc>(this))
+        return const_cast<DFunction*>(std::get_if<DFunction>(&method_ptr->func));
+    if (auto* lambda_ptr = std::get_if<LambdaFunc>(this))
+        return const_cast<DFunction*>(std::get_if<DFunction>(&lambda_ptr->func));
     return nullptr;
 }
 
 dawn::CFunction* dawn::FunctionValue::cfunction() const
 {
-    if (std::holds_alternative<AsGlobal>(data))
-    {
-        auto& func = std::get<AsGlobal>(data).func;
-        if (std::holds_alternative<CFunction>(func))
-            return const_cast<CFunction*>(&std::get<CFunction>(func));
-    }
-    else if (std::holds_alternative<AsMethod>(data))
-    {
-        auto& func = std::get<AsMethod>(data).func;
-        if (std::holds_alternative<CFunction>(func))
-            return const_cast<CFunction*>(&std::get<CFunction>(func));
-    }
-    else if (std::holds_alternative<AsLambda>(data))
-    {
-        auto& func = std::get<AsLambda>(data).func;
-        if (std::holds_alternative<CFunction>(func))
-            return const_cast<CFunction*>(&std::get<CFunction>(func));
-    }
+    if (auto* global_ptr = std::get_if<GlobalFunc>(this))
+        return const_cast<CFunction*>(std::get_if<CFunction>(&global_ptr->func));
+    if (auto* method_ptr = std::get_if<MethodFunc>(this))
+        return const_cast<CFunction*>(std::get_if<CFunction>(&method_ptr->func));
+    if (auto* lambda_ptr = std::get_if<LambdaFunc>(this))
+        return const_cast<CFunction*>(std::get_if<CFunction>(&lambda_ptr->func));
     return nullptr;
 }
 
@@ -354,7 +330,7 @@ dawn::Value::Value(StructValue* value, Bool is_const, Location location)
 
 dawn::Bool& dawn::Value::as_bool() const
 {
-    const auto type = m_regref ? m_regref->type_id : id_void;
+    const ID type = m_regref ? m_regref->type_id : id_void;
     if (type != id_bool)
         ENGINE_PANIC(location(), "expected [", id_bool, "] but got [", type, "]");
     return m_regref.as<ValueStorage<Bool>>()->get();
@@ -362,7 +338,7 @@ dawn::Bool& dawn::Value::as_bool() const
 
 dawn::Int& dawn::Value::as_int() const
 {
-    const auto type = m_regref ? m_regref->type_id : id_void;
+    const ID type = m_regref ? m_regref->type_id : id_void;
     if (type != id_int)
         ENGINE_PANIC(location(), "expected [", id_int, "] but got [", type, "]");
     return m_regref.as<ValueStorage<Int>>()->get();
@@ -370,7 +346,7 @@ dawn::Int& dawn::Value::as_int() const
 
 dawn::Float& dawn::Value::as_float() const
 {
-    const auto type = m_regref ? m_regref->type_id : id_void;
+    const ID type = m_regref ? m_regref->type_id : id_void;
     if (type != id_float)
         ENGINE_PANIC(location(), "expected [", id_float, "] but got [", type, "]");
     return m_regref.as<ValueStorage<Float>>()->get();
@@ -378,7 +354,7 @@ dawn::Float& dawn::Value::as_float() const
 
 dawn::Char& dawn::Value::as_char() const
 {
-    const auto type = m_regref ? m_regref->type_id : id_void;
+    const ID type = m_regref ? m_regref->type_id : id_void;
     if (type != id_char)
         ENGINE_PANIC(location(), "expected [", id_char, "] but got [", type, "]");
     return m_regref.as<ValueStorage<Char>>()->get();
@@ -386,7 +362,7 @@ dawn::Char& dawn::Value::as_char() const
 
 dawn::String& dawn::Value::as_string() const
 {
-    const auto type = m_regref ? m_regref->type_id : id_void;
+    const ID type = m_regref ? m_regref->type_id : id_void;
     if (type != id_string)
         ENGINE_PANIC(location(), "expected [", id_string, "] but got [", type, "]");
     return m_regref.as<ValueStorage<String>>()->get();
@@ -394,7 +370,7 @@ dawn::String& dawn::Value::as_string() const
 
 dawn::RangeValue& dawn::Value::as_range() const
 {
-    const auto type = m_regref ? m_regref->type_id : id_void;
+    const ID type = m_regref ? m_regref->type_id : id_void;
     if (type != id_range)
         ENGINE_PANIC(location(), "expected [", id_range, "] but got [", type, "]");
     return m_regref.as<ValueStorage<RangeValue>>()->get();
@@ -402,7 +378,7 @@ dawn::RangeValue& dawn::Value::as_range() const
 
 dawn::FunctionValue& dawn::Value::as_function() const
 {
-    const auto type = m_regref ? m_regref->type_id : id_void;
+    const ID type = m_regref ? m_regref->type_id : id_void;
     if (type != id_function)
         ENGINE_PANIC(location(), "expected [", id_function, "] but got [", type, "]");
     return m_regref.as<ValueStorage<FunctionValue>>()->get();
@@ -410,7 +386,7 @@ dawn::FunctionValue& dawn::Value::as_function() const
 
 dawn::ArrayValue& dawn::Value::as_array() const
 {
-    const auto type = m_regref ? m_regref->type_id : id_void;
+    const ID type = m_regref ? m_regref->type_id : id_void;
     if (type != id_array)
         ENGINE_PANIC(location(), "expected [", id_array, "] but got [", type, "]");
     return m_regref.as<ValueStorage<ArrayValue>>()->get();
@@ -418,7 +394,7 @@ dawn::ArrayValue& dawn::Value::as_array() const
 
 dawn::EnumValue& dawn::Value::as_enum() const
 {
-    const auto type = m_regref ? m_regref->type_id : id_void;
+    const ID type = m_regref ? m_regref->type_id : id_void;
     if (type != id_enum)
         ENGINE_PANIC(location(), "expected [", id_enum, "] but got [", type, "]");
     return m_regref.as<ValueStorage<EnumValue>>()->get();
@@ -426,7 +402,7 @@ dawn::EnumValue& dawn::Value::as_enum() const
 
 dawn::StructValue& dawn::Value::as_struct() const
 {
-    const auto type = m_regref ? m_regref->type_id : id_void;
+    const ID type = m_regref ? m_regref->type_id : id_void;
     if (type != id_struct)
         ENGINE_PANIC(location(), "expected [", id_struct, "] but got [", type, "]");
     return m_regref.as<ValueStorage<StructValue>>()->get();

@@ -14,10 +14,7 @@ struct RangeValue
 
     constexpr Bool empty() const
     {
-        if (inclusive)
-            return false;
-        else
-            return start == end;
+        return inclusive ? false : (start == end);
     }
 };
 
@@ -32,38 +29,36 @@ struct CFunction : Func<Value(Location, Engine&, Value const*, Int)>
     using Func<Value(Location, Engine&, Value const*, Int)>::function;
 };
 
-struct FunctionValue
+using Fn = Variant<DFunction, CFunction>;
+
+struct GlobalFunc
 {
-    using Fn = Variant<DFunction, CFunction>;
+    ID id;
+    Fn func;
+};
 
-    struct AsGlobal
-    {
-        ID id;
-        Fn func;
-    };
+struct MethodFunc
+{
+    ID id;
+    Fn func;
+    Holder<Value> self;
+};
 
-    struct AsMethod
-    {
-        ID id;
-        Fn func;
-        Holder<Value> self;
-    };
+struct LambdaFunc
+{
+    Fn func;
+    RegisterRef<Frame> frame;
+};
 
-    struct AsLambda
-    {
-        Fn func;
-        RegisterRef<Frame> frame;
-    };
-
-    Variant<AsGlobal, AsMethod, AsLambda> data;
-
+struct FunctionValue : Variant<GlobalFunc, MethodFunc, LambdaFunc>
+{
     Bool is_global() const;
     Bool is_method() const;
     Bool is_lambda() const;
 
-    AsGlobal& as_global() const;
-    AsMethod& as_method() const;
-    AsLambda& as_lambda() const;
+    GlobalFunc& as_global() const;
+    MethodFunc& as_method() const;
+    LambdaFunc& as_lambda() const;
 
     DFunction* dfunction() const;
     CFunction* cfunction() const;
