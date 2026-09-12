@@ -698,16 +698,14 @@ void dawn::Parser::expression_complex_scope(Vector<Token>& left, Token op, Vecto
         left.pop_back();
 
         auto& node = tree.emplace<LambdaNode>(op.location);
-        auto& func = (node.func_value = Value{FunctionValue{}, op.location})
-                         .as_function()
-                         .emplace<LambdaFunc>()
-                         .func.emplace<DFunction>();
+        node.func_value = Value{FunctionValue{}, op.location};
+        auto& lambda = node.func_value.as_function().emplace<DLambdaFunc>();
 
         Set<ID> args;
         TokenIterator left_it{left.begin()._Ptr, left.end()._Ptr};
         while (left_it.valid())
         {
-            auto& arg = func.args.emplace_back();
+            auto& arg = lambda.args.emplace_back();
 
             if (left_it->value == vr_reference)
             {
@@ -764,7 +762,7 @@ void dawn::Parser::expression_complex_scope(Vector<Token>& left, Token op, Vecto
         right.push_back(right_scope);
 
         TokenIterator right_it{right.begin()._Ptr, right.end()._Ptr};
-        parse_scope(right_it, func.body);
+        parse_scope(right_it, lambda.body);
     }
     else
         PARSER_PANIC(op, "scope is not an expression");

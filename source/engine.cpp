@@ -48,15 +48,20 @@ void dawn::Engine::load_operator(Operator const& entry)
     if (right_types.get(right.type.type_id))
         ENGINE_PANIC({}, "operator [", entry.type, "] with left type [", left.type.type_id, "] and right type [",
                      right.type.type_id, "] already defined");
-    right_types.set(right.type.type_id, {}).as_global().func.emplace<DFunction>(entry.args, entry.body);
+
+    FunctionValue fv{};
+    auto& global = fv.emplace<DGlobalFunc>();
+    global.args = entry.args;
+    global.body = entry.body;
+    right_types.set(right.type.type_id, fv);
 }
 
 void dawn::Engine::load_cast(Cast const& entry)
 {
     FunctionValue fv{};
-    auto& global = fv.emplace<GlobalFunc>();
-    global.id = format(entry.from_type_id, op_point, entry.to_type_id);
-    global.func.emplace<DFunction>(entry.args, entry.body);
+    auto& global = fv.emplace<DGlobalFunc>();
+    global.args = entry.args;
+    global.body = entry.body;
     bind_cast(entry.from_type_id, entry.to_type_id, false,
               [fv](Location location, Engine& engine, Value const* argv, Int argc) {
                   return engine.handle_function(location, fv, argv, argc);
@@ -70,12 +75,13 @@ void dawn::Engine::load_function(Function const& entry)
         auto& funcs = members.get_or_set(entry.type_id);
         if (funcs.get(entry.id))
             ENGINE_PANIC({}, "method [", entry.id, "] already defined for type [", entry.type_id, "]");
-        funcs.set(entry.id, [entry](Location location, Engine& engine, Value const* argv, Int argc) -> Value {
-            FunctionValue fv{};
-            auto& method = fv.emplace<MethodFunc>();
-            method.id = entry.id;
-            method.func = DFunction{entry.args, entry.body};
-            *method.self = argv[0];
+        FunctionValue fv{};
+        auto& method = fv.emplace<DMethodFunc>();
+        method.id = entry.id;
+        method.args = entry.args;
+        method.body = entry.body;
+        funcs.set(entry.id, [fv](Location location, Engine& engine, Value const* argv, Int argc) -> Value {
+            *std::get<DMethodFunc>(fv).self = argv[0];
             return Value{fv, location};
         });
     }
@@ -84,9 +90,10 @@ void dawn::Engine::load_function(Function const& entry)
         if (stack.root().get(entry.id))
             ENGINE_PANIC({}, "object [", entry.id, "] already exists");
         FunctionValue fv{};
-        auto& global = fv.emplace<GlobalFunc>();
+        auto& global = fv.emplace<DGlobalFunc>();
         global.id = entry.id;
-        global.func = DFunction{entry.args, entry.body};
+        global.args = entry.args;
+        global.body = entry.body;
         stack.root().set(entry.id, Value{fv});
     }
 }
@@ -113,11 +120,12 @@ void dawn::Engine::load_struct(Struct const& entry)
     for (auto& method : entry.methods)
     {
         FunctionValue fv{};
-        auto& f = fv.emplace<MethodFunc>();
-        f.id = method.id;
-        f.func.emplace<DFunction>(method.args, method.body);
+        auto& m = fv.emplace<DMethodFunc>();
+        m.id = method.id;
+        m.args = method.args;
+        m.body = method.body;
         funcs.set(method.id, [fv](Location location, Engine& engine, Value const* argv, Int argc) -> Value {
-            *fv.as_method().self = argv[0];
+            *std::get<DMethodFunc>(fv).self = argv[0];
             return Value{fv, location};
         });
     }
@@ -156,7 +164,10 @@ void dawn::Engine::bind_operator(ID left_type_id, OperatorType op_type, ID right
     if (right_types->get(right_type_id))
         ENGINE_PANIC({}, "operator [", op_type, "] with left type [", left_type_id, "] and right type [", right_type_id,
                      "] already defined");
-    right_types->set(right_type_id, {}).as_global().func.emplace<CFunction>(std::move(cfunc));
+
+    FunctionValue fv{};
+    fv.emplace<CGlobalFunc>(std::move(cfunc));
+    right_types->set(right_type_id, fv);
 
     if (is_const)
         m_ctime_ops[(Int)op_type].insert(combine_ids(left_type_id, right_type_id));
@@ -178,17 +189,17 @@ void dawn::Engine::bind_method(ID type_id, ID id, Bool is_const, Int expected_ar
     members.get_or_set(type_id).set(
         id, [id, is_const, expected_args, func](Location location, Engine& _, Value const* argv, Int argc) -> Value {
             FunctionValue fv{};
-            auto& f = fv.emplace<MethodFunc>();
-            f.id = id;
-            *f.self = argv[0];
-            f.func = [id, is_const, expected_args, func](Location location, Engine& engine, Value const* argv,
-                                                         Int argc) -> Value {
-                if (!is_const && argv[0].is_const())
-                    ENGINE_PANIC(location, "can not call [", id, "] on a const value");
-                if ((1 + expected_args) != argc)
-                    ENGINE_PANIC(location, "method [", id, "] expects self + ", expected_args, " arguments");
-                return func(location, engine, argv, argc);
-            };
+            auto& method =
+                fv.emplace<CMethodFunc>([id, is_const, expected_args, func](Location location, Engine& engine,
+                                                                            Value const* argv, Int argc) -> Value {
+                    if (!is_const && argv[0].is_const())
+                        ENGINE_PANIC(location, "can not call [", id, "] on a const value");
+                    if ((1 + expected_args) != argc)
+                        ENGINE_PANIC(location, "method [", id, "] expects self + ", expected_args, " arguments");
+                    return func(location, engine, argv, argc);
+                });
+            method.id = id;
+            *method.self = argv[0];
             return Value{fv, location};
         });
 }
@@ -208,9 +219,8 @@ void dawn::Engine::bind_function(ID id, Bool is_ctime, CFunction cfunc)
         m_ctime_funcs.erase(id);
 
     FunctionValue fv{};
-    auto& global = fv.emplace<GlobalFunc>();
+    auto& global = fv.emplace<CGlobalFunc>(std::move(cfunc));
     global.id = id;
-    global.func = std::move(cfunc);
     stack.root().set(id, Value{fv});
 }
 
@@ -375,7 +385,7 @@ dawn::Value dawn::Engine::handle_call_node(CallNode const& node)
 
     if (func.is_method())
     {
-        args_ptr[0] = *func.as_method().self;
+        args_ptr[0] = func.self();
         for (Int i = 0; i < (Int)node.args.size(); i++)
             args_ptr[1 + i] = handle_expression(node.args[i]);
     }
@@ -595,7 +605,7 @@ void dawn::Engine::handle_for_node(ForNode const& node, Opt<Value>& retval)
 dawn::Value const& dawn::Engine::handle_lambda_node(LambdaNode const& node)
 {
     auto& func_val = node.func_value;
-    func_val.as_function().as_lambda().frame = stack.peek();
+    func_val.as_function().frame() = stack.peek();
     return func_val;
 }
 
@@ -765,15 +775,14 @@ dawn::Value dawn::Engine::handle_function(Location location, FunctionValue const
         if (dfunc->args.size() != argc)
         {
             if (func.is_global())
-                ENGINE_PANIC(location, "invalid argument count for function [", func.as_global().id, "]");
+                ENGINE_PANIC(location, "invalid argument count for function [", func.id(), "]");
             else if (func.is_method())
-                ENGINE_PANIC(location, "invalid argument count for method [", func.as_method().id, "]");
+                ENGINE_PANIC(location, "invalid argument count for method [", func.id(), "]");
             else
                 ENGINE_PANIC(location, "invalid argument count for lambda");
         }
 
-        const PopHandler pop_handler =
-            stack.push_from(func.is_lambda() ? func.as_lambda().frame : RegisterRef<Frame>{});
+        const PopHandler pop_handler = stack.push_from(func.is_lambda() ? func.frame() : RegisterRef<Frame>{});
 
         for (Int i = 0; i < argc; i++)
             add_variable(location, dfunc->args[i].type, dfunc->args[i].id, argv[i]);

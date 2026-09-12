@@ -8,54 +8,68 @@ static const dawn::ID id_struct = dawn::kw_struct;
 
 dawn::Bool dawn::FunctionValue::is_global() const
 {
-    return std::holds_alternative<GlobalFunc>(*this);
+    return std::holds_alternative<DGlobalFunc>(*this) || std::holds_alternative<CGlobalFunc>(*this);
 }
 
 dawn::Bool dawn::FunctionValue::is_method() const
 {
-    return std::holds_alternative<MethodFunc>(*this);
+    return std::holds_alternative<DMethodFunc>(*this) || std::holds_alternative<CMethodFunc>(*this);
 }
 
 dawn::Bool dawn::FunctionValue::is_lambda() const
 {
-    return std::holds_alternative<LambdaFunc>(*this);
-}
-
-dawn::GlobalFunc& dawn::FunctionValue::as_global() const
-{
-    return *const_cast<GlobalFunc*>(std::get_if<GlobalFunc>(this));
-}
-
-dawn::MethodFunc& dawn::FunctionValue::as_method() const
-{
-    return *const_cast<MethodFunc*>(std::get_if<MethodFunc>(this));
-}
-
-dawn::LambdaFunc& dawn::FunctionValue::as_lambda() const
-{
-    return *const_cast<LambdaFunc*>(std::get_if<LambdaFunc>(this));
+    return std::holds_alternative<DLambdaFunc>(*this) || std::holds_alternative<CLambdaFunc>(*this);
 }
 
 dawn::DFunction* dawn::FunctionValue::dfunction() const
 {
-    if (auto* global_ptr = std::get_if<GlobalFunc>(this))
-        return const_cast<DFunction*>(std::get_if<DFunction>(&global_ptr->func));
-    if (auto* method_ptr = std::get_if<MethodFunc>(this))
-        return const_cast<DFunction*>(std::get_if<DFunction>(&method_ptr->func));
-    if (auto* lambda_ptr = std::get_if<LambdaFunc>(this))
-        return const_cast<DFunction*>(std::get_if<DFunction>(&lambda_ptr->func));
+    if (auto* global_ptr = std::get_if<DGlobalFunc>(this))
+        return const_cast<DFunction*>(static_cast<DFunction const*>(global_ptr));
+    if (auto* method_ptr = std::get_if<DMethodFunc>(this))
+        return const_cast<DFunction*>(static_cast<DFunction const*>(method_ptr));
+    if (auto* lambda_ptr = std::get_if<DLambdaFunc>(this))
+        return const_cast<DFunction*>(static_cast<DFunction const*>(lambda_ptr));
     return nullptr;
 }
 
 dawn::CFunction* dawn::FunctionValue::cfunction() const
 {
-    if (auto* global_ptr = std::get_if<GlobalFunc>(this))
-        return const_cast<CFunction*>(std::get_if<CFunction>(&global_ptr->func));
-    if (auto* method_ptr = std::get_if<MethodFunc>(this))
-        return const_cast<CFunction*>(std::get_if<CFunction>(&method_ptr->func));
-    if (auto* lambda_ptr = std::get_if<LambdaFunc>(this))
-        return const_cast<CFunction*>(std::get_if<CFunction>(&lambda_ptr->func));
+    if (auto* global_ptr = std::get_if<CGlobalFunc>(this))
+        return const_cast<CFunction*>(static_cast<CFunction const*>(global_ptr));
+    if (auto* method_ptr = std::get_if<CMethodFunc>(this))
+        return const_cast<CFunction*>(static_cast<CFunction const*>(method_ptr));
+    if (auto* lambda_ptr = std::get_if<CLambdaFunc>(this))
+        return const_cast<CFunction*>(static_cast<CFunction const*>(lambda_ptr));
     return nullptr;
+}
+
+dawn::ID dawn::FunctionValue::id() const
+{
+    if (auto* dglobal_ptr = std::get_if<DGlobalFunc>(this))
+        return dglobal_ptr->id;
+    else if (auto* cglobal_ptr = std::get_if<CGlobalFunc>(this))
+        return cglobal_ptr->id;
+    else if (auto* dmethod_ptr = std::get_if<DMethodFunc>(this))
+        return dmethod_ptr->id;
+    else if (auto* cmethod_ptr = std::get_if<CMethodFunc>(this))
+        return cmethod_ptr->id;
+    return ID{};
+}
+
+dawn::Value& dawn::FunctionValue::self() const
+{
+    if (auto* ptr = std::get_if<DMethodFunc>(this))
+        return *ptr->self;
+    else
+        return *std::get<CMethodFunc>(*this).self;
+}
+
+dawn::RegisterRef<dawn::Frame>& dawn::FunctionValue::frame() const
+{
+    if (auto* ptr = std::get_if<DLambdaFunc>(this))
+        return const_cast<RegisterRef<Frame>&>(ptr->frame);
+    else
+        return const_cast<RegisterRef<Frame>&>(std::get<CLambdaFunc>(*this).frame);
 }
 
 dawn::ArrayValue::ArrayValue(ArrayValue const& other)

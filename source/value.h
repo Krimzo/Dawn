@@ -29,39 +29,50 @@ struct CFunction : Func<Value(Location, Engine&, Value const*, Int)>
     using Func<Value(Location, Engine&, Value const*, Int)>::function;
 };
 
-using Fn = Variant<DFunction, CFunction>;
-
-struct GlobalFunc
+struct DGlobalFunc : DFunction
 {
     ID id;
-    Fn func;
 };
 
-struct MethodFunc
+struct CGlobalFunc : CFunction
 {
     ID id;
-    Fn func;
+};
+
+struct DMethodFunc : DFunction
+{
+    ID id;
     Holder<Value> self;
 };
 
-struct LambdaFunc
+struct CMethodFunc : CFunction
 {
-    Fn func;
+    ID id;
+    Holder<Value> self;
+};
+
+struct DLambdaFunc : DFunction
+{
     RegisterRef<Frame> frame;
 };
 
-struct FunctionValue : Variant<GlobalFunc, MethodFunc, LambdaFunc>
+struct CLambdaFunc : CFunction
+{
+    RegisterRef<Frame> frame;
+};
+
+struct FunctionValue : Variant<DGlobalFunc, CGlobalFunc, DMethodFunc, CMethodFunc, DLambdaFunc, CLambdaFunc>
 {
     Bool is_global() const;
     Bool is_method() const;
     Bool is_lambda() const;
 
-    GlobalFunc& as_global() const;
-    MethodFunc& as_method() const;
-    LambdaFunc& as_lambda() const;
-
     DFunction* dfunction() const;
     CFunction* cfunction() const;
+
+    ID id() const;
+    Value& self() const;
+    RegisterRef<Frame>& frame() const;
 };
 
 struct ArrayValue
@@ -112,22 +123,13 @@ template <typename T> struct ValueStorage
     ValueInfo info{};
     T value{};
 
-    constexpr T& get()
+    constexpr T& get() const
     {
         static_assert(alignof(decltype(*this)) == alignof(ValueInfo), "Bad ValueStorage data alignment.");
         if (info.is_ptr)
-            return *static_cast<T*>(reinterpret_cast<ValueStorage<Ptr>*>(this)->value);
+            return *const_cast<T*>(static_cast<T const*>(reinterpret_cast<Ptr const&>(value)));
         else
-            return value;
-    }
-
-    constexpr T const& get() const
-    {
-        static_assert(alignof(decltype(*this)) == alignof(ValueInfo), "Bad ValueStorage data alignment.");
-        if (info.is_ptr)
-            return *static_cast<T const*>(reinterpret_cast<ValueStorage<Ptr> const*>(this)->value);
-        else
-            return value;
+            return const_cast<T&>(value);
     }
 };
 

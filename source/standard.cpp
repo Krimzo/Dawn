@@ -947,15 +947,9 @@ void dawn::Engine::load_standard_casts()
         StringStream stream;
         auto& func = argv[0].as_function();
         if (func.is_global())
-        {
-            auto& global = func.as_global();
-            stream << global.id << op_expr_opn;
-        }
+            stream << func.id() << op_expr_opn;
         else if (func.is_method())
-        {
-            auto& method = func.as_method();
-            stream << method.self->as_struct().parent_id << op_access << method.id << op_expr_opn;
-        }
+            stream << func.self().type_id() << op_access << func.id() << op_expr_opn;
         else
             stream << "lambda" << op_lambda;
         if (auto* dfunc = func.dfunction())

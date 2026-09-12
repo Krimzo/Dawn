@@ -40,6 +40,14 @@ func main(array& args)
 
 	Animal animal = Animal::cat
 	print -> "{animal} is a pet: {is_a_pet(animal)}" + " !"
+
+	print(print)
+	print(is_a_pet)
+	print(`int a`{})
+	print((2.0).who)
+	print(Person{}.who)
+
+	print("All should be good?")
 }
 
 enum Animal
