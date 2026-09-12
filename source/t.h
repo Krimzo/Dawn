@@ -46,19 +46,17 @@ using OFileStream = std::ofstream;
 
 template <typename T> using Func = std::function<T>;
 
+template <typename T> using Opt = std::optional<T>;
+
 template <typename T1, typename T2> using Pair = std::pair<T1, T2>;
 
 template <typename... Args> using Variant = std::variant<Args...>;
-
-template <typename T> using Opt = std::optional<T>;
 
 template <typename T> using Vector = std::vector<T>;
 
 template <typename T> using List = std::forward_list<T>;
 
 template <typename K> using Set = std::unordered_set<K>;
-
-template <typename K, typename V> using Map = std::unordered_map<K, V>;
 } // namespace dawn
 
 // Hash.
