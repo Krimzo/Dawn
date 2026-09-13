@@ -33,11 +33,11 @@ struct Index
 
 struct Location
 {
-    using IntType = int32_t;
+    using IntType = uint32_t;
 
     ID path_id;
-    IntType line{};
-    IntType col{};
+    IntType line : 20 = 0;
+    IntType col : 12 = 0;
 
     constexpr Location()
     {
